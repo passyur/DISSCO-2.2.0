@@ -32,6 +32,8 @@ class Modifier {
     Envelope* probEnv;
     deque<Envelope*> env_values; // values for the mod
     double checkPt;  // hold onto the checkpoint in case mod is WAVE_TYPE
+    int partialNum;  // Partial num if applyHow==PARTIAL
+    string partialResultString; // Partial result string for applying a modifier to multiple partials
 
   public:
    /**
@@ -45,7 +47,7 @@ class Modifier {
      *  \param prob probability envelope
      *  \param modApplyHow apply to SOUND or PARTIAL
     **/
-    Modifier(string modType, Envelope* prob, string modApplyHow);
+    Modifier(string modType, Envelope* prob, string modApplyHow, int modPartialNum=0);
 
    /**
      *  Copy constructor for a Modifier.
@@ -83,6 +85,14 @@ class Modifier {
      **/
     string getModName();
 
+    /**
+     *  Get the partial number of the modifier for applyHow == PARTIAL
+     *  \return the name/type of the modifier
+     **/
+    int getPartialNum();
+
+    string getPartialResultString();
+
    /**
      *  Checks whether a Modifier should occur, given a checkpoint
      *  \param checkPoint the checkpoint (in time) of the probability
@@ -93,10 +103,9 @@ class Modifier {
    /**
      *  Apply the modifier to a sound
      *  \param snd pointer to the sound to add this modifier to
-     *  \param numParts the number of partials in the sound (only used
-     *                  if applyHow == "PARTIAL"
+     *  \param partNum the number of partials in the sound (only used if applyHow == "PARTIAL")
     **/
-    void applyModifier(Sound* snd, int numParts = 0);
+    void applyModifier(Sound* snd);
 
   private:
    /**
@@ -110,7 +119,7 @@ class Modifier {
      *  \param snd pointer to the sound to add this modifier to
      *  \param partNum the partial to apply the mod to
     **/
-    void applyModPartial(Sound* snd, int partNum);
+    void applyModPartial(Sound* snd);
 };
   
 #endif

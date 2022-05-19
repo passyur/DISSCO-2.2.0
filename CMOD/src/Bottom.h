@@ -329,6 +329,11 @@ class Bottom : public Event {
      **/
     void applyReverberation(Sound* s);
 
+    /** Experimental: apply reverb_simple for different partials
+     * \param s a pointer to the sound being created
+     * \param numPartials the number of partials contained in the sound
+     **/
+    void applyReverberation(Sound* s, int numPartials);
     /**
     *  Use of modifiers: tremolo, vibrato, transients. Makes 3 lists/maps -
     *  one for modifiers with no dependencies, one for modifiers grouped

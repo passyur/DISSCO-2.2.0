@@ -165,6 +165,32 @@ public:
 
   };
 
+  class REVPartialAlignment: public Gtk::Alignment{
+  public:
+    REVPartialAlignment(
+      FunctionGenerator* _parent);
+    ~REVPartialAlignment();
+    void setNumber(int _number);
+    void entryEditSwitch(int _flag);// 0 = disable, 1 = enable
+    std::string getText();
+    void setText(std::string _text);
+    void insertPartialButtonClicked();
+    void setLabel(string _label);
+    void appendNewNode(REVPartialAlignment* _newNode);
+    REVPartialAlignment* next;
+    REVPartialAlignment* prev;
+  private:
+    Glib::RefPtr<Gtk::Builder> attributesRefBuilder;
+    FunctionGenerator* parent;
+
+    void textChanged();
+
+    void removePartialButtonClicked();
+    void funButtonClicked();
+
+
+  };
+
   class SPAChannelAlignment: public Gtk::Alignment{
   public:
     SPAChannelAlignment(FunctionGenerator* _parent,int _numOfPartial,int _flagButtonsShown);
@@ -212,6 +238,14 @@ public:
   void SPAApplyByRadioButtonClicked();
   void SPATextChanged();
 
+  int REVNumOfPartials;
+  int REVApplyFlag;
+  REVPartialAlignment* REVPartialAlignments;
+  void REVRemovePartial (REVPartialAlignment* _remove);
+  REVPartialAlignment* REVInsertPartial ();
+  void REVApplyByRadioButtonClicked();
+  void REVTextChanged();
+  
 
 protected:
   //signal handelers

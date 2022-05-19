@@ -2900,6 +2900,8 @@ It must contain exactly 6 very small numbers </property>
   <object class="GtkVBox" id="REV_SimpleVBox">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <!-- 
+	 4/19: REMOVED AFTER ADDING PARTIALS OPTION TO REV_SIMPLE
     <child>
       <object class="GtkHBox" id="hbox46">
         <property name="visible">True</property>
@@ -2907,7 +2909,7 @@ It must contain exactly 6 very small numbers </property>
         <property name="tooltip_text" translatable="yes">Float, 0.0 - 1.0</property>
         <child>
           <object class="GtkLabel" id="label45">
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Room Size :</property>
           </object>
@@ -2920,7 +2922,7 @@ It must contain exactly 6 very small numbers </property>
         </child>
         <child>
           <object class="GtkEntry" id="REV_SimpleEntry">
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="invisible_char">●</property>
             <property name="primary_icon_activatable">False</property>
@@ -2937,7 +2939,7 @@ It must contain exactly 6 very small numbers </property>
         <child>
           <object class="GtkButton" id="REV_SimpleEntryFunButton">
             <property name="label" translatable="yes">Insert Function</property>
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_action_appearance">False</property>
@@ -2956,8 +2958,97 @@ It must contain exactly 6 very small numbers </property>
         <property name="position">0</property>
       </packing>
     </child>
+    -->
+
     <child>
-      <placeholder/>
+      <object class="GtkHBox" id="hboxreverb1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkLabel" id="labelreverb1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Apply By : </property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">10</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="REVSimpleSoundRadioButton">
+            <property name="label" translatable="yes">Sound</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_action_appearance">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="REVSimplePartialRadioButton">
+            <property name="label" translatable="yes">Partial</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_action_appearance">False</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">REVSimpleSoundRadioButton</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="padding">10</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+   <child>
+     <placeholder/>
+   </child>
+    <child>
+     <object class="GtkScrolledWindow" id="scrolledwindowREVSimple">
+       <property name="width_request">400</property>
+       <property name="height_request">300</property>
+       <property name="visible">True</property>
+       <property name="can_focus">True</property>
+       <child>
+         <object class="GtkViewport" id="viewportREVSimple">
+           <property name="visible">True</property>
+           <property name="can_focus">False</property>
+           <property name="resize_mode">queue</property>
+           <child>
+    	     <object class="GtkVBox" id="REVSimpleMainVBox">
+    	       <property name="visible">True</property>
+    	       <property name="can_focus">False</property>
+    	       <child>
+    	         <placeholder/>
+    	       </child>
+    	       <child>
+    	         <placeholder/>
+    	       </child>
+    	       <child>
+    	         <placeholder/>
+    	       </child>
+    	     </object>
+           </child>
+         </object>
+       </child>
+     </object>
+     <packing>
+       <property name="expand">True</property>
+       <property name="fill">True</property>
+       <property name="position">3</property>
+     </packing>
     </child>
   </object>
   <object class="GtkVBox" id="RandomIntVBox">

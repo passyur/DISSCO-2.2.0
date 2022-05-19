@@ -36,6 +36,9 @@
 
 
 
+// For greying out/turning on text boxes
+const static int OFF {0};
+const static int ON {1};
 
 // these definitions are for calling yyparse(). They are copied from lex.yy.c
 #ifndef YY_TYPEDEF_YY_SIZE_T
@@ -166,6 +169,8 @@ FunctionGenerator::FunctionGenerator(
     makeEnvelopeNumOfNodes = 0;
     SPANumOfChannels = 0;
     SPANumOfPartials = 0;
+    // TEJUS
+    REVNumOfPartials = 0;
     SPAApplyFlag = 0; //junk here,
     SPAChannelAlignments = NULL;
     SPAMethodFlag = 0;//same here
@@ -1330,15 +1335,31 @@ FunctionGenerator::FunctionGenerator(
     *this, & FunctionGenerator::readREVFileTextChanged));
 
   //REV_Simple
-    attributesRefBuilder->get_widget(
-    "REV_SimpleEntryFunButton", button);
-  button->signal_clicked().connect(sigc::mem_fun(
-    *this, &FunctionGenerator::REV_SimpleEntryFunButtonClicked));
+
+  // TEJUS
+  REVPartialAlignments = NULL;
+  REVNumOfPartials = 0; // Start with no partials
+  REVApplyFlag = 0; // default apply by sound
 
   attributesRefBuilder->get_widget(
-    "REV_SimpleEntry", entry);
-  entry->signal_changed().connect(sigc::mem_fun(
-    *this, & FunctionGenerator::REV_SimpleEntryTextChanged));
+    "REVSimplePartialRadioButton", radiobutton);
+  radiobutton->signal_clicked().connect(sigc::mem_fun(
+    *this, & FunctionGenerator::REVApplyByRadioButtonClicked));
+
+  attributesRefBuilder->get_widget(
+    "REVSimpleSoundRadioButton", radiobutton);
+  radiobutton->signal_clicked().connect(sigc::mem_fun(
+    *this, & FunctionGenerator::REVApplyByRadioButtonClicked));
+
+  //  attributesRefBuilder->get_widget(
+  //  "REV_SimpleEntryFunButton", button);
+  //button->signal_clicked().connect(sigc::mem_fun(
+  //  *this, &FunctionGenerator::REV_SimpleEntryFunButtonClicked));
+
+  //attributesRefBuilder->get_widget(
+  //  "REV_SimpleEntry", entry);
+  //entry->signal_changed().connect(sigc::mem_fun(
+  //  *this, & FunctionGenerator::REV_SimpleEntryTextChanged));
 
   //REV_Medium
 
@@ -2696,10 +2717,33 @@ FunctionGenerator::FunctionGenerator(
     combobox->set_active(iter);
 
     thisElement = functionNameElement->getNextElementSibling();    // one argument
-    attributesRefBuilder->get_widget("REV_SimpleEntry",entry);
-    entry->set_text(getFunctionString(thisElement));
+    //Add ApplyHow to REV_Simple
+    if(getFunctionString(thisElement)=="SOUND"){
+      REVApplyFlag = 0;
+      attributesRefBuilder->get_widget("REVSimpleSoundRadioButton",radiobutton);
+      radiobutton->set_active();
 
+    }
 
+    else {   //partial
+      REVApplyFlag = 1;
+      attributesRefBuilder->get_widget("REVSimplePartialRadioButton",radiobutton);
+      radiobutton->set_active();
+    }
+
+    // <Sizes>
+    thisElement = thisElement->getNextElementSibling();
+    // First <Size>
+    DOMElement* currentPartialElement = thisElement->getFirstElementChild();
+    while(currentPartialElement){
+      auto partial = REVInsertPartial();
+      if (partial != NULL) {
+          partial->setText(getFunctionString(currentPartialElement));	
+      }
+      currentPartialElement = currentPartialElement->getNextElementSibling();
+    }
+    // Choose whether SOUND is active or PARTIAL
+    REVApplyByRadioButtonClicked();
 
     //end parsing
   }
@@ -3567,13 +3611,14 @@ void FunctionGenerator::function_list_combo_changed(){
         attributesRefBuilder->get_widget("REV_SimpleVBox", vbox);
         alignment->add (*vbox); //add random vbox in
         //reset all data
-        attributesRefBuilder->get_widget(
-          "REV_SimpleEntry", entry);
-        entry->set_text("0.5");
-        REV_SimpleEntryTextChanged();
+	// TEJUS 4/19/21: Since REV_Simple takes by partials, the "room size" box at the beginning of the window
+	// was removed
+        // attributesRefBuilder->get_widget(
+        //   "REV_SimpleEntry", entry);
+        // entry->set_text("0.5");
+        // REV_SimpleEntryTextChanged();
         set_position(Gtk::WIN_POS_CENTER_ALWAYS);
         resize(400,300);
-
       }
       else if (function == functionREV_Medium){
         alignment->remove(); //remove the current parameter box
@@ -6503,7 +6548,7 @@ void FunctionGenerator::SPAPartialAlignment::removePartialButtonClicked(){
 void FunctionGenerator::SPAPartialAlignment::entryEditSwitch(int _flag){
   Gtk::Entry* entry;
   attributesRefBuilder->get_widget( "entry", entry);
-  if (_flag ==0){
+  if (_flag == OFF){
     entry->set_sensitive(false);
   }
   else {
@@ -7012,7 +7057,7 @@ void FunctionGenerator::SPAApplyByRadioButtonClicked(){
 
       SPAPartialAlignment* partial = temp->partials->next;
       while (partial!= NULL){
-        partial->entryEditSwitch(0);
+        partial->entryEditSwitch(OFF);
         partial = partial->next;
       }
       temp = temp->next;
@@ -7032,7 +7077,7 @@ void FunctionGenerator::SPAApplyByRadioButtonClicked(){
 
       SPAPartialAlignment* partial = temp->partials->next;
       while (partial!= NULL){
-        partial->entryEditSwitch(1);
+        partial->entryEditSwitch(ON);
         partial = partial->next;
       }
       temp = temp->next;
@@ -7300,3 +7345,306 @@ std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElemen
   delete theSerializer;
   return returnString;
 }
+
+
+// ------- REV PARTIALS
+
+void FunctionGenerator::REVRemovePartial(REVPartialAlignment* _remove){
+
+  if (REVNumOfPartials==1||REVApplyFlag==0){
+    return;
+  }
+
+  Gtk::VBox* vbox;
+  attributesRefBuilder->get_widget(
+    "REVSimpleMainVBox", vbox);
+  vbox->remove ( *_remove);
+
+  REVNumOfPartials --;
+  if (_remove == REVPartialAlignments){ //if removing head
+    REVPartialAlignments = REVPartialAlignments->next;
+    if (REVPartialAlignments != NULL){
+      REVPartialAlignments->prev = NULL;
+    }
+  }
+
+  else {  //normal case
+
+    _remove->prev->next = _remove->next;
+    if (_remove->next != NULL){
+      _remove->next->prev = _remove->prev;
+    }
+  }
+
+
+  // Update partial number counts for all nodes
+  auto curr = REVPartialAlignments;
+  int i = 1;
+  Gtk::Label* label;
+
+  while (curr) {
+    // Set the partial number on the left column of the window
+    curr->setNumber(i);
+    curr = curr->next;
+    i ++;
+  }
+
+  delete _remove;
+  // Update result string and display window
+  REVTextChanged();
+  show_all_children();
+
+}
+
+
+FunctionGenerator::REVPartialAlignment* FunctionGenerator::REVInsertPartial (){
+
+  REVNumOfPartials ++;
+
+  REVPartialAlignment* newSubAlignment =
+    new REVPartialAlignment(this);
+  if (REVPartialAlignments ==NULL){
+    REVPartialAlignments = newSubAlignment;
+  }
+  else {
+    REVPartialAlignments->appendNewNode(newSubAlignment);
+  }
+
+  Gtk::VBox * vbox;
+  attributesRefBuilder->get_widget(
+    "REVSimpleMainVBox", vbox);
+  vbox->pack_start(*newSubAlignment,Gtk::PACK_SHRINK);
+  newSubAlignment->setNumber(REVNumOfPartials);
+  REVTextChanged();
+  show_all_children();
+  return newSubAlignment;
+}
+
+
+
+
+void FunctionGenerator::REVApplyByRadioButtonClicked(){
+  Gtk::RadioButton* radiobutton;
+  attributesRefBuilder->get_widget( "REVSimpleSoundRadioButton", radiobutton);
+  REVPartialAlignment* curr = REVPartialAlignments;
+
+  if (radiobutton->get_active()){ //applied by sound
+    REVApplyFlag = 0;
+    // First partial: change to be the sound
+    if (curr!=NULL){
+      curr->setLabel("Room Size: ");
+      curr = curr->next;
+    }
+
+    while (curr != NULL){ //each partial
+      curr->entryEditSwitch(OFF);
+      curr = curr->next;
+    }
+  }
+  else {//applied by partial
+    REVApplyFlag = 1;
+
+    // First partial: change to be the sound
+    if (curr!=NULL){
+      curr->setLabel("Partial 1 ");
+      curr = curr->next;
+    }
+
+    while (curr != NULL){ //each partial
+      curr->entryEditSwitch(ON);
+      curr = curr->next;
+    }
+  }
+  REVTextChanged();
+  show_all_children();
+}
+
+
+
+void FunctionGenerator::REVTextChanged(){
+  std::string stringbuffer = "";
+  int method;
+  int apply;
+
+  Gtk::TextView* textview;
+  attributesRefBuilder->get_widget("resultStringTextView", textview);
+  Gtk::RadioButton* applyHow;
+  attributesRefBuilder->get_widget( "REVSimpleSoundRadioButton", applyHow);
+  stringbuffer = "<Fun><Name>REV_Simple</Name><Apply>";
+  // Applyhow = SOUND
+  if (applyHow->get_active()){
+    stringbuffer = stringbuffer +"SOUND";
+  }
+  // Applyhow = PARTIAL
+  else {
+    stringbuffer = stringbuffer +"PARTIAL";
+  }
+
+  stringbuffer = stringbuffer + "</Apply><Sizes>";
+
+  // Build result string using each partial's room size
+  REVPartialAlignment* curr = REVPartialAlignments;
+  while (curr != NULL){
+        stringbuffer = stringbuffer + curr->getText();
+        curr = curr->next;
+  }
+
+  stringbuffer = stringbuffer + "</Sizes></Fun>";
+  
+  textview->get_buffer()->set_text(stringbuffer);
+
+}
+
+
+
+
+
+// ----- REV PARTIAL SUBALIGNMENT
+
+
+FunctionGenerator::REVPartialAlignment::REVPartialAlignment(
+  FunctionGenerator* _parent){
+  parent = _parent;
+  prev = NULL;
+  next = NULL;
+  attributesRefBuilder = Gtk::Builder::create();
+  #ifdef GLIBMM_EXCEPTIONS_ENABLED
+  try{
+    attributesRefBuilder->add_from_file(
+      "./LASSIE/src/UI/FunGenREVPartialAlignment.ui");
+  }
+  catch (const Glib::FileError& ex){
+    std::cerr << "FileError: " << ex.what() << std::endl;
+  }
+  catch (const Gtk::BuilderError& ex){
+    std::cerr << "BuilderError: " << ex.what() << std::endl;
+  }
+
+   #else
+  std::auto_ptr<Glib::Error> error;
+  if (!attributesRefBuilder->add_from_file(
+    "./LASSIE/src/UI/FunGenREVPartialAlignment.ui", error)){
+    std::cerr << error->what() << std::endl;
+  }
+
+   #endif
+
+  Gtk::HBox* hbox;
+  attributesRefBuilder->get_widget("MainHBox", hbox);
+  add(*hbox);
+
+  Gtk::Button* button;
+  
+  attributesRefBuilder->get_widget( "REVRemoveButton", button);
+  button->signal_clicked().connect(sigc::mem_fun(
+    *this,
+    &FunctionGenerator::REVPartialAlignment::removePartialButtonClicked));
+
+  attributesRefBuilder->get_widget( "REVInsertButton", button);
+  button->signal_clicked().connect(sigc::mem_fun(
+    *this,
+    &FunctionGenerator::REVPartialAlignment::insertPartialButtonClicked));
+
+  attributesRefBuilder->get_widget( "REVFunButton", button);
+  button->signal_clicked().connect(sigc::mem_fun(
+    *this, &FunctionGenerator::REVPartialAlignment::funButtonClicked));
+
+
+  Gtk::Entry* entry;
+  attributesRefBuilder->get_widget( "entry", entry);
+  entry->signal_changed().connect(sigc::mem_fun(
+    *this, & FunctionGenerator::REVPartialAlignment::textChanged));
+  
+}
+
+FunctionGenerator::REVPartialAlignment::~REVPartialAlignment(){}
+
+void FunctionGenerator::REVPartialAlignment::appendNewNode(REVPartialAlignment* _newNode) {
+  if (next == NULL){
+    next = _newNode;
+    _newNode->prev = this;
+  }
+  else {
+    next-> appendNewNode(_newNode);
+  }
+}
+
+
+void FunctionGenerator::REVPartialAlignment::setNumber(int _number){
+  std::stringstream out;
+  out<< _number;
+  std::string stringbuffer = "Partial " + out.str()+ " ";
+  Gtk::Label* label;
+  attributesRefBuilder->get_widget( "TitleLabel", label);
+  label->set_text(stringbuffer);
+}
+
+void FunctionGenerator::REVPartialAlignment::entryEditSwitch(int _flag){
+  Gtk::Entry* entry;
+  attributesRefBuilder->get_widget( "entry", entry);
+  if (_flag == OFF){
+    entry->set_sensitive(false);
+  }
+  else {
+    entry->set_sensitive(true);
+  }
+}
+
+void FunctionGenerator::REVPartialAlignment::setLabel(string _label){
+  Gtk::Label* label;
+  attributesRefBuilder->get_widget( "TitleLabel", label);
+  label->set_text(_label);
+}
+
+
+
+std::string FunctionGenerator::REVPartialAlignment::getText(){
+  Gtk::Entry* entry;
+  attributesRefBuilder->get_widget( "entry", entry);
+  string stringbuffer = "<Size>" + entry->get_text() + "</Size>";
+  return    stringbuffer;
+}
+
+
+void FunctionGenerator::REVPartialAlignment::setText(std::string _string){
+  Gtk::Entry* entry;
+  attributesRefBuilder->get_widget( "entry", entry);
+  entry->set_text(_string);
+}
+
+
+
+void FunctionGenerator::REVPartialAlignment::textChanged(){
+  parent->REVTextChanged();
+}
+
+
+void FunctionGenerator::REVPartialAlignment::funButtonClicked(){
+  Gtk::Entry* entry;
+  attributesRefBuilder->get_widget(
+    "entry", entry);
+  if (!entry->get_sensitive()){
+    return;
+  }
+
+  FunctionGenerator* generator =
+    new FunctionGenerator(functionReturnFloat,entry->get_text());
+  generator->run();
+
+  if (generator->getResultString() !=""){
+    entry->set_text(generator->getResultString());
+  }
+  delete generator;
+
+}
+
+
+void FunctionGenerator::REVPartialAlignment::insertPartialButtonClicked(){
+  parent->REVInsertPartial();
+}
+
+
+void FunctionGenerator::REVPartialAlignment::removePartialButtonClicked(){
+  parent->REVRemovePartial(this);
+}
+

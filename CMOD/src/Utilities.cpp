@@ -704,10 +704,6 @@ Sieve* Utilities::evaluateSieveFunction(string _functionString,void* _object){
 //  cout << "Sieve* Utilities::evaluateSieveFunction - ValuePick" << endl;
     resultSieve = sieve_ValuePick(root, _object);
   }
-  else if (functionName.compare("PREVIOUS_CHILD_DURATION")==0) {
-//  cout << "Sieve* Utilities::evaluateSieveFunction - PREVIOUS " << endl;
-     resultSieve = NULL;
-  }
 
   delete parser;
   return resultSieve;
@@ -805,11 +801,11 @@ string Utilities::static_function_CURRENT_LAYER(void* _object){
 
 string Utilities::static_function_PREVIOUS_CHILD_DURATION(void* _object){
 if (_object !=NULL){
-    double resultNum = ((Event*)_object)->getPreviousChildEndTime();
+    double resultNum = ((Event*)_object)->getPreviousChildDuration();
     char result [50];
     sprintf(result, "%f",  resultNum);
-//  cout << "Utilities::static_function_PREVIOUS_CHILD_DURATION - resultNum=" 
-//   << resultNum << endl;
+cout << "Utilities::static_function_PREVIOUS_CHILD_DURATION - resultNum=" 
+     << resultNum << endl;
     return string(result);
   }
   else {
@@ -839,7 +835,6 @@ string Utilities::function_Markov(DOMElement* _functionElement, void* _object) {
   int entry = (int)evaluate(XMLTranscode(elementIter), _object);
 
   float resultNum = markovModelLibrary[entry].nextSample(Random::Rand());
-//cout << "Markov picked " << resultNum << endl;
   char result [50];
   sprintf(result, "%f", resultNum);
   return string(result);
@@ -1111,6 +1106,30 @@ Sieve* Utilities::sieve_ValuePick(DOMElement* _functionElement, void* _object){
                          eMethod.c_str(), wMethod.c_str(),
                          eArgs[0], wArgVect,
                          offsetVect);
+
+/*			added by Sever
+  vector<int> attTimes;
+  vector<double> attProbs;
+
+  si.FillInVectors(attTimes, attProbs);
+cout << "   sieve_ValuePick - attTimes.size()=" << attTimes.size() << endl;
+  int beatEDUs;
+  beatEDUs = _tempo.getEDUPerTimeSignatureBeat().Num();
+cout << "      beatEDUs=" << beatEDUs << endl;
+
+  for(int i = 0; i < attTimes.size(); i++){
+
+    if(attTimes[i] > eArgs.size()){
+      break;
+    }
+
+ // short_attime.push_back(attTimes[i]);
+    cout << "   attTimes.size=" << attTimes.size() << endl;
+    cout << attTimes[i] << " , ";
+  }
+  cout << endl;
+*/
+
   } else {
     si.Build(minVal, maxVal, eMethod.c_str(), wMethod.c_str(), eArgVect, wArgVect, offsetVect);
   }
@@ -1308,21 +1327,21 @@ string Utilities::function_RandomOrderInt(DOMElement* _functionElement, void* _o
   int highBound = (int)evaluate(XMLTranscode(highBoundElement), _object);
   int id = (int) evaluate(XMLTranscode(idElement), _object);
   
-  Event* currentEvent = ((Event*)_object);
-  int numChildren = currentEvent->getNumberOfChildren();
-  string eventName = currentEvent->getEventName();
+  // Event* currentEvent = ((Event*)_object);
+  // int numChildren = currentEvent->getNumberOfChildren();
+  // string eventName = currentEvent->getEventName();
 
-  // Warn the user if the # of choices is less than # of children
-  if (highBound - lowBound + 1 < numChildren) {
-    cout << "WARNING: number of choices in RandomOrderInt [" 
-         << lowBound << ", " << highBound << "] is less than"
-         << " number of children in event " << eventName << "."
-         << " This will cause repeated values."
-         << endl;
-  }
+  // // Warn the user if the # of choices is less than # of children
+  // if (highBound - lowBound + 1 < numChildren) {
+  //   cout << "WARNING: number of choices in RandomOrderInt [" 
+  //        << lowBound << ", " << highBound << "] is less than"
+  //        << " number of children in event " << eventName << "."
+  //        << " This will cause repeated values."
+  //        << endl;
+  // }
 
   char result [50];
-  sprintf(result, "%d",  Random::RandOrderInt(lowBound, highBound, numChildren, id));
+  sprintf(result, "%d",  Random::RandOrderInt(lowBound, highBound, id));
   return string(result);
 }
 
@@ -1554,16 +1573,16 @@ Patter* Utilities::getPatternHelper(void* _object, DOMElement* _PATFunction){
   // those values.
   else if (XMLTranscode(functionNameElement).compare("MakePattern")==0){
 
-//  cout << "Patter* Utilities::getPatternHelper - MakePattern option" << endl;
+cout << "Patter* Utilities::getPatternHelper - MakePattern option" << endl;
     DOMElement* listElement = _PATFunction->GFEC()->GFEC()->GNES();
-//  cout << "	after listElement" << endl;
+cout << "	after listElement" << endl;
     vector<string> stringList =listElementToStringVector (listElement);
-//  cout <<			"after ElementToString" << "  " << endl;
+cout <<			"after ElementToString" << "  " << endl;
     vector<int> intList;
-//  cout << "intList size: " << stringList.size() << "    " << endl;
+cout << "intList size: " << stringList.size() << "    " << endl;
     for (int i = 0; i < stringList.size(); i ++){
       int num = (int) evaluate(stringList[i], _object);
-//    cout << "	i=" << i<< " num=" << num << endl;
+cout << "	i=" << i<< " num=" << num << endl;
       intList.push_back(num);
     }
 
@@ -1580,7 +1599,7 @@ Patter* Utilities::getPatternHelper(void* _object, DOMElement* _PATFunction){
   //
   // TODO: Figure out if this is true.
   else if (XMLTranscode(functionNameElement).compare("ExpandPattern")==0){
-//  cout<<"see Expand pattern:"<<endl;
+    cout<<"see Expand pattern:"<<endl;
     cout<<XMLTranscode(_PATFunction->GFEC())<<endl;
     DOMElement* elementIter = _PATFunction->GFEC()->GFEC()->GNES();
     string method = XMLTranscode(elementIter);

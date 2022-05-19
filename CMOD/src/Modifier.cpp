@@ -33,14 +33,19 @@ Modifier::Modifier() {
   applyHow = "";
   probEnv = NULL;
   checkPt = 0;
+  partialNum = 0;
+  partialResultString = "";
 }
 
 //----------------------------------------------------------------------------//
 
-Modifier::Modifier(string modType, Envelope* prob, string modApplyHow) {
+Modifier::Modifier(string modType, Envelope* prob, string modApplyHow, int modPartialNum) {
   type = modType;
-  probEnv = new Envelope(*prob);
+  if (prob != NULL) {
+      probEnv = new Envelope(*prob);
+  }
   applyHow = modApplyHow;
+  partialNum = modPartialNum;
   checkPt = 0;
 }
 
@@ -50,6 +55,8 @@ Modifier::Modifier(const Modifier& orig) {
   type = orig.type;
   applyHow = orig.applyHow;
   checkPt = orig.checkPt;
+  partialNum = orig.partialNum;
+  partialResultString = orig.partialResultString;
 
   if (orig.probEnv != NULL) {
     probEnv = new Envelope(*orig.probEnv);
@@ -72,6 +79,8 @@ Modifier& Modifier::operator=(const Modifier& rhs) {
   type = rhs.type;
   applyHow = rhs.applyHow;
   checkPt = rhs.checkPt;
+  partialNum = rhs.partialNum;
+  partialResultString = rhs.partialResultString;
 
   if (rhs.probEnv != NULL) {
     probEnv = new Envelope(*rhs.probEnv);
@@ -91,7 +100,10 @@ Modifier& Modifier::operator=(const Modifier& rhs) {
 //----------------------------------------------------------------------------//
 
 Modifier::~Modifier() {
-  delete probEnv;
+  if (probEnv != NULL) {
+    delete probEnv;
+  }
+
   for (int i = 0; i < env_values.size(); i++) {
     delete env_values[i];
   }
@@ -109,6 +121,7 @@ float Modifier::getProbability(double checkPoint) {
   if (checkPoint < 0 || checkPoint > 1) {
     cerr << "Modifier::getProbability -- Error: checkPt out of bounds;" << endl;
     cerr << "        checkPoint = " << checkPoint << endl;
+    return -1;
   }
   checkPt = checkPoint;
   return probEnv->getValue(checkPoint, 1);
@@ -122,11 +135,23 @@ string Modifier::getModName() {
 
 //----------------------------------------------------------------------------//
 
+int Modifier::getPartialNum() {
+  return partialNum;
+}
+
+//----------------------------------------------------------------------------//
+
+string Modifier::getPartialResultString() {
+  return partialResultString;
+}
+
+//----------------------------------------------------------------------------//
+
 bool Modifier::willOccur(double checkPoint) {
   bool result = false;
   double rand  = Random::Rand();
 
-  if (rand <= getProbability(checkPoint)) {
+  if (rand > 0.0 && rand <= getProbability(checkPoint)) {
     result = true;
   }
   return result;
@@ -134,13 +159,11 @@ bool Modifier::willOccur(double checkPoint) {
 
 //----------------------------------------------------------------------------//
 
-void Modifier::applyModifier(Sound* snd, int numParts) {
+void Modifier::applyModifier(Sound* snd) {
   if (applyHow == "SOUND") {
     applyModSound(snd);
   } else if (applyHow == "PARTIAL") {
-    for (int i = 0; i < numParts; i++) {
-      applyModPartial(snd, i);
-    }
+    applyModPartial(snd);
   }
 }
 
@@ -176,64 +199,64 @@ void Modifier::applyModSound(Sound* snd) {
 
 //----------------------------------------------------------------------------//
 
-void Modifier::applyModPartial(Sound* snd, int partNum) {
+void Modifier::applyModPartial(Sound* snd) {
   if (type == "FREQUENCY" || type == "GLISSANDO"
       || type == "DETUNE" || type == "BEND") {
-    snd->get(partNum).setParam(FREQ_ENV, *(env_values.front()));
+    snd->get(partialNum).setParam(FREQ_ENV, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
   } else if (type == "TREMOLO") {
-    snd->get(partNum).setParam(TREMOLO_AMP, *(env_values.front()));
+    snd->get(partialNum).setParam(TREMOLO_AMP, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
-    snd->get(partNum).setParam(TREMOLO_RATE, *(env_values.front()));
+    snd->get(partialNum).setParam(TREMOLO_RATE, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
   } else if (type == "VIBRATO") {
-    snd->get(partNum).setParam(VIBRATO_AMP, *(env_values.front()));
+    snd->get(partialNum).setParam(VIBRATO_AMP, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
-    snd->get(partNum).setParam(VIBRATO_RATE, *(env_values.front()));
+    snd->get(partialNum).setParam(VIBRATO_RATE, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
   } else if (type == "PHASE") {
-    snd->get(partNum).setParam(PHASE, *(env_values.front()));
+    snd->get(partialNum).setParam(PHASE, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
   } else if (type == "AMPTRANS") {
-    snd->get(partNum).setParam(AMPTRANS_AMP_ENV, *(env_values.front()));
+    snd->get(partialNum).setParam(AMPTRANS_AMP_ENV, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
-    snd->get(partNum).setParam(AMPTRANS_RATE_ENV, *(env_values.front()));
+    snd->get(partialNum).setParam(AMPTRANS_RATE_ENV, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
-    snd->get(partNum).setParam(AMPTRANS_WIDTH, *(env_values.front()));
+    snd->get(partialNum).setParam(AMPTRANS_WIDTH, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
   } else if (type == "FREQTRANS") {
-    snd->get(partNum).setParam(FREQTRANS_AMP_ENV, *(env_values.front()));
+    snd->get(partialNum).setParam(FREQTRANS_AMP_ENV, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
-    snd->get(partNum).setParam(FREQTRANS_RATE_ENV, *(env_values.front()));
+    snd->get(partialNum).setParam(FREQTRANS_RATE_ENV, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
-    snd->get(partNum).setParam(FREQTRANS_WIDTH, *(env_values.front()));
+    snd->get(partialNum).setParam(FREQTRANS_WIDTH, *(env_values.front()));
     delete env_values.front();
     env_values.pop_front();
 
   } else if (type == "WAVE_TYPE") {
-    snd->get(partNum).setParam(WAVE_TYPE, env_values.front()->getValue(checkPt, 1));
+    snd->get(partialNum).setParam(WAVE_TYPE, env_values.front()->getValue(checkPt, 1));
     delete env_values.front();
     env_values.pop_front();
 

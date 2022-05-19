@@ -178,11 +178,9 @@ void Bottom::modifyChildren(){            //Incomplete Override
    //const short unsigned num = 15 ;
    //const short unsigned* loudness_val = &num;
 
-   //cout<<computeLoudness();
 
    //loudnessElement->setNodeValue(loudness_val);
 
-   //cout<<*loudnessElement->getNodeValue(); //Checking if update is successful
 
 }
 
@@ -193,7 +191,6 @@ void Bottom::modifyChildren(){            //Incomplete Override
 void Bottom::constructChild(SoundAndNoteWrapper* _soundNoteWrapper) {
   //Just to get the checkpoint. Not used any other time.
   checkPoint = (_soundNoteWrapper->ts.start - ts.start) / ts.duration;
-//cout << "CHECK POINT: " << checkPoint << endl;
   if (name.substr(0,1) == "s"){
     // buildNote(_soundNoteWrapper);
     buildSound(_soundNoteWrapper);
@@ -312,7 +309,9 @@ void Bottom::buildSound(SoundAndNoteWrapper* _soundNoteWrapper) {
   applyFilter(newSound);
 
   //Apply the reverberation to the sound.
-  applyReverberation(newSound);
+  //applyReverberation(newSound);
+  // EXPERIMENTAL: Added option of applying reverb by partial
+  applyReverberation(newSound, numPartials);
 
   if (utilities->getOutputParticel())Output::endSubLevel();
 
@@ -766,6 +765,63 @@ void Bottom::applyFilter(Sound* s){
 
 //----------------------------------------------------------------------------//
 
+// TEJUS: applyReverberation, but for partials
+void Bottom::applyReverberation(Sound *s, int numPartials) {
+  // Sample XML string:
+  // <Reverb>
+  //   <Fun>
+  //     <Name>REV_Simple</Name>
+  //     <Apply>PARTIAL</Apply>
+  //     <Sizes>
+  //       <Size><Fun><Name>EnvLib</Name><Env>2</Env><Scale>1.0</Scale></Fun></Size>
+  //       <Size>0.2</Size>
+  //       <Size>0.3</Size>
+  //     </Sizes>
+  //   </Fun>
+  // </Reverb>
+	
+  // May need to modify utilities...
+  DOMElement* reverbElement =
+          (DOMElement*) utilities->evaluateObject("", (void*) this, eventRev);
+
+//this call will return a rev function, just in case users use "select" here.
+//The string here is just a dummy since the callee will find the right rev
+//element  within "this".
+
+  // Assume this correctly gets <Name>
+  string rev_method =  XMLTC(reverbElement->GFEC());
+  if (rev_method.compare("REV_Simple") == 0) {
+    
+    DOMElement* arg = reverbElement->GFEC()->GNES();
+    // Apply by sound or by partial
+    string applyHow = XMLTC(arg);
+    arg = arg->GNES()->GFEC(); // First <Size>
+    if (applyHow == "SOUND") {
+	// Same as before, but get first <Size>
+        float roomSize =
+             utilities->evaluate(XMLTC(arg),(void*)this);
+        Reverb* reverbObj = new Reverb(roomSize, SAMPLING_RATE);
+        s->use_reverb(reverbObj);
+    } else if (applyHow == "PARTIAL") {
+    	// Now apply the reverb to each partial
+    	for (int i = 0; i < numPartials; i++) {
+	    float roomSize =
+	    	utilities->evaluate(XMLTC(arg), (void*)this);
+            Reverb* reverbObj = new Reverb(roomSize, SAMPLING_RATE);
+            // Add the reverb obj to the partial. It appears that this is already implemented in LASS/src/Partial.cpp.
+	    s->get(i).use_reverb(reverbObj);
+	    arg = arg->GNES(); // Next <Size>	
+	}
+    } else {
+    	cout << "WARNING: No <Apply> specifier for reverb, cannot apply." << endl;
+    }
+  } else {
+  	// Other methods not implemented as of 3/28/2022
+  }
+
+
+}
+
 void Bottom::applyReverberation(Sound* s) {
 
   DOMElement* reverbElement =
@@ -778,7 +834,7 @@ void Bottom::applyReverberation(Sound* s) {
   string rev_method =  XMLTC(reverbElement->GFEC());
 
   if (rev_method.compare("REV_Simple") == 0) {
-
+    cout << "_input = " << XMLTC(reverbElement->GFEC()->GNES()) << endl;
     float roomSize =
          utilities->evaluate(XMLTC(reverbElement->GFEC()->GNES()),(void*)this);
     Reverb* reverbObj = new Reverb(roomSize, SAMPLING_RATE);
@@ -911,7 +967,6 @@ void Bottom::applyModifiers(Sound *s, int numPartials) {
 
 
   DOMElement* modifierElement = modifiersIncludingAncestorsElement->GFEC();
-  //cout<<"modifierElement: "<<XMLTC(modifierElement)<<endl;
   while (modifierElement!=NULL) {
 
 //    <Modifier>
@@ -922,6 +977,7 @@ void Bottom::applyModifiers(Sound *s, int numPartials) {
 //      <Rate></Rate>
 //      <Width></Width>
 //      <GroupName></GroupName>
+//      <PartialResultString></PartialResultString>
 //    </Modifier>
 
     DOMElement* arg = modifierElement->GFEC();
@@ -942,19 +998,40 @@ void Bottom::applyModifiers(Sound *s, int numPartials) {
 
     arg = arg->GNES();
 
-    Envelope* probEnv = (Envelope*)utilities->evaluateObject(XMLTC(arg), this, eventEnv);
-    DOMElement* ampElement = arg->GNES();
-    DOMElement* rateElement = ampElement->GNES();
-    DOMElement* widthElement = rateElement->GNES();
+    Envelope* probEnv = NULL;
+    DOMElement *ampElement, *rateElement, *widthElement, *partialResultStringElement;
+    string ampStr, rateStr, widthStr, probStr, partialResultStr;
 
-    string ampStr = XMLTC(ampElement);
-    string rateStr = XMLTC(rateElement);
-    string widthStr = XMLTC(widthElement);
+    // Only evaluate the envelope if we apply by SOUND. Otherwise, may segfault on empty probability envelopes.
+    if (applyHow == "SOUND") {
+	probEnv = (Envelope*)utilities->evaluateObject(XMLTC(arg), this, eventEnv);
+	probStr = XMLTC(arg);
+    }
 
-    Modifier newMod(modType, probEnv, applyHow);
+    ampElement = arg->GNES();
+    rateElement = ampElement->GNES();
+    widthElement = rateElement->GNES();
+    partialResultStringElement = widthElement->GNES()->GNES();	
+    ampStr = XMLTC(ampElement);
+    rateStr = XMLTC(rateElement);
+    widthStr = XMLTC(widthElement);
+    partialResultStr = XMLTC(partialResultStringElement);
+
+
+    // ADDED BY TEJUS
+    // skip group name
+    // DOMElement* partialResultStringElement = widthElement->GNES()->GNES();
+
+
+    // TEJUS 2/8
+
+    // and apply modifiers one by one via their partial number.
+    // TODO: Validate the partial num to make sure that it does not go out of range.
 
     if (applyHow == "SOUND") {
+      Modifier newMod(modType, probEnv, applyHow);
 
+      // TEST
       if (ampStr!=""){
         Envelope* env =  (Envelope*)utilities->evaluateObject(ampStr, this, eventEnv );
         newMod.addValueEnv(env);
@@ -972,55 +1049,87 @@ void Bottom::applyModifiers(Sound *s, int numPartials) {
         newMod.addValueEnv(env);
         delete env;
       }
+
+      arg = widthElement->GNES();//group name (MUT_EX)
+      string mutExGroup = XMLTC(arg);
+      if (mutExGroup == "") {
+        // not MUT_EX
+        modNoDep.push_back(newMod);
+      } else {
+        // mutually exclusive
+        modMutEx[mutExGroup].push_back(newMod);
+      }
+  
+      delete probEnv;
     }
     else if (applyHow == "PARTIAL") {
+ 
 
+      // See PartialWindow.cpp (and FunctionGenerator) -- same parsing used here
+      XMLPlatformUtils::Initialize();
+      XercesDOMParser* parser = new XercesDOMParser();
+      xercesc::MemBufInputSource myxml_buf  ((const XMLByte*)partialResultStr.c_str(), partialResultStr.size(),
+                                        "function (in memory)");
+
+      parser->parse(myxml_buf);
+
+      DOMDocument* xmlDocument = parser->getDocument();
+      DOMElement* root = xmlDocument->getDocumentElement();
+
+      DOMElement* thisElement = root->GFEC();    //start of envelopes
+        thisElement = thisElement->GNES();    //envelopes
+
+      DOMElement* envelopeElement = thisElement->GFEC();//first envelope
       for (int i = 0; i <numPartials; i ++){ // make envelopes for all the partials
 
-        if (ampStr!=""){
+        Envelope* probEnv =
+	   (Envelope*)utilities->evaluateObject(XMLTC(envelopeElement), this, eventEnv);
+        probStr = XMLTC(envelopeElement);
+      	// Make a new modifier 
+      	Modifier newPartialMod(modType, probEnv, applyHow, i);
+
+        envelopeElement = envelopeElement->GNES();
+        ampStr = XMLTC(envelopeElement);
+        envelopeElement = envelopeElement->GNES();
+        widthStr = XMLTC(envelopeElement);
+        envelopeElement = envelopeElement->GNES();
+        rateStr = XMLTC(envelopeElement);
+
+        if (ampStr!="" && ampStr!="N/A"){
           Envelope* env =  (Envelope*)utilities->evaluateObject(ampStr, this, eventEnv );
-          newMod.addValueEnv(env);
+          newPartialMod.addValueEnv(env);
           delete env;
         }
 
 
-        if (rateStr!=""){
+        if (rateStr!="" && rateStr!="N/A"){
           Envelope* env =  (Envelope*)utilities->evaluateObject(rateStr, this, eventEnv );
-          newMod.addValueEnv(env);
+          newPartialMod.addValueEnv(env);
           delete env;
         }
 
 
-        if (widthStr!=""){
+        if (widthStr!="" && widthStr!="N/A"){
           Envelope* env =  (Envelope*)utilities->evaluateObject(widthStr, this, eventEnv );
-          newMod.addValueEnv(env);
+          newPartialMod.addValueEnv(env);
           delete env;
         }
+
+	// delete probEnv;
+        modNoDep.push_back(newPartialMod);
+        envelopeElement = envelopeElement->GNES();
       }
     }
 
-
-    arg = widthElement->GNES();//group name (MUT_EX)
-    string mutExGroup = XMLTC(arg);
-    if (mutExGroup == "") {
-      // not MUT_EX
-      modNoDep.push_back(newMod);
-    } else {
-      // mutually exclusive
-      modMutEx[mutExGroup].push_back(newMod);
-    }
-
-    delete probEnv;
     modifierElement = modifierElement->GNES(); // go to the next MOD in the list
   } // end of the main while loop
-
 
   // go through the non-exclusive mods
   for (int i = 0; i < modNoDep.size(); i++) {
 
     if (modNoDep[i].willOccur(checkPoint)) {
 
-      modNoDep[i].applyModifier(s, numPartials);
+      modNoDep[i].applyModifier(s);
 
     }
   }
@@ -1035,7 +1144,7 @@ void Bottom::applyModifiers(Sound *s, int numPartials) {
     bool appliedMod = false;
     for (int i = 0; i < modGroup.size() && !appliedMod; i++) {
       if (modGroup[i].willOccur(checkPoint)) {
-        modGroup[i].applyModifier(s, numPartials);
+        modGroup[i].applyModifier(s);
         appliedMod = true;
       }
     }
