@@ -149,13 +149,13 @@ namespace mu
     tok.Cmd = a_Oprt;
     m_vRPN.push_back(tok);
 
-/*  Testcode für RPN optimierung. Ist zwar funktionsfähig, wird
-    aber derzeit nicht verwendet. (paßt hier nicht richtig rein...)
+/*  Testcode fï¿½r RPN optimierung. Ist zwar funktionsfï¿½hig, wird
+    aber derzeit nicht verwendet. (paï¿½t hier nicht richtig rein...)
 
     std::size_t sz = m_vRPN.size();
    
     // reorder RPN to make optimization easier
-    // Problemfälle:
+    // Problemfï¿½lle:
     //    1+sin(a)+2
     //    1+(2+a)
     //    (a+2)+2

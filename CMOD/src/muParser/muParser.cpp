@@ -202,7 +202,7 @@ namespace mu
   void Parser::InitCharSets()
   {
     DefineNameChars( _T("0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") );
-    DefineOprtChars( _T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*^/?<>=#!$§%&|~'_{}") );
+    DefineOprtChars( _T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*^/?<>=#!$ï¿½%&|~'_{}") );
     DefineInfixOprtChars( _T("/+-*^?<>=#!$%&|~'_") );
   }
 
