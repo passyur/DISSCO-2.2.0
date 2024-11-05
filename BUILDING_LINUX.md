@@ -41,7 +41,7 @@ Installing DISSCO
 -----------------
 Just `git clone` this repo; explicitly:
 
-    git clone https://github.com/tipei/DISSCO-2.1.0.git
+    git clone https://github.com/passyur/DISSCO-2.2.0.git
 
 Building
 --------
