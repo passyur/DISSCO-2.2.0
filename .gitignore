@@ -14,3 +14,5 @@ Makefile
 lassie
 cmod
 UpgradeProjectFormat
+
+.DS_Store
