@@ -48,7 +48,7 @@ or
 
     -DLIBXERCESC_INCLUDE='/path/to/xerces-c/.../include' -DLIBXERCESC_LIB='/path/to/xerces-c/.../lib'
 
-For your personal edification: for ARM Macs, `brew` will install in `/opt/homebrew/Cellar/[your stuff here]` and symlink to `/opt/homebrew/opt/[your stuff here]`, and for Intel/x86 Macs, `brew.sh` will install in `/usr/local/bin/[your stuff here]`.
+For your personal edification: for ARM Macs, `brew` will install in `/opt/homebrew/Cellar/[your stuff here]` and symlink to `/opt/homebrew/opt/[your stuff here]`, and for Intel/x86 Macs, `brew` will install in `/usr/local/bin/[your stuff here]`.
 
 MacPorts will install it in `/opt/local/include/[your includes here]` and `/opt/local/lib/[your libs here]`.
 
