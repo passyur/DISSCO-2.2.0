@@ -1,16 +1,25 @@
+# editor related
 /.vscode
+*.swp
 
+# make related
 Makefile
-/make
 *.make
 /lib
 /obj
 
-*.swp
-
+# cmake related
 /out
 /build
 
+# premake related
+/bin
+/make
+
+# binaries
 lassie
 cmod
 UpgradeProjectFormat
+
+# macOS related
+.DS_Store

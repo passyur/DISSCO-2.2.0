@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "AuWriter.h"
 
-#include "sndfile.h"
+#include <sndfile.h>
 
 //----------------------------------------------------------------------------//
 bool AuWriter::write(SoundSample& ss, string filename, int bits)
