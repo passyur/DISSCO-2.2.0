@@ -9,7 +9,6 @@ Makefile
 /obj
 
 # cmake related
-/out
 /build
 
 # premake related
@@ -17,9 +16,8 @@ Makefile
 /make
 
 # binaries
-lassie
-cmod
-UpgradeProjectFormat
+*.a
+*.o
 
 # macOS related
 .DS_Store
