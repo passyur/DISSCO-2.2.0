@@ -70,7 +70,7 @@ Then, in `build`, do
 
 to generate the build files and
 
-    cmake -B .
+    cmake --build .
 
 to build.
 
