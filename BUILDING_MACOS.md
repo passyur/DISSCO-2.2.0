@@ -60,7 +60,26 @@ Just `git clone` this repo; explicitly:
 
 Building
 --------
-In the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
+From the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
+
+    mkdir build && cd build
+
+Then, in `build`, do
+
+    cmake ..
+
+to generate the build files and
+
+    cmake -B .
+
+to build.
+
+By running this command in `build`, one generates a so-called *out-of-source* (OOS) build. The alternative, an in-source build, is heavily discouraged (including [by the CMake maintainers](https://cmake.org/cmake/help/book/mastering-cmake/chapter/Getting%20Started.html#directory-structure)), and the root `CMakeLists.txt` reflects this distaste. The rationale is that OOS builds minimize clutter and collect all build files in one directory, whereas in-source builds put build files virtually everywhere. (This is bad.)
+
+From `build`, you can clean `build` using `cmake --build . --target clean`.
+
+(**For premake4 builds, not current, may or may not work**)
+From the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
 
     premake4 && make
 
