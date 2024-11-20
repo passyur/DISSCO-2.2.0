@@ -7,10 +7,10 @@ Of extreme importance:
 
 Of roughly equal importance:
 - [ ] macOS support
-    - [ ] CMOD
+    - [x] CMOD
         - [x] Compiles
         - [ ] Works
-    - [ ] LASS
+    - [x] LASS
         - [x] Compiles
         - [ ] Works
     - [ ] LASSIE
