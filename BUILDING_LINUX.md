@@ -8,15 +8,17 @@ The following are *necessary* to compile CMOD and LASS:
 
 - A C++11-supporting compiler (g++, clang),
 - A C compiler (gcc ...),
-- premake4 >= 4.3,
+- premake4 >= 4.3 OR (experimental) CMake >= 3.5,
 - libsndfile >= 1.0,
 - libxerces-c >= 3.2, and
-- muparser >= 2.X (developers: this should be updated!)
+- muparser >= 2.X
 
 To compile with LASSIE, the following couple are *necessary* inclusions:
 
 - GTK+ 2.4 < 3.24 (developers: also should be updated!) and
 - GTKmm-2.4 >= 1.5.
+
+For Qt development, we'll require Qt >= 6.4.
 
 Recommended
 -----------
@@ -27,13 +29,11 @@ Installing requirements and recommendations on:
 -----------------------------------------------
 
 ### Debian-likes
-You should first choose a compiler, say:
-
-    sudo apt install g++ gcc
-
-Then install the following:
+Install the following:
 
     sudo apt install build-essential premake4 libsndfile1 libsndfile1-dev libxerces-c3.2 libxerces-c-dev libmuparser2v5 libmuparser-dev xterm
+
+`build-essential` includes `g++` and `gcc`. If you prefer another C/C++ compiler, you can install separately.
 
 <!-- TODO: RHEL, maybe -->
 
@@ -50,3 +50,5 @@ In the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the fo
     premake4 && make
 
 To generate the release build, do `make config=release`.
+
+(The authors have not gotten around to testing CMake on Linux. Soon! :)
