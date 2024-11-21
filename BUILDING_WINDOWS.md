@@ -74,7 +74,7 @@ Now, make a `CMakeUserPresets.json` file with the following:
     "version": 2,
     "configurePresets": [
         {
-            "name": "default",
+            "name": "windows",
             "inherits": "vcpkg",
             "environment": {
                 "VCPKG_ROOT": "C:/path/to/vcpkg"
@@ -85,7 +85,7 @@ Now, make a `CMakeUserPresets.json` file with the following:
 ```
 where `C:/path/to/vcpkg` is the path to the directory you installed `vcpkg` in.
 
-Finally, run `cmake --preset=default -G Ninja`.
+Finally, run `cmake --preset=windows -G Ninja`.
 
 **(❌) Rest of the Build** 
 
