@@ -13,10 +13,10 @@ The following are *necessary* to compile CMOD and LASS:
 
 - A C++11-supporting compiler (g++, clang++),
 - A C compiler (gcc, clang),
-- (❌) cmake >= 3.2
+- cmake >= 3.25,
 - libsndfile >= 1.0,
 - libxerces-c >= 3.2, and
-- muparser >= 2.X (developers: this should be updated!)
+- muparser >= 2.X
 
 To compile with LASSIE, the following is *necessary*:
 
@@ -40,7 +40,7 @@ Installing requirements and recommendations:
     # port install libsndfile xercesc3 qt6
 
 ### (❌) Other accommodations
-We automatically check for installs at the directories preferred by `brew` and `port`. If you have your own installations of the above libraries you'd like to compile against, you may ensure they're included and linked at compile-time by passing the following arguments (when `cmake`ing):
+CMake automatically finds the relevant packages installed on the build system. If you have your own installations of the above libraries you'd like to compile against, you may ensure they're included and linked at compile-time by passing the following arguments (when `cmake`ing):
 
     -DLIBSNDFILE_INCLUDE='/path/to/libsndfile/include' -DLIBSNDFILE_LIB='/path/to/libsndfile/lib'
 
