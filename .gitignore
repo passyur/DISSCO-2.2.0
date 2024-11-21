@@ -1,6 +1,10 @@
-# editor related
+# VSCode related
 /.vscode
 *.swp
+
+# Visual Studio related
+/.vs
+/out
 
 # make related
 Makefile
@@ -10,6 +14,7 @@ Makefile
 
 # cmake related
 /build
+CMakeUserPresets.json
 
 # premake related
 /bin
@@ -21,3 +26,7 @@ Makefile
 
 # macOS related
 .DS_Store
+
+# vcpkg related
+vcpkg-configuration.json
+vcpkg.json

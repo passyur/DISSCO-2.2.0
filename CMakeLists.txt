@@ -38,7 +38,7 @@ elseif(LINUX)
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchains/linux.cmake")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-deprecated")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-deprecated")
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/LASS)
 add_subdirectory(${CMAKE_SOURCE_DIR}/CMOD)
