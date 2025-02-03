@@ -16,10 +16,11 @@ file(GLOB_RECURSE LASS_SRC
 #     "${EXAMPLES_DIR}/*.cxx"
 # )
 
+### in the future, we may fork LASS and let it be shared if we find a viable LASS install
 add_library(LASS STATIC ${LASS_SRC})
 
 ### libsndfile must be linked in just the same way as it is in CMOD ###
-target_link_libraries(LASS PRIVATE ${SNDFILE_LIBRARY})
+target_link_libraries(LASS PUBLIC ${SNDFILE_LIBRARY})
 message(STATUS "libsndfile linked with target!")
 
 target_include_directories(LASS PUBLIC

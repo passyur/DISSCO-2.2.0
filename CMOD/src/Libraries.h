@@ -73,9 +73,7 @@ using namespace std;
 using namespace xercesc;
 
 // this is the math expression parser : muparser
-#include "muParser/muParser.h"
-
-
+#include "muParser.h"
 
 typedef enum {
   eventTop    = 0,

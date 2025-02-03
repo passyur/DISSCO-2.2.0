@@ -99,7 +99,7 @@ MarkovModel<T>::MarkovModel(int size) {
   transitionMatrix.resize(size);
   stateValues.resize(size);
   initialDistribution.resize(size);
-  for (int i = 0; i < transitionMatrix.size(); i++) {
+  for (unsigned i = 0; i < transitionMatrix.size(); i++) {
     transitionMatrix[i].resize(size);
   }
 }
@@ -119,20 +119,20 @@ const vector<double>& MarkovModel<T>::getTransitionProbabilities(int state) cons
 
 template<typename T>
 void MarkovModel<T>::makeConsistent() {
-  for (int i = 0; i < transitionMatrix.size(); i++) {
+  for (unsigned i = 0; i < transitionMatrix.size(); i++) {
     vector<double>& row = transitionMatrix[i];
     // find row sum
     double sum = 0;
-    for (int i = 0; i < row.size(); i++) {
+    for (unsigned i = 0; i < row.size(); i++) {
       sum += row[i];
     }
 
     if (sum == 0) {    // when sum is 0, use uniform distribution
-      for (int i = 0; i < row.size(); i++) {
+      for (unsigned i = 0; i < row.size(); i++) {
         row[i] = 1.0 / row.size();
       }
     } else { // otherwise, normalize
-      for (int i = 0; i < row.size(); i++) {
+      for (unsigned i = 0; i < row.size(); i++) {
         row[i] /= sum;
       }
     }
@@ -140,15 +140,15 @@ void MarkovModel<T>::makeConsistent() {
 
   // make sure initial distribution is a distribution
   double sum = 0;
-  for (int i = 0; i < initialDistribution.size(); i++) {
+  for (unsigned i = 0; i < initialDistribution.size(); i++) {
     sum += initialDistribution[i];
   }
   if (sum == 0) {
-    for (int i = 0; i < initialDistribution.size(); i++) {
+    for (unsigned i = 0; i < initialDistribution.size(); i++) {
       initialDistribution[i] = 1.0 / initialDistribution.size();
     }
   } else {
-    for (int i = 0; i < initialDistribution.size(); i++) {
+    for (unsigned i = 0; i < initialDistribution.size(); i++) {
       initialDistribution[i] /= sum;
     }
   }
@@ -184,7 +184,7 @@ void MarkovModel<T>::from_str(std::string str) {
   stateValues.resize(size);
   initialDistribution.resize(size);
 
-  for (int i = 0; i < transitionMatrix.size(); i++) {
+  for (int i = 0; i < size; i++) {
     transitionMatrix[i].resize(size);
   }
 
@@ -205,27 +205,45 @@ void MarkovModel<T>::from_str(std::string str) {
 
 template<typename T>
 T MarkovModel<T>::nextSample(double rand) {
+  vector<double> samplelist;
   if (thisIndex < 0) {
-    double sum;
-    int i = 0;
-    for (; i < initialDistribution.size(); i++) {
-      sum += initialDistribution[i];
-      if (sum >= rand) break;
-    }
-    if (i == initialDistribution.size()) i -= 1;
-    thisIndex = i;
-    return stateValues[i];
+    samplelist = initialDistribution;
+    // double sum;
+    // int i = 0;
+    // for (; i < initialDistribution.size(); i++) {
+    //   sum += initialDistribution[i];
+    //   if (sum >= rand) break;
+    // }
+    // if (i == initialDistribution.size()) i -= 1;
+    // thisIndex = i;
+    // return stateValues[i];
   } else {
-    double sum;
-    int i = 0;
-    for (; i < transitionMatrix[thisIndex].size(); i++) {
-      sum += transitionMatrix[thisIndex][i];
-      if (sum >= rand) break;
-    }
-    if (i == transitionMatrix[thisIndex].size()) i -= 1;
-    thisIndex = i;
-    return stateValues[i];
+    samplelist = transitionMatrix[thisIndex];
+    // double sum;
+    // int i = 0;
+    // for (; i < transitionMatrix[thisIndex].size(); i++) {
+    //   sum += transitionMatrix[thisIndex][i];
+    //   if (sum >= rand) break;
+    // }
+    // if (i == transitionMatrix[thisIndex].size()) i -= 1;
+    // thisIndex = i;
+    // return stateValues[i];
   }
+  double sum;
+  int i = 0;
+  while(i < (int)samplelist.size()){
+    sum += samplelist[i];
+
+    if(rand <= sum) break;
+
+    ++i;
+  }
+
+  if(i == (int)samplelist.size())
+    --i;
+
+  thisIndex = i;
+  return stateValues[i];
 }
 
 #endif /* MARKOVMODEL_H */

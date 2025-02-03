@@ -35,5 +35,6 @@ elseif(LINUX)
 endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/LASS)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external-libs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/CMOD)
 add_subdirectory(${CMAKE_SOURCE_DIR}/LASSIE)
