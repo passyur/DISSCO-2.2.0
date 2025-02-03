@@ -90,7 +90,7 @@ string OutputNode::getXML(void) {
   s += sanitize(nodeName);
   s += ">\n";
 
-  for(int i = 0; i < propertyNames.size(); i++) {
+  for(unsigned i = 0; i < propertyNames.size(); i++) {
     s += "<";
     s += sanitize(propertyNames[i]);
     s += ">";
@@ -102,7 +102,7 @@ string OutputNode::getXML(void) {
     s += ">\n";
   }
 
-  for(int i = 0; i < subNodes.size(); i++) {
+  for(unsigned i = 0; i < subNodes.size(); i++) {
     if(subNodes[i]->isBuildPhase())
       continue;
     s += subNodes[i]->getXML();

@@ -101,7 +101,7 @@ struct TimeSignature {
   void ConstructTupletNames() {
     tuplet_types_.clear();
 
-    for(size_t i = 0; i < tuplet_limit_; ++i) {
+    for(int i = 0; i < tuplet_limit_; ++i) {
       int l = CalculateNearestPow2(i);
       string t = "\\tuplet ";
       t += Note::int_to_str(i) + "/" + Note::int_to_str(l) + "{ ";

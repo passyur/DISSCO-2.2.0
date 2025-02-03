@@ -108,7 +108,7 @@ int PieceHelper::getSeedNumber(string seed) {
   const char* seed_c = seed.c_str();
   int seedNumber = 0;
   int digits = 1;
-  for(int i = 0; i < seed.length(); i++)
+  for(unsigned i = 0; i < seed.length(); i++)
     digits *= 10;
   for(int i = 0; seed_c[i] != 0; i++) {
     digits /= 10;
@@ -505,9 +505,9 @@ vector<DOMElement*> Piece::calcEventM(DOMElement* eventElement){
 	      }
 	      else {// by layer
 	      numChildren = 0;
-		for (int i = 0; i < layerElements.size(); i ++){
-		  numChildren +=utilities->evaluate(XMLTC(layerElements[i]->GFEC()),(void*)this);
-		}
+          for (unsigned i = 0; i < layerElements.size(); i ++){
+            numChildren +=utilities->evaluate(XMLTC(layerElements[i]->GFEC()),(void*)this);
+          }
 	      }
 
 	      if(type == 4){ //Bottom
@@ -592,10 +592,10 @@ void Piece::geneticOptimization(string fitnessFunction, double optimum){
 
   cout << "EventValues: " << utilities->eventValues.size() << endl;
 
-  for(int i = 0; i < children.size(); i++){
+  for(unsigned i = 0; i < children.size(); i++){
       vector<DOMElement*> currChildren = calculateAesthetic(children[i]);
 
-      for(int j = 0; j < currChildren.size(); j++){
+      for(unsigned j = 0; j < currChildren.size(); j++){
         children.push_back(currChildren[j]);
       }
 
@@ -607,7 +607,7 @@ void Piece::geneticOptimization(string fitnessFunction, double optimum){
   //(Only bottom events for now)
   double pieceAesthetic = 0.0;
   double fitnessSum = 0.0;
-  int numUniqueEvents = 0;
+//   int numUniqueEvents = 0;
   std::map<double, string> bottoms;
   std::vector<string> names;
 
@@ -616,7 +616,7 @@ void Piece::geneticOptimization(string fitnessFunction, double optimum){
     cout<<it->first<<", "<<it->second<<endl;
     if(it->second != 0.0){
       pieceAesthetic += it->second;
-      numUniqueEvents++;
+    //   numUniqueEvents++;
       bottoms.insert(std::pair<double, string>(it->second, it->first));
       cout<< "CHOOSEN: "<<it->first<<", "<<it->second<<endl;
       fitnessSum += it->second;
@@ -647,7 +647,7 @@ if(pieceAesthetic < optimum){
   double randNum = Random::Rand();
 
   //Selecting First Parent
-  for(int i = 0; i < prange.size(); i++){
+  for(unsigned i = 0; i < prange.size(); i++){
     if(prange[i] >= randNum){
       cout<<"P1: "<<sortedEvents[i]<<endl;
       parents.push_back(utilities->getEventElement(t, sortedEvents[i]));
@@ -660,7 +660,7 @@ if(pieceAesthetic < optimum){
   }
 
   //Recalculating Probability
-  for(int i = 0; i < sortedEvents.size(); i++){
+  for(unsigned i = 0; i < sortedEvents.size(); i++){
     cout<<"Piece::geneticOptimization :  Recalculating Probability "<< i <<endl;
     prange.push_back(runningSum + (utilities->eventValues[sortedEvents[i]] / fitnessSum));
     runningSum += utilities->eventValues[sortedEvents[i]] / fitnessSum;
@@ -669,7 +669,7 @@ if(pieceAesthetic < optimum){
   //Selecting Second Parent
   randNum = Random::Rand();
 
-  for(int i = 0; i < prange.size(); i++){
+  for(unsigned i = 0; i < prange.size(); i++){
     if(prange[i] >= randNum){
       cout<<"P2: "<<sortedEvents[i]<<endl;
       parents.push_back(utilities->getEventElement(t, sortedEvents[i]));
@@ -682,14 +682,14 @@ if(pieceAesthetic < optimum){
   }
 
   //Recalculating Probability
-  for(int i = 0; i < sortedEvents.size(); i++){
+  for(unsigned i = 0; i < sortedEvents.size(); i++){
     prange.push_back(runningSum + (utilities->eventValues[sortedEvents[i]] / fitnessSum));
     runningSum += utilities->eventValues[sortedEvents[i]] / fitnessSum;
   }
 
   //Selecting Child
   randNum = Random::Rand();
-  for(int i = 0; i < prange.size(); i++){
+  for(unsigned i = 0; i < prange.size(); i++){
     if(prange[i] >= randNum){
       cout<<"child: "<<sortedEvents[sortedEvents.size() - i]<<endl;
       child.push_back(utilities->getEventElement(t, sortedEvents[sortedEvents.size() - i]));
@@ -722,7 +722,7 @@ crossoverMutation(parents[0], parents[1], child[0], 0.2);
 
 //Resetting eventValues map for next iteration
 utilities->eventValues.clear();
-for(int i = 0; i < names.size(); i++){
+for(unsigned i = 0; i < names.size(); i++){
   utilities->eventValues.insert(std::pair<string, double>(names[i], 0.0));
 }
 
@@ -1342,8 +1342,8 @@ void Piece::functionModifier(DOMElement* functionElement, int maxValue){ //Needs
 
       }
       else {// by layer
-      numChildren = 0;
-        for (int i = 0; i < layerElements.size(); i ++){
+        numChildren = 0;
+        for (unsigned i = 0; i < layerElements.size(); i ++){
           numChildren +=utilities->evaluate(XMLTC(layerElements[i]->GFEC()),(void*)this);
         }
       }
@@ -1460,25 +1460,24 @@ return childElements;
 
     double sampleRange = sampleData[sampleData.size() - 1] - sampleData[0];
 
-    for(int i = 0; i < sampleData.size(); i++){
+    for(unsigned i = 0; i < sampleData.size(); i++){
       if(partitionMethod.compare("Pow2") == 0){
-        probs[(int)(log(sampleData[i])/log(2))] += 1.0/sampleData.size();
+        probs[(int)(log(sampleData[i]) / log(2))] += 1.0 / sampleData.size();
       }
       else if(partitionMethod.compare("Unit") == 0){
-        probs[(int)sampleData[i]] += 1.0/sampleData.size();
+        probs[(int)sampleData[i]] += 1.0 / sampleData.size();
       }
     }
 
-    for(int i = 0; i < probs.size(); i++){
+    for(unsigned i = 0; i < probs.size(); i++){
 
-      if(probs[i] > 0.0){
-      shannonEntropy += -1 * probs[i] * log(probs[i])/log(2);
-    }
+      if(0.0 < probs[i])
+        shannonEntropy += -1 * probs[i] * (log(probs[i]) / log(2));
+
   }
 
-  if(shannonEntropy < 0.0){     // C++ log stuff error?
+  if(shannonEntropy < 0.0)    // C++ log stuff error?
     shannonEntropy = 0.0;
-  }
 
   //cout<<"Shannon: "<<shannonEntropy;
 

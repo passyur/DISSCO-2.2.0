@@ -64,7 +64,7 @@ Modifier::Modifier(const Modifier& orig) {
     probEnv = NULL;
   }
 
-  for (int i = 0; i < orig.env_values.size(); i++) {
+  for (unsigned i = 0; i < orig.env_values.size(); i++) {
     if (orig.env_values[i] != NULL) {
       env_values.push_back(new Envelope(*orig.env_values[i]));
     } else {
@@ -95,7 +95,7 @@ Modifier& Modifier::operator=(const Modifier& rhs) {
     delete env;  
   }
   env_values.clear();
-  for (int i = 0; i < rhs.env_values.size(); i++) {
+  for (unsigned i = 0; i < rhs.env_values.size(); i++) {
     if (rhs.env_values[i] != NULL) {
       env_values.push_back(new Envelope(*rhs.env_values[i]));
     } else {
@@ -112,7 +112,7 @@ Modifier::~Modifier() {
     delete probEnv;
   }
 
-  for (int i = 0; i < env_values.size(); i++) {
+  for (unsigned i = 0; i < env_values.size(); i++) {
     delete env_values[i];
   }
 }

@@ -60,9 +60,9 @@ Matrix::Matrix(int numTypes, int numAttacks, int numDurations,
     }
   }
 
-  for (int i = 0; i < numTypesInLayers.size(); i++) {
+  for (unsigned i = 0; i < numTypesInLayers.size(); i++) {
     for (int j = 0; j < numTypesInLayers[i]; j++) {
-      typeLayers.push_back( i );
+      typeLayers.push_back(i);
     }
   }
 
@@ -109,13 +109,13 @@ void Matrix::setAttacks(Sieve* attackSieve, vector<Envelope*> attackEnvs) {
 
   // add the results into the matrix
     // do for each type
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
 
       // do for each attack
-    for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+    for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
       double attackSieveValue = attProbs[attNum];
 
-      if (attNum < 0 || attNum >= matr[type].size()) {
+      if (matr[type].size() - 1 < attNum) {
         cerr << "Matrix::setAttacks -- error - getValue out of bounds;" << endl;
         cerr << "  attNum=" << attNum << ", matr[type].size()="
              << matr[type].size() << endl;
@@ -124,7 +124,7 @@ void Matrix::setAttacks(Sieve* attackSieve, vector<Envelope*> attackEnvs) {
       int attackStime = attTimes[attNum];
       att.insert(attackStime);
 
-      for (int durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
+      for (unsigned durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
         matr[type][attNum][durNum].attdurprob += attackSieveValue;
         if (hasEnv) {
           double attackEnvValue = attackEnvs[type]->getValue(attNum, matr[type].size());
@@ -135,7 +135,7 @@ void Matrix::setAttacks(Sieve* attackSieve, vector<Envelope*> attackEnvs) {
     }
   }
 
-  for(int i = 0; i < attTimes.size(); i++){
+  for(unsigned i = 0; i < attTimes.size(); i++){
     if(attTimes[i] > beatEDUs){
       break;
     }
@@ -165,16 +165,16 @@ void Matrix::setDurations(Sieve* durSieve, int maxVal, vector<Envelope*> durEnvs
   //int oldType = 0;
 
   // add the results into the matrix
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
     // do for each type
 
-    for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+    for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
       // do for each attack
 
-      for (int durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
+      for (unsigned durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
         double durSieveVal = durProbs[durNum];
 
-        if (durNum < 0 || durNum > matr[type][attNum].size()) {
+        if (matr[type][attNum].size() < durNum) {
           cerr << "Matrix::setDurations -- error - getValue out of bounds;" << endl;
           cerr << "  durNum=" << durNum << ", matr[type][attNum].size()="
               << matr[type][attNum].size() << endl;
@@ -287,13 +287,13 @@ MatPoint Matrix::choose() {
 
   // find the nearest prob to that random in the matrix
     // do for each type
-  for (int type = 0; !found && type < matr.size(); type++) {
+  for (unsigned type = 0; !found && type < matr.size(); type++) {
 
       // do for each attack
-    for (int attNum = 0; !found && attNum < matr[type].size(); attNum++) {
+    for (unsigned attNum = 0; !found && attNum < matr[type].size(); attNum++) {
 
         // do for each dur
-      for (int durNum = 0; !found && durNum < matr[type][attNum].size(); durNum++) {
+      for (unsigned durNum = 0; !found && durNum < matr[type][attNum].size(); durNum++) {
 
         // look for the closest prob, greater than the rand num
         if (matr[type][attNum][durNum].normprob >= randNum) {
@@ -328,7 +328,7 @@ bool Matrix::normalizeMatrix() {
   double matrSum = 0;
   double lastSum = 0;
   // get the sum of the matrix
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
 /*attackSieve
     cout << "		Matrix::normalizeMatrix - type=" << type
          << " matr.size=" << matr.size()
@@ -336,10 +336,10 @@ bool Matrix::normalizeMatrix() {
 */
 
     // do for each type
-    for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+    for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
 
       // do for each attackattackSieve
-      for (int durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
+      for (unsigned durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
 
         // do for each dur
         matr[type][attNum][durNum].normprob =
@@ -366,13 +366,13 @@ bool Matrix::normalizeMatrix() {
   }
 
   // set the matrix probs to add up to 1
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
     // do for each type
 
-    for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+    for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
       // do for each attack
 
-      for (int durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
+      for (unsigned durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
         // do for each dur
         lastSum += (matr[type][attNum][durNum].normprob) / matrSum;
         matr[type][attNum][durNum].normprob = lastSum;
@@ -392,8 +392,8 @@ bool Matrix::normalizeMatrix() {
 
 void Matrix::recomputeTypeProbs(int chosenType, int remaining) {
   if (remaining != 0) {
-    for (int i = 0; i < typeProb.size(); i++) {
-      if (i == chosenType) {
+    for (unsigned i = 0; i < typeProb.size(); i++) {
+      if ((int)i == chosenType) {
         typeProb[i] = round(typeProb[i] * (remaining + 1) - 1) / remaining;
       } else {
         typeProb[i] = (typeProb[i] * (remaining + 1)) / remaining;
@@ -441,15 +441,15 @@ void Matrix::removeConflicts(MatPoint &chosenPt) {
   int chosenLayer = typeLayers[chosenPt.type];
 
 
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
     // only remove conflicts if this type is in the same layer
     //   as the chosen type
     if ( chosenLayer == typeLayers[type] ) {
 
-      for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+      for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
         // do for each attackattackSieve
 
-        for (int durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
+        for (unsigned durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
           // do for each dur
 
           int currStart = matr[type][attNum][durNum].stime;
@@ -481,15 +481,15 @@ void Matrix::removeSweepConflicts(MatPoint &chosenPt) {
   chosenPt.dur = chosenEnd - chosenStart;
   int chosenLayer = typeLayers[chosenPt.type];
 
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
     // only remove conflicts if this type is in the same layer
     //   as the chosen type
     if ( chosenLayer == typeLayers[type] ) {
 
-      for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+      for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
         // do for each attack
 
-        for (int durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
+        for (unsigned durNum = 0; durNum < matr[type][attNum].size(); durNum++) {
           // do for each dur
 
           int currStart = matr[type][attNum][durNum].stime;
@@ -519,21 +519,21 @@ void Matrix::printMatrix(bool normalized) {
          << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << endl;
   }
 
-  for (int type = 0; type < matr.size(); type++) {
+  for (unsigned type = 0; type < matr.size(); type++) {
     printf("Type %-2i", type);
 
     //print out a header row of possible start times
-    for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+    for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
       printf("%7i  ", matr[type][attNum][0].stime);
     }
     cout << endl;
 
     // print the left column as a possible dur value, followed by probs
-    for (int durNum = 0; durNum < matr[type][0].size(); durNum++) {
+    for (unsigned durNum = 0; durNum < matr[type][0].size(); durNum++) {
       printf("%5i  ", matr[type][0][durNum].dur);
 
       // print the probs
-      for (int attNum = 0; attNum < matr[type].size(); attNum++) {
+      for (unsigned attNum = 0; attNum < matr[type].size(); attNum++) {
         if (normalized) {
           printf("%6.5f  ", matr[type][attNum][durNum].normprob);
         } else {

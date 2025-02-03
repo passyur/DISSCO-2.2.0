@@ -106,7 +106,7 @@ bool Section::InsertNote(Note* n) {
 
   int bar_num = n->start_t / time_signature_.bar_edus_;
 
-  if (bar_num >= section_.size()) {
+  if (bar_num >= (int)section_.size()) {
     ResizeSection(bar_num);
   }
 
@@ -329,7 +329,7 @@ void Section::EnsureNoteExpressible(Note* n) {
   int min_diff = time_signature_.beat_edus_;
   bool note_needs_chop = true;
 
-  for (int i = 0; i < time_signature_.valid_dividers_.size(); i++) {
+  for (unsigned i = 0; i < time_signature_.valid_dividers_.size(); i++) {
     if (dur % time_signature_.valid_dividers_[i] == 0) {
       note_needs_chop = false;
       break;
@@ -778,9 +778,7 @@ list<Note*> Section::PopFirstBar() {
   list<Note*>::iterator note_iter = section_flat_.begin();
   int num_items_in_bar = 0;
   bool first_barline_seen = false;
-  while (note_iter != section_flat_.end() &&
-         !first_barline_seen ||
-         (*note_iter)->type != NoteType::kBarline) {
+  while ((note_iter != section_flat_.end() && !first_barline_seen) || (*note_iter)->type != NoteType::kBarline) {
     bar.push_back(*note_iter);
 
     if ((*note_iter)->type == NoteType::kBarline) 
