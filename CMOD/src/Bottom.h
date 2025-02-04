@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Random.h"
 #include "Piece.h"
 #include "Patter.h"
-#include "../../LASS/src/ProbabilityEnvelope.h" // consider moving this into LASS.h
+#include "ProbabilityEnvelope.h" // consider moving this into LASS.h
 #include <string>
 #include <stdlib.h>
 

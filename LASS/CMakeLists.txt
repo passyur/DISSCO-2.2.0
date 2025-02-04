@@ -24,7 +24,7 @@ target_link_libraries(LASS PUBLIC ${SNDFILE_LIBRARY})
 message(STATUS "libsndfile linked with target!")
 
 target_include_directories(LASS PUBLIC
-    ${SRC_DIR}
+    "${PROJECT_SOURCE_DIR}/src"
     ${SNDFILE_INCLUDE_DIR}
 )
 message(STATUS "libsndfile included in target!")
