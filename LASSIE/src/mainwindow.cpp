@@ -114,66 +114,66 @@ void MainWindow::aboutQt()
 void MainWindow::createActions()
 {
     //! [5]
-    new_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
+    new_act = new QAction(QIcon::fromTheme("document-new"),
                          tr("&New"), this);
     new_act->setShortcuts(QKeySequence::New);
     new_act->setStatusTip(tr("Create a new file"));
     connect(new_act, &QAction::triggered, this, &MainWindow::newFile);
     //! [4]
 
-    open_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentOpen),
+    open_act = new QAction(QIcon::fromTheme("document-open"),
                           tr("&Open..."), this);
     open_act->setShortcuts(QKeySequence::Open);
     open_act->setStatusTip(tr("Open an existing file"));
     connect(open_act, &QAction::triggered, this, &MainWindow::open);
     //! [5]
 
-    save_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentSave),
+    save_act = new QAction(QIcon::fromTheme("document-save"),
                           tr("&Save"), this);
     save_act->setShortcuts(QKeySequence::Save);
     save_act->setStatusTip(tr("Save the document to disk"));
     connect(save_act, &QAction::triggered, this, &MainWindow::save);
 
-    exit_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ApplicationExit),
+    exit_act = new QAction(QIcon::fromTheme("application-exit"),
                           tr("E&xit"), this);
     exit_act->setShortcuts(QKeySequence::Quit);
     exit_act->setStatusTip(tr("Exit the application"));
     connect(exit_act, &QAction::triggered, this, &QWidget::close);
 
-    undo_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditUndo),
+    undo_act = new QAction(QIcon::fromTheme("edit-undo"),
                           tr("&Undo"), this);
     undo_act->setShortcuts(QKeySequence::Undo);
     undo_act->setStatusTip(tr("Undo the last operation"));
     connect(undo_act, &QAction::triggered, this, &MainWindow::undo);
 
-    redo_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditRedo),
+    redo_act = new QAction(QIcon::fromTheme("edit-redo"),
                           tr("&Redo"), this);
     redo_act->setShortcuts(QKeySequence::Redo);
     redo_act->setStatusTip(tr("Redo the last operation"));
     connect(redo_act, &QAction::triggered, this, &MainWindow::redo);
 
-    cut_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditCut),
+    cut_act = new QAction(QIcon::fromTheme("edit-cut"),
                          tr("Cu&t"), this);
     cut_act->setShortcuts(QKeySequence::Cut);
     cut_act->setStatusTip(tr("Cut the current selection's contents to the "
                             "clipboard"));
     connect(cut_act, &QAction::triggered, this, &MainWindow::cut);
 
-    copy_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditCopy),
+    copy_act = new QAction(QIcon::fromTheme("edit-copy"),
                           tr("&Copy"), this);
     copy_act->setShortcuts(QKeySequence::Copy);
     copy_act->setStatusTip(tr("Copy the current selection's contents to the "
                              "clipboard"));
     connect(copy_act, &QAction::triggered, this, &MainWindow::copy);
 
-    paste_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::EditPaste),
+    paste_act = new QAction(QIcon::fromTheme("edit-paste"),
                            tr("&Paste"), this);
     paste_act->setShortcuts(QKeySequence::Paste);
     paste_act->setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"));
     connect(paste_act, &QAction::triggered, this, &MainWindow::paste);
 
-    about_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::HelpAbout),
+    about_act = new QAction(QIcon::fromTheme("help-about"),
                            tr("&About"), this);
     about_act->setStatusTip(tr("Show the application's About box"));
     connect(about_act, &QAction::triggered, this, &MainWindow::about);
