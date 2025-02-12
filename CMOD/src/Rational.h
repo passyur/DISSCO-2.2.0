@@ -106,6 +106,12 @@ protected:
 public:
   Rational() : n(0), d(1) {}
 
+  Rational(const Rational<T>& other){
+    n = other.n;
+    d = other.d;
+    simplify();
+  }
+
   Rational(T Numerator, T Denominator)
   {
     n = Numerator;
@@ -197,7 +203,7 @@ public:
   //Operator definitions//
   //--------------------//
 
-  Rational<T> operator + (Rational<T> other)
+  Rational<T> operator+(Rational<T> other)
   {
     if(!isDeterminate() || !other.isDeterminate())
       return Rational<T>(0, 0);
@@ -207,12 +213,12 @@ public:
     return Rational<T>(new_n, new_d);
   }
 
-  Rational<T> operator + (T other)
+  Rational<T> operator+(T other)
   {
     return *this + Rational<T>(other, 1);
   }
 
-  Rational<T> operator - (Rational<T> other)
+  Rational<T> operator-(Rational<T> other)
   {
     if(!isDeterminate() || !other.isDeterminate())
       return Rational<T>(0, 0);
@@ -222,12 +228,12 @@ public:
     return Rational<T>(new_n, new_d);
   }
 
-  Rational<T> operator - (T other)
+  Rational<T> operator-(T other)
   {
     return *this - Rational<T>(other, 1);
   }
 
-  Rational<T> operator * (Rational<T> other)
+  Rational<T> operator*(Rational<T> other)
   {
     if(!isDeterminate() || !other.isDeterminate())
       return Rational<T>(0, 0);
@@ -236,72 +242,72 @@ public:
     return Rational<T>(new_n, new_d);
   }
 
-  Rational<T> operator * (T other)
+  Rational<T> operator*(T other)
   {
     return *this * Rational<T>(other, 1);
   }
 
-  Rational<T> operator / (Rational<T> other)
+  Rational<T> operator/(Rational<T> other)
   {
     T new_n = n * other.d;
     T new_d = d * other.n;
     return Rational<T>(new_n, new_d);
   }
 
-  Rational<T> operator / (T other)
+  Rational<T> operator/(T other)
   {
     return *this / Rational<T>(other, 1);
   }
 
-  Rational<T> operator += (Rational<T> other)
+  Rational<T> operator+=(Rational<T> other)
   {
     *this = *this + other;
     return *this;
   }
 
-  Rational<T> operator += (T other)
+  Rational<T> operator+=(T other)
   {
     *this = *this + Rational<T>(other, 1);
     return *this;
   }
 
-  Rational<T> operator -= (Rational<T> other)
+  Rational<T> operator-=(Rational<T> other)
   {
     *this = *this + other;
     return *this;
   }
 
-  Rational<T> operator -= (T other)
+  Rational<T> operator-=(T other)
   {
     *this = *this - Rational<T>(other, 1);
     return *this;
   }
 
-  Rational<T> operator *= (Rational<T> other)
+  Rational<T> operator*=(Rational<T> other)
   {
     *this = *this * other;
     return *this;
   }
 
-  Rational<T> operator *= (T other)
+  Rational<T> operator*=(T other)
   {
     *this = *this * Rational<T>(other, 1);
     return *this;
   }
 
-  Rational<T> operator /= (Rational<T> other)
+  Rational<T> operator/=(Rational<T> other)
   {
     *this = *this / other;
     return *this;
   }
 
-  Rational<T> operator /= (T other)
+  Rational<T> operator/=(T other)
   {
     *this = *this / Rational<T>(other, 1);
     return *this;
   }
 
-  Rational<T> operator = (Rational<T> other)
+  Rational<T> operator=(const Rational<T> other)
   {
     n = other.n;
     d = other.d;
@@ -309,96 +315,96 @@ public:
     return *this;
   }
 
-  Rational<T> operator = (T other)
+  Rational<T> operator=(T other)
   {
     n = other;
     d = 1;
     return *this;
   }
 
-  Rational<T> operator ++ (int dummy)
+  Rational<T> operator++(int dummy)
   {
     n = n + d;
     return *this;
   }
 
-  Rational<T> operator -- (int dummy)
+  Rational<T> operator--(int dummy)
   {
     n = n - d;
     return *this;
   }
 
-  Rational<T> operator - ()
+  Rational<T> operator-()
   {
     return (*this * -1);
   }
 
-  bool operator == (Rational<T> other)
+  bool operator==(Rational<T> other)
   {
     return (n == other.n && d == other.d);
   }
 
-  bool operator == (T other)
+  bool operator==(T other)
   {
     return (n == other && d == 1);
   }
 
-  bool operator != (Rational<T> other)
+  bool operator!=(Rational<T> other)
   {
     return (n != other.n || d != other.d);
   }
 
-  bool operator != (T other)
+  bool operator!=(T other)
   {
     return (n != other || d != 1);
   }
 
-  bool operator > (Rational<T> other)
+  bool operator>(Rational<T> other)
   {
     Rational<T> difference = *this - other;
     return (difference.n > 0);
   }
 
-  bool operator > (T other)
+  bool operator>(T other)
   {
     Rational<T> difference = *this - 
       Rational<T>(other, 1);
     return (difference.n > 0);
   }
 
-  bool operator >= (Rational<T> other)
+  bool operator>=(Rational<T> other)
   {
     Rational<T> difference = *this - other;
     return (difference.n >= 0);
   }
 
-  bool operator >= (T other)
+  bool operator>=(T other)
   {
     Rational<T> difference = *this - 
       Rational<T>(other, 1);
     return (difference.n >= 0);
   }
 
-  bool operator < (Rational<T> other)
+  bool operator<(Rational<T> other)
   {
     Rational<T> difference = *this - other;
     return (difference.n < 0);
   }
 
-  bool operator < (T other)
+  bool operator<(T other)
   {
     Rational<T> difference = *this - 
       Rational<T>(other, 1);
     return (difference.n < 0);
   }
 
-  bool operator <= (Rational<T> other)
+  bool operator<=(Rational<T> other)
   {
     Rational<T> difference = *this - other;
     return (difference.n <= 0);
   }
 
-  bool operator <= (T other)
+  bool operator<=(T other)
   {
     Rational<T> difference = *this - 
       Rational<T>(other, 1);
@@ -519,22 +525,22 @@ public:
     return (difference.n <= 0);
   }
 
-  std::string toString(void)
+  string toString(void)
   {
     if(d == 0)
       return "NaN";
 
-    std:stringstream os;
+    stringstream os;
     os << n << "/" << d;
     return os.str();
   }
 
-  std::string toPrettyString(void)
+  string toPrettyString(void)
   {
     if(d == 0)
       return "indeterminate";
 
-    std:stringstream os;
+    std::stringstream os;
     os << n;
 
     if (n != 0 && d != 1)

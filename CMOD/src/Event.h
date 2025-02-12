@@ -63,27 +63,24 @@ public:
 **/
 class SoundAndNoteWrapper{
 public:
-  Tempo tempo;
-  TimeSpan ts;
-  string name;
-  int type;
   // this is the element of the spectrum if the bottom event is a sound
   // or of the note
   DOMElement* element;
+  TimeSpan ts;
+  string name;
+  int type;
+  Tempo tempo;
 
   // multistaffs
   // DOMElement* staffs;
   // DOMElement* modifiers;
-  SoundAndNoteWrapper(DOMElement* _element,
-                      TimeSpan _ts,
-		      string _name,
-                      int _type,
-                      Tempo _tempo ):
-    ts(_ts),
-    type(_type),
-    name(_name),
+
+  SoundAndNoteWrapper(DOMElement* _element, TimeSpan _ts, string _name, int _type, Tempo _tempo ):
     element(_element),
-    tempo (_tempo){}
+    ts(_ts),
+    name(_name),
+    type(_type),
+    tempo(_tempo){}
 };
 
 
@@ -107,7 +104,7 @@ public:
     Tempo tempo;
 
     //stores the pattern needed for the Event and its XML representation
-    std::vector<PatternPair*> patternStorage;
+    vector<PatternPair*> patternStorage;
 
     //Utilities needs these
     DOMElement* AttackSieveElement;

@@ -213,7 +213,7 @@ bool is_attach_mark(string mod_name){
 //----------------------------------------------------------------------------//
 
 void Note::setModifiers(vector<string> modNames) {
-  for(int i = 0; i < modNames.size(); i++) {
+  for(unsigned i = 0; i < modNames.size(); i++) {
     if (is_attach_mark(modNames[i])){
       string temp = "\\" + modNames[i];
       modifiers_out.push_back(temp);
@@ -267,7 +267,7 @@ const string& Note::GetText() const {
 
 int Note::str_to_int(string s) {
   int temp = 0;
-  for (int i = 0; i < s.length(); ++i) {
+  for (unsigned i = 0; i < s.length(); ++i) {
     int x = int(s[i] - 48);
     temp = temp*10 + x;
   }

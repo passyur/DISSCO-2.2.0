@@ -1,8 +1,8 @@
 #include "NotationScore.h"
 
 NotationScore::NotationScore() : 
-    is_built_(false),
-    score_title_("Score") {}
+    score_title_("Score"),
+    is_built_(false) {}
 
 // NotationScore::NotationScore(const string& score_title) :
 //     is_built_(false),
@@ -11,8 +11,8 @@ NotationScore::NotationScore() :
 
 // multistaffs
 NotationScore::NotationScore(const string& score_title,bool grandStaff, int numberOfStaff) :
-    is_built_(false),
-    score_title_(score_title) {
+    score_title_(score_title),
+    is_built_(false) {
     // initialize the staff
     if(grandStaff){
       is_grand = true;
@@ -51,7 +51,7 @@ void NotationScore::RegisterTempo(Tempo& tempo,int staffNum) {
   if(staffNum < 0){
     staffNum = 0;
   }
-  if(staffNum >= score_staff.size()){
+  if(staffNum >= (int)score_staff.size()){
     staffNum = staffSum-1;
   }
   // Find insertion point by comparing the global start in __seconds__

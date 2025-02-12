@@ -376,6 +376,9 @@ namespace mu
             idx = stElse.pop();
             m_vRPN[idx].Oprt.offset = i - idx;
             break;
+
+      default:
+        ;
       }
     }
   }

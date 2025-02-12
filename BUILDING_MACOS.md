@@ -13,10 +13,10 @@ The following are *necessary* to compile CMOD and LASS:
 
 - A C++11-supporting compiler (g++, clang++),
 - A C compiler (gcc, clang),
-- (❌) cmake >= 3.2
+- cmake >= 3.25,
 - libsndfile >= 1.0,
 - libxerces-c >= 3.2, and
-- muparser >= 2.X (developers: this should be updated!)
+- muparser >= 2.X
 
 To compile with LASSIE, the following is *necessary*:
 
@@ -40,7 +40,7 @@ Installing requirements and recommendations:
     # port install libsndfile xercesc3 qt6
 
 ### (❌) Other accommodations
-We automatically check for installs at the directories preferred by `brew` and `port`. If you have your own installations of the above libraries you'd like to compile against, you may ensure they're included and linked at compile-time by passing the following arguments (when `cmake`ing):
+CMake automatically finds the relevant packages installed on the build system. If you have your own installations of the above libraries you'd like to compile against, you may ensure they're included and linked at compile-time by passing the following arguments (when `cmake`ing):
 
     -DLIBSNDFILE_INCLUDE='/path/to/libsndfile/include' -DLIBSNDFILE_LIB='/path/to/libsndfile/lib'
 
@@ -60,7 +60,26 @@ Just `git clone` this repo; explicitly:
 
 Building
 --------
-In the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
+From the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
+
+    mkdir build && cd build
+
+Then, in `build`, do
+
+    cmake ..
+
+to generate the build files and
+
+    cmake --build .
+
+to build.
+
+By running this command in `build`, one generates a so-called *out-of-source* (OOS) build. The alternative, an in-source build, is heavily discouraged (including [by the CMake maintainers](https://cmake.org/cmake/help/book/mastering-cmake/chapter/Getting%20Started.html#directory-structure)), and the root `CMakeLists.txt` reflects this distaste. The rationale is that OOS builds minimize clutter and collect all build files in one directory, whereas in-source builds put build files virtually everywhere. (This is bad.)
+
+From `build`, you can clean `build` using `cmake --build . --target clean`.
+
+(**For premake4 builds, not current, may or may not work**)
+From the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
 
     premake4 && make
 

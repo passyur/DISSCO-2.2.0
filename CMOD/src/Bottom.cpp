@@ -153,7 +153,7 @@ void Bottom::buildChildren(){
 
   //Using the temporary events that were created, construct the actual children.
   //The code below is different from buildchildren in Event class.
-  for (int i = 0; i < childSoundsAndNotes.size(); i++) {
+  for (unsigned i = 0; i < childSoundsAndNotes.size(); i++) {
     SoundAndNoteWrapper* thisChild = childSoundsAndNotes[i];
     //Increment the static current child number.
     currChildNum = i;
@@ -407,7 +407,7 @@ void Bottom::buildNote(SoundAndNoteWrapper* _soundNoteWrapper) {
 
 list<Note> Bottom::getNotes() {
   list<Note> result;
-  for(int i = 0; i < childNotes.size(); i++)
+  for(unsigned i = 0; i < childNotes.size(); i++)
     result.push_back(*childNotes[i]);
   return result;
 }
@@ -453,10 +453,10 @@ float Bottom::computeBaseFreq() {
 //----------------------------------------------------------------------------//
 
 float Bottom::computeLoudness() {
-  float expVal = 0;
-  for(int i = 0; i < 10; i++){
-      expVal += utilities->evaluate(XMLTC(loudnessElement), (void*)this);
-  }
+//   float expVal = 0;
+//   for(int i = 0; i < 10; i++){
+//       expVal += utilities->evaluate(XMLTC(loudnessElement), (void*)this);
+//   }
   // expVal /= 10;
   float loudval = utilities->evaluate(XMLTC(loudnessElement), (void*)this);
   // float diff = loudval - expVal;
@@ -676,7 +676,7 @@ void Bottom::spatializationMultiPan(Sound *s,
   DOMElement* partials = _channels->GFEC();
   DOMElement* envElement;
 
-  int j; // index of partials
+  unsigned j; // index of partials
 
   // populate mults, essentially "transposing" the grid of envelopes
   while (partials!=NULL){
@@ -710,8 +710,8 @@ void Bottom::spatializationMultiPan(Sound *s,
     s->setSpatializer(multipan);
 
   } else if (applyHow == "PARTIAL") {
-    for (int i = 0; i < numParts; i++) { // apply multipan to each partial
-      if (i >= mults.size()){
+    for (unsigned i = 0; (int)i < numParts; i++) { // apply multipan to each partial
+      if (mults.size() <= i){
         cout << "WARNING: spatializationMultiPan got empty envelopes for partial " << i << " and onwards; ignoring" << endl;
         break;
       }
@@ -738,7 +738,7 @@ MultiPan Bottom::computeSpatializationMultiPan(vector<Envelope*> mult) {
 
   MultiPan multipan(mult.size(), mult);
 
-  for (int i = 0; i < mult.size(); i++) {
+  for (unsigned i = 0; i < mult.size(); i++) {
     delete mult[i];
   }
 
@@ -1208,7 +1208,7 @@ Reverb* Bottom::computeReverberationAdvanced(DOMElement* percentElement,
     }
     vector<float> comb_gain_list;
 
-    for (int i = 0; i < stringListC.size(); i ++){
+    for (unsigned i = 0; i < stringListC.size(); i ++){
       float num = (float) utilities->evaluate(stringListC[i], this);
       comb_gain_list.push_back(num);
     }
@@ -1224,7 +1224,7 @@ Reverb* Bottom::computeReverberationAdvanced(DOMElement* percentElement,
     }
     vector<float> lp_gain_list;
 
-    for (int i = 0; i < stringListG.size(); i ++){
+    for (unsigned i = 0; i < stringListG.size(); i ++){
       float num = (float) utilities ->evaluate(stringListG[i], this);
       lp_gain_list.push_back(num);
     }
@@ -1498,7 +1498,7 @@ float vel;
   // ZIYUAN CHEN, July 2023 - apply the specified one (1) group of modifiers
   if (modGroups.find(targetModGroupName) != modGroups.end()) {
     vector<Modifier> modGroup = modGroups[targetModGroupName];
-    for (int i = 0; i < modGroup.size(); i++) {
+    for (unsigned i = 0; i < modGroup.size(); i++) {
       modGroup[i].applyModifier(s);
     }
   } else {
@@ -1650,7 +1650,7 @@ vector<string> Bottom::applyNoteModifiersOld() {
 
 
   // go through the non-exclusive mods
-  for (int i = 0; i < modNoDep.size(); i++) {
+  for (unsigned i = 0; i < modNoDep.size(); i++) {
     if (modNoDep[i].willOccur(checkPoint)) {
       modNames.push_back( modNoDep[i].getModName() );
     }
@@ -1663,7 +1663,7 @@ vector<string> Bottom::applyNoteModifiersOld() {
 
     //go through the group, and apply 1 at most
     bool appliedMod = false;
-    for (int i = 0; i < modGroup.size() && !appliedMod; i++) {
+    for (unsigned i = 0; i < modGroup.size() && !appliedMod; i++) {
       if (modGroup[i].willOccur(checkPoint)) {
         modNames.push_back( modGroup[i].getModName() );
         appliedMod = true;
@@ -1774,33 +1774,33 @@ void Bottom::generatePartials(Sound* newsound, float frequency, float loudness, 
   Output::addProperty(ss.str(), actualFrequency, "Hz");
     //Set the spectrum for this partial.
     //interpolate the scale from scale table
-    double scale;
-    if (frequency <= 466){
-      if (strength <= 1){
-        double scale_strength1 = calculateFreqPartial(233,scaleTable[0][0][i],466,scaleTable[1][0][i],frequency);
-        double scale_strength2 = calculateFreqPartial(233,scaleTable[0][1][i],466,scaleTable[1][1][i],frequency);
-        scale = strength * scale_strength1 + (1 - strength) * scale_strength2;
-      }
-      else{
-        double scale_strength1 = calculateFreqPartial(233,scaleTable[0][1][i],466,scaleTable[1][1][i],frequency);
-        double scale_strength2 = calculateFreqPartial(233,scaleTable[0][2][i],466,scaleTable[1][2][i],frequency);
-        scale = (2 - strength) * scale_strength1 + (strength - 1) * scale_strength2;
-      }
-    }
-    else{
-      if (strength <= 1){
-        double scale_strength1 = calculateFreqPartial(466,scaleTable[1][0][i],932,scaleTable[2][0][i],frequency);
-        double scale_strength2 = calculateFreqPartial(466,scaleTable[1][1][i],932,scaleTable[2][1][i],frequency);
-        scale = strength * scale_strength1 + (1 - strength) * scale_strength2;
-      }
-      else{
-        double scale_strength1 = calculateFreqPartial(466,scaleTable[1][1][i],932,scaleTable[2][1][i],frequency);
-        double scale_strength2 = calculateFreqPartial(466,scaleTable[1][2][i],932,scaleTable[2][2][i],frequency);
-        scale = (2 - strength) * scale_strength1 + (strength - 1) * scale_strength2;
-      }
-    }
+    // double scale;
+    // if (frequency <= 466){
+    //   if (strength <= 1){
+    //     double scale_strength1 = calculateFreqPartial(233,scaleTable[0][0][i],466,scaleTable[1][0][i],frequency);
+    //     double scale_strength2 = calculateFreqPartial(233,scaleTable[0][1][i],466,scaleTable[1][1][i],frequency);
+    //     scale = strength * scale_strength1 + (1 - strength) * scale_strength2;
+    //   }
+    //   else{
+    //     double scale_strength1 = calculateFreqPartial(233,scaleTable[0][1][i],466,scaleTable[1][1][i],frequency);
+    //     double scale_strength2 = calculateFreqPartial(233,scaleTable[0][2][i],466,scaleTable[1][2][i],frequency);
+    //     scale = (2 - strength) * scale_strength1 + (strength - 1) * scale_strength2;
+    //   }
+    // }
+    // else{
+    //   if (strength <= 1){
+    //     double scale_strength1 = calculateFreqPartial(466,scaleTable[1][0][i],932,scaleTable[2][0][i],frequency);
+    //     double scale_strength2 = calculateFreqPartial(466,scaleTable[1][1][i],932,scaleTable[2][1][i],frequency);
+    //     scale = strength * scale_strength1 + (1 - strength) * scale_strength2;
+    //   }
+    //   else{
+    //     double scale_strength1 = calculateFreqPartial(466,scaleTable[1][1][i],932,scaleTable[2][1][i],frequency);
+    //     double scale_strength2 = calculateFreqPartial(466,scaleTable[1][2][i],932,scaleTable[2][2][i],frequency);
+    //     scale = (2 - strength) * scale_strength1 + (strength - 1) * scale_strength2;
+    //   }
+    // }
 
-    partial.setParam(WAVE_SHAPE, *waveShape );
+    partial.setParam(WAVE_SHAPE, *waveShape);
     //Add the partial to the sound.
     newsound->add(partial);
   }

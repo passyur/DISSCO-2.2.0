@@ -71,19 +71,17 @@ double Random::Rand(double low, double high, Random::distribution_type
     case RAND_FLAT:
       return Rand(low, high);
       break;
-
     case RAND_TRIANGLE:
       return  (Rand(low, high) + Rand(low, high)) * 0.5 * (high - low) + low;
       break;
-
     case RAND_SIGN:
 
       if (randNum <= 0.5)
         return Rand(low, high);
       else
         return Rand(low, high)*-1.0;
-        break;
-
+    
+      break;
     default:
       return 0.0;
   }
@@ -154,7 +152,7 @@ int Random::ChooseFromList(int array[], int size) {
 int Random::ChooseFromProb(vector<double> probs) {
   double randomNumber = Rand();
 
-  for (int i = 0; i < probs.size(); i++) {
+  for (unsigned i = 0; i < probs.size(); i++) {
     if (randomNumber <= probs[i]) {
       return i;
     }
@@ -163,7 +161,8 @@ int Random::ChooseFromProb(vector<double> probs) {
   std::cerr << "Error in Random::ChooseFromProb" << std::endl;
   std::cerr << "         probs.size()=" << probs.size() << ", randNum=" << randomNumber << std::endl;
   std::cerr << "         probs=< ";
-  for (int i = 0; i < probs.size(); i++) std::cerr << probs[i] << " ";
+  for (unsigned i = 0; i < probs.size(); i++) 
+    std::cerr << probs[i] << " ";
   std::cerr << ">" << std::endl;
   exit(1);
 }

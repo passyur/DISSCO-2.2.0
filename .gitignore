@@ -1,6 +1,10 @@
-# editor related
+# VSCode related
 /.vscode
 *.swp
+
+# Visual Studio related
+/.vs
+/out
 
 # make related
 Makefile
@@ -9,17 +13,20 @@ Makefile
 /obj
 
 # cmake related
-/out
 /build
+CMakeUserPresets.json
 
 # premake related
 /bin
 /make
 
 # binaries
-lassie
-cmod
-UpgradeProjectFormat
+*.a
+*.o
 
 # macOS related
 .DS_Store
+
+# vcpkg related
+vcpkg-configuration.json
+vcpkg.json

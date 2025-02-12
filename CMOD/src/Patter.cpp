@@ -118,7 +118,7 @@ void Patter::SimplePat() {
   
   patty.push_back(origin);
   
-  for(int i = 0; i < intervals.size(); i++) {
+  for(unsigned i = 0; i < intervals.size(); i++) {
     int lastNum = patty.back();
     int thisNum = lastNum + intervals[i];    
     patty.push_back( lastNum + intervals[i] );
@@ -178,7 +178,7 @@ void Patter::Equivalence(int modulo, int low, int high) {
   patty.clear(); // make sure the pattern is empty
 
   int lastNum;  // the last number to be added
-  for(int location = 0; location <= intervals.size(); location++) {
+  for(unsigned location = 0; location <= intervals.size(); location++) {
     //use current patty element as origin for next interval
     if(location == 0) {
       lastNum = origin;
@@ -216,15 +216,15 @@ void Patter::Equivalence(int modulo, int low, int high) {
     // (this should probably go back into utility --- cavis)
     double partSum = 0;
     double sum = 0;
-    for (int i = 0; i < probs.size(); i++) {
+    for (unsigned i = 0; i < probs.size(); i++) {
       sum += probs[i];
     }
  
-    for (int i = 0; i < probs.size(); i++) {
+    for (unsigned i = 0; i < probs.size(); i++) {
       probs[i] /= sum; 
     }
 
-    for(int i = 0; i < probs.size(); i++) {
+    for(unsigned i = 0; i < probs.size(); i++) {
       partSum += probs[i];
       probs[i] = partSum;
 //    cout << "Patter::Equivalence - probs{" << i << "]=" << probs[i] << endl;

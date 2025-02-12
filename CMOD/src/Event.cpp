@@ -45,17 +45,15 @@ Event::Event(DOMElement* _element,
              DOMElement* _ancestorRev,
              DOMElement* _ancestorFil,
              DOMElement* _ancestorModifiers):
+  type(_type),
+  modifiersIncludingAncestorsElement(NULL),
   maxChildDur(0), checkPoint(0),
+  previousChildEndTime(0.0f), sieveAligned(false),
   numChildren(0),
   restartsRemaining(0),
   currChildNum(0), childType(0),
   matrix(0),
-  type(_type),
-//previousChildEndTime(0),
-  discreteFailedResponse(""),
-  utilities( _utilities),
-  modifiersIncludingAncestorsElement(NULL),
-  sieveAligned(false), previousChildEndTime(0.0f) {
+  discreteFailedResponse("") {
 
   //Initialize parameters
   DOMElement* thisEventElement = _element->GFEC();
@@ -172,7 +170,7 @@ Event::Event(DOMElement* _element,
   }
   else {// by layer
   numChildren = 0;
-    for (int i = 0; i < layerElements.size(); i ++){
+    for (unsigned i = 0; i < layerElements.size(); i ++){
       numChildren +=utilities->evaluate(XMLTC(layerElements[i]->GFEC()),(void*)this);
     }
   }
@@ -438,7 +436,7 @@ void Event::buildChildren() {
   }
 
   //Using the temporary events that were created, construct the actual children.
-  for (int i = 0; i < temporaryChildEvents.size(); i++) {
+  for (unsigned i = 0; i < temporaryChildEvents.size(); i++) {
 
     //Increment the static current child number.
     currChildNum = i;
@@ -452,7 +450,7 @@ void Event::buildChildren() {
   temporaryChildEvents.clear();
 
   //For each child that was created, build its children.
-  for(int i = 0; i < childEvents.size(); i++){
+  for(unsigned i = 0; i < childEvents.size(); i++){
     //overload in bottom
 	/*
 		RISKY METHOD 1
@@ -491,8 +489,7 @@ void Event::modifyChildren(){            //Incomplete
 
   //cout<<childEvents.size();
 
-  for(int i = 0; i < childEvents.size(); i++){
-
+  for(unsigned i = 0; i < childEvents.size(); i++){
      childEvents[i]->modifyChildren();
   }
 
@@ -505,12 +502,11 @@ void Event::findLeafChildren(vector<Event*> & leafChildren){
 	if(childEvents.size() == 0){
 		cout << "FOUND A LEAF: " << name << endl;
 		leafChildren.push_back(this);
-	}
-	else{
+	}else{
 		cout << "numchildren: " << childEvents.size()
                      << "----Non-Leaf----: " << name << endl;
 	}
-	for(int i = 0; i < childEvents.size(); i++){
+	for(unsigned i = 0; i < childEvents.size(); i++){
 		cout << "Before a dereference in findLeafChildren in " << name << endl;
 		if(childEvents[i]!=NULL)
 			childEvents[i]->findLeafChildren(leafChildren);
@@ -891,9 +887,8 @@ Event::~Event() {
   //if ( modifiersIncludingAncestorsElement!=NULL)
   //  			delete modifiersIncludingAncestorsElement;
 //turns out that clone dom node is not created in heap
-  for (int i = 0; i < temporaryXMLParsers.size(); i++){
+  for (unsigned i = 0; i < temporaryXMLParsers.size(); i++)
     delete temporaryXMLParsers[i];
-  }
 
   vector<PatternPair*>::iterator iter = patternStorage.begin();
 
@@ -980,7 +975,7 @@ void Event::tryToRestart(void) {
   //Start over by clearing the event arrays and resetting the for-loop index.
 	// NOTE: SHOULD BE -1
   currChildNum = -1;
-  for (int i = 0; i < childEvents.size(); i++)
+  for (unsigned i = 0; i < childEvents.size(); i++)
     delete temporaryChildEvents[i];
   temporaryChildEvents.clear();
 
@@ -1119,7 +1114,7 @@ void Event::checkEvent(bool buildResult) {
   }
 
   //Make sure the childType indexes correctly.
-  if (childType >= childTypeElements.size() ) {
+  if (childType >= (int)childTypeElements.size() ) {
     cerr << "There is a mismatch between childType and typeVect." << endl;
     exit(1);
   }
@@ -1180,7 +1175,7 @@ void Event::outputProperties() {
 
 list<Note> Event::getNotes() {
   list<Note> result;
-  for (int i = 0; i < childEvents.size(); i++) {
+  for (unsigned i = 0; i < childEvents.size(); i++) {
     list<Note> append = childEvents[i]->getNotes();
     list<Note>::iterator iter = append.begin();
     while (iter != append.end()) {
@@ -1197,7 +1192,7 @@ list<Note> Event::getNotes() {
 
 int Event::getCurrentLayer() {
   int countInLayer = 0;
-  for(int i = 0; i < layerVect.size(); i++) {
+  for(unsigned i = 0; i < layerVect.size(); i++) {
     countInLayer += layerVect[i].size();
     if(childType < countInLayer)
       return i;
@@ -1368,18 +1363,18 @@ void Event::buildMatrix(bool discrete) {
   }
 
   double weightSum = 0;
-  for (int i = 0; i < childTypeElements.size(); i ++){
+  for (unsigned i = 0; i < childTypeElements.size(); i ++){
     double prob = utilities->evaluate(XMLTC(childTypeElements[i]->GFEC()->GNES()->GNES()), (void*) this);
     typeProbs.push_back(prob);
     weightSum += prob;
   }
-  for (int i = 0; i < typeProbs.size(); i ++){
+  for (unsigned i = 0; i < typeProbs.size(); i ++){
     typeProbs[i] = typeProbs[i] / weightSum;
 
   }
 
   if (discrete) {
-    for (int i = 0; i < childTypeElements.size(); i ++){
+    for (unsigned i = 0; i < childTypeElements.size(); i ++){
       // attack env
       DOMElement* elementIter = childTypeElements[i]->GFEC()->GNES()->GNES()->GNES();
 
@@ -1414,7 +1409,7 @@ void Event::buildMatrix(bool discrete) {
         utilities->evaluateObject(durationFunctionString, this, eventEnv));
     }
   }
-  for (int i = 0; i < layerElements.size(); i ++){
+  for (unsigned i = 0; i < layerElements.size(); i ++){
     int numOfDiscretePackages = 0;
     DOMElement* elementIter = layerElements[i]->GFEC()->GNES()->GFEC();
     while (elementIter!= NULL){
@@ -1442,11 +1437,11 @@ void Event::buildMatrix(bool discrete) {
   delete attackSiv;
   delete durSiv;
 
-  for (int i = 0 ; i < attackEnvs.size(); i++){
+  for (unsigned i = 0 ; i < attackEnvs.size(); i++){
     delete attackEnvs[i];
   }
   attackEnvs.clear();
-  for (int i = 0 ; i< durEnvs.size(); i++){
+  for (unsigned i = 0 ; i< durEnvs.size(); i++){
     delete durEnvs[i];
   }
   durEnvs.clear();
@@ -1468,12 +1463,10 @@ int Event::verify_valid(int endTime){
      sieveSweep->FillInVectors(attTimes, attProbs);
      attackSweep.clear();
 
-     for (int i = 0; i < attTimes.size(); i++){
-     	if (attTimes[i] >= beatEDUs){
-	   break;
-	}
+     for (unsigned i = 0; i < attTimes.size(); i++){
+     	if (beatEDUs <= attTimes[i]) break;
 //cout << "Event::verify_valid - attTimes[" << i << "]: "<< attTimes[i] << " ";
-	attackSweep.push_back(attTimes[i]);
+	    attackSweep.push_back(attTimes[i]);
      }
 //cout << " " << endl;
   }

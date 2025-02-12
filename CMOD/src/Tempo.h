@@ -44,17 +44,28 @@ class Tempo {
 
   const Event* rootExactAncestor; // The root ancestor event in which this tempo was created.
   
-  ///When unitsPerSecond was used, it assumed this tempo (5/4 at quarter=60).
+  // When unitsPerSecond was used, it assumed this tempo (5/4 at quarter=60).
   void setBackwardsCompatibleTempo(void);
   
   public:
   
-  ///Constructor initializes a backwards-compatible tempo of 5/4 quarter=60.
+  // constructor initializes a backwards-compatible tempo of 5/4 quarter=60.
   Tempo();
   
-  ///Explicit copy constructor just to be sure (eventually this should go away).
+  // Explicit copy constructor just to be sure (eventually this should go away).
   Tempo(const Tempo& other);
   
+  Tempo& operator=(const Tempo& other){
+    tempoBeatsPerMinute = other.tempoBeatsPerMinute;
+    tempoBeat = other.tempoBeat;
+    timeSignatureBeat = other.timeSignatureBeat;
+    timeSignatureBeatsPerBar = other.timeSignatureBeatsPerBar;
+    EDUPerTimeSignatureBeat = other.EDUPerTimeSignatureBeat;
+    tempoStartTime = other.tempoStartTime;
+    rootExactAncestor = other.rootExactAncestor;
+
+    return *this;
+  }
   /**Two tempos are identical if they have the same tempo and time signature and
   tempo start time. Note that EDU per beat does not matter because the two
   tempos are still easily conflated with rational numbers.*/

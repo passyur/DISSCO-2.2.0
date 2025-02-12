@@ -153,7 +153,7 @@ int ModParser::precedence(char c) {
 void ModParser::parseExpr(const std::string& exp, int minVal, int maxVal) {
   std::vector<ModParser::Token> operands;
   std::stack<char> operators;
-  int chNum = 0;
+  unsigned chNum = 0;
   int modIndex = 0;
   while (chNum < exp.size()) {
     char ch = exp[chNum];

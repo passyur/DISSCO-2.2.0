@@ -113,13 +113,13 @@ namespace mu
     ,m_FunDef()
     ,m_PostOprtDef()
     ,m_InfixOprtDef()
-    ,m_nIfElseCounter(0)
     ,m_OprtDef()
     ,m_ConstDef()
     ,m_StrVarDef()
     ,m_VarDef()
     ,m_bOptimize(true)
     ,m_bBuiltInOp(true)
+    ,m_nIfElseCounter(0)
   {
     m_pTokenReader.reset(new token_reader_type(this));
     Assign(a_Parser);
@@ -379,8 +379,8 @@ namespace mu
     {
       switch(a_Callback.GetCode())
       {
-      case cmOPRT_POSTFIX: Error(ecINVALID_POSTFIX_IDENT, -1, a_sName);
-      case cmOPRT_INFIX:   Error(ecINVALID_INFIX_IDENT, -1, a_sName);
+      case cmOPRT_POSTFIX: Error(ecINVALID_POSTFIX_IDENT, -1, a_sName); __attribute__ ((fallthrough));
+      case cmOPRT_INFIX:   Error(ecINVALID_INFIX_IDENT, -1, a_sName); __attribute__ ((fallthrough));
       default:             Error(ecINVALID_NAME, -1, a_sName);
       }
     }
@@ -1444,6 +1444,7 @@ namespace mu
 
                 ++stArgCount.top();
                 // fallthrough intentional (no break!)
+                __attribute__ ((fallthrough));
 
         case cmEND:
                 ApplyRemainingOprt(stOpt, stVal);

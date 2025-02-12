@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Event.h"
 #include "Piece.h"
 #include "Patter.h"
-#include "../../LASS/src/ProbabilityEnvelope.h" // consider moving this into LASS.h
+#include "ProbabilityEnvelope.h" // consider moving this into LASS.h
 #include <string>
 
 Utilities::Utilities(DOMElement* root,
@@ -48,9 +48,9 @@ Utilities::Utilities(DOMElement* root,
   soundSynthesis(_soundSynthesis),
   outputParticel(_outputParticel),
   numThreads(_numThreads),
+  numChannels(_numChannels),
   samplingRate(_samplingRate),
-  piece(_piece),
-  numChannels(_numChannels){
+  piece(_piece){
 
   // New LASS Score
   if (soundSynthesis){
@@ -352,7 +352,7 @@ Sieve* Utilities::evaluateSieve(std::string _input, void* _object){
 //----------------------------------------------------------------------------//
 
 double Utilities::evaluate(std::string _input, void* _object){
-  if (_input =="") return 0;
+  if (_input == "") return 0;
 
   string workingString = _input;
   // Test if there is any function in this string (look for <Fun>), if so,
@@ -360,7 +360,7 @@ double Utilities::evaluate(std::string _input, void* _object){
   // functions are replaced by numbers.
   size_t locOfFun = workingString.find("<Fun>");
   int functionStringLength;
-  while ( locOfFun!=string::npos){
+  while (locOfFun != string::npos){
     size_t locOfEndFun = findTheEndOfFirstFunction (workingString);
     functionStringLength = ((int) locOfEndFun) + 6 - ((int) locOfFun);//6 is the length of "</fun>"
     string functionString = workingString.substr(locOfFun, functionStringLength);
@@ -380,14 +380,12 @@ double Utilities::evaluate(std::string _input, void* _object){
   try {
     result = p.Eval();
 //cout << "utilities result: " << result << endl;
-  }
-  catch (mu::ParserError){
-    cerr<<"Oooops, we find a typo in your project."<<endl;
+  } catch (mu::ParserError) {
+    cerr << "Oooops, we find a typo in your project." << endl;
     if (_object != NULL){
-        cerr<<"The string we see is located in Event (or Bottom): "<<
-          ((Event*)_object)->getEventName()<<endl;
+        cerr << "The string we see is located in Event (or Bottom): " << ((Event*)_object)->getEventName() << endl;
     }
-    cerr<<"The string we see is: "<< _input<<endl;
+    cerr << "The string we see is: " << _input << endl;
     exit(1);
   }
 
@@ -950,7 +948,7 @@ string Utilities::function_Stochos(DOMElement* _functionElement, void* _object){
   DOMElement* envElementIter = elementIter->GFEC();
   vector<Envelope*> envVect;
   while (envElementIter!=NULL) {
-    //cout<<XMLTC(envElementIter)<<endl;
+    //cou << MLTC(envElementIter)<<endl;
     envVect.push_back((Envelope*)evaluateObject(XMLTC(envElementIter), _object, eventEnv));
     envElementIter = envElementIter->GNES();
   }
@@ -964,7 +962,7 @@ string Utilities::function_Stochos(DOMElement* _functionElement, void* _object){
     float randomNumber;
 
     // stacked up envelopes: their values at the same moment add up to 1
-    for (int i = 0; i < envVect.size(); i++) {
+    for (int i = 0; i < (int)envVect.size(); i++) {
       returnVal = envVect[i]->getValue(checkpoint, 1.);
       if(envVect.size() > 1) {                      // probability areas
         if(i == 0) randomNumber = Random::Rand();
@@ -978,7 +976,7 @@ string Utilities::function_Stochos(DOMElement* _functionElement, void* _object){
     float limit[2];
 
     // distribution within given range; takes 3 envs: min, MAX, val in between
-    if(3 * offset >= envVect.size()) {
+    if((int)envVect.size() <= 3 * offset) {
       cerr << "Error - Stochos - Not enough envelopes on the list: envVect.size="
            << envVect.size() << " 3*offset=" << 3 * offset << endl;
       if (_object != NULL) {
@@ -1009,7 +1007,7 @@ string Utilities::function_Stochos(DOMElement* _functionElement, void* _object){
     exit(1);
   }
 
-  for (int i = 0; i < envVect.size(); i ++){
+  for (unsigned i = 0; i < envVect.size(); i ++){
     delete envVect[i];
   }
 
@@ -1074,11 +1072,11 @@ Sieve* Utilities::sieve_ValuePick(DOMElement* _functionElement, void* _object){
   string eMethod = XMLTC(elementIter);
 
   elementIter = elementIter->GNES();
-  vector<std::string> eArgs = listElementToStringVector( elementIter);
+  vector<string> eArgs = listElementToStringVector( elementIter);
   vector<int> eArgVect;
 
   if (eMethod != "MODS") {
-    for (int i = 0; i < eArgs.size(); i ++){
+    for (unsigned i = 0; i < eArgs.size(); i ++){
       eArgVect.push_back((int)evaluate(eArgs[i], _object));
     }
   }
@@ -1086,9 +1084,9 @@ Sieve* Utilities::sieve_ValuePick(DOMElement* _functionElement, void* _object){
   string wMethod = XMLTC(elementIter);
 
   elementIter = elementIter->GNES();
-  vector<std::string> wArgs = listElementToStringVector( elementIter);
+  vector<string> wArgs = listElementToStringVector( elementIter);
   vector<int> wArgVect;
-  for (int i = 0; i < wArgs.size(); i ++){
+  for (unsigned i = 0; i < wArgs.size(); i ++){
     wArgVect.push_back((int)evaluate(wArgs[i], _object));
   }
 
@@ -1098,7 +1096,7 @@ Sieve* Utilities::sieve_ValuePick(DOMElement* _functionElement, void* _object){
   elementIter = elementIter->GNES();
   vector<std::string> offsetString = listElementToStringVector( elementIter);
   vector<int> offsetVect;
-  for (int i = 0; i < offsetString.size(); i ++){
+  for (unsigned i = 0; i < offsetString.size(); i ++){
     offsetVect.push_back((int)evaluate(offsetString[i], _object));
   }
 
@@ -1188,7 +1186,7 @@ string Utilities::function_MakeList(DOMElement* _functionElement, void* _object)
 */
     vector<int> intList;
 
-    for (int i = 0; i < intList.size(); i ++){
+    for (unsigned i = 0; i < intList.size(); i ++){
       int num = (int) evaluate(stringList[i], _object);
       if (num <= bound) {
         intList.push_back(num);
@@ -1286,7 +1284,7 @@ string Utilities::function_GetPattern(DOMElement* _functionElement, void* _objec
   string patternString = XMLTranscode(_functionElement);
 
   Patter* pattern = NULL;
-  for (int i = 0; i < ((Event*) _object)->patternStorage.size(); i++){
+  for (unsigned i = 0; i < ((Event*) _object)->patternStorage.size(); i++){
 
     if (patternString == (static_cast<Event*> (_object))->patternStorage[i]->getKey()){
       //cout<<"find existing pattern"<<endl;
@@ -1452,10 +1450,10 @@ Sieve* Utilities::getSieveHelper(void* _object, DOMElement* _SIVFunction){
 
     // Get eArgInts
     elementIter = elementIter->GNES();
-    vector<std::string> eArgs = listElementToStringVector( elementIter);
+    vector<string> eArgs = listElementToStringVector( elementIter);
     vector<int> eArgInts;
     if (eMethod != "MODS") {
-      for (int i = 0; i < eArgs.size(); i ++){
+      for (unsigned i = 0; i < eArgs.size(); i ++){
         eArgInts.push_back((int)evaluate(eArgs[i], _object));
       }
     }
@@ -1466,24 +1464,23 @@ Sieve* Utilities::getSieveHelper(void* _object, DOMElement* _SIVFunction){
 
     // Get wArgInts
     elementIter = elementIter->GNES();
-    vector<std::string> wArgs = listElementToStringVector( elementIter);
+    vector<string> wArgs = listElementToStringVector( elementIter);
     vector<int> wArgInts;
-    for (int i = 0; i < wArgs.size(); i ++){
+    for (unsigned i = 0; i < wArgs.size(); i ++){
       wArgInts.push_back((int)evaluate(wArgs[i], _object));
     }
 
     // Get offsetVect
     elementIter = elementIter->GNES();
-    vector<std::string> offsetString = listElementToStringVector( elementIter);
+    vector<string> offsetString = listElementToStringVector( elementIter);
     vector<int> offsetVect;
 
-    if (offsetString.size()==1){ //only one number, so we need to copy it to form a vector to match the number elements
-      for (int i = 0; i < eArgs.size(); i ++){
+    if (offsetString.size() == 1){ //only one number, so we need to copy it to form a vector to match the number elements
+      for (unsigned i = 0; i < eArgs.size(); i ++){
         offsetVect.push_back((int)evaluate(offsetString[0], _object));
       }
-    }
-    else {
-      for (int i = 0; i < offsetString.size(); i ++){
+    } else {
+      for (unsigned i = 0; i < offsetString.size(); i ++){
         offsetVect.push_back((int)evaluate(offsetString[i], _object));
       }
     }
@@ -1584,12 +1581,12 @@ cout << "Patter* Utilities::getPatternHelper - MakePattern option" << endl;
     DOMElement* listElement = _PATFunction->GFEC()->GFEC()->GNES();
 cout << "	after listElement" << endl;
     vector<string> stringList =listElementToStringVector (listElement);
-cout <<			"after ElementToString" << "  " << endl;
+cout <<	"after ElementToString" << "  " << endl;
     vector<int> intList;
 cout << "intList size: " << stringList.size() << "    " << endl;
-    for (int i = 0; i < stringList.size(); i ++){
+    for (unsigned i = 0; i < stringList.size(); i ++){
       int num = (int) evaluate(stringList[i], _object);
-cout << "	i=" << i<< " num=" << num << endl;
+      cout << "	i=" << i << " num=" << num << endl;
       intList.push_back(num);
     }
 
@@ -1663,8 +1660,7 @@ cout << "	i=" << i<< " num=" << num << endl;
 //----------------------------------------------------------------------------//
 
 DOMElement* Utilities::getSPAFunctionElement(void* _object){
-  getSPAFunctionElementHelper(_object,NULL,true);
-  
+  return getSPAFunctionElementHelper(_object, NULL, true);
 }
 
 //----------------------------------------------------------------------------//
@@ -1759,7 +1755,7 @@ DOMElement* Utilities::getSPAFunctionElementHelper(void* _object, DOMElement* _S
 //----------------------------------------------------------------------------//
 
 DOMElement* Utilities::getREVFunctionElement(void* _object){
-  getREVFunctionElementHelper(_object,NULL,true);
+  return getREVFunctionElementHelper(_object,NULL,true);
 }
 
 //----------------------------------------------------------------------------//
@@ -1858,7 +1854,7 @@ DOMElement* Utilities::getREVFunctionElementHelper(void* _object, DOMElement* _R
 //----------------------------------------------------------------------------//
 
 DOMElement* Utilities::getFILFunctionElement(void* _object){
-  getFILFunctionElementHelper(_object,NULL,true);
+  return getFILFunctionElementHelper(_object,NULL,true);
 }
 
 //----------------------------------------------------------------------------//

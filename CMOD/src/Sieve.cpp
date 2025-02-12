@@ -196,7 +196,7 @@ void Sieve::Weights(std::vector<int> eArgVect,
 void Sieve::Meaningful(int minVal, int maxVal, vector<int> eArgVect, std::vector<int> offsetVect) {
   skip = 0;
 
-  for (int i = 0; i < eArgVect.size(); i++) {
+  for (unsigned i = 0; i < eArgVect.size(); i++) {
     if( (eArgVect[i]+ offsetVect[i]) >= minVal && (eArgVect[i] + offsetVect[i]) <= maxVal) {
 /*
     cout << "Sieve::Meaningful - eArgVect[" << i << "]=" << eArgVect[i]
@@ -235,8 +235,7 @@ void Sieve::Multiples(int minVal, int maxVal, vector<int> numMods, std::vector<i
   }
   cout << endl;
 */
-  for (int i = 0; i < numMods.size(); i++) {
-
+  for (unsigned i = 0; i < numMods.size(); i++) {
     if (minVal == 0 && offsetVect[i] >=0) { //put 0 in the list if minVal ==0 and at least one of the offset is 0
       eList.push_back(offsetVect[i]);
     }
@@ -290,7 +289,7 @@ void Sieve::PeriodicWeights(const vector<int>& wArgVect) {
     }
   }
 */
-  for (int count = 0; count < eList.size(); count++) {
+  for (unsigned count = 0; count < eList.size(); count++) {
     wList.push_back(wArgVect[count % wArgVect.size()]);
   }
 }
@@ -300,7 +299,7 @@ void Sieve::PeriodicWeights(const vector<int>& wArgVect) {
 void Sieve::HierarchicWeights(const std::vector<int>& eArgVect,
 				std::vector<int> wArgVect,
 				std::vector<int> offsetVect) {
-  int whichMod;
+  unsigned whichMod;
   double probability;
 
   list<int>::iterator eIter = eList.begin();
@@ -313,11 +312,10 @@ cout << "Sieve::Hierarchic - eList.end=" << eList.end() << " eArgVect.size()="
 */
 
   while (eIter != eList.end()) {
-     whichMod = 0;
+    whichMod = 0;
     probability = 0;
 
     while (whichMod < wArgVect.size()) {
-
       if((*eIter - offsetVect[whichMod]) % eArgVect[whichMod] == 0) {
          probability += wArgVect[whichMod];
       }
@@ -336,8 +334,8 @@ cout << "Sieve::Hierarchic - eList.end=" << eList.end() << " eArgVect.size()="
 
 void Sieve::IncludeWeights(const vector<int>& wArgVect) {
 //for(int i = 0; i < wArgVect.size(); i++) {
-  for(int i = 0; i < eList.size(); i++) {
-    if(i >= skip && i < eList.size()+ skip) {
+  for(unsigned i = 0; i < eList.size(); i++) {
+    if((int)i >= skip && i < eList.size() + skip) {
       wList.push_back(wArgVect[i]);
     }
   }

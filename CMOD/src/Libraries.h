@@ -42,8 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <dirent.h>
 
 //The LASS library for additive sound synthesis
-#include "../../LASS/src/LASS.h"
-#include "../../LASS/src/Score.h"
+#include "LASS.h"
+#include "Score.h"
 
 //Include the Rational number class here since it is a fundamental type and has
 //no .cpp file that is actually compiled.
@@ -73,9 +73,7 @@ using namespace std;
 using namespace xercesc;
 
 // this is the math expression parser : muparser
-#include "muParser/muParser.h"
-
-
+#include "muParser.h"
 
 typedef enum {
   eventTop    = 0,
