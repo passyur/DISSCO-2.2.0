@@ -6,6 +6,9 @@
 /.vs
 /out
 
+# Qt Creator related
+*.autosave
+
 # make related
 Makefile
 *.make
@@ -15,6 +18,7 @@ Makefile
 # cmake related
 /build
 CMakeUserPresets.json
+*.user
 
 # premake related
 /bin
