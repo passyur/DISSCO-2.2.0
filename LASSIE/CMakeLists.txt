@@ -4,29 +4,19 @@ project(LASSIE)
 message(STATUS "== LASSIE ==")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-# qt_standard_project_setup()
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-# find_package(XercesC REQUIRED)
-# find_package(SndFile REQUIRED)
-# qt_standard_project_setup()
 
 file(GLOB_RECURSE LASSIE_SRC
     "${PROJECT_SOURCE_DIR}/src/*.cpp"
     "${PROJECT_SOURCE_DIR}/src/*.hpp"
     "${PROJECT_SOURCE_DIR}/src/*.ui"
 )
-# set(PROJECT_SOURCES
-#         src/main.cpp
-#         src/mainwindow.cpp
-#         src/mainwindow.hpp
 
-# )
-# if(${QT_VERSION} VERSION_LESS 6.1.0)
-# set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.lassie_qt)
-# endif()
 
+### This will need to be updated as we add more windows/classes
 qt_add_executable(LASSIE
     MANUAL_FINALIZATION
     src/main.cpp
@@ -36,9 +26,6 @@ qt_add_executable(LASSIE
 )
 
 target_link_libraries(LASSIE PRIVATE Qt6::Widgets)
-# target_link_libraries(LASSIE PRIVATE ${SNDFILE_LIBRARY})
-# target_link_libraries(LASSIE PRIVATE ${XercesC_LIBRARY})
-# target_link_libraries(LASSIE PRIVATE LASS)
 
 set_target_properties(LASSIE PROPERTIES
     WIN32_EXECUTABLE ON
