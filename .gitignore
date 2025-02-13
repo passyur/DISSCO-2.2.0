@@ -9,6 +9,7 @@
 /out
 
 # Qt Creator related
+*.user
 *.autosave
 
 # make related
