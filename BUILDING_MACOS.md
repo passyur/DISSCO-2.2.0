@@ -16,16 +16,16 @@ The following are *necessary* to compile CMOD and LASS:
 - cmake >= 3.25,
 - libsndfile >= 1.0,
 - libxerces-c >= 3.2, and
-- muparser >= 2.X
+<!-- - muparser >= 2.X -->
 
 To compile with LASSIE, the following is *necessary*:
 
-- (❌) Qt >= 6.4
+- Qt >= 6.4
 
 Installing requirements and recommendations:
 --------------------------------------------
 
-*For all methods*, it's worth keeping in mind that we statically link `muparser`, meaning you don't need to worry about installing it. Please report any issues related to muparser during compilation.
+<!-- *For all methods*, it's worth keeping in mind that we statically link `muparser`, meaning you don't need to worry about installing it. Please report any issues related to muparser during compilation. -->
 
 ### brew
 `brew`, or homebrew, is something like a package manager for macOS. It's widely used and tends to have better maintained packages than the equivalent ports on MacPorts. (As of 11/13/24: It has a newer stable version of `libxerces-c` and an older stable version of Qt6.) Read more and acquire it at [https://brew.sh](https://brew.sh). Simply:
@@ -76,11 +76,4 @@ to build.
 
 By running this command in `build`, one generates a so-called *out-of-source* (OOS) build. The alternative, an in-source build, is heavily discouraged (including [by the CMake maintainers](https://cmake.org/cmake/help/book/mastering-cmake/chapter/Getting%20Started.html#directory-structure)), and the root `CMakeLists.txt` reflects this distaste. The rationale is that OOS builds minimize clutter and collect all build files in one directory, whereas in-source builds put build files virtually everywhere. (This is bad.)
 
-From `build`, you can clean `build` using `cmake --build . --target clean`.
-
-(**For premake4 builds, not current, may or may not work**)
-From the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
-
-    premake4 && make
-
-To generate the release build, do `make config=release`.
+From `build`, you can clean `build` using `cmake --build . --target clean`. Alternatively, you can do `rm -r build` from outside of `build`.

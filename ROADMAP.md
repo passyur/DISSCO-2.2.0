@@ -1,34 +1,33 @@
 Systems Needs
 -------------
 Of extreme importance:
-- [ ] Transition from `premake` to `CMake`
+- [x] Transition from `premake` to `CMake`
 - [ ] Port from GTK+2.X to Qt6.4
-
 
 Of roughly equal importance:
 - [ ] macOS support
-    - [x] CMOD
+    - [ ] CMOD
         - [x] Compiles
         - [ ] Works
-    - [x] LASS
+    - [ ] LASS
         - [x] Compiles
         - [ ] Works
     - [ ] LASSIE
         - [ ] Compiles
         - [ ] Works
-    - [ ] Build Documentation
+    - [~] Build Documentation
 
 - [ ] Windows support
-  - [ ] CMOD
-    - [ ] Compiles
-    - [ ] Works
-  - [ ] LASS
-    - [ ] Compiles
-    - [ ] Works
-  - [ ] LASSIE
-    - [ ] Compiles
-    - [ ] Works
-  - [ ] Build Documentation
+    - [ ] CMOD
+      - [x] Compiles
+      - [ ] Works
+    - [ ] LASS
+      - [x] Compiles
+      - [ ] Works
+    - [ ] LASSIE
+      - [ ] Compiles
+      - [ ] Works
+    - [~] Build Documentation
 
 Other important matters:
 - [ ] Satisfactory Documentation (contribute using the project wiki)
@@ -40,3 +39,4 @@ My wish list to Santa this year, or new years' resolutions:
 - [ ] Cross-platform parallelization
   - [ ] CUDA
   - [ ] Accelerate/Metal
+- [ ] Better memory management

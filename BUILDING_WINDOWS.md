@@ -13,22 +13,22 @@ The following are *necessary* to compile CMOD and LASS:
 
 - Visual Studio 2022,
 - A C/C++ compiler (like MSVC `cl`),
-- CMake >= 3.25,
+- cmake >= 3.25,
 - vcpkg >= 2024.X.X
 - libsndfile >= 1.0,
 - libxerces-c >= 3.2, and
-- muparser >= 2.X
+<!-- - muparser >= 2.X -->
 
 To compile with LASSIE, the following is *necessary*:
 
-- (❌) Qt >= 6.4
+- (🟡) Qt >= 6.4
 
 Note: There are definitely other ways to compile DISSCO on Windows, but this is the way the author decided to go.
 
 Installing requirements and recommendations:
 --------------------------------------------
 
-*For all methods*, it's worth keeping in mind that we statically link `muparser`, meaning you don't need to worry about installing it. Please report any issues related to muparser during compilation.
+<!-- *For all methods*, it's worth keeping in mind that we statically link `muparser`, meaning you don't need to worry about installing it. Please report any issues related to muparser during compilation. -->
 
 You should [install Visual Studio 2022](https://visualstudio.microsoft.com/) from Microsoft and, in the process, install the Microsoft Visual C/C++ compilers, CMake, and vcpkg. You will need to run all the commands given hereafter in **Developer PowerShell**, which you can access either within a VS project or through the PowerShell script provided at `C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1`.
 
@@ -97,4 +97,4 @@ to build.
 
 By running this command in `build`, one generates a so-called *out-of-source* (OOS) build. The alternative, an in-source build, is heavily discouraged (including [by the CMake maintainers](https://cmake.org/cmake/help/book/mastering-cmake/chapter/Getting%20Started.html#directory-structure)), and the root `CMakeLists.txt` reflects this distaste. The rationale is that OOS builds minimize clutter and collect all build files in one directory, whereas in-source builds put build files virtually everywhere. (This is bad.)
 
-From `build`, you can clean `build` using `cmake --build . --target clean`. Alternatively, you can do `rmdir -r build` from outside of build.
+From `build`, you can clean `build` using `cmake --build . --target clean`. Alternatively, you can do `rmdir /s build` from outside of `build`.

@@ -8,17 +8,20 @@ The following are *necessary* to compile CMOD and LASS:
 
 - A C++11-supporting compiler (g++, clang),
 - A C compiler (gcc ...),
-- premake4 >= 4.3 OR (experimental) CMake >= 3.5,
+- cmake >= 3.5,
 - libsndfile >= 1.0,
 - libxerces-c >= 3.2, and
-- muparser >= 2.X
+<!-- - muparser >= 2.X -->
 
-To compile with LASSIE, the following couple are *necessary* inclusions:
+<!-- Keeping for reference, but not relevant to current development -->
+<!-- To compile with LASSIE, the following couple are *necessary* inclusions:
 
 - GTK+ 2.4 < 3.24 (developers: also should be updated!) and
-- GTKmm-2.4 >= 1.5.
+- GTKmm-2.4 >= 1.5. -->
 
-For Qt development, we'll require Qt >= 6.4.
+To compile with LASSIE, the following is *necessary*:
+
+- Qt >= 6.4
 
 Recommended
 -----------
@@ -47,8 +50,18 @@ Building
 --------
 In the project's root directory (by default: `path/to/DISSCO-X.X.X`), run the following:
 
-    premake4 && make
+    mkdir build && cd build
 
-To generate the release build, do `make config=release`.
+Then, in `build`, do
 
-(The authors have not gotten around to testing CMake on Linux. Soon! :)
+    cmake ..
+
+to generate the build files and
+
+    cmake --build .
+
+to build.
+
+By running this command in `build`, one generates a so-called *out-of-source* (OOS) build. The alternative, an in-source build, is heavily discouraged (including [by the CMake maintainers](https://cmake.org/cmake/help/book/mastering-cmake/chapter/Getting%20Started.html#directory-structure)), and the root `CMakeLists.txt` reflects this distaste. The rationale is that OOS builds minimize clutter and collect all build files in one directory, whereas in-source builds put build files virtually everywhere. (This is bad.)
+
+From `build`, you can clean `build` using `cmake --build . --target clean`. Alternatively, you can do `rm -r build` from outside of `build`.
