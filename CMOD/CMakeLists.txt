@@ -43,4 +43,4 @@ else()
     message(STATUS "Found libxerces-c install!")
 endif()
 
-# set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
+message(STATUS "DONE!")

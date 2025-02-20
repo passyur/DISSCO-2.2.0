@@ -35,3 +35,5 @@ if(NOT SNDFILE_FOUND)
 else()
     message(STATUS "Found libsndfile install!")
 endif()
+
+message(STATUS "DONE!")

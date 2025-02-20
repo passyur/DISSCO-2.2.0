@@ -12,3 +12,5 @@ file(GLOB_RECURSE MUPARSER_SRC
 add_library(MUPARSER STATIC ${MUPARSER_SRC})
 
 target_include_directories(MUPARSER PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+message(STATUS "DONE!")
