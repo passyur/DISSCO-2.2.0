@@ -5,6 +5,7 @@
 #define MAINWINDOW_HPP
 
 #include <QMainWindow>
+#include <QTextEdit>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -13,7 +14,6 @@ class QLabel;
 class QMenu;
 QT_END_NAMESPACE
 
-//! [0]
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -25,31 +25,40 @@ protected:
 #ifndef QT_NO_CONTEXTMENU
     void contextMenuEvent(QContextMenuEvent *event) override;
 #endif // QT_NO_CONTEXTMENU
-    //! [0]
 
-    //! [1]
 private slots:
+    /*** FILE ACTIONS ***/
+    /* should open a dialog to save a new file to disk */
     void newFile();
+    /* should open a dialog to open a .dissco file already on disk */
     void open();
+    /* should save the current project, only if there is a file */
     void save();
+    /* should open a dialog to save the current file at a particular filepath, only if there is a file */
+    // void saveAs();
+
+    /*** EDIT ACTIONS ***/
+    /* following two should undo/redo the previous action/undo performed in the current view, only if there is a previous action/undo */
     void undo();
     void redo();
+    /* following three should do as name suggests using system clipboard, only if there is content/access to system clipboard */
     void cut();
     void copy();
     void paste();
+
+    /*** HELP ACTIONS ***/
     void about();
     void aboutQt();
-    //! [1]
-
-    //! [2]
 private:
+    /* The following two f'ns should populate the menus and the actions those menus contain, e.g., the "File" menu to contain the actions "New File", "Save As", etc. */
     void createActions();
     void createMenus();
-    //! [2]
-
-    //! [3]
-    // Main *mmenu;
     
+    /* loadFile should take a const reference to a valid file_path and attempt to open it with ReadOnly and Text flags, err out if it cannot, parse the .dissco file, and open the project view for that .dissco file. */
+    void loadFile(const QString &file_path);
+
+    // void saveToFile(const QString &file_path);
+
     QMenu *file_menu;
     QMenu *edit_menu;
     QMenu *help_menu;
@@ -65,59 +74,10 @@ private:
     QAction *about_act;
     QAction *about_qt_act;
     QLabel *info_label;
+
+    QString current_file_;
+    QTextEdit *text_edit_;
 };
 //! [3]
 
 #endif
-// #ifndef MAINWINDOW_H
-// #define MAINWINDOW_H
-
-// #include <QMainWindow>
-
-// QT_BEGIN_NAMESPACE
-// namespace Ui {
-// class MainWindow;
-// }
-// QT_END_NAMESPACE
-
-// class MainWindow : public QMainWindow
-// {
-//     Q_OBJECT
-
-// public:
-//     MainWindow(QWidget *parent = nullptr);
-//     ~MainWindow();
-
-// private slots:
-//     void newFile();
-//     // void open();
-//     // void save();
-//     // void undo();
-//     // void redo();
-//     // void about();
-//     // void aboutQt();
-
-// private:
-//     Ui::MainWindow *ui;
-//     void createActions();
-//     void createMenus();
-
-//     QMenu *file_menu;
-//     // QMenu *edit_menu;
-//     // QMenu *project_menu;
-//     // QMenu *help_menu;
-//     // QActionGroup *alignment_group;
-//     QAction *new_act;
-//     // QAction *open_act;
-//     // QAction *save_act;
-//     // QAction *save_as_act;
-//     QAction *quit_act;
-//     // QAction *create_act;
-//     // QAction *properties_act;
-//     // QAction *run_act;
-//     // QAction *conf_mod_act;
-//     // QAction *contents_act;
-//     // QAction *about_act;
-//     // QAction *about_qt_act;
-// };
-// #endif // MAINWINDOW_H

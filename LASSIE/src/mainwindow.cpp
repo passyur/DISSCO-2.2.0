@@ -1,18 +1,12 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 #include <QtWidgets>
 
 #include "mainwindow.hpp"
 
-//! [0]
 MainWindow::MainWindow()
 {
     QWidget *widget = new QWidget;
     setCentralWidget(widget);
-    //! [0]
 
-    //! [1]
     QWidget *top_filler = new QWidget;
     top_filler->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -30,22 +24,18 @@ MainWindow::MainWindow()
     layout->addWidget(info_label);
     layout->addWidget(bottom_filler);
     widget->setLayout(layout);
-    //! [1]
 
-    //! [2]
     createActions();
     createMenus();
 
     QString message = tr("A context menu is available by right-clicking");
     statusBar()->showMessage(message);
 
-    setWindowTitle(tr("Menus"));
+    setWindowTitle("LASSIE");
     setMinimumSize(160, 160);
     resize(480, 320);
 }
-//! [2]
 
-//! [3]
 #ifndef QT_NO_CONTEXTMENU
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
@@ -56,20 +46,45 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     menu.exec(event->globalPos());
 }
 #endif // QT_NO_CONTEXTMENU
-//! [3]
 
 void MainWindow::newFile()
 {
-    info_label->setText(tr("Invoked <b>File|New</b>"));
+    QString file_path = QFileDialog::getSaveFileName(this, "New File", "", "Dissco Files (*.dissco)");
+    if(file_path.isEmpty())
+        return;
+
+    loadFile(file_path);
+}
+
+void MainWindow::loadFile(const QString &file_path)
+{
+    QFile file(file_path);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        QMessageBox::warning(this, "Error", "Cannot open file: " + file.errorString());
+        return;
+    }
+
+    file.close();
+    current_file_ = file_path;
 }
 
 void MainWindow::open()
 {
-    info_label->setText(tr("Invoked <b>File|Open</b>"));
+    QString file_path = QFileDialog::getOpenFileName(this, "Open File", "", "Dissco Files (*.dissco)");
+    if(file_path.isEmpty())
+        return;
+
+    loadFile(file_path);
 }
 
 void MainWindow::save()
 {
+    if(current_file_.isEmpty()){
+        // saveFileAs();
+        return;
+    }
+
+    // saveToFile
     info_label->setText(tr("Invoked <b>File|Save</b>"));
 }
 
@@ -110,23 +125,19 @@ void MainWindow::aboutQt()
     info_label->setText(tr("Invoked <b>Help|About Qt</b>"));
 }
 
-//! [4]
 void MainWindow::createActions()
 {
-    //! [5]
     new_act = new QAction(QIcon::fromTheme("document-new"),
                          tr("&New"), this);
     new_act->setShortcuts(QKeySequence::New);
     new_act->setStatusTip(tr("Create a new file"));
     connect(new_act, &QAction::triggered, this, &MainWindow::newFile);
-    //! [4]
 
     open_act = new QAction(QIcon::fromTheme("document-open"),
                           tr("&Open..."), this);
     open_act->setShortcuts(QKeySequence::Open);
     open_act->setStatusTip(tr("Open an existing file"));
     connect(open_act, &QAction::triggered, this, &MainWindow::open);
-    //! [5]
 
     save_act = new QAction(QIcon::fromTheme("document-save"),
                           tr("&Save"), this);
@@ -135,7 +146,7 @@ void MainWindow::createActions()
     connect(save_act, &QAction::triggered, this, &MainWindow::save);
 
     exit_act = new QAction(QIcon::fromTheme("application-exit"),
-                          tr("E&xit"), this);
+                          tr("&Exit"), this);
     exit_act->setShortcuts(QKeySequence::Quit);
     exit_act->setStatusTip(tr("Exit the application"));
     connect(exit_act, &QAction::triggered, this, &QWidget::close);
@@ -183,21 +194,14 @@ void MainWindow::createActions()
     connect(about_qt_act, &QAction::triggered, qApp, &QApplication::aboutQt);
     connect(about_qt_act, &QAction::triggered, this, &MainWindow::aboutQt);
 }
-//! [7]
 
-//! [8]
 void MainWindow::createMenus()
 {
-    //! [9] //! [10]
     file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(new_act);
-    //! [9]
     file_menu->addAction(open_act);
-    //! [10]
     file_menu->addAction(save_act);
-    //! [11]
     file_menu->addSeparator();
-    //! [11]
     file_menu->addAction(exit_act);
 
     edit_menu = menuBar()->addMenu(tr("&Edit"));
@@ -212,95 +216,4 @@ void MainWindow::createMenus()
     help_menu = menuBar()->addMenu(tr("&Help"));
     help_menu->addAction(about_act);
     help_menu->addAction(about_qt_act);
-    //! [8]
-
 }
-//! [12]
-
-// #include "mainwindow.h"
-// #include "./ui_mainwindow.h"
-
-// #include <QIcon>
-// #include <QAction>
-// #include <QToolbar>
-// #include <QMenuBar>
-
-// MainWindow::MainWindow(QWidget *parent)
-//     : QMainWindow(parent)
-//     , ui(new Ui::MainWindow)
-// {
-//     createActions();
-//     /* v depends on ^ */
-//     createMenus();
-
-//     setWindowTitle("Menu");
-//     // setMinimumSize(160, 160);
-//     // QAction *exit_act;
-//     // file_menu->addAction(exit_act);
-//     // menu->addAction("something");
-
-//     // QToolBar *toolbar = addToolBar("main");
-//     // toolbar->addAction("File");
-//     // toolbar->addAction("Edit");
-//     // toolbar->addAction("Project");
-//     // toolbar->addAction("Help");
-//     ui->setupUi(this);
-// }
-
-// MainWindow::~MainWindow()
-// {
-//     delete ui;
-// }
-
-// void MainWindow::newFile(){
-
-// }
-
-// /* Will instantiate the actions to be added to menus in createMenus() */
-// void MainWindow::createActions(){
-//     new_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::DocumentNew),
-//                           tr("&New"), this);
-//     new_act->setShortcuts(QKeySequence::New);
-//     new_act->setStatusTip(tr("Create a new project"));
-//     connect(new_act, &QAction::triggered, this, &MainWindow::newFile);
-
-//     // alignment_group = new QActionGroup(this);
-//     // alignment_group->addAction()
-
-//     // QAction *open_act;
-//     // QAction *save_act;
-//     // QAction *save_as_act;
-//     // quit_act = new QAction(QIcon::fromTheme(QIcon::ThemeIcon::ApplicationExit),
-//     //                        tr("&Quit"), this);
-//     // quit_act->setShortcuts(QKeySequence::Quit);
-//     // quit_act->setStatusTip(tr("Quit DISSCO"));
-//     // connect(quit_act, &QAction::triggered, this, &QApplication::quit);
-//     // QAction *create_act;
-//     // QAction *properties_act;
-//     // QAction *run_act;
-//     // QAction *conf_mod_act;
-//     // QAction *contents_act;
-//     // QAction *about_act;
-//     // QAction *about_qt_act;
-// }
-
-// /* Will instantiate the menus in the menubar */
-// void MainWindow::createMenus(){
-//     file_menu = menuBar()->addMenu(tr("&File"));
-//     // try{
-
-//     // } catch (std::exception &e) {
-//     //     qFatal("Error %s creating menu %s with act %s",
-//     //            e.what(), typeid(*menu).name(),
-//     //            typeid(*action).name());
-//     // }
-
-//     file_menu->addAction(new_act);
-//     // file_menu->addSeparator();
-//     // file_menu->addAction(quit_act);
-
-//     // QMenu *edit_menu;
-//     // QMenu *project_menu;
-//     // QMenu *help_menu;
-// }
-
