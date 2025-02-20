@@ -13,30 +13,45 @@ Of roughly equal importance:
         - [x] Compiles
         - [ ] Works
     - [ ] LASSIE
-        - [ ] Compiles
+        - [x] Compiles
         - [ ] Works
-    - [~] Build Documentation
+    - [x] Build Documentation
 
 - [ ] Windows support
     - [ ] CMOD
-      - [x] Compiles
+      - [ ] Compiles
       - [ ] Works
     - [ ] LASS
-      - [x] Compiles
+      - [ ] Compiles
       - [ ] Works
     - [ ] LASSIE
       - [ ] Compiles
       - [ ] Works
-    - [~] Build Documentation
+    - [x] Build Documentation
+
+- [ ] Linux Support
+  - [x] CMOD
+  - [x] LASS
+  - [ ] LASSIE
+    - [x] Compiles
+    - [ ] Works
+  - [x] Build Documentation
 
 Other important matters:
 - [ ] Satisfactory Documentation (contribute using the project wiki)
   - [ ] Translating the files in Documents to a wiki format
   - [ ] Extending documentation where necessary/desired
+- [ ] Replace all '.h' extensions with '.hpp' extensions, particularly when the file uses C++ features
+- [ ] Tidy up the project
+  - [ ] Remove references to deprecated functions, replace if necessary
+  - [ ] Make code modular while preserving functionality
+  - [ ] Standardize style
+  - [ ] Compactify file structure (to prevent undue sprawl)
 
 My wish list to Santa this year, or new years' resolutions:
-- [ ] Transition from XML to a lesser evil (e.g., JSON)
+- [ ] Transition from XML to, e.g., JSON
 - [ ] Cross-platform parallelization
   - [ ] CUDA
   - [ ] Accelerate/Metal
+  <!-- - [ ] OpenMP? -->
 - [ ] Better memory management
