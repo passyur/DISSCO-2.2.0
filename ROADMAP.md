@@ -41,6 +41,7 @@ Other important matters:
 - [ ] Satisfactory Documentation (contribute using the project wiki)
   - [ ] Translating the files in Documents to a wiki format
   - [ ] Extending documentation where necessary/desired
+- [ ] Add Dockerfile and Apptainer definition
 - [ ] Replace all '.h' extensions with '.hpp' extensions, particularly when the file uses C++ features
 - [ ] Tidy up the project
   - [ ] Remove references to deprecated functions, replace if necessary
