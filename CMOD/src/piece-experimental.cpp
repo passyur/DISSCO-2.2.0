@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Libraries.h"
 #include "Define.h"
-#include "FileValue.h"
 #include "Note.h"
 #include "Output.h"
 #include "Random.h"

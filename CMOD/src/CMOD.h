@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "Libraries.h"
 
-#include "FileValue.h"
 #include "Bottom.h"
 #include "Define.h"
 #include "Event.h"
@@ -38,7 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Rational.h"
 #include "Sieve.h"
 #include "Tempo.h"
-#include "EventParser.h"
 
 
 
