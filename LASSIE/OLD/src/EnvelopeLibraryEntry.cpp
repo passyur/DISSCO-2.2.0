@@ -30,201 +30,204 @@
  *
  ******************************************************************************/
 
- #include "EnvelopeLibraryEntry.h"
-//#include <stdlib.h>
+#include "EnvelopeLibraryEntry.h"
+#include <sstream>
 
-EnvelopeLibraryEntry::EnvelopeLibraryEntry(int _number){
-  number =_number;
-  prev = NULL;
-  next = NULL;
-
-  head = new EnvLibEntryNode(0,0);
-  head->rightSeg = new EnvLibEntrySeg();
-  head->rightSeg->leftNode = head;
-  head->rightSeg->rightNode = new EnvLibEntryNode(1,0);
-  head->rightSeg->rightNode->leftSeg = head->rightSeg;
-
+// EnvelopeNode implementation
+EnvelopeNode::EnvelopeNode(double _x, double _y) : 
+  x(_x), y(_y), leftSeg(nullptr), rightSeg(nullptr) {
 }
 
+int EnvelopeNode::countNumOfNodes() const {
+  return (rightSeg == nullptr) ? 1 : 1 + rightSeg->rightNode->countNumOfNodes();
+}
 
-EnvelopeLibraryEntry::EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelope, int _number){
-  number =_number;
-  prev = NULL;
-  next = NULL;
+// EnvelopeSegment implementation
+EnvelopeSegment::EnvelopeSegment() :
+  leftNode(nullptr),
+  rightNode(nullptr),
+  segmentType(EnvelopeSegmentType::Linear),
+  segmentProperty(EnvelopeSegmentProperty::Flexible) {
+}
 
-  EnvLibEntryNode* originalEnvelopeCurrentNode = _originalEnvelope->head;
-  EnvLibEntryNode* duplicationCurrentNode;
+EnvelopeSegment::~EnvelopeSegment() {
+  // No need to delete nodes as they are managed by the envelope
+}
 
+// EnvelopeLibraryEntry implementation
+EnvelopeLibraryEntry::EnvelopeLibraryEntry(int _number) :
+  number(_number),
+  next(nullptr),
+  prev(nullptr) {
+  
+  // Create initial envelope with two nodes and one segment
+  head = std::make_unique<EnvelopeNode>(0, 0);
+  
+  auto rightSeg = std::make_unique<EnvelopeSegment>();
+  rightSeg->leftNode = head.get();
+  head->rightSeg = std::move(rightSeg);
+  
+  auto rightNode = std::make_unique<EnvelopeNode>(1, 0);
+  head->rightSeg->rightNode = rightNode.get();
+  rightNode->leftSeg = head->rightSeg.get();
+}
 
-  head = new EnvLibEntryNode(originalEnvelopeCurrentNode->x,
-                             originalEnvelopeCurrentNode->y);
-  duplicationCurrentNode = head;
-
-  while (originalEnvelopeCurrentNode->rightSeg !=NULL){
-    EnvLibEntrySeg* newSegment = new EnvLibEntrySeg();
-    newSegment->segmentType =
-      originalEnvelopeCurrentNode->rightSeg->segmentType;
-    newSegment->segmentProperty =
-      originalEnvelopeCurrentNode->rightSeg->segmentProperty;
-
-    duplicationCurrentNode->rightSeg = newSegment;
-    newSegment->leftNode = duplicationCurrentNode;
-
-    EnvLibEntryNode* newNode =
-      new EnvLibEntryNode(originalEnvelopeCurrentNode->rightSeg->rightNode->x,
-                          originalEnvelopeCurrentNode->rightSeg->rightNode->y);
-
-    newSegment->rightNode = newNode;
-    newNode->leftSeg = newSegment;
-
-    originalEnvelopeCurrentNode =
-      originalEnvelopeCurrentNode->rightSeg->rightNode;
-
-    duplicationCurrentNode = newNode;
-
+EnvelopeLibraryEntry::EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelope, int _number) :
+  number(_number),
+  next(nullptr),
+  prev(nullptr) {
+  
+  if (!_originalEnvelope || !_originalEnvelope->head) {
+    // Create a default envelope if the original is invalid
+    head = std::make_unique<EnvelopeNode>(0, 0);
+    auto rightSeg = std::make_unique<EnvelopeSegment>();
+    rightSeg->leftNode = head.get();
+    head->rightSeg = std::move(rightSeg);
+    
+    auto rightNode = std::make_unique<EnvelopeNode>(1, 0);
+    head->rightSeg->rightNode = rightNode.get();
+    rightNode->leftSeg = head->rightSeg.get();
+    return;
   }
-
-
-
-}
-
-
-
-
-
-EnvelopeLibraryEntry::~EnvelopeLibraryEntry(){//delete segments!}
-//TODO: lassie doesn't support deleting envelope so far so no worry about it.
-
-}
-
-
-
-int EnvelopeLibraryEntry::count(){
-  if (next == NULL) return 1;
-  else return next->count() + 1;
-}
-
-
-EnvelopeLibraryEntry* EnvelopeLibraryEntry::createNewEnvelope(){
-  if (next != NULL) return next->createNewEnvelope();
-  else {
-    next = new EnvelopeLibraryEntry (number + 1);
-    next->prev = this;
-    return next;
+  
+  // Copy the original envelope
+  EnvelopeNode* originalCurrentNode = _originalEnvelope->head.get();
+  
+  // Create the head node
+  head = std::make_unique<EnvelopeNode>(originalCurrentNode->x, originalCurrentNode->y);
+  EnvelopeNode* currentNewNode = head.get();
+  
+  // Copy the rest of the nodes and segments
+  while (originalCurrentNode->rightSeg) {
+    // Create a new segment
+    auto newSegment = std::make_unique<EnvelopeSegment>();
+    newSegment->segmentType = originalCurrentNode->rightSeg->segmentType;
+    newSegment->segmentProperty = originalCurrentNode->rightSeg->segmentProperty;
+    newSegment->leftNode = currentNewNode;
+    
+    // Link the segment to the current node
+    currentNewNode->rightSeg = std::move(newSegment);
+    
+    // Create a new right node
+    auto newNode = std::make_unique<EnvelopeNode>(
+      originalCurrentNode->rightSeg->rightNode->x,
+      originalCurrentNode->rightSeg->rightNode->y
+    );
+    
+    // Link the segment to the new node
+    currentNewNode->rightSeg->rightNode = newNode.get();
+    newNode->leftSeg = currentNewNode->rightSeg.get();
+    
+    // Move to the next node
+    originalCurrentNode = originalCurrentNode->rightSeg->rightNode;
+    currentNewNode = newNode.get();
   }
 }
 
+EnvelopeLibraryEntry::~EnvelopeLibraryEntry() {
+  // The unique_ptr will automatically delete the head node and all segments
+  // No need to manually delete anything
+}
 
-EnvelopeLibraryEntry* EnvelopeLibraryEntry::duplicateEnvelope(
-  EnvelopeLibraryEntry* _originalEnvelope){
-    if (next != NULL) return next->duplicateEnvelope(_originalEnvelope);
-  else {
+int EnvelopeLibraryEntry::count() const {
+  if (next == nullptr) return 1;
+  return next->count() + 1;
+}
 
-    next = new EnvelopeLibraryEntry (_originalEnvelope, number + 1 );
-    next->prev = this;
-    return next;
+EnvelopeLibraryEntry* EnvelopeLibraryEntry::createNewEnvelope() {
+  if (next != nullptr) return next->createNewEnvelope();
+  
+  next = new EnvelopeLibraryEntry(number + 1);
+  next->prev = this;
+  return next;
+}
 
+EnvelopeLibraryEntry* EnvelopeLibraryEntry::duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) {
+  if (next != nullptr) return next->duplicateEnvelope(_originalEnvelope);
+  
+  next = new EnvelopeLibraryEntry(_originalEnvelope, number + 1);
+  next->prev = this;
+  return next;
+}
+
+Glib::ustring EnvelopeLibraryEntry::getNumberString() const {
+  std::ostringstream oss;
+  oss << number;
+  return oss.str();
+}
+
+EnvelopeLibraryEntry::EnvelopeLibraryEntry(Envelope* _envelope, int _number) :
+  number(_number),
+  next(nullptr),
+  prev(nullptr) {
+  
+  if (!_envelope) {
+    // Create a default envelope if the input is invalid
+    head = std::make_unique<EnvelopeNode>(0, 0);
+    auto rightSeg = std::make_unique<EnvelopeSegment>();
+    rightSeg->leftNode = head.get();
+    head->rightSeg = std::move(rightSeg);
+    
+    auto rightNode = std::make_unique<EnvelopeNode>(1, 0);
+    head->rightSeg->rightNode = rightNode.get();
+    rightNode->leftSeg = head->rightSeg.get();
+    return;
   }
-
-
+  
+  Collection<envelope_segment>* segments = _envelope->getSegments();
+  if (!segments || segments->size() < 2) {
+    // Create a default envelope if there are not enough segments
+    head = std::make_unique<EnvelopeNode>(0, 0);
+    auto rightSeg = std::make_unique<EnvelopeSegment>();
+    rightSeg->leftNode = head.get();
+    head->rightSeg = std::move(rightSeg);
+    
+    auto rightNode = std::make_unique<EnvelopeNode>(1, 0);
+    head->rightSeg->rightNode = rightNode.get();
+    rightNode->leftSeg = head->rightSeg.get();
+    return;
+  }
+  
+  // Create the head node
+  head = std::make_unique<EnvelopeNode>(segments->get(0).x, segments->get(0).y);
+  EnvelopeNode* currentNode = head.get();
+  
+  // Create the rest of the nodes and segments
+  for (int i = 0; i < segments->size() - 1; i++) {
+    // Create a new segment
+    auto newSegment = std::make_unique<EnvelopeSegment>();
+    
+    // Set segment properties
+    if (_envelope->getSegmentLengthType(i) == FIXED) {
+      newSegment->segmentProperty = EnvelopeSegmentProperty::Fixed;
+    } else {
+      newSegment->segmentProperty = EnvelopeSegmentProperty::Flexible;
+    }
+    
+    // Set segment type
+    if (_envelope->getSegmentInterpolationType(i) == EXPONENTIAL) {
+      newSegment->segmentType = EnvelopeSegmentType::Exponential;
+    } else if (_envelope->getSegmentInterpolationType(i) == CUBIC_SPLINE) {
+      newSegment->segmentType = EnvelopeSegmentType::Spline;
+    } else {
+      newSegment->segmentType = EnvelopeSegmentType::Linear;
+    }
+    
+    // Link the segment to the current node
+    newSegment->leftNode = currentNode;
+    currentNode->rightSeg = std::move(newSegment);
+    
+    // Create a new right node
+    auto newNode = std::make_unique<EnvelopeNode>(
+      segments->get(i + 1).x,
+      segments->get(i + 1).y
+    );
+    
+    // Link the segment to the new node
+    currentNode->rightSeg->rightNode = newNode.get();
+    newNode->leftSeg = currentNode->rightSeg.get();
+    
+    // Move to the next node
+    currentNode = newNode.get();
+  }
 }
-
-
-
-
-
-
-
-Glib::ustring EnvelopeLibraryEntry::getNumberString(){
-
-  std::string temp;
-
-  char tem1[20] ;
-  sprintf(tem1,"%d",number);
-
-  temp = string(tem1);
-
-  Glib::ustring ret = temp;
-  return ret;
-
-
-}
-
-
-
-
-EnvelopeLibraryEntry::EnvelopeLibraryEntry(Envelope* _envelope,int _number){
-  prev =NULL;
-  next =NULL;
-	number = _number;
-	Collection<envelope_segment>* segments = _envelope->getSegments ();
-
-	EnvLibEntryNode* currentNode = NULL;
-	EnvLibEntryNode* prevNode = NULL;
-	EnvLibEntrySeg* currentSeg = NULL;
-	EnvLibEntrySeg* prevSeg = NULL;
-
-
-
-	int i = 0;
-	for (i ; i < segments->size()-1; i++){
-
-		prevNode = currentNode;
-		prevSeg = currentSeg;
-		currentNode = new EnvLibEntryNode(segments->get(i).x, segments->get(i).y);
-		currentSeg = new EnvLibEntrySeg();
-		if (i ==0){
-			head = currentNode;
-		}
-		else{
-			prevSeg->rightNode = currentNode;
-		}
-		currentNode->leftSeg = prevSeg;
-		currentNode->rightSeg = currentSeg;
-		currentSeg->leftNode = currentNode;
-
-		if (_envelope->getSegmentLengthType(i) == FIXED){
-
-
-      currentSeg->segmentProperty = envSegmentPropertyFixed;
-    }
-    else {
-
-      currentSeg->segmentProperty = envSegmentPropertyFlexible;
-    }
-
-
-    if (_envelope->getSegmentInterpolationType(i) ==EXPONENTIAL){
-      currentSeg->segmentType = envSegmentTypeExponential;
-    }
-    else if(_envelope->getSegmentInterpolationType(i) == CUBIC_SPLINE){
-      currentSeg->segmentType = envSegmentTypeSpline;
-    }
-    else {
-      currentSeg->segmentType = envSegmentTypeLinear;
-    }
-
-  }// end of for loop
-
-	currentSeg->rightNode = new EnvLibEntryNode(segments->get(i).x,
-	                                            segments->get(i).y);
-
-	currentSeg->rightNode->leftSeg = currentSeg;
-
-}
-
-
-EnvLibEntrySeg::EnvLibEntrySeg():
-  leftNode(NULL),
-  rightNode(NULL),
-  segmentType(envSegmentTypeLinear),
-  segmentProperty(envSegmentPropertyFlexible){}
-
-
-
-
-EnvLibEntryNode::EnvLibEntryNode(double _x, double _y):
-  leftSeg(NULL),rightSeg(NULL),x(_x),y(_y){}
-
-int EnvLibEntryNode::countNumOfNodes(){
-  return (rightSeg==NULL)?1:1+rightSeg->rightNode->countNumOfNodes();}
