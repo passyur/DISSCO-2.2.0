@@ -206,7 +206,7 @@ void MultiPan::print(){
  * @param t the time stamp (as a percent of total sound
  *  length, from 0.0 to 1.0)
  **/
-void MultiPan::addEntry(float t, ...)
+void MultiPan::addEntry(double t, ...)
 {
 	va_list marker;
 	int i;

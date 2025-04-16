@@ -535,7 +535,7 @@ public:
     return os.str();
   }
 
-  string toPrettyString(void)
+  string toPrettyString(void) const
   {
     if(d == 0)
       return "indeterminate";
@@ -591,10 +591,10 @@ public:
     return Rational<T>(numerator, denominator);
   }
 
-  
-  operator const char *(void)
-  {
-    return toPrettyString().c_str();
+  operator const char*() const {
+    static string temp;  // Make it static to avoid stack memory issues
+    temp = toPrettyString();
+    return temp.c_str();
   }
 #endif //RATIONAL_USES_STRINGS
 };

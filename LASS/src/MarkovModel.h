@@ -122,7 +122,7 @@ void MarkovModel<T>::makeConsistent() {
   for (unsigned i = 0; i < transitionMatrix.size(); i++) {
     vector<double>& row = transitionMatrix[i];
     // find row sum
-    double sum = 0;
+    double sum = 0.0;
     for (unsigned i = 0; i < row.size(); i++) {
       sum += row[i];
     }
@@ -139,7 +139,7 @@ void MarkovModel<T>::makeConsistent() {
   }
 
   // make sure initial distribution is a distribution
-  double sum = 0;
+  double sum = 0.0;
   for (unsigned i = 0; i < initialDistribution.size(); i++) {
     sum += initialDistribution[i];
   }
@@ -229,7 +229,7 @@ T MarkovModel<T>::nextSample(double rand) {
     // thisIndex = i;
     // return stateValues[i];
   }
-  double sum;
+  double sum = 0.0;
   int i = 0;
   while(i < (int)samplelist.size()){
     sum += samplelist[i];

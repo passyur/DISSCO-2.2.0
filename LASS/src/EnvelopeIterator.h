@@ -104,8 +104,6 @@ private:
     *	This indicates whether we have more values.
     **/
     bool moreValues_;
-
-    long tempCounter_;
 };
 
 
