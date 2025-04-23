@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EnvelopeLibraryWindow</class>
+ <widget class="QWidget" name="EnvelopeLibraryWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="vbox1">
+   <item>
+    <widget class="QWidget" name="EnvelopeListAlignment" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>300</width>
+       <height>300</height>
+      </size>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTreeView" name="envelopeTreeView">
+        <property name="headerHidden">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="dragEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="acceptDrops">
+         <bool>true</bool>
+        </property>
+        <property name="dropIndicatorShown">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="newButton">
+          <property name="text">
+           <string>New</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="duplicateButton">
+          <property name="text">
+           <string>Duplicate</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="hseparator1">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="hbox4">
+     <item>
+      <widget class="QLabel" name="ScaleLabel">
+       <property name="text">
+        <string>1.0
+
+
+
+
+
+
+
+
+
+
+
+0.0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="DrawingAreaAlignment" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>280</width>
+         <height>200</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QWidget" name="drawingAreaWidget" native="true"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="hbox2">
+     <item>
+      <widget class="QLabel" name="label2">
+       <property name="text">
+        <string>X value:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="xValueEdit">
+       <property name="minimumWidth">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="hbox3">
+     <item>
+      <widget class="QLabel" name="label3">
+       <property name="text">
+        <string>Y value: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="yValueEdit">
+       <property name="minimumWidth">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="hbox1">
+     <item>
+      <widget class="QLabel" name="CoordinateLabel">
+       <property name="text">
+        <string>X:0.0
+Y:0.0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label1">
+       <property name="text">
+        <string>Right click the graph to see available actions or click-and-drag a node to adjust the envelope.
+Thick segment = Flexible; Thin segment = Fixed.
+Blue = Linear; Green = Spline; Red = Exponential.</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui> 

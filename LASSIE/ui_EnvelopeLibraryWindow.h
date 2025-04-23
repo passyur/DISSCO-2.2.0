@@ -10,19 +10,13 @@
 #define UI_ENVELOPELIBRARYWINDOW_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QSplitter>
-#include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -32,160 +26,177 @@ QT_BEGIN_NAMESPACE
 class Ui_EnvelopeLibraryWindow
 {
 public:
-    QAction *actionSave;
-    QWidget *centralwidget;
-    QHBoxLayout *horizontalLayout;
-    QSplitter *splitter;
-    QWidget *leftWidget;
+    QVBoxLayout *vbox1;
+    QWidget *EnvelopeListAlignment;
     QVBoxLayout *verticalLayout;
     QTreeView *envelopeTreeView;
-    QHBoxLayout *horizontalLayout_2;
+    QHBoxLayout *horizontalLayout;
     QPushButton *newButton;
     QPushButton *duplicateButton;
-    QWidget *rightWidget;
+    QFrame *hseparator1;
+    QHBoxLayout *hbox4;
+    QLabel *ScaleLabel;
+    QWidget *DrawingAreaAlignment;
     QVBoxLayout *verticalLayout_2;
     QWidget *drawingAreaWidget;
-    QGridLayout *gridLayout;
-    QLabel *label;
+    QHBoxLayout *hbox2;
+    QLabel *label2;
     QLineEdit *xValueEdit;
-    QLabel *label_2;
+    QHBoxLayout *hbox3;
+    QLabel *label3;
     QLineEdit *yValueEdit;
-    QLabel *coordinateLabel;
-    QLabel *scaleLabel;
-    QMenuBar *menubar;
-    QMenu *menuFile;
-    QStatusBar *statusbar;
+    QHBoxLayout *hbox1;
+    QLabel *CoordinateLabel;
+    QLabel *label1;
 
-    void setupUi(QMainWindow *EnvelopeLibraryWindow)
+    void setupUi(QWidget *EnvelopeLibraryWindow)
     {
         if (EnvelopeLibraryWindow->objectName().isEmpty())
             EnvelopeLibraryWindow->setObjectName(QString::fromUtf8("EnvelopeLibraryWindow"));
-        EnvelopeLibraryWindow->resize(800, 600);
-        actionSave = new QAction(EnvelopeLibraryWindow);
-        actionSave->setObjectName(QString::fromUtf8("actionSave"));
-        centralwidget = new QWidget(EnvelopeLibraryWindow);
-        centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-        horizontalLayout = new QHBoxLayout(centralwidget);
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        splitter = new QSplitter(centralwidget);
-        splitter->setObjectName(QString::fromUtf8("splitter"));
-        splitter->setOrientation(Qt::Horizontal);
-        leftWidget = new QWidget(splitter);
-        leftWidget->setObjectName(QString::fromUtf8("leftWidget"));
-        verticalLayout = new QVBoxLayout(leftWidget);
+        EnvelopeLibraryWindow->resize(600, 400);
+        vbox1 = new QVBoxLayout(EnvelopeLibraryWindow);
+        vbox1->setObjectName(QString::fromUtf8("vbox1"));
+        EnvelopeListAlignment = new QWidget(EnvelopeLibraryWindow);
+        EnvelopeListAlignment->setObjectName(QString::fromUtf8("EnvelopeListAlignment"));
+        EnvelopeListAlignment->setMinimumSize(QSize(300, 300));
+        verticalLayout = new QVBoxLayout(EnvelopeListAlignment);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        envelopeTreeView = new QTreeView(leftWidget);
+        envelopeTreeView = new QTreeView(EnvelopeListAlignment);
         envelopeTreeView->setObjectName(QString::fromUtf8("envelopeTreeView"));
-        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(envelopeTreeView->sizePolicy().hasHeightForWidth());
-        envelopeTreeView->setSizePolicy(sizePolicy);
+        envelopeTreeView->setHeaderHidden(true);
+        envelopeTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
+        envelopeTreeView->setDragEnabled(true);
+        envelopeTreeView->setAcceptDrops(true);
+        envelopeTreeView->setDropIndicatorShown(true);
 
         verticalLayout->addWidget(envelopeTreeView);
 
-        horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
-        newButton = new QPushButton(leftWidget);
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        newButton = new QPushButton(EnvelopeListAlignment);
         newButton->setObjectName(QString::fromUtf8("newButton"));
 
-        horizontalLayout_2->addWidget(newButton);
+        horizontalLayout->addWidget(newButton);
 
-        duplicateButton = new QPushButton(leftWidget);
+        duplicateButton = new QPushButton(EnvelopeListAlignment);
         duplicateButton->setObjectName(QString::fromUtf8("duplicateButton"));
 
-        horizontalLayout_2->addWidget(duplicateButton);
+        horizontalLayout->addWidget(duplicateButton);
 
 
-        verticalLayout->addLayout(horizontalLayout_2);
+        verticalLayout->addLayout(horizontalLayout);
 
-        splitter->addWidget(leftWidget);
-        rightWidget = new QWidget(splitter);
-        rightWidget->setObjectName(QString::fromUtf8("rightWidget"));
-        verticalLayout_2 = new QVBoxLayout(rightWidget);
+
+        vbox1->addWidget(EnvelopeListAlignment);
+
+        hseparator1 = new QFrame(EnvelopeLibraryWindow);
+        hseparator1->setObjectName(QString::fromUtf8("hseparator1"));
+        hseparator1->setFrameShape(QFrame::HLine);
+        hseparator1->setFrameShadow(QFrame::Sunken);
+
+        vbox1->addWidget(hseparator1);
+
+        hbox4 = new QHBoxLayout();
+        hbox4->setObjectName(QString::fromUtf8("hbox4"));
+        ScaleLabel = new QLabel(EnvelopeLibraryWindow);
+        ScaleLabel->setObjectName(QString::fromUtf8("ScaleLabel"));
+
+        hbox4->addWidget(ScaleLabel);
+
+        DrawingAreaAlignment = new QWidget(EnvelopeLibraryWindow);
+        DrawingAreaAlignment->setObjectName(QString::fromUtf8("DrawingAreaAlignment"));
+        DrawingAreaAlignment->setMinimumSize(QSize(280, 200));
+        verticalLayout_2 = new QVBoxLayout(DrawingAreaAlignment);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
-        drawingAreaWidget = new QWidget(rightWidget);
+        drawingAreaWidget = new QWidget(DrawingAreaAlignment);
         drawingAreaWidget->setObjectName(QString::fromUtf8("drawingAreaWidget"));
-        QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        sizePolicy1.setHorizontalStretch(1);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(drawingAreaWidget->sizePolicy().hasHeightForWidth());
-        drawingAreaWidget->setSizePolicy(sizePolicy1);
 
         verticalLayout_2->addWidget(drawingAreaWidget);
 
-        gridLayout = new QGridLayout();
-        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        label = new QLabel(rightWidget);
-        label->setObjectName(QString::fromUtf8("label"));
 
-        gridLayout->addWidget(label, 0, 0, 1, 1);
+        hbox4->addWidget(DrawingAreaAlignment);
 
-        xValueEdit = new QLineEdit(rightWidget);
+
+        vbox1->addLayout(hbox4);
+
+        hbox2 = new QHBoxLayout();
+        hbox2->setObjectName(QString::fromUtf8("hbox2"));
+        label2 = new QLabel(EnvelopeLibraryWindow);
+        label2->setObjectName(QString::fromUtf8("label2"));
+
+        hbox2->addWidget(label2);
+
+        xValueEdit = new QLineEdit(EnvelopeLibraryWindow);
         xValueEdit->setObjectName(QString::fromUtf8("xValueEdit"));
+        xValueEdit->setMinimumWidth(100);
 
-        gridLayout->addWidget(xValueEdit, 0, 1, 1, 1);
+        hbox2->addWidget(xValueEdit);
 
-        label_2 = new QLabel(rightWidget);
-        label_2->setObjectName(QString::fromUtf8("label_2"));
 
-        gridLayout->addWidget(label_2, 0, 2, 1, 1);
+        vbox1->addLayout(hbox2);
 
-        yValueEdit = new QLineEdit(rightWidget);
+        hbox3 = new QHBoxLayout();
+        hbox3->setObjectName(QString::fromUtf8("hbox3"));
+        label3 = new QLabel(EnvelopeLibraryWindow);
+        label3->setObjectName(QString::fromUtf8("label3"));
+
+        hbox3->addWidget(label3);
+
+        yValueEdit = new QLineEdit(EnvelopeLibraryWindow);
         yValueEdit->setObjectName(QString::fromUtf8("yValueEdit"));
+        yValueEdit->setMinimumWidth(100);
 
-        gridLayout->addWidget(yValueEdit, 0, 3, 1, 1);
-
-        coordinateLabel = new QLabel(rightWidget);
-        coordinateLabel->setObjectName(QString::fromUtf8("coordinateLabel"));
-
-        gridLayout->addWidget(coordinateLabel, 1, 0, 1, 4);
-
-        scaleLabel = new QLabel(rightWidget);
-        scaleLabel->setObjectName(QString::fromUtf8("scaleLabel"));
-
-        gridLayout->addWidget(scaleLabel, 2, 0, 1, 4);
+        hbox3->addWidget(yValueEdit);
 
 
-        verticalLayout_2->addLayout(gridLayout);
+        vbox1->addLayout(hbox3);
 
-        splitter->addWidget(rightWidget);
+        hbox1 = new QHBoxLayout();
+        hbox1->setObjectName(QString::fromUtf8("hbox1"));
+        CoordinateLabel = new QLabel(EnvelopeLibraryWindow);
+        CoordinateLabel->setObjectName(QString::fromUtf8("CoordinateLabel"));
 
-        horizontalLayout->addWidget(splitter);
+        hbox1->addWidget(CoordinateLabel);
 
-        EnvelopeLibraryWindow->setCentralWidget(centralwidget);
-        menubar = new QMenuBar(EnvelopeLibraryWindow);
-        menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 800, 24));
-        menuFile = new QMenu(menubar);
-        menuFile->setObjectName(QString::fromUtf8("menuFile"));
-        EnvelopeLibraryWindow->setMenuBar(menubar);
-        statusbar = new QStatusBar(EnvelopeLibraryWindow);
-        statusbar->setObjectName(QString::fromUtf8("statusbar"));
-        EnvelopeLibraryWindow->setStatusBar(statusbar);
+        label1 = new QLabel(EnvelopeLibraryWindow);
+        label1->setObjectName(QString::fromUtf8("label1"));
 
-        menubar->addAction(menuFile->menuAction());
-        menuFile->addAction(actionSave);
+        hbox1->addWidget(label1);
+
+
+        vbox1->addLayout(hbox1);
+
 
         retranslateUi(EnvelopeLibraryWindow);
 
         QMetaObject::connectSlotsByName(EnvelopeLibraryWindow);
     } // setupUi
 
-    void retranslateUi(QMainWindow *EnvelopeLibraryWindow)
+    void retranslateUi(QWidget *EnvelopeLibraryWindow)
     {
-        EnvelopeLibraryWindow->setWindowTitle(QCoreApplication::translate("EnvelopeLibraryWindow", "Envelope Library", nullptr));
-        actionSave->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Save", nullptr));
-#if QT_CONFIG(shortcut)
-        actionSave->setShortcut(QCoreApplication::translate("EnvelopeLibraryWindow", "Ctrl+S", nullptr));
-#endif // QT_CONFIG(shortcut)
         newButton->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "New", nullptr));
         duplicateButton->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Duplicate", nullptr));
-        label->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "X:", nullptr));
-        label_2->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Y:", nullptr));
-        coordinateLabel->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Mouse: (0.000, 0.000)", nullptr));
-        scaleLabel->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Scale: 0.000 - 1.000", nullptr));
-        menuFile->setTitle(QCoreApplication::translate("EnvelopeLibraryWindow", "File", nullptr));
+        ScaleLabel->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "1.0\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"0.0", nullptr));
+        label2->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "X value:", nullptr));
+        label3->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Y value: ", nullptr));
+        CoordinateLabel->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "X:0.0\n"
+"Y:0.0", nullptr));
+        label1->setText(QCoreApplication::translate("EnvelopeLibraryWindow", "Right click the graph to see available actions or click-and-drag a node to adjust the envelope.\n"
+"Thick segment = Flexible; Thin segment = Fixed.\n"
+"Blue = Linear; Green = Spline; Red = Exponential.", nullptr));
+        (void)EnvelopeLibraryWindow;
     } // retranslateUi
 
 };

@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AttributesDialog</class>
+ <widget class="QDialog" name="AttributesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Attributes</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <widget class="QGroupBox" name="PatternAttributesFrame">
+     <property name="title">
+      <string>Pattern Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="patternLayout">
+      <item>
+       <layout class="QHBoxLayout" name="hbox20">
+        <item>
+         <widget class="QLabel" name="u2">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="PatternAttributesNameEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox21">
+        <item>
+         <widget class="QLabel" name="label15">
+          <property name="text">
+           <string>Type: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="PatternAttributesTypeEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox22">
+        <item>
+         <widget class="QLabel" name="label16">
+          <property name="text">
+           <string>PatternBuilder: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="PatternAttributesBuilderEntry">
+          <property name="toolTip">
+           <string>use "Insert Function" to fill in this field</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="PatternAttributesFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="ReverbAttributesFrame">
+     <property name="title">
+      <string>Reverb Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="reverbLayout">
+      <item>
+       <layout class="QHBoxLayout" name="hbox23">
+        <item>
+         <widget class="QLabel" name="u3">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="ReverbAttributesNameEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox24">
+        <item>
+         <widget class="QLabel" name="label18">
+          <property name="text">
+           <string>Type: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="ReverbAttributesTypeEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox25">
+        <item>
+         <widget class="QLabel" name="label19">
+          <property name="text">
+           <string>Reverberation: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="ReverbAttributesBuilderEntry">
+          <property name="toolTip">
+           <string>use "Insert Function" to fill in this field</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ReverbAttributesFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="MeasureAttributesFrame">
+     <property name="title">
+      <string>Measure Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="measureLayout">
+      <item>
+       <layout class="QHBoxLayout" name="hbox34">
+        <item>
+         <widget class="QLabel" name="u7">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="MeasureAttributesNameEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox35">
+        <item>
+         <widget class="QLabel" name="label34">
+          <property name="text">
+           <string>Type: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="MeasureAttributesTypeEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox36">
+        <item>
+         <widget class="QLabel" name="label35">
+          <property name="text">
+           <string>Measurement Builder: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="MeasureAttributesBuilderEntry">
+          <property name="toolTip">
+           <string>use "Insert Function" to fill in this field</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="MeasureAttributesFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="SieveAttributesFrame">
+     <property name="title">
+      <string>Sieve Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="sieveLayout">
+      <item>
+       <layout class="QHBoxLayout" name="hbox17">
+        <item>
+         <widget class="QLabel" name="u1">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SieveAttributesNameEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox18">
+        <item>
+         <widget class="QLabel" name="label10">
+          <property name="text">
+           <string>Type: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SieveAttributesTypeEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox19">
+        <item>
+         <widget class="QLabel" name="label13">
+          <property name="text">
+           <string>Sieve Builder: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SieveAttributesBuilderEntry">
+          <property name="toolTip">
+           <string>use "Insert Function" to fill in this field</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SieveAttributesFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="SpatializationAttributesFrame">
+     <property name="title">
+      <string>Spatialization Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="spatializationLayout">
+      <item>
+       <layout class="QHBoxLayout" name="hbox26">
+        <item>
+         <widget class="QLabel" name="u4">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SpatializationAttributesNameEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox27">
+        <item>
+         <widget class="QLabel" name="label21">
+          <property name="text">
+           <string>Type: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SpatializationAttributesTypeEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox28">
+        <item>
+         <widget class="QLabel" name="label22">
+          <property name="text">
+           <string>Spatialization: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SpatializationAttributesBuilderEntry">
+          <property name="toolTip">
+           <string>use "Insert Function" to fill in this field</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SpatializationAttributesFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="attributesStandard">
+     <property name="title">
+      <string>Standard Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="attributesMainVBox">
+      <item>
+       <layout class="QHBoxLayout" name="hbox700">
+        <item>
+         <widget class="QLabel" name="label2000"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="attributesStandardType">
+        <property name="text">
+         <string>Event Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox5">
+        <item>
+         <widget class="QLabel" name="attributesStandardName">
+          <property name="text">
+           <string>Event Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="attributesStandardNameEntry">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="attributesStandardUnitsPerSecond">
+        <item>
+         <widget class="QLabel" name="attributesStandardUnitsPerSecondLabel">
+          <property name="toolTip">
+           <string>int</string>
+          </property>
+          <property name="text">
+           <string>EDU Per Beat:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="attributesStandardUnitsPerSecondEntry">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>int</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="attributesStandardUnitsPerSecondFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox30">
+        <item>
+         <widget class="QLabel" name="attributesStandardTimeSignature">
+          <property name="text">
+           <string>Time Signature:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="AttributestimeSignatureVBox" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QVBoxLayout" name="timeSignatureLayout">
+           <item>
+            <widget class="QLineEdit" name="attributesStandardTimeSignatureEntry1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="hseparator5">
+             <property name="frameShape">
+              <enum>QFrame::HLine</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="attributesStandardTimeSignatureEntry2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="hseparator8">
+        <property name="frameShape">
+         <enum>QFrame::HLine</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox29">
+        <item>
+         <widget class="QLabel" name="label25">
+          <property name="text">
+           <string>Tempo: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="attributesStandardTempleMethodNoteValueRadioButton">
+          <property name="text">
+           <string>as Note Value</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="attributesStandardTempleMethodFractionRadioButton">
+          <property name="text">
+           <string>Beats / Seconds</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QWidget" name="DensityAndFixedAlignment" native="true">
+        <layout class="QVBoxLayout" name="DensityAndFixedVBox"/>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="layerBoxes" native="true">
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <layout class="QVBoxLayout" name="layerBoxesLayout"/>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addNewLayerButton">
+        <property name="text">
+         <string>Add New Layer</string>
+        </property>
+        <property name="toolTip">
+         <string>Add a new Layer of children</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="hseparator3">
+        <property name="frameShape">
+         <enum>QFrame::HLine</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="envelopeAttributesFrame">
+     <property name="title">
+      <string>Envelope Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="vbox2">
+      <item>
+       <layout class="QHBoxLayout" name="hbox14">
+        <item>
+         <widget class="QLabel" name="u">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="envelopeAttributesNameEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox15">
+        <item>
+         <widget class="QLabel" name="label11">
+          <property name="text">
+           <string>Type: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="envelopeAttributesTypeEntry">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox16">
+        <item>
+         <widget class="QLabel" name="label12">
+          <property name="text">
+           <string>Envelope Builder: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="envelopeAttributesBuilderEntry">
+          <property name="toolTip">
+           <string>use "Insert Function" to fill in this field</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="envelopeAttributesFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <connections>
+   <connection>
+    <sender>buttonBox</sender>
+    <signal>accepted()</signal>
+    <receiver>AttributesDialog</receiver>
+    <slot>accept()</slot>
+   </connection>
+   <connection>
+    <sender>buttonBox</sender>
+    <signal>rejected()</signal>
+    <receiver>AttributesDialog</receiver>
+    <slot>reject()</slot>
+   </connection>
+  </connections>
+ </widget>
+ <resources/>
+ <connections/>
+</ui> 

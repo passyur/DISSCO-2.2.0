@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProjectPropertiesDialog</class>
+ <widget class="QDialog" name="ProjectPropertiesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Project Properties</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="vbox1">
+     <item>
+      <layout class="QHBoxLayout" name="hbox1">
+       <item>
+        <widget class="QLabel" name="label1">
+         <property name="text">
+          <string>Project Title: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="titleEntry">
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="hbox2">
+       <item>
+        <widget class="QLabel" name="label2">
+         <property name="text">
+          <string>File Flag: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="flagEntry">
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="hbox4">
+       <item>
+        <widget class="QLabel" name="label4">
+         <property name="text">
+          <string>Number Of Channels: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="channelEntry">
+         <property name="text">
+          <string>2</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="hbox5">
+       <item>
+        <widget class="QLabel" name="label5">
+         <property name="text">
+          <string>Sample Rate: </string>
+         </property>
+         <property name="toolTip">
+          <string>Hertz, 44100 is the most commonly used value. 48000 is another common value.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sampleRateEntry">
+         <property name="text">
+          <string>44100</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="hbox6">
+       <item>
+        <widget class="QLabel" name="label6">
+         <property name="text">
+          <string>Sample Size: </string>
+         </property>
+         <property name="toolTip">
+          <string>in Bits, 16 and 24 are the most commonly used values.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sampleSizeEntry">
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+         <property name="toolTip">
+          <string>in Bits, 16 and 24 are the most commonly used values.</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ProjectPropertiesDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ProjectPropertiesDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui> 

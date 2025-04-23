@@ -59,8 +59,6 @@ void EnvelopeLibraryWindow::setupUi()
             this, &EnvelopeLibraryWindow::onNewEnvelopeTriggered);
     connect(ui->duplicateButton, &QPushButton::clicked,
             this, &EnvelopeLibraryWindow::onDuplicateEnvelopeTriggered);
-    connect(ui->actionSave, &QAction::triggered,
-            this, &EnvelopeLibraryWindow::onSaveTriggered);
 }
 
 void EnvelopeLibraryWindow::createActions()
@@ -73,7 +71,7 @@ void EnvelopeLibraryWindow::createActions()
     connect(duplicateEnvelopeAction, &QAction::triggered,
             this, &EnvelopeLibraryWindow::onDuplicateEnvelopeTriggered);
 
-    saveAction = ui->actionSave;
+    saveAction = new QAction(tr("&Save"), this);
     connect(saveAction, &QAction::triggered,
             this, &EnvelopeLibraryWindow::onSaveTriggered);
 }

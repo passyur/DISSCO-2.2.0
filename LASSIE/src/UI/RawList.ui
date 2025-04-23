@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RawList</class>
+ <widget class="QWidget" name="RawList">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>40</height>
+   </rect>
+  </property>
+  <layout class="QHBoxLayout" name="hbox1">
+   <item>
+    <widget class="QLineEdit" name="entry">
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="InsertFunctionButton">
+     <property name="text">
+      <string>Insert Function</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="InsertNodeButton">
+     <property name="text">
+      <string>Insert Node</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="RemoveButton">
+     <property name="text">
+      <string>Remove</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui> 

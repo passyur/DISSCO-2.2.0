@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PaletteViewController</class>
+ <widget class="QWidget" name="PaletteViewController">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>300</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>10</number>
+   </property>
+   <property name="leftMargin">
+    <number>10</number>
+   </property>
+   <property name="topMargin">
+    <number>10</number>
+   </property>
+   <property name="rightMargin">
+    <number>10</number>
+   </property>
+   <property name="bottomMargin">
+    <number>10</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="paletteTabs">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="toolsTab">
+      <attribute name="title">
+       <string>Tools</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="toolsLayout">
+       <item>
+        <widget class="QListWidget" name="toolsList">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="objectsTab">
+      <attribute name="title">
+       <string>Objects</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="objectsLayout">
+       <item>
+        <widget class="QTreeWidget" name="objectsTree">
+         <property name="headerLabels">
+          <stringlist>
+           <string>Name</string>
+           <string>Type</string>
+          </stringlist>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui> 

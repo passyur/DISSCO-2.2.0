@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FunctionGeneratorDialog</class>
+ <widget class="QDialog" name="FunctionGeneratorDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Function Generator</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="ChooseLVBox">
+     <property name="title">
+      <string>Choose L</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="hbox27">
+        <item>
+         <widget class="QLabel" name="label27">
+          <property name="text">
+           <string>Sieve to choose from :</string>
+          </property>
+          <property name="toolTip">
+           <string>a Sieve</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="ChooseLEntry">
+          <property name="echoMode">
+           <enum>QLineEdit::Normal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ChooseLFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+          <property name="toolTip">
+           <string>SIV</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="DecayVBox">
+     <property name="title">
+      <string>Decay</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="hbox10">
+        <item>
+         <widget class="QLabel" name="label10">
+          <property name="text">
+           <string>Decay Type : </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="DecayTypeExponentialRadioButton">
+          <property name="text">
+           <string>Exponential</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="DecayTypeLinearRadioButton">
+          <property name="text">
+           <string>Linear</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox8">
+        <item>
+         <widget class="QLabel" name="label8">
+          <property name="text">
+           <string>Base : </string>
+          </property>
+          <property name="toolTip">
+           <string>Float</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="DecayBaseEntry">
+          <property name="echoMode">
+           <enum>QLineEdit::Normal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="DecayBaseFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox9">
+        <item>
+         <widget class="QLabel" name="label9">
+          <property name="text">
+           <string>Rate : </string>
+          </property>
+          <property name="toolTip">
+           <string>Float</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="DecayRateEntry">
+          <property name="echoMode">
+           <enum>QLineEdit::Normal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="DecayRateFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>FunctionGeneratorDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>FunctionGeneratorDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui> 

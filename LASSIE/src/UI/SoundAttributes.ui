@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SoundAttributesDialog</class>
+ <widget class="QDialog" name="SoundAttributesDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Sound Attributes</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <widget class="QGroupBox" name="SoundAttributesStandard">
+     <property name="title">
+      <string>Sound Attributes</string>
+     </property>
+     <layout class="QVBoxLayout" name="vbox2">
+      <item>
+       <layout class="QHBoxLayout" name="hbox6">
+        <item>
+         <widget class="QLabel" name="label7">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SoundAttributesNameEntry">
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox7">
+        <item>
+         <widget class="QLabel" name="label8">
+          <property name="text">
+           <string>Type:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SoundAttributesTypeEntry">
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox8">
+        <item>
+         <widget class="QLabel" name="label9">
+          <property name="toolTip">
+           <string>an integer, indicating the partial you want.</string>
+          </property>
+          <property name="text">
+           <string>Number of partials: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SoundAttributesNumPartialEntry">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox9">
+        <item>
+         <widget class="QLabel" name="label10">
+          <property name="text">
+           <string>Deviation:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SoundAttributesDeviationEntry">
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SoundAttributesDeviationFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="hbox11">
+        <item>
+         <widget class="QLabel" name="label12">
+          <property name="text">
+           <string>Generate Spectrum:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="SoundAttributesGenerateSpectrumEntry">
+          <property name="toolTip">
+           <string>Use this entry to generate spectrum from perceived distance</string>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="SoundAttributesGenerateSpectrumFunButton">
+          <property name="text">
+           <string>Insert Function</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="hseparator1">
+        <property name="frameShape">
+         <enum>QFrame::HLine</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <connections>
+   <connection>
+    <sender>buttonBox</sender>
+    <signal>accepted()</signal>
+    <receiver>SoundAttributesDialog</receiver>
+    <slot>accept()</slot>
+   </connection>
+   <connection>
+    <sender>buttonBox</sender>
+    <signal>rejected()</signal>
+    <receiver>SoundAttributesDialog</receiver>
+    <slot>reject()</slot>
+   </connection>
+  </connections>
+ </widget>
+ <resources/>
+ <connections/>
+</ui> 
