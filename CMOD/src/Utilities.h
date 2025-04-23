@@ -47,6 +47,8 @@ class Patter;
 class Sieve;
 class Score;
 
+using namespace xercesc; // for DOMElement
+
 class Utilities{
 
 public:
