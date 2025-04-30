@@ -1,6 +1,8 @@
 #include <QtWidgets>
 
 #include "mainwindow.hpp"
+#include "markovwindow.hpp"
+#include "envelopewindow.hpp"
 
 MainWindow::MainWindow()
 {
@@ -125,6 +127,24 @@ void MainWindow::aboutQt()
     info_label->setText(tr("Invoked <b>Help|About Qt</b>"));
 }
 
+void MainWindow::markov()
+{
+    info_label->setText(tr("Invoked <b>Libraries|Markov</b>"));
+    MarkovWindow *mw = new MarkovWindow(this);
+    mw->setWindowFlag(Qt::Window);
+    mw->setAttribute(Qt::WA_DeleteOnClose);
+    mw->show();
+}
+
+void MainWindow::envelope()
+{
+    info_label->setText(tr("Invoked <b>Libraries|Envelope</b>"));
+    EnvelopeWindow *ew = new EnvelopeWindow(this);
+    ew->setWindowFlag(Qt::Window);
+    ew->setAttribute(Qt::WA_DeleteOnClose);
+    ew->show();
+}
+
 void MainWindow::createActions()
 {
     new_act = new QAction(QIcon::fromTheme("document-new"),
@@ -193,6 +213,14 @@ void MainWindow::createActions()
     about_qt_act->setStatusTip(tr("Show the Qt library's About box"));
     connect(about_qt_act, &QAction::triggered, qApp, &QApplication::aboutQt);
     connect(about_qt_act, &QAction::triggered, this, &MainWindow::aboutQt);
+
+    markov_act = new QAction(tr("&Markov"), this);
+    markov_act->setStatusTip(tr("Open the markov library"));
+    connect(markov_act, &QAction::triggered, this, &MainWindow::markov);
+
+    envelope_act = new QAction(tr("&Envelope"), this);
+    markov_act->setStatusTip(tr("Open the envelope library"));
+    connect(envelope_act, &QAction::triggered, this, &MainWindow::envelope);
 }
 
 void MainWindow::createMenus()
@@ -216,4 +244,9 @@ void MainWindow::createMenus()
     help_menu = menuBar()->addMenu(tr("&Help"));
     help_menu->addAction(about_act);
     help_menu->addAction(about_qt_act);
+
+    libraries_menu = menuBar()->addMenu(tr("&Libraries"));
+    libraries_menu->addAction(markov_act);
+    libraries_menu->addSeparator();
+    libraries_menu->addAction(envelope_act);
 }

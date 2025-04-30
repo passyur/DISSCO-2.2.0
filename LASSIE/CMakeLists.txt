@@ -23,6 +23,10 @@ qt_add_executable(LASSIE
     src/mainwindow.cpp
     src/mainwindow.hpp
     src/mainwindow.ui
+    src/markovwindow.cpp
+    src/markovwindow.hpp
+    src/envelopewindow.cpp
+    src/envelopewindow.hpp
 )
 
 target_link_libraries(LASSIE PRIVATE Qt6::Widgets)

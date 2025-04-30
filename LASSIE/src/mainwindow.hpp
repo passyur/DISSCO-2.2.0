@@ -6,6 +6,7 @@
 
 #include <QMainWindow>
 #include <QTextEdit>
+#include <QtLogging>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -49,6 +50,11 @@ private slots:
     /*** HELP ACTIONS ***/
     void about();
     void aboutQt();
+
+    /*** LIBRARY ACTIONS ***/
+    void markov();
+    void envelope();
+
 private:
     /* The following two f'ns should populate the menus and the actions those menus contain, e.g., the "File" menu to contain the actions "New File", "Save As", etc. */
     void createActions();
@@ -62,6 +68,7 @@ private:
     QMenu *file_menu;
     QMenu *edit_menu;
     QMenu *help_menu;
+    QMenu *libraries_menu;
     QAction *new_act;
     QAction *open_act;
     QAction *save_act;
@@ -74,6 +81,8 @@ private:
     QAction *about_act;
     QAction *about_qt_act;
     QLabel *info_label;
+    QAction *markov_act;
+    QAction *envelope_act;
 
     QString current_file_;
     QTextEdit *text_edit_;
