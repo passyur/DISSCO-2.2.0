@@ -1,165 +1,109 @@
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 #include <QDomDocument>
 #include <QDomElement>
 #include <cmath>
 #include <stdexcept>
 
+EnvelopeNode::EnvelopeNode(double x, double y)
+    : x(x)
+    , y(y)
+{
+}
+
+EnvelopeSegment::EnvelopeSegment(int start, int end)
+    : startNodeIndex(start)
+    , endNodeIndex(end)
+    , type(EnvelopeSegmentType::Linear)
+    , property(EnvelopeSegmentProperty::Flexible)
+{
+}
+
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(const QString& name)
     : name(name)
-    , minY(0.0)
-    , maxY(1.0)
-    , firstNode(nullptr)
 {
 }
 
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(const EnvelopeLibraryEntry& other)
     : name(other.name)
-    , minY(other.minY)
-    , maxY(other.maxY)
-    , firstNode(nullptr)
 {
-    // Deep copy nodes
-    EnvelopeNode* otherNode = other.firstNode;
-    while (otherNode) {
-        addNode(otherNode->x, otherNode->y);
-        otherNode = otherNode->next;
+    // Copy nodes
+    for (const auto* node : other.nodes) {
+        nodes.push_back(new EnvelopeNode(node->x, node->y));
     }
-
-    // Deep copy segments
-    for (const auto& segment : other.segments) {
-        int startIndex = 0, endIndex = 0;
-        EnvelopeNode* node = firstNode;
-        
-        // Find start node index
-        while (node && node != segment->startNode) {
-            startIndex++;
-            node = node->next;
-        }
-        
-        // Find end node index
-        node = firstNode;
-        while (node && node != segment->endNode) {
-            endIndex++;
-            node = node->next;
-        }
-        
-        addSegment(startIndex, endIndex, segment->type, segment->property);
+    
+    // Copy segments
+    for (const auto* segment : other.segments) {
+        auto* newSegment = new EnvelopeSegment(segment->startNodeIndex, segment->endNodeIndex);
+        newSegment->type = segment->type;
+        newSegment->property = segment->property;
+        segments.push_back(newSegment);
     }
 }
 
 EnvelopeLibraryEntry::~EnvelopeLibraryEntry()
 {
-    // Delete all nodes
-    EnvelopeNode* current = firstNode;
-    while (current) {
-        EnvelopeNode* next = current->next;
-        delete current;
-        current = next;
+    for (auto* node : nodes) {
+        delete node;
     }
+    nodes.clear();
+    
+    for (auto* segment : segments) {
+        delete segment;
+    }
+    segments.clear();
 }
 
 int EnvelopeLibraryEntry::addNode(double x, double y)
 {
-    EnvelopeNode* newNode = new EnvelopeNode(x, y);
-    
-    if (!firstNode || x < firstNode->x) {
-        // Insert at beginning
-        newNode->next = firstNode;
-        if (firstNode) {
-            firstNode->prev = newNode;
-        }
-        firstNode = newNode;
-        return 0;
-    }
-    
-    // Find insertion point
-    EnvelopeNode* current = firstNode;
-    int index = 0;
-    
-    while (current->next && current->next->x < x) {
-        current = current->next;
-        index++;
-    }
-    
-    // Insert after current
-    newNode->next = current->next;
-    newNode->prev = current;
-    if (current->next) {
-        current->next->prev = newNode;
-    }
-    current->next = newNode;
-    
-    return index + 1;
+    auto* node = new EnvelopeNode(x, y);
+    nodes.push_back(node);
+    return nodes.size() - 1;
 }
 
 void EnvelopeLibraryEntry::removeNode(int index)
 {
-    if (!firstNode) return;
-    
-    EnvelopeNode* nodeToRemove = firstNode;
-    for (int i = 0; i < index && nodeToRemove; i++) {
-        nodeToRemove = nodeToRemove->next;
+    if (index >= 0 && index < nodes.size()) {
+        delete nodes[index];
+        nodes.erase(nodes.begin() + index);
+        
+        // Remove any segments connected to this node
+        auto it = segments.begin();
+        while (it != segments.end()) {
+            if ((*it)->startNodeIndex == index || (*it)->endNodeIndex == index) {
+                delete *it;
+                it = segments.erase(it);
+            } else {
+                // Update indices of segments after the removed node
+                if ((*it)->startNodeIndex > index) (*it)->startNodeIndex--;
+                if ((*it)->endNodeIndex > index) (*it)->endNodeIndex--;
+                ++it;
+            }
+        }
     }
-    
-    if (!nodeToRemove) return;
-    
-    // Remove any segments connected to this node
-    segments.erase(
-        std::remove_if(segments.begin(), segments.end(),
-            [nodeToRemove](const std::unique_ptr<EnvelopeSegment>& segment) {
-                return segment->startNode == nodeToRemove || segment->endNode == nodeToRemove;
-            }),
-        segments.end()
-    );
-    
-    // Update node links
-    if (nodeToRemove->prev) {
-        nodeToRemove->prev->next = nodeToRemove->next;
-    } else {
-        firstNode = nodeToRemove->next;
-    }
-    
-    if (nodeToRemove->next) {
-        nodeToRemove->next->prev = nodeToRemove->prev;
-    }
-    
-    delete nodeToRemove;
 }
 
 void EnvelopeLibraryEntry::moveNode(int index, double x, double y)
 {
-    EnvelopeNode* node = firstNode;
-    for (int i = 0; i < index && node; i++) {
-        node = node->next;
-    }
-    
-    if (node) {
-        node->x = x;
-        node->y = y;
+    if (index >= 0 && index < nodes.size()) {
+        nodes[index]->x = x;
+        nodes[index]->y = y;
     }
 }
 
 int EnvelopeLibraryEntry::findClosestNode(double x, double y, double threshold) const
 {
-    if (!firstNode) return -1;
-    
     int closestIndex = -1;
     double minDistance = threshold;
-    EnvelopeNode* current = firstNode;
-    int index = 0;
     
-    while (current) {
-        double dx = current->x - x;
-        double dy = current->y - y;
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        double dx = nodes[i]->x - x;
+        double dy = nodes[i]->y - y;
         double distance = std::sqrt(dx * dx + dy * dy);
         
         if (distance < minDistance) {
             minDistance = distance;
-            closestIndex = index;
+            closestIndex = i;
         }
-        
-        current = current->next;
-        index++;
     }
     
     return closestIndex;
@@ -167,81 +111,40 @@ int EnvelopeLibraryEntry::findClosestNode(double x, double y, double threshold) 
 
 const EnvelopeNode* EnvelopeLibraryEntry::getNode(int index) const
 {
-    const EnvelopeNode* node = firstNode;
-    for (int i = 0; i < index && node; i++) {
-        node = node->next;
+    if (index >= 0 && index < nodes.size()) {
+        return nodes[index];
     }
-    return node;
+    return nullptr;
 }
 
-void EnvelopeLibraryEntry::addSegment(int startIndex, int endIndex,
-                                     EnvelopeSegmentType type,
-                                     EnvelopeSegmentProperty property)
+void EnvelopeLibraryEntry::addSegment(int startIndex, int endIndex, EnvelopeSegmentType type)
 {
-    EnvelopeNode* startNode = firstNode;
-    for (int i = 0; i < startIndex && startNode; i++) {
-        startNode = startNode->next;
+    if (startIndex >= 0 && startIndex < nodes.size() &&
+        endIndex >= 0 && endIndex < nodes.size() &&
+        startIndex != endIndex) {
+        auto* segment = new EnvelopeSegment(startIndex, endIndex);
+        segment->type = type;
+        segments.push_back(segment);
     }
-    
-    EnvelopeNode* endNode = firstNode;
-    for (int i = 0; i < endIndex && endNode; i++) {
-        endNode = endNode->next;
-    }
-    
-    if (!startNode || !endNode || startNode == endNode) return;
-    
-    // Check if segment already exists
-    for (const auto& segment : segments) {
-        if ((segment->startNode == startNode && segment->endNode == endNode) ||
-            (segment->startNode == endNode && segment->endNode == startNode)) {
-            return;
-        }
-    }
-    
-    segments.push_back(std::make_unique<EnvelopeSegment>(startNode, endNode, type, property));
 }
 
 void EnvelopeLibraryEntry::removeSegment(int startIndex, int endIndex)
 {
-    EnvelopeNode* startNode = firstNode;
-    for (int i = 0; i < startIndex && startNode; i++) {
-        startNode = startNode->next;
+    auto it = segments.begin();
+    while (it != segments.end()) {
+        if ((*it)->startNodeIndex == startIndex && (*it)->endNodeIndex == endIndex) {
+            delete *it;
+            segments.erase(it);
+            break;
+        }
+        ++it;
     }
-    
-    EnvelopeNode* endNode = firstNode;
-    for (int i = 0; i < endIndex && endNode; i++) {
-        endNode = endNode->next;
-    }
-    
-    if (!startNode || !endNode) return;
-    
-    segments.erase(
-        std::remove_if(segments.begin(), segments.end(),
-            [startNode, endNode](const std::unique_ptr<EnvelopeSegment>& segment) {
-                return (segment->startNode == startNode && segment->endNode == endNode) ||
-                       (segment->startNode == endNode && segment->endNode == startNode);
-            }),
-        segments.end()
-    );
 }
 
 void EnvelopeLibraryEntry::setSegmentType(int startIndex, int endIndex, EnvelopeSegmentType type)
 {
-    EnvelopeNode* startNode = firstNode;
-    for (int i = 0; i < startIndex && startNode; i++) {
-        startNode = startNode->next;
-    }
-    
-    EnvelopeNode* endNode = firstNode;
-    for (int i = 0; i < endIndex && endNode; i++) {
-        endNode = endNode->next;
-    }
-    
-    if (!startNode || !endNode) return;
-    
-    for (auto& segment : segments) {
-        if ((segment->startNode == startNode && segment->endNode == endNode) ||
-            (segment->startNode == endNode && segment->endNode == startNode)) {
+    for (auto* segment : segments) {
+        if (segment->startNodeIndex == startIndex && segment->endNodeIndex == endIndex) {
             segment->type = type;
             break;
         }
@@ -250,21 +153,8 @@ void EnvelopeLibraryEntry::setSegmentType(int startIndex, int endIndex, Envelope
 
 void EnvelopeLibraryEntry::setSegmentProperty(int startIndex, int endIndex, EnvelopeSegmentProperty property)
 {
-    EnvelopeNode* startNode = firstNode;
-    for (int i = 0; i < startIndex && startNode; i++) {
-        startNode = startNode->next;
-    }
-    
-    EnvelopeNode* endNode = firstNode;
-    for (int i = 0; i < endIndex && endNode; i++) {
-        endNode = endNode->next;
-    }
-    
-    if (!startNode || !endNode) return;
-    
-    for (auto& segment : segments) {
-        if ((segment->startNode == startNode && segment->endNode == endNode) ||
-            (segment->startNode == endNode && segment->endNode == startNode)) {
+    for (auto* segment : segments) {
+        if (segment->startNodeIndex == startIndex && segment->endNodeIndex == endIndex) {
             segment->property = property;
             break;
         }
@@ -273,72 +163,36 @@ void EnvelopeLibraryEntry::setSegmentProperty(int startIndex, int endIndex, Enve
 
 const EnvelopeSegment* EnvelopeLibraryEntry::getSegment(int startIndex, int endIndex) const
 {
-    EnvelopeNode* startNode = firstNode;
-    for (int i = 0; i < startIndex && startNode; i++) {
-        startNode = startNode->next;
-    }
-    
-    EnvelopeNode* endNode = firstNode;
-    for (int i = 0; i < endIndex && endNode; i++) {
-        endNode = endNode->next;
-    }
-    
-    if (!startNode || !endNode) return nullptr;
-    
-    for (const auto& segment : segments) {
-        if ((segment->startNode == startNode && segment->endNode == endNode) ||
-            (segment->startNode == endNode && segment->endNode == startNode)) {
-            return segment.get();
+    for (const auto* segment : segments) {
+        if (segment->startNodeIndex == startIndex && segment->endNodeIndex == endIndex) {
+            return segment;
         }
     }
-    
     return nullptr;
 }
 
 void EnvelopeLibraryEntry::saveToXml(QDomDocument& doc, QDomElement& element) const
 {
     element.setAttribute("name", name);
-    element.setAttribute("minY", QString::number(minY));
-    element.setAttribute("maxY", QString::number(maxY));
     
     // Save nodes
     QDomElement nodesElement = doc.createElement("nodes");
-    EnvelopeNode* current = firstNode;
-    while (current) {
+    for (const auto* node : nodes) {
         QDomElement nodeElement = doc.createElement("node");
-        nodeElement.setAttribute("x", QString::number(current->x));
-        nodeElement.setAttribute("y", QString::number(current->y));
+        nodeElement.setAttribute("x", QString::number(node->x));
+        nodeElement.setAttribute("y", QString::number(node->y));
         nodesElement.appendChild(nodeElement);
-        current = current->next;
     }
     element.appendChild(nodesElement);
     
     // Save segments
     QDomElement segmentsElement = doc.createElement("segments");
-    for (const auto& segment : segments) {
+    for (const auto* segment : segments) {
         QDomElement segmentElement = doc.createElement("segment");
-        
-        // Find indices of start and end nodes
-        int startIndex = 0;
-        int endIndex = 0;
-        current = firstNode;
-        
-        while (current && current != segment->startNode) {
-            startIndex++;
-            current = current->next;
-        }
-        
-        current = firstNode;
-        while (current && current != segment->endNode) {
-            endIndex++;
-            current = current->next;
-        }
-        
-        segmentElement.setAttribute("startIndex", QString::number(startIndex));
-        segmentElement.setAttribute("endIndex", QString::number(endIndex));
+        segmentElement.setAttribute("startIndex", QString::number(segment->startNodeIndex));
+        segmentElement.setAttribute("endIndex", QString::number(segment->endNodeIndex));
         segmentElement.setAttribute("type", static_cast<int>(segment->type));
         segmentElement.setAttribute("property", static_cast<int>(segment->property));
-        
         segmentsElement.appendChild(segmentElement);
     }
     element.appendChild(segmentsElement);
@@ -346,18 +200,13 @@ void EnvelopeLibraryEntry::saveToXml(QDomDocument& doc, QDomElement& element) co
 
 void EnvelopeLibraryEntry::loadFromXml(const QDomElement& element)
 {
-    // Clear existing data
-    while (firstNode) {
-        EnvelopeNode* next = firstNode->next;
-        delete firstNode;
-        firstNode = next;
-    }
-    segments.clear();
-    
-    // Load basic properties
     name = element.attribute("name");
-    minY = element.attribute("minY").toDouble();
-    maxY = element.attribute("maxY").toDouble();
+    
+    // Clear existing data
+    for (auto* node : nodes) delete node;
+    nodes.clear();
+    for (auto* segment : segments) delete segment;
+    segments.clear();
     
     // Load nodes
     QDomElement nodesElement = element.firstChildElement("nodes");
@@ -365,7 +214,7 @@ void EnvelopeLibraryEntry::loadFromXml(const QDomElement& element)
     while (!nodeElement.isNull()) {
         double x = nodeElement.attribute("x").toDouble();
         double y = nodeElement.attribute("y").toDouble();
-        addNode(x, y);
+        nodes.push_back(new EnvelopeNode(x, y));
         nodeElement = nodeElement.nextSiblingElement("node");
     }
     
@@ -375,10 +224,10 @@ void EnvelopeLibraryEntry::loadFromXml(const QDomElement& element)
     while (!segmentElement.isNull()) {
         int startIndex = segmentElement.attribute("startIndex").toInt();
         int endIndex = segmentElement.attribute("endIndex").toInt();
-        EnvelopeSegmentType type = static_cast<EnvelopeSegmentType>(segmentElement.attribute("type").toInt());
-        EnvelopeSegmentProperty property = static_cast<EnvelopeSegmentProperty>(segmentElement.attribute("property").toInt());
-        
-        addSegment(startIndex, endIndex, type, property);
+        auto* segment = new EnvelopeSegment(startIndex, endIndex);
+        segment->type = static_cast<EnvelopeSegmentType>(segmentElement.attribute("type").toInt());
+        segment->property = static_cast<EnvelopeSegmentProperty>(segmentElement.attribute("property").toInt());
+        segments.push_back(segment);
         segmentElement = segmentElement.nextSiblingElement("segment");
     }
 } 

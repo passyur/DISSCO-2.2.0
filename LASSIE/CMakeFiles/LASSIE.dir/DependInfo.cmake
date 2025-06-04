@@ -14,6 +14,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvLibDrawingArea.cpp" "CMakeFiles/LASSIE.dir/src/EnvLibDrawingArea.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/EnvLibDrawingArea.cpp.o.d"
   "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryEntry.cpp" "CMakeFiles/LASSIE.dir/src/EnvelopeLibraryEntry.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/EnvelopeLibraryEntry.cpp.o.d"
   "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryWindow.cpp" "CMakeFiles/LASSIE.dir/src/EnvelopeLibraryWindow.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/EnvelopeLibraryWindow.cpp.o.d"
+  "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/MarkovModelLibraryWindow.cpp" "CMakeFiles/LASSIE.dir/src/MarkovModelLibraryWindow.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/MarkovModelLibraryWindow.cpp.o.d"
+  "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/ProjectViewController.cpp" "CMakeFiles/LASSIE.dir/src/ProjectViewController.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/ProjectViewController.cpp.o.d"
   "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/main.cpp" "CMakeFiles/LASSIE.dir/src/main.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/main.cpp.o.d"
   "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/mainwindow.cpp" "CMakeFiles/LASSIE.dir/src/mainwindow.cpp.o" "gcc" "CMakeFiles/LASSIE.dir/src/mainwindow.cpp.o.d"
   )

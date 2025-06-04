@@ -32,7 +32,7 @@ public:
     
     // Project items
     QVector<QSharedPointer<MarkovModel>> models() const;
-    void setModels(const QVector<QSharedPointer<MarkovModel>>>& models);
+    void setModels(const QVector<QSharedPointer<MarkovModel>>& models);
     
     void addModel(const QSharedPointer<MarkovModel>& model);
     void removeModel(const QString& modelName);

@@ -516,6 +516,23 @@
 		"/opt/homebrew/lib/cmake/Qt6Multimedia/Qt6QDarwinMediaPluginTargets-release.cmake",
 		"/opt/homebrew/lib/cmake/Qt6Multimedia/Qt6QDarwinMediaPluginAdditionalTargetInfo.cmake",
 		"/opt/homebrew/lib/cmake/Qt6Multimedia/Qt6MultimediaVersionlessAliasTargets.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlConfigVersion.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlConfigVersionImpl.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlConfig.cmake",
+		"/opt/homebrew/share/cmake/Modules/CMakeFindDependencyMacro.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlDependencies.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlTargets.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlTargets-release.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlAdditionalTargetInfo.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateConfigVersion.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateConfigVersionImpl.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateConfig.cmake",
+		"/opt/homebrew/share/cmake/Modules/CMakeFindDependencyMacro.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateDependencies.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateTargets.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateAdditionalTargetInfo.cmake",
+		"/opt/homebrew/lib/cmake/Qt6XmlPrivate/Qt6XmlPrivateVersionlessAliasTargets.cmake",
+		"/opt/homebrew/lib/cmake/Qt6Xml/Qt6XmlVersionlessAliasTargets.cmake",
 		"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/resources/resources.qrc"
 	],
 	"CMAKE_SOURCE_DIR" : "/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE",
@@ -525,21 +542,33 @@
 	"HEADERS" : 
 	[
 		[
-			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvLibDrawingArea.h",
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvLibDrawingArea.hpp",
 			"MU",
 			"UVLADIE3JM/moc_EnvLibDrawingArea.cpp",
 			null
 		],
 		[
-			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryEntry.h",
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryEntry.hpp",
 			"MU",
 			"UVLADIE3JM/moc_EnvelopeLibraryEntry.cpp",
 			null
 		],
 		[
-			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryWindow.h",
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryWindow.hpp",
 			"MU",
 			"UVLADIE3JM/moc_EnvelopeLibraryWindow.cpp",
+			null
+		],
+		[
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/MarkovModelLibraryWindow.hpp",
+			"MU",
+			"UVLADIE3JM/moc_MarkovModelLibraryWindow.cpp",
+			null
+		],
+		[
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/ProjectViewController.hpp",
+			"MU",
+			"UVLADIE3JM/moc_ProjectViewController.cpp",
 			null
 		],
 		[
@@ -562,7 +591,8 @@
 		"QT_NO_DEBUG",
 		"QT_OPENGLWIDGETS_LIB",
 		"QT_OPENGL_LIB",
-		"QT_WIDGETS_LIB"
+		"QT_WIDGETS_LIB",
+		"QT_XML_LIB"
 	],
 	"MOC_DEPEND_FILTERS" : 
 	[
@@ -574,10 +604,10 @@
 	"MOC_INCLUDES" : 
 	[
 		"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src",
+		"/opt/homebrew/lib/QtDBus.framework/Headers",
+		"/opt/homebrew/lib/QtDBus.framework",
 		"/opt/homebrew/lib/QtCore.framework/Headers",
 		"/opt/homebrew/lib/QtCore.framework",
-		"/opt/homebrew/share/qt/mkspecs/macx-clang",
-		"/opt/homebrew/include",
 		"/opt/homebrew/lib/QtGui.framework/Headers",
 		"/opt/homebrew/lib/QtGui.framework",
 		"/opt/homebrew/lib/QtWidgets.framework/Headers",
@@ -592,6 +622,10 @@
 		"/opt/homebrew/lib/QtMultimedia.framework",
 		"/opt/homebrew/lib/QtNetwork.framework/Headers",
 		"/opt/homebrew/lib/QtNetwork.framework",
+		"/opt/homebrew/lib/QtXml.framework/Headers",
+		"/opt/homebrew/lib/QtXml.framework",
+		"/opt/homebrew/share/qt/mkspecs/macx-clang",
+		"/opt/homebrew/include",
 		"/Users/dinhuyennhi/Downloads/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1",
 		"/Users/dinhuyennhi/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include",
 		"/Users/dinhuyennhi/Downloads/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include",
@@ -642,6 +676,16 @@
 		],
 		[
 			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/EnvelopeLibraryWindow.cpp",
+			"MU",
+			null
+		],
+		[
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/MarkovModelLibraryWindow.cpp",
+			"MU",
+			null
+		],
+		[
+			"/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/src/ProjectViewController.cpp",
 			"MU",
 			null
 		],

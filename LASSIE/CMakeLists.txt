@@ -7,6 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# Find Qt6 packages
 find_package(Qt6 COMPONENTS
     Core
     Gui
@@ -14,6 +15,7 @@ find_package(Qt6 COMPONENTS
     Charts
     Multimedia
     Network
+    Xml
     REQUIRED
 )
 
@@ -24,20 +26,26 @@ set(SOURCES
     src/EnvelopeLibraryEntry.cpp
     src/EnvelopeLibraryWindow.cpp
     src/EnvLibDrawingArea.cpp
+    src/ProjectViewController.cpp
+    src/MarkovModelLibraryWindow.cpp
 )
 
 # Header files
 set(HEADERS
     src/mainwindow.hpp
-    src/EnvelopeLibraryEntry.h
-    src/EnvelopeLibraryWindow.h
-    src/EnvLibDrawingArea.h
+    src/EnvelopeLibraryEntry.hpp
+    src/EnvelopeLibraryWindow.hpp
+    src/EnvLibDrawingArea.hpp
+    src/ProjectViewController.hpp
+    src/MarkovModelLibraryWindow.hpp
 )
 
 # UI files
 set(UI_FILES
     src/mainwindow.ui
     src/EnvelopeLibraryWindow.ui
+    src/MarkovModelLibraryWindow.ui
+    src/ProjectViewController.ui
 )
 
 # Resource files
@@ -61,11 +69,19 @@ target_link_libraries(LASSIE PRIVATE
     Qt6::Charts
     Qt6::Multimedia
     Qt6::Network
+    Qt6::Xml
 )
 
 # Include directories
 target_include_directories(LASSIE PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${Qt6Core_INCLUDE_DIRS}
+    ${Qt6Gui_INCLUDE_DIRS}
+    ${Qt6Widgets_INCLUDE_DIRS}
+    ${Qt6Charts_INCLUDE_DIRS}
+    ${Qt6Multimedia_INCLUDE_DIRS}
+    ${Qt6Network_INCLUDE_DIRS}
+    ${Qt6Xml_INCLUDE_DIRS}
 )
 
 # Install rules

@@ -2,24 +2,26 @@
 #define PROJECTVIEWCONTROLLER_HPP
 
 #include <QWidget>
-#include <QMap>
-#include <QSharedPointer>
-#include "Project.hpp"
+#include <QTreeWidget>
+#include <QString>
+#include <QStandardItemModel>
+#include <QPushButton>
+#include <QLineEdit>
 
 namespace Ui {
 class ProjectViewController;
 }
-
-class QStandardItemModel;
-class QStandardItem;
 
 class ProjectViewController : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ProjectViewController(QWidget *parent = nullptr);
+    explicit ProjectViewController(QTreeWidget *treeWidget, QWidget *parent = nullptr);
     ~ProjectViewController();
+
+    int getProjectCount() const;
+    void addProject(const QString &filePath);
 
 private slots:
     void onNewButtonClicked();
@@ -27,26 +29,15 @@ private slots:
     void onSaveButtonClicked();
     void onCloseButtonClicked();
     void onSearchTextChanged(const QString &text);
-    void onProjectSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    
-    // Project editing
-    void onAddModelClicked();
-    void onRemoveModelClicked();
-    void onEditModelClicked();
+    void onProjectSelectionChanged();
 
 private:
     void setupConnections();
     void initializeModel();
-    void updateProjectView(const QSharedPointer<Project>& project);
-    void clearProjectView();
-    void addProjectToTree(const QSharedPointer<Project>& project);
-    void removeProjectFromTree(const QString& projectName);
-    void filterProjects(const QString& searchText);
-    
-    Ui::ProjectViewController *ui;
+
+    QTreeWidget *treeWidget;
     QStandardItemModel *model;
-    QMap<QString, QSharedPointer<Project>> projects;
-    QSharedPointer<Project> currentProject;
+    Ui::ProjectViewController *ui;
 };
 
 #endif // PROJECTVIEWCONTROLLER_HPP 

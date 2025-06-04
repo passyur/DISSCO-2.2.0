@@ -1,42 +1,28 @@
-#ifndef ENVELOPELIBRARYWINDOW_H
-#define ENVELOPELIBRARYWINDOW_H
+#ifndef ENVELOPE_LIBRARY_WINDOW_H
+#define ENVELOPE_LIBRARY_WINDOW_H
 
 #include <QMainWindow>
-#include <QTreeView>
 #include <QTreeWidget>
-#include <QLabel>
-#include <QLineEdit>
-#include <QAction>
-#include <QMenu>
-#include <QContextMenuEvent>
+#include <QTreeWidgetItem>
 #include <QStandardItemModel>
-#include <QDomDocument>
-#include <QDomElement>
-
-class EnvelopeLibraryEntry;
-class EnvLibDrawingArea;
+#include "EnvelopeLibraryEntry.hpp"
 
 namespace Ui {
 class EnvelopeLibraryWindow;
 }
 
-class EnvelopeLibraryWindow : public QMainWindow
-{
+class EnvLibDrawingArea;
+
+class EnvelopeLibraryWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit EnvelopeLibraryWindow(QWidget *parent = nullptr);
     ~EnvelopeLibraryWindow();
 
-    void createNewEnvelope();
-    void duplicateEnvelope();
+    EnvelopeLibraryEntry* getActiveEnvelope() const;
     void setEntries(const QString& x, const QString& y);
-    EnvelopeLibraryEntry* getActiveEnvelope();
-    QString folderSelected(); // check if any row is selected
-
-protected:
-    void contextMenuEvent(QContextMenuEvent *event) override;
-    void closeEvent(QCloseEvent *event) override;
+    QString folderSelected();
 
 private slots:
     void onTreeItemActivated(const QModelIndex &index);
@@ -46,25 +32,32 @@ private slots:
     void onDuplicateEnvelopeTriggered();
     void onSaveTriggered();
 
+protected:
+    void contextMenuEvent(QContextMenuEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     void setupUi();
     void createActions();
     void createMenus();
+    void createNewEnvelope();
+    void duplicateEnvelope();
     void refreshEnvelopeList();
     void showEnvelopeLibrary();
+    void updateEnvelopeView(EnvelopeLibraryEntry* envelope);
+    void clearEnvelopeView();
+    void addEnvelopeToTree(EnvelopeLibraryEntry* envelope);
+    void removeEnvelopeFromTree(const QString& name);
+    void filterEnvelopes(const QString& searchText);
 
     Ui::EnvelopeLibraryWindow *ui;
     QStandardItemModel *treeModel;
     EnvLibDrawingArea *drawingArea;
     EnvelopeLibraryEntry *activeEnvelope;
-    
-    // Actions
+    QMenu *contextMenu;
     QAction *newEnvelopeAction;
     QAction *duplicateEnvelopeAction;
     QAction *saveAction;
-    
-    // Context menu
-    QMenu *contextMenu;
 };
 
-#endif // ENVELOPELIBRARYWINDOW_H 
+#endif // ENVELOPE_LIBRARY_WINDOW_H 

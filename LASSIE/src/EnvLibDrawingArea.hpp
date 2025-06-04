@@ -1,26 +1,22 @@
-#ifndef ENVLIBDRAWINGAREA_H
-#define ENVLIBDRAWINGAREA_H
+#ifndef ENV_LIB_DRAWING_AREA_H
+#define ENV_LIB_DRAWING_AREA_H
 
 #include <QWidget>
-#include <QPoint>
 #include <QPainter>
 #include <QMouseEvent>
-#include <QPainterPath>
+#include "EnvelopeLibraryEntry.hpp"
 
 class EnvelopeLibraryWindow;
-class EnvelopeLibraryEntry;
 
-class EnvLibDrawingArea : public QWidget
-{
+class EnvLibDrawingArea : public QWidget {
     Q_OBJECT
 
 public:
-    explicit EnvLibDrawingArea(EnvelopeLibraryWindow *parent = nullptr);
+    explicit EnvLibDrawingArea(QWidget *parent = nullptr);
     ~EnvLibDrawingArea();
 
     void setEnvelope(EnvelopeLibraryEntry *envelope);
-    void clearEnvelope();
-    void updateSelectedNode(double x, double y);
+    void updateNodePosition(double x, double y);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -44,16 +40,17 @@ private:
     bool isDragging;
     QPoint lastMousePos;
 
-    // Drawing parameters
-    static const int GRID_SPACING = 50;
-    static const int NODE_RADIUS = 5;
-    static const int SELECTED_NODE_RADIUS = 7;
-    
-    // Coordinate transformation
-    double worldXMin, worldXMax;
-    double worldYMin, worldYMax;
-    int viewportWidth, viewportHeight;
-    double scaleX, scaleY;
+    // Drawing area settings
+    double worldXMin;
+    double worldXMax;
+    double worldYMin;
+    double worldYMax;
+    int viewportWidth;
+    int viewportHeight;
+    double scaleX;
+    double scaleY;
+
+    static const int GRID_SPACING = 20;
 };
 
-#endif // ENVLIBDRAWINGAREA_H 
+#endif // ENV_LIB_DRAWING_AREA_H 

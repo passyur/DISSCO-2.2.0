@@ -1,13 +1,18 @@
 /****************************************************************************
 ** Resource object code
 **
-** Created by: The Resource Compiler for Qt version 5.15.2
+** Created by: The Resource Compiler for Qt version 6.9.0
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
+#ifdef _MSC_VER
+// disable informational message "function ... selected for automatic inline expansion"
+#pragma warning (disable: 4711)
+#endif
+
 static const unsigned char qt_resource_data[] = {
-  // /Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/resources/styles/main.qss
+  // main.qss
   0x0,0x0,0x3,0xa5,
   0x2f,
   0x2a,0x20,0x4d,0x61,0x69,0x6e,0x20,0x77,0x69,0x6e,0x64,0x6f,0x77,0x20,0x73,0x74,
@@ -111,7 +116,9 @@ static const unsigned char qt_resource_struct[] = {
 #   define QT_RCC_MANGLE_NAMESPACE(name) name
 #endif
 
-#ifdef QT_NAMESPACE
+#if defined(QT_INLINE_NAMESPACE)
+inline namespace QT_NAMESPACE {
+#elif defined(QT_NAMESPACE)
 namespace QT_NAMESPACE {
 #endif
 
@@ -140,9 +147,18 @@ int QT_RCC_MANGLE_NAMESPACE(qCleanupResources_resources)()
     return 1;
 }
 
+#ifdef __clang__
+#   pragma clang diagnostic push
+#   pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif
+
 namespace {
    struct initializer {
        initializer() { QT_RCC_MANGLE_NAMESPACE(qInitResources_resources)(); }
        ~initializer() { QT_RCC_MANGLE_NAMESPACE(qCleanupResources_resources)(); }
    } dummy;
 }
+
+#ifdef __clang__
+#   pragma clang diagnostic pop
+#endif

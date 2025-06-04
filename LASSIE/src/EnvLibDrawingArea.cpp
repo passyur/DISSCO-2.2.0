@@ -1,6 +1,6 @@
-#include "EnvLibDrawingArea.h"
-#include "EnvelopeLibraryWindow.h"
-#include "EnvelopeLibraryEntry.h"
+#include "EnvLibDrawingArea.hpp"
+#include "EnvelopeLibraryWindow.hpp"
+#include "EnvelopeLibraryEntry.hpp"
 
 #include <QPainter>
 #include <QPen>
@@ -11,9 +11,9 @@
 #include <QResizeEvent>
 #include <cmath>
 
-EnvLibDrawingArea::EnvLibDrawingArea(EnvelopeLibraryWindow *parent)
+EnvLibDrawingArea::EnvLibDrawingArea(QWidget *parent)
     : QWidget(parent)
-    , parentWindow(parent)
+    , parentWindow(qobject_cast<EnvelopeLibraryWindow*>(parent))
     , currentEnvelope(nullptr)
     , selectedNode(-1)
     , isDragging(false)
@@ -40,21 +40,23 @@ void EnvLibDrawingArea::setEnvelope(EnvelopeLibraryEntry *envelope)
     currentEnvelope = envelope;
     selectedNode = -1;
     if (envelope) {
-        worldYMin = envelope->getMinY();
-        worldYMax = envelope->getMaxY();
+        // Calculate min/max Y values from envelope nodes
+        double minY = 0.0, maxY = 1.0;
+        for (size_t i = 0; i < envelope->getNodeCount(); ++i) {
+            const EnvelopeNode* node = envelope->getNode(i);
+            if (node) {
+                minY = std::min(minY, node->y);
+                maxY = std::max(maxY, node->y);
+            }
+        }
+        worldYMin = minY;
+        worldYMax = maxY;
         scaleY = viewportHeight / (worldYMax - worldYMin);
     }
     update();
 }
 
-void EnvLibDrawingArea::clearEnvelope()
-{
-    currentEnvelope = nullptr;
-    selectedNode = -1;
-    update();
-}
-
-void EnvLibDrawingArea::updateSelectedNode(double x, double y)
+void EnvLibDrawingArea::updateNodePosition(double x, double y)
 {
     if (currentEnvelope && selectedNode >= 0) {
         currentEnvelope->moveNode(selectedNode, x, y);
@@ -180,58 +182,14 @@ void EnvLibDrawingArea::drawEnvelope(QPainter &painter)
     painter.setPen(envelopePen);
 
     // Draw segments between nodes
-    const EnvelopeNode* node = currentEnvelope->getNode(0);
-    while (node && node->next) {
-        QPoint start = worldToScreen(node->x, node->y);
-        QPoint end = worldToScreen(node->next->x, node->next->y);
-        
-        // Find segment type
-        const EnvelopeSegment* segment = currentEnvelope->getSegment(0, 1); // TODO: Fix indices
-        if (segment) {
-            switch (segment->type) {
-                case EnvelopeSegmentType::Linear:
-                    painter.drawLine(start, end);
-                    break;
-                    
-                case EnvelopeSegmentType::Exponential: {
-                    QPainterPath path;
-                    path.moveTo(start);
-                    
-                    // Draw exponential curve using multiple line segments
-                    const int steps = 20;
-                    for (int i = 1; i <= steps; ++i) {
-                        double t = i / static_cast<double>(steps);
-                        double x = node->x + t * (node->next->x - node->x);
-                        double y = node->y * std::pow(node->next->y / node->y, t);
-                        QPoint p = worldToScreen(x, y);
-                        path.lineTo(p);
-                    }
-                    
-                    painter.drawPath(path);
-                    break;
-                }
-                
-                case EnvelopeSegmentType::Spline: {
-                    QPainterPath path;
-                    path.moveTo(start);
-                    
-                    // Calculate control points for cubic Bezier curve
-                    double dx = node->next->x - node->x;
-                    double dy = node->next->y - node->y;
-                    QPoint c1 = worldToScreen(node->x + dx/3, node->y + dy/3);
-                    QPoint c2 = worldToScreen(node->x + 2*dx/3, node->y + 2*dy/3);
-                    
-                    path.cubicTo(c1, c2, end);
-                    painter.drawPath(path);
-                    break;
-                }
-            }
-        } else {
-            // Default to linear if no segment found
-            painter.drawLine(start, end);
+    for (size_t i = 0; i < currentEnvelope->getNodeCount() - 1; ++i) {
+        const EnvelopeNode* node1 = currentEnvelope->getNode(i);
+        const EnvelopeNode* node2 = currentEnvelope->getNode(i + 1);
+        if (node1 && node2) {
+            QPoint p1 = worldToScreen(node1->x, node1->y);
+            QPoint p2 = worldToScreen(node2->x, node2->y);
+            painter.drawLine(p1, p2);
         }
-        
-        node = node->next;
     }
 }
 
@@ -240,21 +198,18 @@ void EnvLibDrawingArea::drawNodes(QPainter &painter)
     if (!currentEnvelope)
         return;
 
-    QPen nodePen(Qt::blue, 1, Qt::SolidLine);
+    QPen nodePen(Qt::black, 1, Qt::SolidLine);
     QBrush nodeBrush(Qt::white);
     painter.setPen(nodePen);
     painter.setBrush(nodeBrush);
 
-    // Draw all nodes except selected node
-    const EnvelopeNode* node = currentEnvelope->getNode(0);
-    int index = 0;
-    while (node) {
-        if (index != selectedNode) {
-            QPoint screenPos = worldToScreen(node->x, node->y);
-            painter.drawEllipse(screenPos, NODE_RADIUS, NODE_RADIUS);
+    // Draw all nodes
+    for (size_t i = 0; i < currentEnvelope->getNodeCount(); ++i) {
+        const EnvelopeNode* node = currentEnvelope->getNode(i);
+        if (node) {
+            QPoint center = worldToScreen(node->x, node->y);
+            painter.drawEllipse(center, 4, 4);
         }
-        node = node->next;
-        index++;
     }
 }
 
@@ -264,16 +219,15 @@ void EnvLibDrawingArea::drawSelectedNode(QPainter &painter)
         return;
 
     const EnvelopeNode* node = currentEnvelope->getNode(selectedNode);
-    if (!node)
-        return;
+    if (node) {
+        QPen selectedPen(Qt::red, 2, Qt::SolidLine);
+        QBrush selectedBrush(Qt::red);
+        painter.setPen(selectedPen);
+        painter.setBrush(selectedBrush);
 
-    QPen selectedPen(Qt::red, 2, Qt::SolidLine);
-    QBrush selectedBrush(Qt::white);
-    painter.setPen(selectedPen);
-    painter.setBrush(selectedBrush);
-
-    QPoint screenPos = worldToScreen(node->x, node->y);
-    painter.drawEllipse(screenPos, SELECTED_NODE_RADIUS, SELECTED_NODE_RADIUS);
+        QPoint center = worldToScreen(node->x, node->y);
+        painter.drawEllipse(center, 6, 6);
+    }
 }
 
 QPoint EnvLibDrawingArea::worldToScreen(double x, double y) const

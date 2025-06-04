@@ -1,7 +1,8 @@
-#include "EnvelopeLibraryWindow.h"
+#include <QtWidgets>
+#include "EnvelopeLibraryWindow.hpp"
+#include "EnvelopeLibraryEntry.hpp"
+#include "EnvLibDrawingArea.hpp"
 #include "ui_EnvelopeLibraryWindow.h"
-#include "EnvLibDrawingArea.h"
-#include "EnvelopeLibraryEntry.h"
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -102,16 +103,14 @@ void EnvelopeLibraryWindow::createNewEnvelope()
                                        QString(), &ok);
     if (ok && !name.isEmpty()) {
         // Create new envelope
-        auto envelope = new EnvelopeLibraryEntry(name);
+        auto* envelope = new EnvelopeLibraryEntry(name);
         
         // Add to tree model
-        QStandardItem *item = new QStandardItem(name);
-        item->setData(QVariant::fromValue(envelope), Qt::UserRole);
-        treeModel->appendRow(item);
+        addEnvelopeToTree(envelope);
         
         // Set as active envelope
         activeEnvelope = envelope;
-        ui->envelopeTreeView->setCurrentIndex(item->index());
+        updateEnvelopeView(envelope);
     }
 }
 
@@ -129,17 +128,15 @@ void EnvelopeLibraryWindow::duplicateEnvelope()
                                        activeEnvelope->getName() + tr("_copy"), &ok);
     if (ok && !name.isEmpty()) {
         // Create new envelope as a copy
-        auto envelope = new EnvelopeLibraryEntry(*activeEnvelope);
+        auto* envelope = new EnvelopeLibraryEntry(*activeEnvelope);
         envelope->setName(name);
         
         // Add to tree model
-        QStandardItem *item = new QStandardItem(name);
-        item->setData(QVariant::fromValue(envelope), Qt::UserRole);
-        treeModel->appendRow(item);
+        addEnvelopeToTree(envelope);
         
         // Set as active envelope
         activeEnvelope = envelope;
-        ui->envelopeTreeView->setCurrentIndex(item->index());
+        updateEnvelopeView(envelope);
     }
 }
 
@@ -149,7 +146,7 @@ void EnvelopeLibraryWindow::setEntries(const QString& x, const QString& y)
     ui->yValueEdit->setText(y);
 }
 
-EnvelopeLibraryEntry* EnvelopeLibraryWindow::getActiveEnvelope()
+EnvelopeLibraryEntry* EnvelopeLibraryWindow::getActiveEnvelope() const
 {
     return activeEnvelope;
 }
@@ -175,6 +172,7 @@ void EnvelopeLibraryWindow::onTreeItemActivated(const QModelIndex &index)
     activeEnvelope = item->data(Qt::UserRole).value<EnvelopeLibraryEntry*>();
     if (activeEnvelope) {
         drawingArea->setEnvelope(activeEnvelope);
+        updateEnvelopeView(activeEnvelope);
     }
 }
 
@@ -184,6 +182,7 @@ void EnvelopeLibraryWindow::onTreeSelectionChanged()
     if (!index.isValid()) {
         activeEnvelope = nullptr;
         drawingArea->setEnvelope(nullptr);
+        clearEnvelopeView();
         return;
     }
 
@@ -195,6 +194,7 @@ void EnvelopeLibraryWindow::onTreeSelectionChanged()
     activeEnvelope = item->data(Qt::UserRole).value<EnvelopeLibraryEntry*>();
     if (activeEnvelope) {
         drawingArea->setEnvelope(activeEnvelope);
+        updateEnvelopeView(activeEnvelope);
     }
 }
 
@@ -210,7 +210,7 @@ void EnvelopeLibraryWindow::onValueEntriesChanged()
     if (xOk && yOk) {
         // Update envelope values
         if (drawingArea) {
-            drawingArea->updateSelectedNode(x, y);
+            drawingArea->updateNodePosition(x, y);
         }
     }
 }
@@ -268,4 +268,92 @@ void EnvelopeLibraryWindow::showEnvelopeLibrary()
     show();
     raise();
     activateWindow();
+}
+
+void EnvelopeLibraryWindow::updateEnvelopeView(EnvelopeLibraryEntry* envelope)
+{
+    if (!envelope)
+        return;
+
+    // Update envelope details in the right panel
+    ui->itemLabel->setText("Envelope: " + envelope->getName());
+    
+    // Create a text display for the envelope details
+    QTextEdit *textEdit = new QTextEdit(ui->itemViewWidget);
+    textEdit->setReadOnly(true);
+    
+    QString details;
+    details += "Name: " + envelope->getName() + "\n";
+    
+    textEdit->setText(details);
+    
+    // Clear any existing layout
+    QLayout *layout = ui->itemViewWidget->layout();
+    if (layout) {
+        QLayoutItem *item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+        delete layout;
+    }
+    
+    // Set new layout
+    QVBoxLayout *newLayout = new QVBoxLayout(ui->itemViewWidget);
+    newLayout->addWidget(textEdit);
+    ui->itemViewWidget->setLayout(newLayout);
+}
+
+void EnvelopeLibraryWindow::clearEnvelopeView()
+{
+    ui->itemLabel->setText("Item View");
+    
+    // Clear any existing layout
+    QLayout *layout = ui->itemViewWidget->layout();
+    if (layout) {
+        QLayoutItem *item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+        delete layout;
+    }
+    
+    // Set new empty layout
+    QVBoxLayout *newLayout = new QVBoxLayout(ui->itemViewWidget);
+    ui->itemViewWidget->setLayout(newLayout);
+}
+
+void EnvelopeLibraryWindow::addEnvelopeToTree(EnvelopeLibraryEntry* envelope)
+{
+    QStandardItem *item = new QStandardItem(envelope->getName());
+    item->setData(QVariant::fromValue(envelope), Qt::UserRole);
+    treeModel->appendRow(item);
+}
+
+void EnvelopeLibraryWindow::removeEnvelopeFromTree(const QString& name)
+{
+    QModelIndexList indices = treeModel->match(treeModel->index(0, 0), Qt::DisplayRole, name, 1, Qt::MatchExactly);
+    if (!indices.isEmpty()) {
+        treeModel->removeRow(indices.first().row());
+    }
+}
+
+void EnvelopeLibraryWindow::filterEnvelopes(const QString& searchText)
+{
+    // Show all rows if search text is empty
+    if (searchText.isEmpty()) {
+        for (int i = 0; i < treeModel->rowCount(); ++i) {
+            ui->envelopeTreeView->setRowHidden(i, QModelIndex(), false);
+        }
+        return;
+    }
+    
+    // Hide rows that don't match the search text
+    for (int i = 0; i < treeModel->rowCount(); ++i) {
+        QModelIndex nameIndex = treeModel->index(i, 0);
+        QString name = treeModel->data(nameIndex).toString();
+        bool match = name.contains(searchText, Qt::CaseInsensitive);
+        ui->envelopeTreeView->setRowHidden(i, QModelIndex(), !match);
+    }
 } 
