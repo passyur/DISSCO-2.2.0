@@ -1,171 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>EnvelopeLibraryWindow</class>
- <widget class="QWidget" name="EnvelopeLibraryWindow">
+ <widget class="QMainWindow" name="EnvelopeLibraryWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="vbox1">
-   <item>
-    <widget class="QWidget" name="EnvelopeListAlignment" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>300</width>
-       <height>300</height>
-      </size>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QTreeView" name="envelopeTreeView">
-        <property name="headerHidden">
-         <bool>true</bool>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
-        </property>
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="acceptDrops">
-         <bool>true</bool>
-        </property>
-        <property name="dropIndicatorShown">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+  <property name="windowTitle">
+   <string>Envelope Library</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="leftWidget" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QPushButton" name="newButton">
-          <property name="text">
-           <string>New</string>
+         <widget class="QTreeView" name="envelopeTreeView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="duplicateButton">
-          <property name="text">
-           <string>Duplicate</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QPushButton" name="newButton">
+            <property name="text">
+             <string>New</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="duplicateButton">
+            <property name="text">
+             <string>Duplicate</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QFrame" name="hseparator1">
-     <property name="frameShape">
-      <enum>QFrame::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="hbox4">
-     <item>
-      <widget class="QLabel" name="ScaleLabel">
-       <property name="text">
-        <string>1.0
-
-
-
-
-
-
-
-
-
-
-
-0.0</string>
-       </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QWidget" name="DrawingAreaAlignment" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>280</width>
-         <height>200</height>
-        </size>
-       </property>
+      <widget class="QWidget" name="rightWidget" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QWidget" name="drawingAreaWidget" native="true"/>
+         <widget class="QWidget" name="drawingAreaWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>X:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="xValueEdit"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Y:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="yValueEdit"/>
+          </item>
+          <item row="1" column="0" colspan="4">
+           <widget class="QLabel" name="coordinateLabel">
+            <property name="text">
+             <string>Mouse: (0.000, 0.000)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="4">
+           <widget class="QLabel" name="scaleLabel">
+            <property name="text">
+             <string>Scale: 0.000 - 1.000</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="hbox2">
-     <item>
-      <widget class="QLabel" name="label2">
-       <property name="text">
-        <string>X value:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="xValueEdit">
-       <property name="minimumWidth">
-        <number>100</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="hbox3">
-     <item>
-      <widget class="QLabel" name="label3">
-       <property name="text">
-        <string>Y value: </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="yValueEdit">
-       <property name="minimumWidth">
-        <number>100</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="hbox1">
-     <item>
-      <widget class="QLabel" name="CoordinateLabel">
-       <property name="text">
-        <string>X:0.0
-Y:0.0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label1">
-       <property name="text">
-        <string>Right click the graph to see available actions or click-and-drag a node to adjust the envelope.
-Thick segment = Flexible; Thin segment = Fixed.
-Blue = Linear; Green = Spline; Red = Exponential.</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-  </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

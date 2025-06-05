@@ -1,9 +1,0 @@
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/LASSIE.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/edit_cache.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/rebuild_cache.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/list_install_components.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/install.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/install/local.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/install/strip.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/LASSIE_autogen_timestamp_deps.dir
-/Users/dinhuyennhi/me_Code/DISSCO-2.2.0/LASSIE/CMakeFiles/LASSIE_autogen.dir
