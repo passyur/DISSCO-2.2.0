@@ -1,21 +1,34 @@
 #include <QtWidgets>
+#include <QFileDialog>
 
 #include "mainwindow.hpp"
 #include "markovwindow.hpp"
 #include "envelopewindow.hpp"
+#include "projectview.hpp"
 
-MainWindow::MainWindow()
+#include "core/project_struct.hpp"
+
+MainWindow* MainWindow::instance_ = 0;
+
+void MainWindow::showStatusMessage(const QString& message){
+    statusbar_->showMessage(message, 5000);
+}
+
+MainWindow::MainWindow(Inst *m)
 {
+    Q_ASSERT(instance_ == nullptr);
+    instance_ = this;
+
+    main_ = m;
+
     QWidget *widget = new QWidget;
     setCentralWidget(widget);
 
+    /* Create status bar to print informative messages to */
+    statusbar_ = statusBar();
+
     QWidget *top_filler = new QWidget;
     top_filler->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    info_label = new QLabel(tr("<i>Choose a menu option, or right-click to "
-                              "invoke a context menu</i>"));
-    info_label->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    info_label->setAlignment(Qt::AlignCenter);
 
     QWidget *bottom_filler = new QWidget;
     bottom_filler->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -23,16 +36,12 @@ MainWindow::MainWindow()
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(5, 5, 5, 5);
     layout->addWidget(top_filler);
-    layout->addWidget(info_label);
     layout->addWidget(bottom_filler);
     widget->setLayout(layout);
 
     createActions();
     createMenus();
-
-    QString message = tr("A context menu is available by right-clicking");
-    statusBar()->showMessage(message);
-
+    
     setWindowTitle("LASSIE");
     setMinimumSize(160, 160);
     resize(480, 320);
@@ -51,85 +60,93 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::newFile()
 {
-    QString file_path = QFileDialog::getSaveFileName(this, "New File", "", "Dissco Files (*.dissco)");
-    if(file_path.isEmpty())
-        return;
+    QString filename = QFileDialog::getSaveFileName(this, "New File", QDir::homePath(), "Dissco Files (*.dissco)");
 
-    loadFile(file_path);
-}
-
-void MainWindow::loadFile(const QString &file_path)
-{
-    QFile file(file_path);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QMessageBox::warning(this, "Error", "Cannot open file: " + file.errorString());
+    if(filename.isEmpty()){
+        showStatusMessage("Empty name");
         return;
     }
-
-    file.close();
-    current_file_ = file_path;
+    // (filename);
+    showStatusMessage("Open pressed");
 }
+
+// void MainWindow::loadFile(const QString &filepath)
+// {
+//     QFile file(filepath);
+//     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+//         QMessageBox::warning(this, "Error", "Cannot open file: " + file.errorString());
+//         return;
+//     }
+
+//     file.close();
+//     current_file_ = filepath;
+// }
 
 void MainWindow::open()
 {
-    QString file_path = QFileDialog::getOpenFileName(this, "Open File", "", "Dissco Files (*.dissco)");
-    if(file_path.isEmpty())
+    QString filepath = QFileDialog::getOpenFileName(this, "Open File", QString(), "Dissco Files (*.dissco)");
+    if(filepath.isEmpty())
         return;
 
-    loadFile(file_path);
+    // QByteArray id = QByteArray();
+    // Project *proj = main_->get_project_manager()->open(filepath, id); 
+    
+    // projview_ = new ProjectView(proj);
+    showStatusMessage("Open pressed");
 }
 
 void MainWindow::save()
 {
     if(current_file_.isEmpty()){
         // saveFileAs();
+        showStatusMessage("Save pressed");
         return;
     }
 
     // saveToFile
-    info_label->setText(tr("Invoked <b>File|Save</b>"));
+    showStatusMessage("Save pressed");
 }
 
 void MainWindow::undo()
 {
-    info_label->setText(tr("Invoked <b>Edit|Undo</b>"));
+    showStatusMessage("Undo pressed");
 }
 
 void MainWindow::redo()
 {
-    info_label->setText(tr("Invoked <b>Edit|Redo</b>"));
+    showStatusMessage("Redo pressed");
 }
 
 void MainWindow::cut()
 {
-    info_label->setText(tr("Invoked <b>Edit|Cut</b>"));
+    showStatusMessage("Cut pressed");
 }
 
 void MainWindow::copy()
 {
-    info_label->setText(tr("Invoked <b>Edit|Copy</b>"));
+    showStatusMessage("Copy pressed");
 }
 
 void MainWindow::paste()
 {
-    info_label->setText(tr("Invoked <b>Edit|Paste</b>"));
+    showStatusMessage("Paste pressed");
 }
 
 void MainWindow::about()
 {
-    info_label->setText(tr("Invoked <b>Help|About</b>"));
+    showStatusMessage("Help pressed");
     QMessageBox::about(this, tr("About Menu"),
                        tr("This is a prototype of the LASSIE UI for DISSCO rewritten in Qt."));
 }
 
 void MainWindow::aboutQt()
 {
-    info_label->setText(tr("Invoked <b>Help|About Qt</b>"));
+    showStatusMessage("About Qt pressed");
 }
 
 void MainWindow::markov()
 {
-    info_label->setText(tr("Invoked <b>Libraries|Markov</b>"));
+    showStatusMessage("Markov Window pressed");
     MarkovWindow *mw = new MarkovWindow(this);
     mw->setWindowFlag(Qt::Window);
     mw->setAttribute(Qt::WA_DeleteOnClose);
@@ -138,7 +155,7 @@ void MainWindow::markov()
 
 void MainWindow::envelope()
 {
-    info_label->setText(tr("Invoked <b>Libraries|Envelope</b>"));
+    showStatusMessage("Envelope Window pressed");
     EnvelopeWindow *ew = new EnvelopeWindow(this);
     ew->setWindowFlag(Qt::Window);
     ew->setAttribute(Qt::WA_DeleteOnClose);

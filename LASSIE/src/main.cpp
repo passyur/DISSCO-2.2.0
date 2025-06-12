@@ -1,11 +1,13 @@
 #include "mainwindow.hpp"
+#include "inst.hpp"
 
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    Inst *m = Inst::instance();
+    MainWindow *w = new MainWindow(m);
+    w->show();
     return a.exec();
 }
