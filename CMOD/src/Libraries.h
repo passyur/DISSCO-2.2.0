@@ -70,7 +70,6 @@ using namespace std;
 #include <xercesc/util/XMLUni.hpp>
 #include <stdexcept>
 #include <xercesc/framework/MemBufInputSource.hpp>
-using namespace xercesc;
 
 // this is the math expression parser : muparser
 #include "muParser.h"

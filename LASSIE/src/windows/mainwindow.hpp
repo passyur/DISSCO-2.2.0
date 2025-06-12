@@ -16,11 +16,10 @@ QT_END_NAMESPACE
 
 class EnvelopeLibraryWindow;
 class MarkovWindow;
+class ProjectViewController;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -84,6 +83,10 @@ private:
     // Toolbars
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
+
+    // projectView pointer for testing
+    std::vector<ProjectViewController*> projects;
+    ProjectViewController* projectView;
 };
 
 #endif // MAINWINDOW_HPP

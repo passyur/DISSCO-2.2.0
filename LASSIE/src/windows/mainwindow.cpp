@@ -4,6 +4,7 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "MarkovWindow.hpp"
+#include "ProjectViewController.hpp"
 
 #include <QApplication>
 #include <QMenuBar>
@@ -15,6 +16,8 @@
 #include <QCloseEvent>
 #include <QSettings>
 #include <QStyle>
+#include <QFileInfo>
+#include<QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -33,9 +36,18 @@ MainWindow::MainWindow(QWidget *parent)
     
     setWindowTitle(tr("LASSIE"));
     setUnifiedTitleAndToolBarOnMac(true);
+
 }
 
-MainWindow::~MainWindow() = default;
+//MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow() {
+    for(std::vector<ProjectViewController*>::
+        iterator it = projects.begin();
+      it!=projects.end();
+      it++){
+    delete *it;
+  }
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -51,6 +63,19 @@ void MainWindow::newFile()
     if (!fileName.isEmpty()) {
         loadFile(fileName);
     }
+
+    QFileInfo fileInfo(fileName);
+    QString pathOnly = fileInfo.absolutePath();
+    QString nameOnly = fileInfo.completeBaseName();
+
+    qDebug() << pathOnly;
+    qDebug() << nameOnly;
+
+    setWindowTitle(tr("%1 - %2").arg(fileName, tr("LASSIE")));
+    statusBar()->showMessage(tr("File created"), 2000);
+
+    projectView = new ProjectViewController(this, pathOnly, nameOnly);
+    projects.push_back(projectView);
 }
 
 void MainWindow::openFile()
@@ -269,4 +294,13 @@ void MainWindow::saveFile(const QString &fileName)
     currentFile = fileName;
     setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
     statusBar()->showMessage(tr("File saved"), 2000);
+    if (projectView == NULL) {
+        QFileInfo fileInfo(fileName);
+        QString pathOnly = fileInfo.absolutePath();
+        QString nameOnly = fileInfo.completeBaseName();
+        projectView = new ProjectViewController(this, pathOnly, nameOnly);
+        projects.push_back(projectView);
+    }
+    qDebug() << "In Main Window Save Function";
+    projectView->save();
 }
