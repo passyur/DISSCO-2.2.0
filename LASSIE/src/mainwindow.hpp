@@ -100,6 +100,7 @@ class MainWindow : public QMainWindow
 
         ProjectView *projview_;
 
+        /* the main instance associated with LASSIE, associated with this MainWindow instance */
         Inst *main_;
 
         static MainWindow *instance_;
