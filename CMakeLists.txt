@@ -33,6 +33,7 @@ find_package(Qt6 COMPONENTS Gui REQUIRED)
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 find_package(Qt6 COMPONENTS Charts REQUIRED)
 find_package(Qt6 COMPONENTS Xml REQUIRED)
+find_package(XercesC REQUIRED)
 
 message(STATUS "Qt6 found at: ${Qt6_DIR}")
 
@@ -96,6 +97,8 @@ target_link_libraries(LASSIE PRIVATE
     Qt6::Charts
     Qt6::Xml
 )
+target_link_libraries(LASSIE PRIVATE ${XercesC_LIBRARY})
+message(STATUS "libxerces-c linked with target!!")
 
 # Set properties for Windows and macOS
 set_target_properties(LASSIE PROPERTIES
@@ -107,6 +110,7 @@ set_target_properties(LASSIE PROPERTIES
 target_include_directories(LASSIE PRIVATE
     ${CMAKE_SOURCE_DIR}/LASSIE/src
 )
+target_include_directories(LASSIE PRIVATE ${XercesC_INCLUDE_DIRS})
 
 # Other components
 add_subdirectory(${CMAKE_SOURCE_DIR}/LASS)
@@ -123,6 +127,12 @@ install(TARGETS LASSIE
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(LASSIE)
+endif()
+
+if(NOT XercesC_FOUND)
+    message(SEND_ERROR "Couldn't find libxerces-c, won't go well; check BUILDING docs")
+else()
+    message(STATUS "Found libxerces-c install!")
 endif()
 
 message(STATUS "DONE!")

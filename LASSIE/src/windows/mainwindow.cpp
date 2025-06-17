@@ -4,7 +4,8 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "MarkovWindow.hpp"
-#include "ProjectViewController.hpp"
+#include "projectview.hpp"
+#include "../core/project_struct.hpp"
 
 #include <QApplication>
 #include <QMenuBar>
@@ -19,12 +20,24 @@
 #include <QFileInfo>
 #include<QDebug>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+
+MainWindow* MainWindow::instance_ = 0;
+
+void MainWindow::showStatusMessage(const QString& message){
+    statusbar_->showMessage(message, 5000);
+}
+
+MainWindow::MainWindow(Inst* m)
+    : QMainWindow()
     , ui(std::make_unique<Ui::MainWindow>())
     , envelopeLibraryWindow(std::make_unique<EnvelopeLibraryWindow>(this))
     , markovWindow(std::make_unique<MarkovWindow>(this))
 {
+
+    Q_ASSERT(instance_ == nullptr);
+    instance_ = this;
+    main_ = m;
+
     ui->setupUi(this);
     
     createActions();
@@ -41,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 //MainWindow::~MainWindow() = default;
 MainWindow::~MainWindow() {
-    for(std::vector<ProjectViewController*>::
+    for(std::vector<ProjectView*>::
         iterator it = projects.begin();
       it!=projects.end();
       it++){
@@ -64,17 +77,13 @@ void MainWindow::newFile()
         loadFile(fileName);
     }
 
-    QFileInfo fileInfo(fileName);
-    QString pathOnly = fileInfo.absolutePath();
-    QString nameOnly = fileInfo.completeBaseName();
 
-    qDebug() << pathOnly;
-    qDebug() << nameOnly;
+    qDebug() << fileName;
 
     setWindowTitle(tr("%1 - %2").arg(fileName, tr("LASSIE")));
     statusBar()->showMessage(tr("File created"), 2000);
 
-    projectView = new ProjectViewController(this, pathOnly, nameOnly);
+    projectView = new ProjectView(this, fileName);
     projects.push_back(projectView);
 }
 
@@ -295,10 +304,7 @@ void MainWindow::saveFile(const QString &fileName)
     setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
     statusBar()->showMessage(tr("File saved"), 2000);
     if (projectView == NULL) {
-        QFileInfo fileInfo(fileName);
-        QString pathOnly = fileInfo.absolutePath();
-        QString nameOnly = fileInfo.completeBaseName();
-        projectView = new ProjectViewController(this, pathOnly, nameOnly);
+        projectView = new ProjectView(this, fileName);
         projects.push_back(projectView);
     }
     qDebug() << "In Main Window Save Function";

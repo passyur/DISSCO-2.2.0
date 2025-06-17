@@ -4,7 +4,7 @@ in the associated window (currently, the project view).
 */
 #include "project_struct.hpp"
 
-#include "../mainwindow.hpp"
+#include "../windows/mainwindow.hpp"
 
 #include <QFile>
 #include <QFileInfo>

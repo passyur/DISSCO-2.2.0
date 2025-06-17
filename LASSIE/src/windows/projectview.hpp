@@ -5,6 +5,8 @@
 #include "core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
 
+class MainWindow;
+
 class ProjectView : public QObject {
     Q_OBJECT
     
@@ -13,6 +15,7 @@ class ProjectView : public QObject {
         // ProjectView();
         /* init/constructor to spawn a project_view inside of mainwin corresponding to a particular filepath and project_title; i.e., open project */
         ProjectView(Project *proj);
+        ProjectView(MainWindow* _mainWindow, QString _pathAndName);
 
         // ProjectView(const project_view& other);
         // ProjectView& operator=(const project_view& rhs);
@@ -21,6 +24,9 @@ class ProjectView : public QObject {
         
         // void showContents();
         // void hideContents();
+
+        // save function
+        void save();
 
     private:
         /* the *.dissco file */
@@ -35,6 +41,7 @@ class ProjectView : public QObject {
         QString sample_rate;
         QString sample_size;
         QString num_threads;
+        QString num_staff;
         QString dat_path;
         QString lib_path;
         QString seed;
@@ -46,6 +53,7 @@ class ProjectView : public QObject {
         bool synthesis;
         bool output_particel;
         bool empty_project;
+        bool grandStaff;
 
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;

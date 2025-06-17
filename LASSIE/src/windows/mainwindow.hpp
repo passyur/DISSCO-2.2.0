@@ -9,6 +9,12 @@
 #include <QMenuBar>
 #include <QAction>
 #include <memory>
+#include <QTextEdit>
+#include <QtLogging>
+#include <QStatusBar>
+
+#include "../inst.hpp"
+#include "projectview.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,77 +22,88 @@ QT_END_NAMESPACE
 
 class EnvelopeLibraryWindow;
 class MarkovWindow;
-class ProjectViewController;
+class ProjectView;
 
 class MainWindow : public QMainWindow
 {
-public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    Q_OBJECT
+    public:
+        //MainWindow(QWidget *parent = nullptr);
+        MainWindow(Inst*);
+        static MainWindow* instance() { return instance_; }
+        ~MainWindow();
 
-private slots:
-    // File operations
-    void newFile();
-    void openFile();
-    void saveFile();
-    void saveFileAs();
+    public slots:
+        void showStatusMessage(const QString& message);
 
-    // Edit operations
-    void undo();
-    void redo();
+    private slots:
+        // File operations
+        void newFile();
+        void openFile();
+        void saveFile();
+        void saveFileAs();
 
-    // Window operations
-    void showEnvelopeLibraryWindow();
-    void showMarkovWindow();
+        // Edit operations
+        void undo();
+        void redo();
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
-    void readSettings();
-    void writeSettings();
+        // Window operations
+        void showEnvelopeLibraryWindow();
+        void showMarkovWindow();
 
-private:
-    void createActions();
-    void createMenus();
-    void createToolBars();
-    void createStatusBar();
-    void loadFile(const QString &fileName);
-    void saveFile(const QString &fileName);
+    protected:
+        void closeEvent(QCloseEvent *event) override;
+        void readSettings();
+        void writeSettings();
 
-    std::unique_ptr<Ui::MainWindow> ui;
-    std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
-    std::unique_ptr<MarkovWindow> markovWindow;
+    private:
+        void createActions();
+        void createMenus();
+        void createToolBars();
+        void createStatusBar();
+        void loadFile(const QString &fileName);
+        void saveFile(const QString &fileName);
 
-    QString currentFile;
-    
-    // Actions
-    QAction *newAct;
-    QAction *openAct;
-    QAction *saveAct;
-    QAction *saveAsAct;
-    QAction *exitAct;
-    QAction *undoAct;
-    QAction *redoAct;
-    QAction *cutAct;
-    QAction *copyAct;
-    QAction *pasteAct;
-    QAction *showEnvelopeLibraryAct;
-    QAction *showMarkovAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;
+        std::unique_ptr<Ui::MainWindow> ui;
+        std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
+        std::unique_ptr<MarkovWindow> markovWindow;
 
-    // Menus
-    QMenu *fileMenu;
-    QMenu *editMenu;
-    QMenu *viewMenu;
-    QMenu *helpMenu;
+        QString currentFile;
+        
+        // Actions
+        QAction *newAct;
+        QAction *openAct;
+        QAction *saveAct;
+        QAction *saveAsAct;
+        QAction *exitAct;
+        QAction *undoAct;
+        QAction *redoAct;
+        QAction *cutAct;
+        QAction *copyAct;
+        QAction *pasteAct;
+        QAction *showEnvelopeLibraryAct;
+        QAction *showMarkovAct;
+        QAction *aboutAct;
+        QAction *aboutQtAct;
 
-    // Toolbars
-    QToolBar *fileToolBar;
-    QToolBar *editToolBar;
+        // Menus
+        QMenu *fileMenu;
+        QMenu *editMenu;
+        QMenu *viewMenu;
+        QMenu *helpMenu;
 
-    // projectView pointer for testing
-    std::vector<ProjectViewController*> projects;
-    ProjectViewController* projectView;
+        // Toolbars
+        QToolBar *fileToolBar;
+        QToolBar *editToolBar;
+
+        QStatusBar *statusbar_;
+        
+        // projectView pointer for testing
+        std::vector<ProjectView*> projects;
+        ProjectView* projectView;
+        
+        Inst *main_;
+        static MainWindow *instance_;
 };
 
 #endif // MAINWINDOW_HPP
