@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow
         MainWindow(Inst*);
         static MainWindow* instance() { return instance_; }
         ~MainWindow();
+        void setUnsavedTitle(QString unsavedFile);
 
     public slots:
         void showStatusMessage(const QString& message);
@@ -50,6 +51,7 @@ class MainWindow : public QMainWindow
         // Window operations
         void showEnvelopeLibraryWindow();
         void showMarkovWindow();
+        void showPropertiesDialog();
 
     protected:
         void closeEvent(QCloseEvent *event) override;
@@ -58,6 +60,7 @@ class MainWindow : public QMainWindow
 
     private:
         void createActions();
+        void enableProjectActions(bool enabled);
         void createMenus();
         void createToolBars();
         void createStatusBar();
@@ -76,11 +79,18 @@ class MainWindow : public QMainWindow
         QAction *saveAct;
         QAction *saveAsAct;
         QAction *exitAct;
+
         QAction *undoAct;
         QAction *redoAct;
         QAction *cutAct;
         QAction *copyAct;
         QAction *pasteAct;
+
+        QAction *newObjAct;
+        QAction *setPropAct;
+        QAction *runAct;
+        QAction *configNoteModAct;
+
         QAction *showEnvelopeLibraryAct;
         QAction *showMarkovAct;
         QAction *aboutAct;
@@ -89,11 +99,13 @@ class MainWindow : public QMainWindow
         // Menus
         QMenu *fileMenu;
         QMenu *editMenu;
+        QMenu *projectMenu;
         QMenu *viewMenu;
         QMenu *helpMenu;
 
         // Toolbars
         QToolBar *fileToolBar;
+        QToolBar *projectToolBar;
         QToolBar *editToolBar;
 
         QStatusBar *statusbar_;

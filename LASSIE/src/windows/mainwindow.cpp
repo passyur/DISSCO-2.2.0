@@ -18,6 +18,7 @@
 #include <QSettings>
 #include <QStyle>
 #include <QFileInfo>
+#include <QDir>
 #include<QDebug>
 
 
@@ -39,8 +40,11 @@ MainWindow::MainWindow(Inst* m)
     main_ = m;
 
     ui->setupUi(this);
+
+    ui->tabWidget->hide();
     
     createActions();
+    enableProjectActions(false);
     createMenus();
     createToolBars();
     createStatusBar();
@@ -70,21 +74,34 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::newFile()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("New File"),
+    QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
                                                   QString(),
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (!fileName.isEmpty()) {
-        loadFile(fileName);
+    if (fileName.isEmpty()) {
+        return;
     }
 
+    QFileInfo fileInfo(fileName);
+    QString baseDir = fileInfo.absolutePath();
+    QString projectName = fileInfo.completeBaseName();
+    QString projectFolder = baseDir + "/" + projectName;
+    QDir dir;
+    if (!dir.exists(projectFolder)) {
+        dir.mkdir(projectFolder);
+    }
 
-    qDebug() << fileName;
+    QString fullFilePath = projectFolder + "/" + projectName + ".dissco";
+    currentFile = fullFilePath;
 
-    setWindowTitle(tr("%1 - %2").arg(fileName, tr("LASSIE")));
+    setUnsavedTitle(currentFile);
     statusBar()->showMessage(tr("File created"), 2000);
 
-    projectView = new ProjectView(this, fileName);
+    projectView = new ProjectView(this, currentFile);
     projects.push_back(projectView);
+    projectView->setProperties();
+
+    ui->tabWidget->show();
+    enableProjectActions(true);
 }
 
 void MainWindow::openFile()
@@ -138,6 +155,11 @@ void MainWindow::showMarkovWindow()
     markovWindow->showMarkovLibrary();
 }
 
+void MainWindow::showPropertiesDialog()
+{
+    projectView->setProperties();
+}
+
 void MainWindow::readSettings()
 {
     QSettings settings;
@@ -161,24 +183,24 @@ void MainWindow::writeSettings()
 void MainWindow::createActions()
 {
     // File actions
-    newAct = new QAction(QIcon::fromTheme("document-new"), tr("&New"), this);
+    newAct = new QAction(QIcon::fromTheme("document-new"), tr("&New Project"), this);
     newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
+    newAct->setStatusTip(tr("Create a new project"));
     connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
     
-    openAct = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
+    openAct = new QAction(QIcon::fromTheme("document-open"), tr("&Open Project"), this);
     openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an existing file"));
+    openAct->setStatusTip(tr("Open an existing project"));
     connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
     
     saveAct = new QAction(QIcon::fromTheme("document-save"), tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save the document to disk"));
+    saveAct->setStatusTip(tr("Save the project to disk"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(saveFile()));
     
-    saveAsAct = new QAction(QIcon::fromTheme("document-save-as"), tr("Save &As..."), this);
+    saveAsAct = new QAction(QIcon::fromTheme("document-save"), tr("Save &As"), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
-    saveAsAct->setStatusTip(tr("Save the document under a new name"));
+    saveAsAct->setStatusTip(tr("Save the project under a new name"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveFileAs);
     
     exitAct = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
@@ -209,6 +231,20 @@ void MainWindow::createActions()
     pasteAct->setShortcuts(QKeySequence::Paste);
     pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
 
+    // Project actions
+    newObjAct = new QAction(QIcon::fromTheme("list-add"), tr("New Object"), this);
+    newObjAct->setStatusTip(tr("Create a new object"));
+
+    setPropAct = new QAction(tr("Set Properties"), this);
+    setPropAct->setStatusTip(tr("Set project properties"));
+    connect(setPropAct, &QAction::triggered, this, &MainWindow::showPropertiesDialog);
+
+    runAct = new QAction(tr("Run"), this);
+    runAct->setStatusTip(tr("Run"));
+
+    configNoteModAct = new QAction(tr("Configure Note Modifiers"), this);
+    configNoteModAct->setStatusTip(tr("Configure note modifiers"));
+
     // View actions
     showEnvelopeLibraryAct = new QAction(tr("&Envelope Library"), this);
     showEnvelopeLibraryAct->setStatusTip(tr("Show the envelope library window"));
@@ -232,6 +268,15 @@ void MainWindow::createActions()
     connect(aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
 }
 
+void MainWindow::enableProjectActions(bool enabled) {
+    saveAct->setEnabled(enabled);
+    saveAsAct->setEnabled(enabled);
+    newObjAct->setEnabled(enabled);
+    setPropAct->setEnabled(enabled);
+    runAct->setEnabled(enabled);
+    configNoteModAct->setEnabled(enabled);
+}
+
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
@@ -245,11 +290,17 @@ void MainWindow::createMenus()
     editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(undoAct);
     editMenu->addAction(redoAct);
-    editMenu->addSeparator();
+    //editMenu->addSeparator();
     editMenu->addAction(cutAct);
     editMenu->addAction(copyAct);
     editMenu->addAction(pasteAct);
 
+    projectMenu = menuBar()->addMenu(tr("&Project"));
+    projectMenu->addAction(newObjAct);
+    projectMenu->addAction(setPropAct);
+    projectMenu->addAction(runAct);
+    projectMenu->addAction(configNoteModAct);
+    
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewMenu->addAction(showEnvelopeLibraryAct);
     viewMenu->addAction(showMarkovAct);
@@ -265,14 +316,21 @@ void MainWindow::createToolBars()
     fileToolBar->addAction(newAct);
     fileToolBar->addAction(openAct);
     fileToolBar->addAction(saveAct);
+    fileToolBar->addAction(saveAsAct);
+    fileToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
-    editToolBar = addToolBar(tr("Edit"));
-    editToolBar->addAction(undoAct);
-    editToolBar->addAction(redoAct);
-    editToolBar->addSeparator();
-    editToolBar->addAction(cutAct);
-    editToolBar->addAction(copyAct);
-    editToolBar->addAction(pasteAct);
+    projectToolBar = addToolBar(tr("Project"));
+    projectToolBar->addAction(newObjAct);
+    projectToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+
+    // editToolBar = addToolBar(tr("Edit"));
+    // editToolBar->addAction(undoAct);
+    // editToolBar->addAction(redoAct);
+    // //editToolBar->addSeparator();
+    // editToolBar->addAction(cutAct);
+    // editToolBar->addAction(copyAct);
+    // editToolBar->addAction(pasteAct);
+    // fileToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 }
 
 void MainWindow::createStatusBar()
@@ -293,14 +351,24 @@ void MainWindow::loadFile(const QString &fileName)
 
     // TODO: Implement file loading
     currentFile = fileName;
+    qDebug() << "Looking for:" << fileName;
+    if (projectView == NULL) {
+        projectView = new ProjectView(this, currentFile);
+        projects.push_back(projectView);
+    }
     setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
     statusBar()->showMessage(tr("File loaded"), 2000);
+    projectView->setProperties();
+
+    ui->tabWidget->show();
+    enableProjectActions(true);
 }
 
 void MainWindow::saveFile(const QString &fileName)
 {
     // TODO: Implement file saving
     currentFile = fileName;
+    qDebug() << "Current File:" << currentFile;
     setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
     statusBar()->showMessage(tr("File saved"), 2000);
     if (projectView == NULL) {
@@ -309,4 +377,11 @@ void MainWindow::saveFile(const QString &fileName)
     }
     qDebug() << "In Main Window Save Function";
     projectView->save();
+}
+
+void MainWindow::setUnsavedTitle(QString unsavedFile){
+    qDebug() << "In setUnsavedTitle";
+    currentFile = unsavedFile;
+    setWindowTitle(tr("%1 - %2").arg("*" + currentFile, tr("LASSIE")));
+    qDebug() << "*currentFile: " << currentFile;
 }

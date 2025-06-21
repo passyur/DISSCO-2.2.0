@@ -37,17 +37,17 @@
       </property>
       <widget class="QWidget" name="projectTab">
        <attribute name="title">
-        <string>Project</string>
+        <string>Object Lists</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="envelopeTab">
        <attribute name="title">
-        <string>Envelopes</string>
+        <string>Envelope Library</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="markovTab">
        <attribute name="title">
-        <string>Markov Models</string>
+        <string>Markov Model Library</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="attributesTab">

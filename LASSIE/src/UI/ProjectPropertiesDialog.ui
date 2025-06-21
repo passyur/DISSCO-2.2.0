@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProjectPropertiesDialog</class>
+ <widget class="QDialog" name="ProjectPropertiesDialog">
+  <property name="windowTitle">
+   <string>Project Properties</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelTitle">
+       <property name="text">
+        <string>Project Title:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="titleEntry"/>
+     </item>
+
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelFlag">
+       <property name="text">
+        <string>File Flag:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="flagEntry"/>
+     </item>
+
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelChannels">
+       <property name="text">
+        <string>Number of Channels:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="numChannelsEntry"/>
+     </item>
+
+     <item row="3" column="0">
+      <widget class="QLabel" name="labelRate">
+       <property name="text">
+        <string>Sample Rate:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="rateEntry"/>
+     </item>
+
+     <item row="4" column="0">
+      <widget class="QLabel" name="labelSize">
+       <property name="text">
+        <string>Sample Size:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="sizeEntry"/>
+     </item>
+
+     <item row="5" column="0">
+      <widget class="QLabel" name="labelThreads">
+       <property name="text">
+        <string>Number of Threads:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="numThreadsEntry"/>
+     </item>
+
+     <item row="6" column="0">
+      <widget class="QCheckBox" name="synthesisCheckBox">
+       <property name="text">
+        <string>Sound Synthesis</string>
+       </property>
+      </widget>
+     </item>
+
+     <item row="7" column="0">
+      <widget class="QCheckBox" name="scoreCheckBox">
+       <property name="text">
+        <string>Score Printing</string>
+       </property>
+      </widget>
+     </item>
+
+     <item row="8" column="0">
+      <widget class="QCheckBox" name="staffCheckBox">
+       <property name="text">
+        <string>Grand Staff</string>
+       </property>
+      </widget>
+     </item>
+
+     <item row="9" column="0">
+      <widget class="QLabel" name="labelStaff">
+       <property name="text">
+        <string>Number of Staff:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QLineEdit" name="numStaffEntry"/>
+     </item>
+
+     <item row="10" column="0">
+      <widget class="QCheckBox" name="particelBox">
+       <property name="text">
+        <string>Output Particel</string>
+       </property>
+      </widget>
+     </item>
+
+     <item row="11" column="0">
+      <widget class="QLabel" name="labelTopEvent">
+       <property name="text">
+        <string>Top Event:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="1">
+      <widget class="QLineEdit" name="topEventEntry"/>
+     </item>
+
+     <item row="12" column="0" colspan="2">
+        <widget class="QWidget" name="durationWidget">
+        <layout class="QHBoxLayout" name="durationLayout">
+            <item>
+                <widget class="QLabel" name="labelDuration">
+                    <property name="text">
+                        <string>Piece Duration:</string>
+                    </property> 
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="durationEntry"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="insertFunctionButton">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok|QDialogButtonBox::Cancel</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
