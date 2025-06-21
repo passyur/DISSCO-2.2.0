@@ -47,6 +47,9 @@ class ProjectView : public QObject {
         /* storing saved state of project */
         bool modifiedButNotSaved;
 
+        /* set properties insert function button */
+        void propertiesInsertFunction();
+
         /* the *.dissco file */
         QString pathAndName;
         /* properties */

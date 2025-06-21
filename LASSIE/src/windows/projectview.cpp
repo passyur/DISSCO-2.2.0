@@ -26,6 +26,8 @@
 #include "EnvelopeLibraryEntry.h"
 #include "ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
+#include "FunctionGenerator.hpp"
+#include "../ui/ui_FunctionGenerator.h"
 // #include "muParser.h"
 
 
@@ -333,6 +335,8 @@ void ProjectView::setProperties() {
     dialog.ui->particelBox->setCheckState(output_particel ? Qt::Checked : Qt::Unchecked);
     dialog.ui->topEventEntry->setText(top_event);
     dialog.ui->durationEntry->setText(duration);
+
+    connect(dialog.ui->insertFunctionButton, &QPushButton::clicked, this, &ProjectView::propertiesInsertFunction);
     
     if (dialog.exec() == QDialog::Accepted) {
         QString new_title = dialog.ui->titleEntry->text();
@@ -361,6 +365,17 @@ void ProjectView::setProperties() {
         modifiedButNotSaved = true;
         modified();
     } 
+}
+
+void ProjectView::propertiesInsertFunction() {
+    FunctionGenerator generator(mainWindow);
+    if (generator.exec() == QDialog::Accepted) {
+        // QString result = generator.getResultString();
+        // if (!result.isEmpty()) {
+        //     // Update whatever field you need, e.g. duration line edit:
+        //     ui->durationEntry->setText(result);
+        // }
+    }
 }
 
 

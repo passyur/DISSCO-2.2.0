@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FunctionGenerator</class>
+ <widget class="QDialog" name="FunctionGenerator">
+  <property name="windowTitle">
+   <string>Function Generator</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelTitle">
+       <property name="text">
+        <string>Function:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="functionOptions"/>
+     </item>
+    </layout>
+   </item>
+
+   <item>
+   <widget class="QStackedWidget" name="functionStackedWidget">
+
+     <widget class="QWidget" name="nonePage0"/>
+
+     <widget class="QWidget" name="randomPage">
+      <layout class="QVBoxLayout" name="randomFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="randomLowerBoundLayout">
+            <item>
+                <widget class="QLabel" name="randomLabelLower">
+                <property name="text">
+                <string>Lower Bound:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomLowerBoundEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomInsertLowerFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="randomUpperBoundLayout">
+            <item>
+                <widget class="QLabel" name="randomLabelUpper">
+                <property name="text">
+                <string>Upper Bound:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomUpperBoundEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomInsertUpperFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+     </widget>
+
+     <widget class="QWidget" name="randomIntPage">
+      <layout class="QVBoxLayout" name="randomIntFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="randomIntLowerBoundLayout">
+            <item>
+                <widget class="QLabel" name="randomIntLabelLower">
+                <property name="text">
+                <string>Lower Bound:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomIntLowerBoundEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomIntInsertLowerFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="randomIntUpperBoundLayout">
+            <item>
+                <widget class="QLabel" name="randomIntLabelUpper">
+                <property name="text">
+                <string>Upper Bound:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomIntUpperBoundEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomIntInsertUpperFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+     </widget>
+
+
+    <widget class="QWidget" name="randomOrderIntPage">
+      <layout class="QVBoxLayout" name="randomOrderIntFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="randomOrderIntLowerBoundLayout">
+            <item>
+                <widget class="QLabel" name="randomOrderIntLabelLower">
+                <property name="text">
+                <string>Lower Bound:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomOrderIntLowerBoundEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomOrderIntInsertLowerFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="randomOrderIntUpperBoundLayout">
+            <item>
+                <widget class="QLabel" name="randomOrderIntLabelUpper">
+                <property name="text">
+                <string>Upper Bound:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomOrderIntUpperBoundEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomOrderIntInsertUpperFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+    <widget class="QWidget" name="randomizerPage">
+      <layout class="QVBoxLayout" name="randomizerFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="randomizerBaseLayout">
+            <item>
+                <widget class="QLabel" name="randomizerLabelBase">
+                <property name="text">
+                <string>Base:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomizerBaseEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomizerInsertBaseFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="randomizerDeviationLayout">
+            <item>
+                <widget class="QLabel" name="randomizerLabelDeviation">
+                <property name="text">
+                <string>Deviation:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="randomizerDeviationEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="randomizerInsertDeviationFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+    <widget class="QWidget" name="randomDensityPage">
+      <layout class="QFormLayout" name="randomDensityFormLayout">
+            <item row="0" column="0">
+                <widget class="QLabel" name="randomDensityLabelEnvelopeID">
+                <property name="text">
+                <string>Envelope Id:</string>
+                </property>
+                </widget>
+            </item>
+            <item row="0" column="1">
+                <widget class="QLineEdit" name="randomDensityEnvelopeIDEdit"/>
+            </item>
+
+            <item row="1" column="0">
+                <widget class="QLabel" name="randomDensityLabelStartTime">
+                <property name="text">
+                <string>Start Time:</string>
+                </property>
+                </widget>
+            </item>
+            <item row="1" column="1">
+                <widget class="QLineEdit" name="randomDensityStartTimeEdit"/>
+            </item>
+
+            <item row="2" column="0">
+                <widget class="QLabel" name="randomDensityLabelEndTime">
+                <property name="text">
+                <string>End Time:</string>
+                </property>
+                </widget>
+            </item>
+            <item row="2" column="1">
+                <widget class="QLineEdit" name="randomDensityEndTimeEdit"/>
+            </item>
+      </layout>
+    </widget>
+
+    <widget class="QWidget" name="inversePage">
+      <layout class="QVBoxLayout" name="inverseFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="numToInverseLayout">
+            <item>
+                <widget class="QLabel" name="numToInverseLabel">
+                <property name="text">
+                <string>Number To Inverse:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="numToInverseEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="InsertNumToInverseFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+    
+    <widget class="QWidget" name="lnPage">
+      <layout class="QVBoxLayout" name="lnFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="lnLayout">
+            <item>
+                <widget class="QLabel" name="lnLabel">
+                <property name="text">
+                <string>LN:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="lnEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="InsertLnFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+     <widget class="QWidget" name="fibbPage">
+      <layout class="QVBoxLayout" name="fibbFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="fibbLayout">
+            <item>
+                <widget class="QLabel" name="fibbLabel">
+                <property name="text">
+                <string>Fibonacci:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="fibbEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="InsertFibbFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+    <widget class="QWidget" name="decayPage">
+      <layout class="QVBoxLayout" name="decayFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="decayTypeLayout">
+            <item>
+                <widget class="QLabel" name="decayTypeLabel">
+                <property name="text">
+                <string>Decay Type:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="decayTypeExponential">
+                <property name="text">
+                    <string>Exponential</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="decayTypeLinear">
+                <property name="text">
+                    <string>Linear</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="decayBaseLayout">
+            <item>
+                <widget class="QLabel" name="decayLabelBase">
+                <property name="text">
+                <string>Base:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="decayBaseEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="decayInsertBaseFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="decayRateLayout">
+            <item>
+                <widget class="QLabel" name="decayLabelRate">
+                <property name="text">
+                <string>Rate:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="decayRateEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="decayInsertRateFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="decayIndexLayout">
+            <item>
+                <widget class="QLabel" name="decayLabelIndex">
+                <property name="text">
+                <string>Index:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="decayIndexEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="decayInsertIndexFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+     <widget class="QWidget" name="markovPage">
+      <layout class="QVBoxLayout" name="markovFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="markovLayout">
+            <item>
+                <widget class="QLabel" name="markovLabel">
+                <property name="text">
+                <string>Markov Model Id:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="markovEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="InsertMarkovFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+    <widget class="QWidget" name="nonePage1"/>
+
+    <widget class="QWidget" name="stochosPage">
+      <layout class="QVBoxLayout" name="stochosFormLayout">
+        <item>
+        <layout class="QHBoxLayout" name="stochosMethodLayout">
+            <item>
+                <widget class="QLabel" name="stochosMethodLabel">
+                <property name="text">
+                <string>Method:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="stochosMethodRange">
+                <property name="text">
+                    <string>Range Distribution</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="stochosMethodFunction">
+                <property name="text">
+                    <string>Functions</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="stochosOffsetLayout">
+            <item>
+                <widget class="QLabel" name="stochosLabelOffset">
+                <property name="text">
+                <string>Offset:</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="stochosOffsetEdit"/>
+            </item>
+        </layout>
+        </item>
+
+        <item>
+            <widget class="QScrollArea" name="stochosScrollWindow">
+            <property name="widgetResizable">
+                <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="stochosScrollWindowNodes">
+                <layout class="QVBoxLayout" name="scrollLayout">
+                <!-- Nodes will be dynamically added here in code -->
+                </layout>
+            </widget>
+            </widget>
+        </item>
+
+        <item>
+        <layout class="QHBoxLayout" name="stochosButtonsLayout">
+            <item>
+                <widget class="QPushButton" name="stochosAddNode">
+                <property name="text">
+                    <string>Add New Node</string>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QPushButton" name="stochosInsertFn">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+      </layout>
+    </widget>
+
+
+
+   </widget>
+   </item>
+
+   <item>
+    <widget class="QLabel" name="resultLabel">
+     <property name="text">
+      <string>Result String</string>
+     </property>
+    </widget>
+   </item>
+
+   <item>
+    <widget class="QTextEdit" name="resultTextEdit">
+    </widget>
+   </item>
+
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok|QDialogButtonBox::Cancel</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
