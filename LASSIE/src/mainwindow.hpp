@@ -99,7 +99,7 @@ class MainWindow : public QMainWindow
         QStatusBar *statusbar_;
 
         ProjectView *projview_;
-
+        
         /* the main instance associated with LASSIE, associated with this MainWindow instance */
         Inst *main_;
 
