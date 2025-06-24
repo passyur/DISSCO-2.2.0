@@ -72,7 +72,8 @@ using namespace std;
 #include <xercesc/framework/MemBufInputSource.hpp>
 
 // this is the math expression parser : muparser
-#include "muParser.h"
+//#include "muParser.h"
+#include "../../external-libs/muParser/muParser.h"
 
 typedef enum {
   eventTop    = 0,

@@ -110,6 +110,9 @@ set_target_properties(LASSIE PROPERTIES
 target_include_directories(LASSIE PRIVATE
     ${CMAKE_SOURCE_DIR}/LASSIE/src
 )
+target_include_directories(LASSIE PRIVATE
+    ${CMAKE_SOURCE_DIR}/LASS/src
+)
 target_include_directories(LASSIE PRIVATE ${XercesC_INCLUDE_DIRS})
 
 # Other components
