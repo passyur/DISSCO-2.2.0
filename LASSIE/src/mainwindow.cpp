@@ -27,6 +27,8 @@ MainWindow::MainWindow(Inst *m)
     /* Create status bar to print informative messages to */
     statusbar_ = statusBar();
 
+    projview_ = nullptr;
+
     QWidget *top_filler = new QWidget;
     top_filler->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -60,39 +62,21 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::newFile()
 {
-    QString filename = QFileDialog::getSaveFileName(this, "New File", QDir::homePath(), "Dissco Files (*.dissco)");
-
-    if(filename.isEmpty()){
-        showStatusMessage("Empty name");
-        return;
+    if(projview_ == nullptr){
+        Project *proj = main_->get_project_manager()->create("Untitled"); 
+        projview_ = new ProjectView(proj);
     }
-    // (filename);
-    showStatusMessage("Open pressed");
 }
-
-// void MainWindow::loadFile(const QString &filepath)
-// {
-//     QFile file(filepath);
-//     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-//         QMessageBox::warning(this, "Error", "Cannot open file: " + file.errorString());
-//         return;
-//     }
-
-//     file.close();
-//     current_file_ = filepath;
-// }
 
 void MainWindow::open()
 {
-    QString filepath = QFileDialog::getOpenFileName(this, "Open File", QString(), "Dissco Files (*.dissco)");
-    if(filepath.isEmpty())
-        return;
-
-    // QByteArray id = QByteArray();
-    // Project *proj = main_->get_project_manager()->open(filepath, id); 
-    
-    // projview_ = new ProjectView(proj);
-    showStatusMessage("Open pressed");
+    if(projview_ == nullptr){
+        QString filepath = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), tr("Dissco Files (*.dissco)"));
+        if(!filepath.isEmpty()){
+            Project *proj = main_->get_project_manager()->open(filepath); 
+            projview_ = new ProjectView(proj);
+        }
+    }
 }
 
 void MainWindow::save()
@@ -100,11 +84,8 @@ void MainWindow::save()
     if(current_file_.isEmpty()){
         // saveFileAs();
         showStatusMessage("Save pressed");
-        return;
+        // QStringList filenames = dialog.selectedFiles();
     }
-
-    // saveToFile
-    showStatusMessage("Save pressed");
 }
 
 void MainWindow::undo()
