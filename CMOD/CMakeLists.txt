@@ -10,21 +10,13 @@ file(GLOB_RECURSE CMOD_SRC
     "${PROJECT_SOURCE_DIR}/src/*.cpp"
     "${PROJECT_SOURCE_DIR}/src/*.h"
 )
-# list(REMOVE_ITEM CMOD_SRC "${PROJECT_SOURCE_DIR}/src/Main.cpp")
-
-# add_library(LCMOD OBJECT ${CMOD_SRC})
-
-# if(EXISTS "${PROJECT_SOURCE_DIR}/src/Main.cpp")
-#     list(INSERT CMOD_SRC 0 "${PROJECT_SOURCE_DIR}/src/Main.cpp")
-# endif()
 
 add_executable(CMOD ${CMOD_SRC})
-# add_executable(CMOD "${PROJECT_SOURCE_DIR}/src/Main.cpp")
-# target_link_libraries(CMOD PUBLIC LCMOD)
+set_property(TARGET CMOD PROPERTY ENABLE_EXPORTS TRUE)
 
 ### libsndfile must be linked in just the same way as it is in LASS ###
 target_link_libraries(CMOD PUBLIC ${SNDFILE_LIBRARY})
-target_link_libraries(CMOD PRIVATE ${XercesC_LIBRARY})
+target_link_libraries(CMOD PUBLIC ${XercesC_LIBRARY})
 # add_subdirectory(${CMAKE_SOURCE_DIR}/external-libs/muParser)
 target_link_libraries(CMOD PRIVATE MUPARSER)
 target_link_libraries(CMOD PUBLIC LASS)
