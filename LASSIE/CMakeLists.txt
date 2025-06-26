@@ -21,7 +21,7 @@ qt_add_executable(LASSIE
     src/projectview.cpp src/projectview.hpp
     src/core/envelope_struct.cpp src/core/envelope_struct.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
-    src/core/IEvent.cpp src/core/IEvent.h
+    # src/core/IEvent.cpp src/core/IEvent.h
 )
 
 target_link_libraries(LASSIE PRIVATE 
