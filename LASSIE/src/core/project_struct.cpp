@@ -164,6 +164,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     XMLString::release(&buffer);
     file.close();
 
+#ifdef ENVELOPE
     EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
     envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
     std::string deleteCommand = "rm " + fileString;
@@ -189,10 +190,12 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     }
 
     delete envelopeLibrary;
+#endif
 
     DOMElement* currentElement = envlibelement;
 
     DOMElement* markovModelLibraryElement = envlibelement->getNextElementSibling();
+#ifdef MARKOV
     std::string tagName = buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
     XMLString::release(&buffer);
     if (tagName == "MarkovModelLibrary") {
@@ -244,21 +247,24 @@ void ProjectManager::parse(Project *p, const QString& filepath){
             (p->markovModels[i])->from_str(modelText);
         }
     }
+#endif
 
-    // DOMElement *domEvents = currentElement->getNextElementSibling();
-    // DOMElement *eventElement = domEvents->getFirstElementChild();
+#ifdef EVENTS
+    DOMElement *domEvents = currentElement->getNextElementSibling();
+    DOMElement *eventElement = domEvents->getFirstElementChild();
 
-    // while (eventElement != NULL){
-    //     IEvent* newEvent = new IEvent(eventElement);
-    //     // paletteView->insertEvent(newEvent, newEvent->getEventTypeString());
-    //     p->events.push_back(newEvent);
-    //     eventElement = eventElement->getNextElementSibling();
-    // }
+    while (eventElement != NULL){
+        IEvent* newEvent = new IEvent(eventElement);
+        // paletteView->insertEvent(newEvent, newEvent->getEventTypeString());
+        p->events.push_back(newEvent);
+        eventElement = eventElement->getNextElementSibling();
+    }
 
-    // auto eventsIter = p->events.begin();
-    // for (; eventsIter != p->events.end(); ++eventsIter){
-    //     (*eventsIter)->link(p);
-    // }
+    auto eventsIter = p->events.begin();
+    for (; eventsIter != p->events.end(); ++eventsIter){
+        (*eventsIter)->link(p);
+    }
+#endif
 }
 
 

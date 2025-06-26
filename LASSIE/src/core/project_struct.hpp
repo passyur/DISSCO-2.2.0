@@ -7,8 +7,11 @@
 #include <QHash>
 #include <QObject>
 
+#ifdef MARKOV
 #include "MarkovModel.h"
-#include "envelope_struct.hpp"
+#endif
+
+#include "../windows/EnvelopeLibraryEntry.hpp"
 // #include "IEvent.h"
 
 /*
@@ -69,7 +72,9 @@ class Project : public QObject {
         bool empty_project = false;
 
         EnvelopeLibraryEntry *elentry = nullptr;
+#ifdef MARKOV
         QList<MarkovModel<float>*> markovModels;
+#endif
         // QList<IEvent*> events;
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
