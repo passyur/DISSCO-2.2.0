@@ -1,7 +1,9 @@
-#ifndef FUNCTIONGENERATOR_H
-#define FUNCTIONGENERATOR_H
+#ifndef FUNCTIONGENERATOR_HPP
+#define FUNCTIONGENERATOR_HPP
 
-#include "LASSIE.h"
+#include "../../../LASS/src/LASS.h"
+#include "../../../CMOD/src/CMOD.h"
+#include "../../../CMOD/src/Utilities.h"
 
 #include <QDialog>
 #include <QWidget>
@@ -62,7 +64,40 @@ typedef enum {
   functionSpectrum_Gen,
 
   NOT_A_FUNCTION
-}CMODFunction;
+} CMODFunction;
+
+typedef enum {
+  functionReturnInt,
+  functionReturnFloat,
+  functionReturnSPA,
+  functionReturnREV,
+  functionReturnENV,
+  functionReturnSIV,
+  functionReturnPAT,
+  funcitonReturnMEA,
+  functionReturnFIL, // added for filter object
+  functionReturnMGP, // ZIYUAN CHEN, July 2023 - added for "Modifier Group"
+  functionReturnSPE, //added for generating spectrum from distance
+  functionReturnIntList,
+  functionReturnFloatList,
+  functionReturnEnvelopeList,
+  functionReturnString, //used to parse FileValue
+  functionReturnList,
+  functionReturnMakeListFun
+
+} FunctionReturnType;
+
+
+
+typedef enum{
+  modifierTremolo = 0,
+  modifierVibrato = 1,
+  modifierGlissando = 2,
+  modifierDetune = 3,
+  modifierAmptrans = 4,
+  modifierFreqtrans = 5,
+  modifierWave_type = 6
+} ModifierType;
 
 namespace Ui {
 class FunctionGenerator;

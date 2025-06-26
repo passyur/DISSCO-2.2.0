@@ -1,6 +1,6 @@
-#include "EnvLibDrawingArea.h"
+#include "EnvLibDrawingArea.hpp"
 #include "EnvelopeLibraryWindow.hpp"
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 #include "EnvelopeCommand.hpp"
 
 #include <QPainter>

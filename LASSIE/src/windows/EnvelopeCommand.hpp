@@ -3,7 +3,7 @@
 
 #include <QUndoCommand>
 #include <QPointF>
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 
 // Base class for envelope commands
 class EnvelopeCommand : public QUndoCommand

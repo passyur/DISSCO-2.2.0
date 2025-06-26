@@ -1,4 +1,4 @@
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 #include <QDomDocument>
 #include <QDomElement>
 #include <cmath>

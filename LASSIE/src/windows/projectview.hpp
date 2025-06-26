@@ -2,9 +2,9 @@
 #define PROJECTVIEW_HPP
 
 #include "mainwindow.hpp"
-#include "core/project_struct.hpp"
+#include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 
 class MainWindow;
 

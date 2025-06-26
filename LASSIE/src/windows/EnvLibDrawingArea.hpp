@@ -1,5 +1,5 @@
-#ifndef ENVLIBDRAWINGAREA_H
-#define ENVLIBDRAWINGAREA_H
+#ifndef ENVLIBDRAWINGAREA_HPP
+#define ENVLIBDRAWINGAREA_HPP
 
 #include <QWidget>
 #include <QPointF>
