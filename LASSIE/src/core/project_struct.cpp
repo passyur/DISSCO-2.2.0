@@ -150,7 +150,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     }
 
     DOMElement *envlibelement = noteModifiers->getNextElementSibling();
-    char_data = ( DOMCharacterData*) envlibelement->getFirstChild();
+    char_data = (DOMCharacterData*) envlibelement->getFirstChild();
 
     buffer = XMLString::transcode(char_data->getData());
     std::string fileString = file_name + ".lib.temp";
@@ -245,20 +245,20 @@ void ProjectManager::parse(Project *p, const QString& filepath){
         }
     }
 
-    DOMElement *domEvents = currentElement->getNextElementSibling();
-    DOMElement *eventElement = domEvents->getFirstElementChild();
+    // DOMElement *domEvents = currentElement->getNextElementSibling();
+    // DOMElement *eventElement = domEvents->getFirstElementChild();
 
-    while (eventElement != NULL){
-        IEvent* newEvent = new IEvent(eventElement);
-        // paletteView->insertEvent(newEvent, newEvent->getEventTypeString());
-        p->events.push_back(newEvent);
-        eventElement = eventElement->getNextElementSibling();
-    }
+    // while (eventElement != NULL){
+    //     IEvent* newEvent = new IEvent(eventElement);
+    //     // paletteView->insertEvent(newEvent, newEvent->getEventTypeString());
+    //     p->events.push_back(newEvent);
+    //     eventElement = eventElement->getNextElementSibling();
+    // }
 
-    auto eventsIter = p->events.begin();
-    for (; eventsIter != p->events.end(); ++eventsIter){
-        (*eventsIter)->link(p);
-    }
+    // auto eventsIter = p->events.begin();
+    // for (; eventsIter != p->events.end(); ++eventsIter){
+    //     (*eventsIter)->link(p);
+    // }
 }
 
 

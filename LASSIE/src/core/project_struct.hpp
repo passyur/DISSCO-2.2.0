@@ -9,7 +9,7 @@
 
 #include "MarkovModel.h"
 #include "envelope_struct.hpp"
-#include "IEvent.h"
+// #include "IEvent.h"
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -21,7 +21,7 @@ the model: all transactions dealing with Projects must go through the ProjectMan
 
 class ProjectManager;
 
-class IEvent;
+// class IEvent;
 
 class Project : public QObject {
     friend class ProjectManager;
@@ -70,7 +70,7 @@ class Project : public QObject {
 
         EnvelopeLibraryEntry *elentry = nullptr;
         QList<MarkovModel<float>*> markovModels;
-        QList<IEvent*> events;
+        // QList<IEvent*> events;
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
         /* dict of known default modifiers */
