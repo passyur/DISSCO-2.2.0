@@ -5,7 +5,7 @@ set(TextReset "${Esc}[m")
 set(TextBold "${Esc}[1m")
 
 ### VERY IMPORTANT. USE OUT OF SOURCE BUILDS ONLY! ###
-if ("${CMAKE_BINARY_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}") 
+if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR}) 
     message(FATAL_ERROR "In-source builds are prohibited.\n"
             "Create a subdirectory 'build/' and use 'cmake ..' inside it.\n"
             "${TextBold}Delete 'CMakeCache.txt' and 'CMakeFiles/' before you continue.${TextReset}")
