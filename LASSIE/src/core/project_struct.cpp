@@ -5,7 +5,7 @@ in the associated window (currently, the project view).
 #include "project_struct.hpp"
 // #include "IEvent.h"
 
-#include "../mainwindow.hpp"
+#include "../windows/mainwindow.hpp"
 
 #include <QFile>
 #include <QTextStream>

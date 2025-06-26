@@ -32,6 +32,7 @@
 #include <map>
 #include <memory>
 #include <locale>
+#include <limits.h>
 
 //--- Parser includes --------------------------------------------------------------------------
 #include "muParserDef.h"
@@ -39,6 +40,8 @@
 #include "muParserTokenReader.h"
 #include "muParserBytecode.h"
 #include "muParserError.h"
+#include "muParserToken.h"
+#include "muParserCallback.h"
 
 
 namespace mu

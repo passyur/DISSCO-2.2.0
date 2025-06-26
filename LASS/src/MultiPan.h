@@ -97,7 +97,7 @@ public:
 	 * \param t The time stamp (as a percent of total sound
 	 *  length, from 0.0 to 1.0)
 	 **/
-	void addEntry(float t, ...);
+	void addEntry(double t, ...);
     
 	/** 
 	 * Add another spatialization point to the dynamic variables using

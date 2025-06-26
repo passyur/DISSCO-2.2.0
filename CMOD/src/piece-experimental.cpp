@@ -362,7 +362,8 @@ Piece::Piece(string _workingPath, string _projectTitle){
 
     Output::notation_score_.Build();
     ofstream score_file;
-    const char* projectNameCstr = (projectName + ".ly").c_str();
+    string temp = projectName + ".ly";
+    const char* projectNameCstr = temp.c_str();
     score_file.open(projectNameCstr);
     score_file << Output::notation_score_;
     score_file.close();

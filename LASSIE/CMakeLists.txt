@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 project(LASSIE)
 message(STATUS "== LASSIE ==")
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

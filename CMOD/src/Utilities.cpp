@@ -686,7 +686,7 @@ Sieve* Utilities::evaluateSieveFunction(string _functionString,void* _object){
   DOMCharacterData* textData;
   string functionName;
   DOMElement* thisElement;
-  Sieve* resultSieve;
+  Sieve* resultSieve = nullptr;
 
   DOMElement* functionNameElement = root->GFEC();
   textData = ( DOMCharacterData*) functionNameElement->getFirstChild();
@@ -901,7 +901,7 @@ string Utilities::function_Decay(DOMElement* _functionElement, void* _object){
   double index = evaluate(XMLTranscode(elementIter ),_object);
 
 
-  double decay;
+  double decay = 0.0;  // Initialize decay to avoid uninitialized variable warning
 
   if (type == "EXPONENTIAL") {
     decay = base * pow(rate, index);
@@ -956,7 +956,7 @@ string Utilities::function_Stochos(DOMElement* _functionElement, void* _object){
 
   elementIter = elementIter->GNES();
   int offset = (int) evaluate ( XMLTC(elementIter), _object);
-  float returnVal;
+  float returnVal = 0.0;
 
   if(method == "FUNCTIONS") {
     float randomNumber;

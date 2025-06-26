@@ -1,0 +1,61 @@
+/* Main window styles */
+QMainWindow {
+    background-color: #f0f0f0;
+}
+
+/* Tree view styles */
+QTreeView {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+QTreeView::item {
+    padding: 4px;
+}
+
+QTreeView::item:selected {
+    background-color: #0078d7;
+    color: white;
+}
+
+/* Button styles */
+QPushButton {
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: #1084e3;
+}
+
+QPushButton:pressed {
+    background-color: #006cc1;
+}
+
+/* Line edit styles */
+QLineEdit {
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+}
+
+QLineEdit:focus {
+    border-color: #0078d7;
+}
+
+/* Label styles */
+QLabel {
+    color: #333;
+}
+
+/* Drawing area styles */
+EnvLibDrawingArea {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+} 

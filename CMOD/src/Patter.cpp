@@ -83,7 +83,7 @@ void Patter::moveOrigin( int newOrigin ) {
 //----------------------------------------------------------------------------//
 
 int Patter::GetNextValue(string method, int newOrigin) {
-  int returnValue;    
+  int returnValue = 0;    // Initialize to 0
   if (origin != newOrigin) {
     moveOrigin(newOrigin);
   }

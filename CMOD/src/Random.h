@@ -128,8 +128,7 @@ class Random {
 
   private:
     static unsigned int seed;
-    double * probArray;
-
+    
     /**
      * Returns a vector containing ints [low, high]
      */

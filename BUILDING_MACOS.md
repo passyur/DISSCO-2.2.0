@@ -21,7 +21,7 @@ The following are *necessary* to compile CMOD and LASS:
 To compile with LASSIE, the following is *necessary*:
 
 - Qt >= 6.4
-
+ 
 Installing requirements and recommendations:
 --------------------------------------------
 
