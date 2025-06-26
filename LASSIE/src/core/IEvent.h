@@ -691,9 +691,6 @@ public:
     std::string reverb;
     std::string filter;
     std::string modifierGroup; // ZIYUAN CHEN, July 2023
-
-
-
   };
 
      // Envelope
@@ -754,7 +751,7 @@ public:
     std::string sieveBuilder;
   };
 
-    // Reverb
+  // Reverb
   class ReverbExtraInfo : public EventExtraInfo {
   public:
   	ReverbExtraInfo(ReverbExtraInfo* _original);
@@ -766,7 +763,6 @@ public:
   private:
     std::string reverbBuilder;
   };
-
 
     // Filter
   class FilterExtraInfo : public EventExtraInfo {
