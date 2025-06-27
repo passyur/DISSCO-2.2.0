@@ -1,0 +1,33 @@
+# editor related
+*.swp
+
+# VSCode related
+/.vscode
+
+# Visual Studio related
+/.vs
+/out
+
+# Qt Creator related
+*.user
+*.autosave
+
+# make related
+Makefile
+*.make
+
+# cmake related
+/build
+CMakeUserPresets.json
+*.user
+
+# vcpkg related
+vcpkg-configuration.json
+vcpkg.json
+
+# binaries
+*.a
+*.o
+
+# macOS related
+.DS_Store
