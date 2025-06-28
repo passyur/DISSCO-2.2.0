@@ -14,14 +14,14 @@
 #include <QStatusBar>
 
 #include "../inst.hpp"
-#include "ProjectViewController.h"
+#include "ProjectViewController.h" //nhi:  use ProjectViewController.h instead of projectview.hpp
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class EnvelopeLibraryWindow;
-class MarkovModelLibraryWindow;
+class MarkovModelLibraryWindow; //nhi: more descriptive than MarkovWindow
 class ProjectView;
 
 class MainWindow : public QMainWindow

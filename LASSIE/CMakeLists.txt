@@ -23,6 +23,8 @@ qt_add_executable(LASSIE
     src/windows/FunctionGenerator.cpp src/windows/FunctionGenerator.h
     src/windows/ProjectPropertiesDialog.cpp src/windows/ProjectPropertiesDialog.h
     src/windows/ProjectViewController.cpp src/windows/ProjectViewController.h
+    # src/windows/ObjectWindow.cpp src/windows/ObjectWindow.h
+    # src/windows/PaletteViewController.cpp src/windows/PaletteViewController.h
     # src/windows/EventAttributesViewController.cpp src/windows/EventAttributesViewController.h
     src/inst.hpp
     src/core/envelope_struct.cpp src/core/envelope_struct.hpp

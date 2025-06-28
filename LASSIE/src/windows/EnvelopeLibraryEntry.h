@@ -5,20 +5,28 @@
 #include "LASSIE.h"
 #include "../../LASS/src/Envelope.h"
 
-/// Types of interpolation between nodes
+/**
+ * @brief Types of interpolation between nodes
+ */
 enum envSegmentType {
-  envSegmentTypeLinear,
-  envSegmentTypeExponential,
-  envSegmentTypeSpline
+  envSegmentTypeLinear,      ///< Linear interpolation
+  envSegmentTypeExponential, ///< Exponential interpolation
+  envSegmentTypeSpline       ///< Cubic spline interpolation
 };
 
-/// Whether segment length is fixed or flexible
+/**
+ * @brief Whether segment length is fixed or flexible
+ */
 enum envSegmentProperty {
-  envSegmentPropertyFlexible,
-  envSegmentPropertyFixed
+  envSegmentPropertyFlexible, ///< Flexible segment length
+  envSegmentPropertyFixed     ///< Fixed segment length
 };
 
 class EnvLibEntryNode;
+
+/**
+ * @brief Represents a segment between two nodes in an envelope
+ */
 class EnvLibEntrySeg {
 public:
   EnvLibEntryNode* leftNode;   ///< pointer to node at start of this segment
@@ -35,6 +43,9 @@ public:
   ~EnvLibEntrySeg() {}
 };
 
+/**
+ * @brief Represents a node (control point) in an envelope
+ */
 class EnvLibEntryNode {
 public:
   double x;                 ///< time or parameter value
@@ -59,6 +70,9 @@ public:
   int countNumOfNodes();
 };
 
+/**
+ * @brief Represents an envelope entry in the library
+ */
 class EnvelopeLibraryEntry {
 public:
   EnvLibEntryNode* head;          ///< head of the node/segment list

@@ -1,9 +1,9 @@
 #include "EnvelopeLibraryEntry.h"
 #include <cstdio>
 
-//------------------------------------------------------------------------------
-// EnvLibEntrySeg
-//------------------------------------------------------------------------------
+/**
+ * @brief Default constructor: sets up a linear, flexible segment
+ */
 EnvLibEntrySeg::EnvLibEntrySeg()
   : leftNode(nullptr),
     rightNode(nullptr),
@@ -11,9 +11,11 @@ EnvLibEntrySeg::EnvLibEntrySeg()
     segmentProperty(envSegmentPropertyFlexible)
 {}
 
-//------------------------------------------------------------------------------
-// EnvLibEntryNode
-//------------------------------------------------------------------------------
+/**
+ * @brief Construct a node at coordinates (_x, _y)
+ * @param _x  x-coordinate
+ * @param _y  y-coordinate
+ */
 EnvLibEntryNode::EnvLibEntryNode(double _x, double _y)
   : x(_x),
     y(_y),
@@ -21,6 +23,10 @@ EnvLibEntryNode::EnvLibEntryNode(double _x, double _y)
     rightSeg(nullptr)
 {}
 
+/**
+ * @brief Count this node plus all nodes reachable to the right
+ * @return number of nodes from this to list end
+ */
 int EnvLibEntryNode::countNumOfNodes() {
   // If no outgoing segment, just this one; otherwise 1 + nodes to the right
   return (rightSeg == nullptr)
@@ -28,9 +34,10 @@ int EnvLibEntryNode::countNumOfNodes() {
          : 1 + rightSeg->rightNode->countNumOfNodes();
 }
 
-//------------------------------------------------------------------------------
-// EnvelopeLibraryEntry
-//------------------------------------------------------------------------------
+/**
+ * @brief Create a fresh envelope with given index
+ * @param _number  index for this entry
+ */
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(int _number)
   : number(_number),
     prev(nullptr),
@@ -46,6 +53,11 @@ EnvelopeLibraryEntry::EnvelopeLibraryEntry(int _number)
   tail->leftSeg = head->rightSeg;
 }
 
+/**
+ * @brief Copy-construct an entry from an existing one
+ * @param _originalEnvelope  entry to duplicate
+ * @param _number            new index
+ */
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelope, int _number)
   : number(_number),
     prev(nullptr),
@@ -76,6 +88,11 @@ EnvelopeLibraryEntry::EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelo
   }
 }
 
+/**
+ * @brief Build from an LASSIE Envelope object
+ * @param _envelope  source Envelope
+ * @param _number    new index
+ */
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(Envelope* _envelope, int _number)
   : number(_number),
     prev(nullptr),
@@ -127,14 +144,25 @@ EnvelopeLibraryEntry::EnvelopeLibraryEntry(Envelope* _envelope, int _number)
   finalNode->leftSeg = prevSeg;
 }
 
+/**
+ * @brief Destructor (cleanup segments/nodes if desired)
+ */
 EnvelopeLibraryEntry::~EnvelopeLibraryEntry() {
   // any cleanup logic would go here (delete nodes/segments) if needed
 }
 
+/**
+ * @brief Count how many entries in the doubly-linked list
+ * @return total entries including this
+ */
 int EnvelopeLibraryEntry::count() {
   return (next == nullptr) ? 1 : 1 + next->count();
 }
 
+/**
+ * @brief Append a new, empty envelope entry after this one
+ * @return pointer to the new entry
+ */
 EnvelopeLibraryEntry* EnvelopeLibraryEntry::createNewEnvelope() {
   if (next)
     return next->createNewEnvelope();
@@ -144,6 +172,11 @@ EnvelopeLibraryEntry* EnvelopeLibraryEntry::createNewEnvelope() {
   return next;
 }
 
+/**
+ * @brief Append a duplicated envelope entry after this one
+ * @param _originalEnvelope  which entry to duplicate
+ * @return pointer to the new duplicate
+ */
 EnvelopeLibraryEntry* EnvelopeLibraryEntry::duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) {
   if (next)
     return next->duplicateEnvelope(_originalEnvelope);
@@ -153,6 +186,10 @@ EnvelopeLibraryEntry* EnvelopeLibraryEntry::duplicateEnvelope(EnvelopeLibraryEnt
   return next;
 }
 
+/**
+ * @brief Get this entry's number as a QString
+ * @return number converted to QString
+ */
 QString EnvelopeLibraryEntry::getNumberString() const {
   return QString::number(number);
 } 
