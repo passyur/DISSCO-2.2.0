@@ -1,5 +1,5 @@
-#ifndef ENVELOPELIBRARYENTRY_H
-#define ENVELOPELIBRARYENTRY_H
+#ifndef ENVELOPELIBRARYENTRY_HPP
+#define ENVELOPELIBRARYENTRY_HPP
 
 #include <QString>
 #include <vector>

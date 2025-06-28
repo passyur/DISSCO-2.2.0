@@ -58,6 +58,7 @@ using namespace std;
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/util/XMLUni.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
 #include <xercesc/dom/DOMDocumentType.hpp>
 #include <xercesc/dom/DOMElement.hpp>
@@ -67,9 +68,8 @@ using namespace std;
 #include <xercesc/dom/DOMNodeList.hpp>
 #include <xercesc/dom/DOMText.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
-#include <xercesc/util/XMLUni.hpp>
-#include <stdexcept>
 #include <xercesc/framework/MemBufInputSource.hpp>
+#include <stdexcept>
 
 // this is the math expression parser : muparser
 //#include "muParser.h"

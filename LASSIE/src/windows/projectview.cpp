@@ -24,7 +24,7 @@
 #include "projectview.hpp"
 #include "mainwindow.hpp"
 #include "../inst.hpp"
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 #include "ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
 #include "FunctionGenerator.hpp"

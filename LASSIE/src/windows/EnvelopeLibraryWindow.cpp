@@ -1,7 +1,7 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "../ui/ui_EnvelopeLibraryWindow.h"
-#include "EnvLibDrawingArea.h"
-#include "EnvelopeLibraryEntry.h"
+#include "EnvLibDrawingArea.hpp"
+#include "EnvelopeLibraryEntry.hpp"
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QFileDialog>

@@ -7,6 +7,13 @@
 #include <QHash>
 #include <QObject>
 
+#ifdef MARKOV
+#include "MarkovModel.h"
+#endif
+
+#include "../windows/EnvelopeLibraryEntry.hpp"
+// #include "IEvent.h"
+
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
               the PM will simply handle all the project requests and will not expose just anything
@@ -16,6 +23,8 @@ the model: all transactions dealing with Projects must go through the ProjectMan
 // QMap<QString, bool> default_note_modifiers;
 
 class ProjectManager;
+
+// class IEvent;
 
 class Project : public QObject {
     friend class ProjectManager;
@@ -27,7 +36,12 @@ class Project : public QObject {
         void showContents();
         void hideContents();
     private:
-        /* init/constructor to spawn a project with a given title and id; TO BE CALLED BY PROJECT MANAGER (hence why it's private) */
+        /**
+         *  This function constructs a Project object that will represent the data contained in a DISSCO project
+         *	\param _title The title of the project, default initialization to empty QString
+         *  \param _id The UUID corresponding to this project, default initialization to empty QByteArray
+         *  \returns 
+        **/
         Project(const QString& _title = QString(), const QByteArray& _id = QByteArray());
 
         /* the *.dissco file */
@@ -40,25 +54,32 @@ class Project : public QObject {
         QString title;
         QString file_flag;
         QString duration;
-        QString num_channels;
-        QString sample_rate;
-        QString sample_size;
-        QString num_threads;
+        QString num_channels = "2";
+        QString sample_rate = "44100";
+        QString sample_size = "16";
+        QString num_threads = "1";
+        QString num_staffs;
         QString dat_path;
         QString lib_path;
         QString seed;
         QString measure;
 
         /* flags for CMOD */
+        bool grand_staff = false;
+        bool score = false;
+        bool synthesis = true;
+        bool output_particel = false;
+        bool empty_project = false;
 
-        bool score;
-        bool synthesis;
-        bool output_particel;
-        bool empty_project;
-
+        EnvelopeLibraryEntry *elentry = nullptr;
+#ifdef MARKOV
+        QList<MarkovModel<float>*> markovModels;
+#endif
+        // QList<IEvent*> events;
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
         /* dict of known default modifiers */
+        QMap<QString, bool> default_note_modifiers{{"+8va", true}, {"-8va", true}, {"accent", true}, {"coda", true}, {"downbow", true}, {"downmordent", true}, {"downprall", true}, {"espressivo", true}, {"fermata", true}, {"flageolet", true}, {"halfopen", true}, {"lheel", true}, {"lineprall", true}, {"longfermata", true}, {"ltoe", true}, {"marcato", true}, {"mordent", true}, {"null", true}, {"open", true}, {"portato", true}, {"prall", true}, {"pralldown", true}, {"prallmordent", true}, {"prallprall", true}, {"prallup", true}, {"reverseturn", true}, {"rheel", true}, {"rtoe", true}, {"segno", true}, {"shortfermata", true}, {"snappizzicato", true}, {"staccatissimo", true}, {"staccato", true}, {"stopped", true}, {"tenuto", true}, {"trill", true}, {"turn", true}, {"upbow", true}, {"upmordent", true}, {"upprall", true}, {"varcoda", true}, {"verylongfermata", true}};
 };
 
 class ProjectManager : public QObject {
@@ -70,7 +91,9 @@ class ProjectManager : public QObject {
         }
         
         Project* create(const QString& title = QString(), const QByteArray& id = QByteArray());
+        /* validates and, if successful, opens the file and creates a Project from that file */
         Project* open(const QString& filepath, const QByteArray& id = QByteArray());
+        void parse(Project *p, const QString& filepath);
         void close(Project*);
         int save(Project*);
         int saveAs(Project*);

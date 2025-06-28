@@ -6,6 +6,7 @@
 
 #include "core/project_struct.hpp"
 
+/* the main instance of LASSIE */
 class Inst : public QObject {
     Q_OBJECT
 
@@ -18,8 +19,10 @@ class Inst : public QObject {
         static ProjectManager* get_project_manager() { return instance()->project_manager_; }
         
     private:
-        Inst(void);
-        
+        Inst(void){
+            project_manager_ = new ProjectManager();
+        }
+
         ProjectManager *project_manager_;
 
 };

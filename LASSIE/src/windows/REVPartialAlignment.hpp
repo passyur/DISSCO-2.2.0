@@ -1,7 +1,6 @@
 #ifndef REVPARTIALALIGNMENT_H
 #define REVPARTIALALIGNMENT_H
 
-#include "LASSIE.h"
 
 #include "FunctionGenerator.hpp"
 

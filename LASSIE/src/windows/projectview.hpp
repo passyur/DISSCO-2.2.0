@@ -5,7 +5,7 @@
 #include "ProjectPropertiesDialog.hpp"
 #include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
-#include "EnvelopeLibraryEntry.h"
+#include "EnvelopeLibraryEntry.hpp"
 
 class MainWindow;
 class ProjectPropertiesDialog;

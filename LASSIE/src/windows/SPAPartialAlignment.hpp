@@ -1,8 +1,6 @@
 #ifndef SPAPARTIALALIGNMENT_H
 #define SPAPARTIALALIGNMENT_H
 
-#include "LASSIE.h"
-
 #include "FunctionGenerator.hpp"
 
 #include <QDialog>
