@@ -1,65 +1,98 @@
-#ifndef ENVLIBDRAWINGAREA_HPP
-#define ENVLIBDRAWINGAREA_HPP
+#ifndef ENV_LIB_DRAWINGAREA_HPP
+#define ENV_LIB_DRAWINGAREA_HPP
 
 #include <QWidget>
-#include <QPointF>
-#include <QUndoStack>
-#include <QPainter>
-#include <QMouseEvent>
-#include <QPainterPath>
+#include <QMenu>
+#include <QAction>
 
-class EnvelopeLibraryWindow;
 class EnvelopeLibraryEntry;
+class EnvLibEntrySeg;
+class EnvLibEntryNode;
+class EnvelopeLibraryWindow;
 
 class EnvLibDrawingArea : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit EnvLibDrawingArea(EnvelopeLibraryWindow *parent = nullptr);
-    ~EnvLibDrawingArea();
+    /// Constructor: set up state, enable mouse tracking, and build context menu
+    explicit EnvLibDrawingArea(EnvelopeLibraryWindow* _envelopeLibraryWindow,
+                               QWidget* parent = nullptr);
 
-    void setEnvelope(EnvelopeLibraryEntry *envelope);
-    void clearEnvelope();
-    void updateSelectedNode(double x, double y);
-    int getSelectedPointIndex() const { return selectedPoint; }
+    /// Destructor: Qt cleans up child widgets/actions automatically
+    ~EnvLibDrawingArea() override;
+
+    /// Reset all internal fields to their defaults
+    void resetFields();
+
+    /// Trigger a redraw of the given envelope
+    void showGraph(EnvelopeLibraryEntry* _envelope);
+
+    /// Clear the drawing area (background will repaint white)
+    void clearGraph();
+
+    /// Update the active node's coords from external input
+    void setActiveNodeCoordinate(const QString& _x, const QString& _y);
+
+    /// Recompute upperY/lowerY based on envelope data
+    void adjustBoundary(EnvelopeLibraryEntry* _envelope);
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
+    /// Paint the envelope graph
+    void paintEvent(QPaintEvent* event) override;
+
+    /// Track mouse movement (update coords display & drag)
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+    /// Handle presses (select node, start drag, show popup)
+    void mousePressEvent(QMouseEvent* event) override;
+
+    /// Handle releases (end drag)
+    void mouseReleaseEvent(QMouseEvent* event) override;
+
+    /// Fallback for context menu key events
+    void contextMenuEvent(QContextMenuEvent* event) override;
+
+private slots:
+    /////// Context-menu actions ///////
+    void insertEnvelopeSegment();
+    void removeNode();
+    void setFlexible();
+    void setFixed();
+    void setLinear();
+    void setExponential();
+    void setSpline();
 
 private:
-    void drawGrid(QPainter &painter);
-    void drawEnvelope(QPainter &painter);
-    void drawPoints(QPainter &painter);
-    int findNearestPoint(const QPointF &pos) const;
-    QPointF mapToEnvelope(const QPointF &pos) const;
-    QPointF mapFromEnvelope(const QPointF &pos) const;
-    void drawSelectedNode(QPainter &painter);
-    QPoint worldToScreen(double x, double y) const;
-    QPointF screenToWorld(const QPoint &point) const;
-    void updateMouseCoordinates(const QPoint &pos);
+    /////// Internal helpers ///////
+    /// Actually move the active node during drag
+    void moveNode();
+    /// Map true y → [0,1] for drawing
+    double getAdjustedY(double y) const;
+    /// Map [0,1] mouse y back to true y
+    double mouseAdjustY(double y) const;
 
-    EnvelopeLibraryWindow *parentWindow;
-    EnvelopeLibraryEntry *currentEnvelope;
-    int selectedPoint;
-    bool isDragging;
-    QPointF dragStartPos;
-    QUndoStack *undoStack;
+    EnvelopeLibraryWindow* envelopeLibraryWindow;
 
-    // Drawing parameters
-    static const int GRID_SPACING = 50;
-    static const int NODE_RADIUS = 5;
-    static const int SELECTED_NODE_RADIUS = 7;
-    
-    // Coordinate transformation
-    double worldXMin, worldXMax;
-    double worldYMin, worldYMax;
-    int viewportWidth, viewportHeight;
-    double scaleX, scaleY;
+    QMenu*   m_pMenuPopup;
+    QAction* actionInsert;
+    QAction* actionRemove;
+    QAction* actionSetFlexible;
+    QAction* actionSetFixed;
+    QAction* actionSetLinear;
+    QAction* actionSetSpline;
+    QAction* actionSetExponential;
+
+    EnvLibEntrySeg*    activeSegment;
+    EnvLibEntryNode*   activeNode;
+    bool               mouseLeftButtonPressedDown;
+    double             mouseX, mouseY;
+
+    double moveLeftBound, moveRightBound;
+    double upperY, lowerY;
+
+    EnvLibEntrySeg* head;
+    EnvLibEntryNode* tail;
 };
 
-#endif // ENVLIBDRAWINGAREA_H 
+#endif // ENV_LIB_DRAWINGAREA_HPP

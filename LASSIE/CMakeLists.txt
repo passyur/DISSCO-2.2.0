@@ -14,20 +14,18 @@ set(CMAKE_AUTORCC ON)
 ### This will need to be updated as we add more windows/classes
 qt_add_executable(LASSIE
     src/main.cpp
-    src/windows/mainwindow.cpp src/windows/mainwindow.hpp src/UI/mainwindow.ui
+    src/windows/MainWindow.cpp src/windows/MainWindow.hpp src/UI/mainwindow.ui
     # src/windows/markovwindow.cpp src/windows/markovwindow.hpp
-    src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp src/UI/EnvelopeLibraryWindow.ui
-    src/windows/MarkovChain.cpp src/windows/MarkovChain.hpp
-    src/windows/MarkovWindow.cpp src/windows/MarkovWindow.hpp src/UI/MarkovWindow.ui
+    src/windows/MarkovModelLibraryWindow.cpp src/windows/MarkovModelLibraryWindow.hpp
+    src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp 
     src/windows/EnvLibDrawingArea.cpp src/windows/EnvLibDrawingArea.hpp 
     src/windows/EnvelopeLibraryEntry.cpp src/windows/EnvelopeLibraryEntry.hpp
-    src/windows/EnvelopeCommand.cpp src/windows/EnvelopeCommand.hpp
     src/windows/FunctionGenerator.cpp src/windows/FunctionGenerator.hpp src/UI/FunctionGenerator.ui
     src/windows/REVPartialAlignment.cpp src/windows/REVPartialAlignment.hpp src/UI/FunGenREVPartialAlignment.ui
     src/windows/SPAPartialAlignment.cpp src/windows/SPAPartialAlignment.hpp src/UI/FunGenSPAPartialAlignment.ui
     src/windows/ProjectPropertiesDialog.cpp src/windows/ProjectPropertiesDialog.hpp src/UI/ProjectPropertiesDialog.ui
     src/inst.hpp
-    src/windows/projectview.cpp src/windows/projectview.hpp
+    src/windows/ProjectViewController.cpp src/windows/ProjectViewController.hpp
     src/core/envelope_struct.cpp src/core/envelope_struct.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
     # src/core/IEvent.cpp src/core/IEvent.h
@@ -37,6 +35,7 @@ target_link_libraries(LASSIE PRIVATE
     Qt6::Widgets
     Qt6::Core
     Qt6::Xml
+    LASS
 )
 
 target_link_libraries(LASSIE PRIVATE CMOD)
@@ -44,6 +43,8 @@ target_link_libraries(LASSIE PRIVATE CMOD)
 include(GNUInstallDirs)
 target_include_directories(LASSIE PRIVATE
     ${XercesC_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/LASS/src
+    ${CMAKE_SOURCE_DIR}/CMOD/src
 )
 
 set_target_properties(LASSIE PROPERTIES

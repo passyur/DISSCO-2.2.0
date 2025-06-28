@@ -1,14 +1,16 @@
 #ifndef PROJECTVIEW_HPP
 #define PROJECTVIEW_HPP
 
-#include "mainwindow.hpp"
+#include "MainWindow.hpp"
 #include "ProjectPropertiesDialog.hpp"
 #include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
 #include "EnvelopeLibraryEntry.hpp"
+#include "../../CMOD/src/Markov.h"
+
+#include <QDomDocument>
 
 class MainWindow;
-class ProjectPropertiesDialog;
 
 class ProjectView : public QObject {
     Q_OBJECT
@@ -30,7 +32,7 @@ class ProjectView : public QObject {
         // void showContents();
         // void hideContents();
 
-        /* functions to write to the xml .dissco file */
+        /* function to write to the xml .dissco file */
         void save();
         QString inlineXml(QDomDocument& doc);
 
@@ -45,10 +47,36 @@ class ProjectView : public QObject {
         /* set properties pop up function */
         void setProperties();
 
+        // nhi: add these functions to the project view controller
+        EnvelopeLibraryEntry* getEnvelopeLibraryEntries() { return envelopeLibraryEntries; }
+        EnvelopeLibraryEntry* createNewEnvelope() { return envelopeLibraryEntries ? envelopeLibraryEntries->createNewEnvelope() : nullptr; }
+        EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) { return envelopeLibraryEntries ? envelopeLibraryEntries->duplicateEnvelope(_originalEnvelope) : nullptr; }
+        void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
+
+        // nhi: Markov model methods
+        std::vector<MarkovModel<float>>& getMarkovModels() { return markovModels; }
+        int createNewMarkovModel() { 
+            markovModels.push_back(MarkovModel<float>()); 
+            return markovModels.size() - 1; 
+        }
+        int duplicateMarkovModel(int idx) { 
+            if (idx >= 0 && idx < markovModels.size()) {
+                markovModels.push_back(markovModels[idx]); 
+                return markovModels.size() - 1;
+            }
+            return -1;
+        }
+        void removeMarkovModel(int idx) { 
+            if (idx >= 0 && idx < markovModels.size()) {
+                markovModels.erase(markovModels.begin() + idx);
+            }
+        }
+
     private:
         /* storing main window */
         MainWindow* mainWindow;
-        ProjectPropertiesDialog* projectPropertiesDialog = nullptr;
+        ProjectPropertiesDialog* projectPropertiesDialog;
+        
         /* storing saved state of project */
         bool modifiedButNotSaved;
 
@@ -84,6 +112,9 @@ class ProjectView : public QObject {
 
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
+
+        /* Markov models */
+        std::vector<MarkovModel<float>> markovModels;
 };
 
 #endif

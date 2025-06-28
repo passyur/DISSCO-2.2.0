@@ -4,6 +4,7 @@
 #include "../../../LASS/src/LASS.h"
 #include "../../../CMOD/src/CMOD.h"
 #include "../../../CMOD/src/Utilities.h"
+#include "../core/IEvent.h"
 
 #include <QDialog>
 #include <QWidget>
@@ -66,38 +67,6 @@ typedef enum {
   NOT_A_FUNCTION
 } CMODFunction;
 
-typedef enum {
-  functionReturnInt,
-  functionReturnFloat,
-  functionReturnSPA,
-  functionReturnREV,
-  functionReturnENV,
-  functionReturnSIV,
-  functionReturnPAT,
-  funcitonReturnMEA,
-  functionReturnFIL, // added for filter object
-  functionReturnMGP, // ZIYUAN CHEN, July 2023 - added for "Modifier Group"
-  functionReturnSPE, //added for generating spectrum from distance
-  functionReturnIntList,
-  functionReturnFloatList,
-  functionReturnEnvelopeList,
-  functionReturnString, //used to parse FileValue
-  functionReturnList,
-  functionReturnMakeListFun
-
-} FunctionReturnType;
-
-
-
-typedef enum{
-  modifierTremolo = 0,
-  modifierVibrato = 1,
-  modifierGlissando = 2,
-  modifierDetune = 3,
-  modifierAmptrans = 4,
-  modifierFreqtrans = 5,
-  modifierWave_type = 6
-} ModifierType;
 
 class SPAPartialAlignment;
 class REVPartialAlignment;
@@ -274,4 +243,4 @@ private:
     
 };
 
-#endif // FUNCTIONGENERATOR_H 
+#endif // FUNCTIONGENERATOR_HPP

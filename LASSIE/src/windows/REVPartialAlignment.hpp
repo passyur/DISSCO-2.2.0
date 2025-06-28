@@ -1,5 +1,5 @@
-#ifndef REVPARTIALALIGNMENT_H
-#define REVPARTIALALIGNMENT_H
+#ifndef REVPARTIALALIGNMENT_HPP
+#define REVPARTIALALIGNMENT_HPP
 
 
 #include "FunctionGenerator.hpp"
@@ -39,4 +39,4 @@ private:
     void roomSizeFunButtonClicked();
 };
 
-#endif // REVPARTIALALIGNMENT_H 
+#endif // REVPARTIALALIGNMENT_HPP

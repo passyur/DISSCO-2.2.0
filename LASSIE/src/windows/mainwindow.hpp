@@ -14,14 +14,14 @@
 #include <QStatusBar>
 
 #include "../inst.hpp"
-#include "projectview.hpp"
+#include "ProjectViewController.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class EnvelopeLibraryWindow;
-class MarkovWindow;
+class MarkovModelLibraryWindow;
 class ProjectView;
 
 class MainWindow : public QMainWindow
@@ -69,7 +69,7 @@ class MainWindow : public QMainWindow
 
         std::unique_ptr<Ui::MainWindow> ui;
         std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
-        std::unique_ptr<MarkovWindow> markovWindow;
+        std::unique_ptr<MarkovModelLibraryWindow> markovWindow;
 
         QString currentFile;
         

@@ -1,303 +1,267 @@
 #include "EnvelopeLibraryWindow.hpp"
-#include "../ui/ui_EnvelopeLibraryWindow.h"
 #include "EnvLibDrawingArea.hpp"
+#include "ProjectViewController.hpp"
 #include "EnvelopeLibraryEntry.hpp"
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QFileDialog>
-#include <QDomDocument>
-#include <QDomElement>
-#include <QTextStream>
-#include <QUndoStack>
-#include <QKeySequence>
-#include <QIcon>
 
-EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget *parent)
+#include <QTreeView>
+#include <QStandardItemModel>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
+#include <QAction>
+#include <QKeyEvent>
+#include <QHeaderView>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QSizePolicy>
+
+EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     : QMainWindow(parent)
-    , ui(new Ui::EnvelopeLibraryWindow)
-    , treeModel(new QStandardItemModel(this))
-    , drawingArea(nullptr)
-    , activeEnvelope(nullptr)
-    , undoStack(new QUndoStack(this))
 {
-    ui->setupUi(this);
-    setupUi();
-    createActions();
-    createMenus();
+    // Window setup
+    setWindowTitle("Envelope Library");
+    resize(600, 220); // Compact initial size
+
+    // Central widget and layout
+    QWidget* central = new QWidget(this);
+    auto* layout = new QVBoxLayout(central);
+
+    // Add button row for create/duplicate/delete
+    auto* buttonRow = new QWidget(this);
+    auto* buttonLayout = new QHBoxLayout(buttonRow);
+    QPushButton* btnCreate = new QPushButton("Create New Envelope", this);
+    QPushButton* btnDuplicate = new QPushButton("Duplicate Envelope", this);
+    QPushButton* btnDelete = new QPushButton("Delete Envelope", this);
+    buttonLayout->addWidget(btnCreate);
+    buttonLayout->addWidget(btnDuplicate);
+    buttonLayout->addWidget(btnDelete);
+    buttonRow->setLayout(buttonLayout);
+    layout->addWidget(buttonRow);
+    connect(btnCreate, &QPushButton::clicked, this, &EnvelopeLibraryWindow::createNewEnvelope);
+    connect(btnDuplicate, &QPushButton::clicked, this, &EnvelopeLibraryWindow::duplicateEnvelope);
+    connect(btnDelete, &QPushButton::clicked, this, &EnvelopeLibraryWindow::deleteEnvelope);
+
+    // Envelope list view (moved above drawing area)
+    envelopeLibrary = new QTreeView(this);
+    refModel = new QStandardItemModel(this);
+    refModel->setHorizontalHeaderLabels({ "Envelope Library Number" });
+    envelopeLibrary->setModel(refModel);
+    envelopeLibrary->header()->setStretchLastSection(true);
+    envelopeLibrary->setMinimumWidth(120); // Make the envelope list narrower
+    layout->addWidget(envelopeLibrary);
+
+    // Drawing area (moved below envelope list)
+    drawingArea = new EnvLibDrawingArea(this);
+    layout->addWidget(drawingArea);
+
+    // X/Y entry fields
+    xEntry = new QLineEdit(this);
+    yEntry = new QLineEdit(this);
+    xEntry->setPlaceholderText("X value");
+    yEntry->setPlaceholderText("Y value");
+
+    // Instead, create a horizontal layout for X/Y fields and legend:
+    QHBoxLayout* xyLegendLayout = new QHBoxLayout();
+    QWidget* xyWidget = new QWidget(this);
+    QFormLayout* xyForm = new QFormLayout();
+    xyForm->addRow("X value:", xEntry);
+    xyForm->addRow("Y value:", yEntry);
+    xyWidget->setLayout(xyForm);
+    xyLegendLayout->addWidget(xyWidget, 0, Qt::AlignLeft);
+    QLabel* legend = new QLabel("Right click the graph to see available actions or click-and-drag a node to adjust the envelope.\nThick segment = Flexible; Thin segment = Fixed.\nBlue = Linear; Green = Spline; Red = Exponential.", this);
+    legend->setWordWrap(true);
+    legend->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    xyLegendLayout->addWidget(legend, 1);
+    layout->addLayout(xyLegendLayout);
+
+    // Actions for context menu & save
+    actionAdd = new QAction("Create New Envelope", this);
+    connect(actionAdd, &QAction::triggered,
+            this, &EnvelopeLibraryWindow::createNewEnvelope);
+
+    actionDuplicate = new QAction("Duplicate Envelope", this);
+    connect(actionDuplicate, &QAction::triggered,
+            this, &EnvelopeLibraryWindow::duplicateEnvelope);
+
+    actionSave = new QAction("Save", this);
+    actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+    connect(actionSave, &QAction::triggered,
+            this, &EnvelopeLibraryWindow::fileSave);
+    addAction(actionSave);
+
+    // Build popup menu
+    popupMenu = new QMenu(this);
+    popupMenu->addAction(actionAdd);
+    popupMenu->addAction(actionDuplicate);
+
+    // Connect tree signals
+    connect(envelopeLibrary, &QTreeView::activated,
+            this, &EnvelopeLibraryWindow::objectActivated);
+    connect(envelopeLibrary->selectionModel(),
+            &QItemSelectionModel::currentChanged,
+            this,
+            &EnvelopeLibraryWindow::onCursorChanged);
+
+    envelopeLibrary->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(envelopeLibrary, &QWidget::customContextMenuRequested,
+            this, &EnvelopeLibraryWindow::onRightClick);
+
+    setCentralWidget(central);
+    drawingArea->setMinimumSize(200, 200); // Ensure it has a visible size
+    drawingArea->show(); // Explicitly show the widget
+    drawingArea->raise(); // Bring it to the front
+    drawingArea->repaint(); // Force repaint after window is shown
+}
+
+EnvelopeLibraryWindow::~EnvelopeLibraryWindow() = default;
+
+// Set the active project and populate the list
+void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
+{
+    drawingArea->clearGraph();
+    activeProject = project;
     refreshEnvelopeList();
-}
 
-EnvelopeLibraryWindow::~EnvelopeLibraryWindow()
-{
-    delete ui;
-}
-
-void EnvelopeLibraryWindow::setupUi()
-{
-    // Set up tree view
-    ui->envelopeTreeView->setModel(treeModel);
-    ui->envelopeTreeView->setHeaderHidden(true);
-    ui->envelopeTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->envelopeTreeView->setDragEnabled(true);
-    ui->envelopeTreeView->setAcceptDrops(true);
-    ui->envelopeTreeView->setDropIndicatorShown(true);
-
-    // Create drawing area
-    if (!drawingArea) {
-        drawingArea = new EnvLibDrawingArea(this);
-        QVBoxLayout* layout = new QVBoxLayout(ui->drawingAreaWidget);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(drawingArea);
+    EnvelopeLibraryEntry* entry = activeProject->getEnvelopeLibraryEntries();
+    while (entry) {
+        // append each entry to the tree
+        QStandardItem* item = new QStandardItem(entry->getNumberString());
+        // store the pointer in UserRole
+        item->setData(QVariant::fromValue<void*>(entry), Qt::UserRole);
+        refModel->appendRow(item);
+        entry = entry->next;
     }
-
-    // Connect signals
-    connect(ui->envelopeTreeView, &QTreeView::activated,
-            this, &EnvelopeLibraryWindow::onTreeItemActivated);
-    connect(ui->envelopeTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &EnvelopeLibraryWindow::onTreeSelectionChanged);
-    connect(ui->xValueEdit, &QLineEdit::textChanged,
-            this, &EnvelopeLibraryWindow::onValueEntriesChanged);
-    connect(ui->yValueEdit, &QLineEdit::textChanged,
-            this, &EnvelopeLibraryWindow::onValueEntriesChanged);
-    connect(ui->newButton, &QPushButton::clicked,
-            this, &EnvelopeLibraryWindow::onNewEnvelopeTriggered);
-    connect(ui->duplicateButton, &QPushButton::clicked,
-            this, &EnvelopeLibraryWindow::onDuplicateEnvelopeTriggered);
-    connect(ui->actionSave, &QAction::triggered,
-            this, &EnvelopeLibraryWindow::onSaveTriggered);
+    activeEnvelope = nullptr;
 }
 
-void EnvelopeLibraryWindow::createActions()
-{
-    newEnvelopeAction = new QAction(tr("Create &New Envelope"), this);
-    connect(newEnvelopeAction, &QAction::triggered,
-            this, &EnvelopeLibraryWindow::onNewEnvelopeTriggered);
-
-    duplicateEnvelopeAction = new QAction(tr("&Duplicate Envelope"), this);
-    connect(duplicateEnvelopeAction, &QAction::triggered,
-            this, &EnvelopeLibraryWindow::onDuplicateEnvelopeTriggered);
-
-    saveAction = ui->actionSave;
-    connect(saveAction, &QAction::triggered,
-            this, &EnvelopeLibraryWindow::onSaveTriggered);
-
-    undoAction = new QAction(QIcon::fromTheme("edit-undo"), tr("&Undo"), this);
-    undoAction->setShortcuts(QKeySequence::Undo);
-    undoAction->setEnabled(false);
-    connect(undoAction, &QAction::triggered, this, &EnvelopeLibraryWindow::onUndoTriggered);
-    connect(undoStack, &QUndoStack::canUndoChanged, undoAction, &QAction::setEnabled);
-
-    redoAction = new QAction(QIcon::fromTheme("edit-redo"), tr("&Redo"), this);
-    redoAction->setShortcuts(QKeySequence::Redo);
-    redoAction->setEnabled(false);
-    connect(redoAction, &QAction::triggered, this, &EnvelopeLibraryWindow::onRedoTriggered);
-    connect(undoStack, &QUndoStack::canRedoChanged, redoAction, &QAction::setEnabled);
-}
-
-void EnvelopeLibraryWindow::createMenus()
-{
-    contextMenu = new QMenu(this);
-    contextMenu->addAction(newEnvelopeAction);
-    contextMenu->addAction(duplicateEnvelopeAction);
-}
-
-void EnvelopeLibraryWindow::contextMenuEvent(QContextMenuEvent *event)
-{
-    contextMenu->exec(event->globalPos());
-}
-
-void EnvelopeLibraryWindow::closeEvent(QCloseEvent *event)
-{
-    // TODO: Check for unsaved changes
-    event->accept();
-}
-
+// Create a new envelope via the project controller
 void EnvelopeLibraryWindow::createNewEnvelope()
 {
-    bool ok;
-    QString name = QInputDialog::getText(this, tr("New Envelope"),
-                                       tr("Enter envelope name:"), QLineEdit::Normal,
-                                       QString(), &ok);
-    if (ok && !name.isEmpty()) {
-        // Create new envelope
-        auto envelope = new EnvelopeLibraryEntry(name);
-        
-        // Add to tree model
-        QStandardItem *item = new QStandardItem(name);
-        item->setData(QVariant::fromValue(envelope), Qt::UserRole);
-        treeModel->appendRow(item);
-        
-        // Set as active envelope
-        activeEnvelope = envelope;
-        ui->envelopeTreeView->setCurrentIndex(item->index());
-    }
+    if (!activeProject) return;
+    EnvelopeLibraryEntry* newEnv = activeProject->createNewEnvelope();
+    activeProject->modified();
+
+    QStandardItem* item = new QStandardItem(newEnv->getNumberString());
+    item->setData(QVariant::fromValue<void*>(newEnv), Qt::UserRole);
+    refModel->appendRow(item);
+
+    // Automatically select the new envelope
+    QModelIndex newIndex = refModel->index(refModel->rowCount() - 1, 0);
+    envelopeLibrary->setCurrentIndex(newIndex);
+    // This will trigger onCursorChanged and update the graph
 }
 
+// Duplicate the selected envelope
 void EnvelopeLibraryWindow::duplicateEnvelope()
 {
-    if (!activeEnvelope) {
-        QMessageBox::warning(this, tr("Duplicate Envelope"),
-                           tr("Please select an envelope to duplicate."));
-        return;
-    }
+    QModelIndex idx = envelopeLibrary->currentIndex();
+    if (!idx.isValid()) return;
 
-    bool ok;
-    QString name = QInputDialog::getText(this, tr("Duplicate Envelope"),
-                                       tr("Enter new envelope name:"), QLineEdit::Normal,
-                                       activeEnvelope->getName() + tr("_copy"), &ok);
-    if (ok && !name.isEmpty()) {
-        // Create new envelope as a copy
-        auto envelope = new EnvelopeLibraryEntry(*activeEnvelope);
-        envelope->setName(name);
-        
-        // Add to tree model
-        QStandardItem *item = new QStandardItem(name);
-        item->setData(QVariant::fromValue(envelope), Qt::UserRole);
-        treeModel->appendRow(item);
-        
-        // Set as active envelope
-        activeEnvelope = envelope;
-        ui->envelopeTreeView->setCurrentIndex(item->index());
-    }
+    QStandardItem* origItem = refModel->itemFromIndex(idx);
+    auto ptr = static_cast<EnvelopeLibraryEntry*>(origItem->data(Qt::UserRole).value<void*>());
+    if (!ptr || !activeProject) return;
+
+    EnvelopeLibraryEntry* dupEnv = activeProject->duplicateEnvelope(ptr);
+    activeProject->modified();
+
+    QStandardItem* newItem = new QStandardItem(dupEnv->getNumberString());
+    newItem->setData(QVariant::fromValue<void*>(dupEnv), Qt::UserRole);
+    refModel->appendRow(newItem);
 }
 
-void EnvelopeLibraryWindow::setEntries(const QString& x, const QString& y)
+// Delete the selected envelope
+void EnvelopeLibraryWindow::deleteEnvelope()
 {
-    ui->xValueEdit->setText(x);
-    ui->yValueEdit->setText(y);
+    QModelIndex idx = envelopeLibrary->currentIndex();
+    if (!idx.isValid()) return;
+
+    QStandardItem* item = refModel->itemFromIndex(idx);
+    auto ptr = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
+    if (!ptr || !activeProject) return;
+
+    activeProject->deleteEnvelope(ptr);
+    activeProject->modified();
+
+    refModel->removeRow(idx.row());
 }
 
-EnvelopeLibraryEntry* EnvelopeLibraryWindow::getActiveEnvelope()
+// Return the active envelope pointer
+EnvelopeLibraryEntry* EnvelopeLibraryWindow::getActiveEnvelope() const
 {
     return activeEnvelope;
 }
 
-QString EnvelopeLibraryWindow::folderSelected()
+// Handle double‐click/Enter on a tree item
+void EnvelopeLibraryWindow::objectActivated(const QModelIndex& index)
 {
-    QModelIndex index = ui->envelopeTreeView->currentIndex();
-    if (!index.isValid())
-        return QString();
-    return treeModel->data(index, Qt::DisplayRole).toString();
+    if (!index.isValid()) return;
+    QStandardItem* item = refModel->itemFromIndex(index);
+    activeEnvelope = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
+
+    drawingArea->resetFields();
+    drawingArea->adjustBoundary(activeEnvelope);
+    drawingArea->showGraph(activeEnvelope);
+    drawingArea->update();
 }
 
-void EnvelopeLibraryWindow::onTreeItemActivated(const QModelIndex &index)
+// Handle selection changes
+void EnvelopeLibraryWindow::onCursorChanged(const QModelIndex& current,
+                                            const QModelIndex&)
 {
-    if (!index.isValid())
-        return;
+    if (!current.isValid()) return;
+    QStandardItem* item = refModel->itemFromIndex(current);
+    activeEnvelope = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
 
-    QStandardItem *item = treeModel->itemFromIndex(index);
-    if (!item)
-        return;
-
-    // Get envelope from item data
-    activeEnvelope = item->data(Qt::UserRole).value<EnvelopeLibraryEntry*>();
-    if (activeEnvelope) {
-        drawingArea->setEnvelope(activeEnvelope);
-    }
+    drawingArea->resetFields();
+    drawingArea->adjustBoundary(activeEnvelope);
+    drawingArea->showGraph(activeEnvelope);
+    drawingArea->update();
 }
 
-void EnvelopeLibraryWindow::onTreeSelectionChanged()
+// Show right‐click context menu
+void EnvelopeLibraryWindow::onRightClick(const QPoint& pos)
 {
-    QModelIndex index = ui->envelopeTreeView->currentIndex();
-    if (!index.isValid()) {
-        activeEnvelope = nullptr;
-        drawingArea->setEnvelope(nullptr);
-        return;
-    }
-
-    QStandardItem *item = treeModel->itemFromIndex(index);
-    if (!item)
-        return;
-
-    // Get envelope from item data
-    activeEnvelope = item->data(Qt::UserRole).value<EnvelopeLibraryEntry*>();
-    if (activeEnvelope) {
-        drawingArea->setEnvelope(activeEnvelope);
-    }
+    QModelIndex idx = envelopeLibrary->indexAt(pos);
+    if (!idx.isValid()) return;
+    popupMenu->exec(envelopeLibrary->viewport()->mapToGlobal(pos));
 }
 
-void EnvelopeLibraryWindow::onValueEntriesChanged()
-{
-    if (!activeEnvelope)
-        return;
-
-    bool xOk, yOk;
-    double x = ui->xValueEdit->text().toDouble(&xOk);
-    double y = ui->yValueEdit->text().toDouble(&yOk);
-
-    if (xOk && yOk) {
-        // Update envelope values
-        if (drawingArea) {
-            drawingArea->updateSelectedNode(x, y);
-        }
-    }
-}
-
-void EnvelopeLibraryWindow::onNewEnvelopeTriggered()
-{
-    createNewEnvelope();
-}
-
-void EnvelopeLibraryWindow::onDuplicateEnvelopeTriggered()
-{
-    duplicateEnvelope();
-}
-
-void EnvelopeLibraryWindow::onSaveTriggered()
-{
-    if (!activeEnvelope) {
-        QMessageBox::warning(this, tr("Save Envelope"),
-                           tr("Please select an envelope to save."));
-        return;
-    }
-
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Envelope"),
-                                                  QString(),
-                                                  tr("XML Files (*.xml);;All Files (*)"));
-    if (fileName.isEmpty())
-        return;
-
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::warning(this, tr("Save Envelope"),
-                           tr("Cannot write file %1:\n%2.")
-                           .arg(QDir::toNativeSeparators(fileName),
-                                file.errorString()));
-        return;
-    }
-
-    QDomDocument doc("envelope");
-    QDomElement root = doc.createElement("envelope");
-    doc.appendChild(root);
-    activeEnvelope->saveToXml(doc, root);
-
-    QTextStream out(&file);
-    doc.save(out, 4);
-}
-
+// Clear and rebuild the model
 void EnvelopeLibraryWindow::refreshEnvelopeList()
 {
-    treeModel->clear();
-    treeModel->setHorizontalHeaderLabels(QStringList() << tr("Envelopes"));
+    refModel->removeRows(0, refModel->rowCount());
 }
 
-void EnvelopeLibraryWindow::showEnvelopeLibrary()
+// Save via project controller
+void EnvelopeLibraryWindow::fileSave()
 {
-    show();
-    raise();
-    activateWindow();
+    if (activeProject) activeProject->save();
 }
 
-void EnvelopeLibraryWindow::onUndoTriggered()
+// Capture Ctrl+S
+void EnvelopeLibraryWindow::keyPressEvent(QKeyEvent* event)
 {
-    if (undoStack) {
-        undoStack->undo();
+    if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_S) {
+        fileSave();
+        return;
     }
+    QMainWindow::keyPressEvent(event);
 }
 
-void EnvelopeLibraryWindow::onRedoTriggered()
+// Called whenever X or Y entry changes
+void EnvelopeLibraryWindow::valueEntriesChanged()
 {
-    if (undoStack) {
-        undoStack->redo();
-    }
+    if (!drawingArea) return;
+    drawingArea->setActiveNodeCoordinate(
+        xEntry->text(),
+        yEntry->text());
+}
+
+// Update the line edits from code
+void EnvelopeLibraryWindow::setEntries(const QString& x, const QString& y)
+{
+    xEntry->setText(x);
+    yEntry->setText(y);
 } 

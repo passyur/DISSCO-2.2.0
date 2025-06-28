@@ -21,8 +21,8 @@
 #include <QMessageBox>
 
 // #include "Define.h"
-#include "projectview.hpp"
-#include "mainwindow.hpp"
+#include "ProjectViewController.hpp"
+#include "MainWindow.hpp"
 #include "../inst.hpp"
 #include "EnvelopeLibraryEntry.hpp"
 #include "ProjectPropertiesDialog.hpp"
@@ -126,14 +126,14 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
     // initialize default note modifiers
     initializeModifiers();
-    // initialize envelope library entries
-    envelopeLibraryEntries = NULL;
+    // initialize envelope library entries with a default envelope
+    envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
 }
 
 
 // ProjectView::~ProjectView(){}
 
-/* Function to initialize project modifiers *///  REMOVE FUNCTION
+/* Function to initialize project modifiers */
 void ProjectView::initializeModifiers() {
     defaultNoteModifiers.insert(pair<string,bool>("-8va",true));
 	defaultNoteModifiers.insert(pair<string,bool>("+8va",true));
@@ -195,9 +195,9 @@ QString ProjectView::inlineXml(QDomDocument& doc) {
 
 /* Function that creates and saves the xml .dissco file */
 void ProjectView::save(){
+    qDebug() << "In Project View Save Function";
 
     modifiedButNotSaved = false; // changes bool value because file is being saved
-
     // creates the file with the specified /path/name.dissco
     QFile file(pathAndName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -255,15 +255,15 @@ void ProjectView::save(){
 
             xmlWriter.writeStartElement("NumberOfStaff");	
                 xmlWriter.writeCharacters(num_staff);
-            xmlWriter.writeEndElement();
+            xmlWriter.writeEndElement();   
 
             xmlWriter.writeStartElement("NumberOfChannels");	
                 xmlWriter.writeCharacters(num_channels);
-            xmlWriter.writeEndElement();
+            xmlWriter.writeEndElement(); 
 
             xmlWriter.writeStartElement("SampleRate");	
                 xmlWriter.writeCharacters(sample_rate);
-            xmlWriter.writeEndElement();
+            xmlWriter.writeEndElement(); 
 
             xmlWriter.writeStartElement("SampleSize");	
                 xmlWriter.writeCharacters(sample_size);
@@ -271,7 +271,7 @@ void ProjectView::save(){
 
             xmlWriter.writeStartElement("NumberOfThreads");	
                 xmlWriter.writeCharacters(num_threads);
-            xmlWriter.writeEndElement();
+            xmlWriter.writeEndElement(); 
 
             xmlWriter.writeStartElement("OutputParticel");
                 xmlWriter.writeCharacters(output_particel ? "True" : "False");
@@ -279,7 +279,7 @@ void ProjectView::save(){
 
             xmlWriter.writeStartElement("Seed");	
                 xmlWriter.writeCharacters(seed);
-            xmlWriter.writeEndElement();
+            xmlWriter.writeEndElement(); 
 
         xmlWriter.writeEndElement();
 
@@ -307,19 +307,19 @@ void ProjectView::save(){
                     }
                 }
             xmlWriter.writeEndElement();       
-        xmlWriter.writeEndElement();
+        xmlWriter.writeEndElement(); 
 
         xmlWriter.writeStartElement("EnvelopeLibrary");	
             /* STILL IN PROGRESS  */
-            if (envelopeLibraryEntries !=NULL){
-                EnvelopeLibraryEntry* envLib = envelopeLibraryEntries;
-                int count = envLib->getPointCount();
-                xmlWriter.writeCharacters(QString::number(count));
-                count = 1;
-                while (envLib!=NULL){
-                    xmlWriter.writeCharacters("Envelope " + QString::number(count));
-                }
-            }
+            // if (envelopeLibraryEntries !=NULL){
+            //     EnvelopeLibraryEntry* envLib = envelopeLibraryEntries;
+            //     int count = envLib->head->countNumOfNodes();
+            //     xmlWriter.writeCharacters(QString::number(count));
+            //     count = 1;
+            //     while (envLib!=NULL){
+            //         xmlWriter.writeCharacters("Envelope " + QString::number(count));
+            //     }
+            // }
         xmlWriter.writeEndElement();
 
         xmlWriter.writeStartElement("MarkovModelLibrary");	
@@ -357,7 +357,7 @@ void ProjectView::setProperties() {
     projectPropertiesDialog->ui->topEventEntry->setText(top_event);
     projectPropertiesDialog->ui->durationEntry->setText(duration);
 
-
+ 
     if (projectPropertiesDialog->exec() == QDialog::Accepted) {
         QString new_title = projectPropertiesDialog->ui->titleEntry->text();
         file_flag = projectPropertiesDialog->ui->flagEntry->text();
@@ -424,4 +424,26 @@ void ProjectView::modified(){
   if (modifiedButNotSaved){
     mainWindow->setUnsavedTitle(pathAndName);
   }
+}
+// nhi: delete envelope
+void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {
+    if (!envelopeLibraryEntries || !toDelete) return;
+    if (envelopeLibraryEntries == toDelete) {
+        EnvelopeLibraryEntry* next = envelopeLibraryEntries->next;
+        if (next) next->prev = nullptr;
+        delete envelopeLibraryEntries;
+        envelopeLibraryEntries = next;
+        return;
+    }
+    EnvelopeLibraryEntry* curr = envelopeLibraryEntries;
+    while (curr && curr->next) {
+        if (curr->next == toDelete) {
+            EnvelopeLibraryEntry* del = curr->next;
+            curr->next = del->next;
+            if (del->next) del->next->prev = curr;
+            delete del;
+            return;
+        }
+        curr = curr->next;
+    }
 }

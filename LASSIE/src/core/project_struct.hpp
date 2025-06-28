@@ -26,6 +26,8 @@ class ProjectManager;
 
 // class IEvent;
 
+class EnvelopeLibraryEntry;
+
 class Project : public QObject {
     friend class ProjectManager;
 

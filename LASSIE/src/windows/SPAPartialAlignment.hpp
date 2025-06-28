@@ -1,5 +1,5 @@
-#ifndef SPAPARTIALALIGNMENT_H
-#define SPAPARTIALALIGNMENT_H
+#ifndef SPAPARTIALALIGNMENT_HPP
+#define SPAPARTIALALIGNMENT_HPP
 
 #include "FunctionGenerator.hpp"
 
@@ -39,4 +39,4 @@ private:
     // void insertPartialButtonClicked();
 };
 
-#endif // SPAPARTIALALIGNMENT_H 
+#endif // SPAPARTIALALIGNMENT_HPP

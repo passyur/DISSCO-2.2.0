@@ -1,107 +1,118 @@
-#ifndef ENVELOPELIBRARYENTRY_HPP
-#define ENVELOPELIBRARYENTRY_HPP
+#ifndef ENVELOPE_LIBRARY_ENTRY_HPP
+#define ENVELOPE_LIBRARY_ENTRY_HPP
 
 #include <QString>
-#include <vector>
-#include <memory>
-#include <QPointF>
+#include "LASSIE.h"
+#include "../../LASS/src/Envelope.h"
 
-// Forward declarations
-class QDomDocument;
-class QDomElement;
-
-// Enums for envelope segment types and properties
-enum class EnvelopeSegmentType {
-    Linear,
-    Exponential,
-    Spline
+/// Types of interpolation between nodes
+enum envSegmentType {
+  envSegmentTypeLinear,
+  envSegmentTypeExponential,
+  envSegmentTypeSpline
 };
 
-enum class EnvelopeSegmentProperty {
-    None,
-    Fixed,
-    Tied
+/// Whether segment length is fixed or flexible
+enum envSegmentProperty {
+  envSegmentPropertyFlexible,
+  envSegmentPropertyFixed
 };
 
-// Structure to represent a node in the envelope
-struct EnvelopeNode {
-    double x;
-    double y;
-    EnvelopeNode* next;
-    EnvelopeNode* prev;
+class EnvLibEntryNode;
+class EnvLibEntrySeg {
+public:
+  EnvLibEntryNode* leftNode;   ///< pointer to node at start of this segment
+  EnvLibEntryNode* rightNode;  ///< pointer to node at end of this segment
+  envSegmentType segmentType;      ///< interpolation type
+  envSegmentProperty segmentProperty;  ///< length property
 
-    EnvelopeNode(double x = 0.0, double y = 0.0)
-        : x(x), y(y), next(nullptr), prev(nullptr) {}
+  /** 
+   * @brief Default constructor: sets up a linear, flexible segment 
+   */
+  EnvLibEntrySeg();
+
+  /** @brief Default destructor */
+  ~EnvLibEntrySeg() {}
 };
 
-// Structure to represent a segment in the envelope
-struct EnvelopeSegment {
-    EnvelopeNode* startNode;
-    EnvelopeNode* endNode;
-    EnvelopeSegmentType type;
-    EnvelopeSegmentProperty property;
+class EnvLibEntryNode {
+public:
+  double x;                 ///< time or parameter value
+  double y;                 ///< amplitude or value
+  EnvLibEntrySeg* leftSeg;  ///< segment coming into this node
+  EnvLibEntrySeg* rightSeg; ///< segment leaving this node
 
-    EnvelopeSegment(EnvelopeNode* start = nullptr, EnvelopeNode* end = nullptr,
-                   EnvelopeSegmentType t = EnvelopeSegmentType::Linear,
-                   EnvelopeSegmentProperty p = EnvelopeSegmentProperty::None)
-        : startNode(start), endNode(end), type(t), property(p) {}
+  /**
+   * @brief Construct a node at coordinates (_x, _y)
+   * @param _x  x-coordinate
+   * @param _y  y-coordinate
+   */
+  EnvLibEntryNode(double _x, double _y);
+
+  /** @brief Default destructor */
+  ~EnvLibEntryNode() {}
+
+  /**
+   * @brief Count this node plus all nodes reachable to the right
+   * @return number of nodes from this to list end
+   */
+  int countNumOfNodes();
 };
 
 class EnvelopeLibraryEntry {
 public:
-    // Constructors and destructor
-    explicit EnvelopeLibraryEntry(const QString& name = QString());
-    EnvelopeLibraryEntry(const EnvelopeLibraryEntry& other);
-    ~EnvelopeLibraryEntry();
+  EnvLibEntryNode* head;          ///< head of the node/segment list
+  int number;                     ///< envelope ID
+  EnvelopeLibraryEntry* next;     ///< next in the library list
+  EnvelopeLibraryEntry* prev;     ///< previous in the library list
 
-    // Node operations
-    int addNode(double x, double y);
-    void removeNode(int index);
-    void moveNode(int index, double x, double y);
-    int findClosestNode(double x, double y, double threshold) const;
-    const EnvelopeNode* getNode(int index) const;
+  /**
+   * @brief Create a fresh envelope with given index
+   * @param _number  index for this entry
+   */
+  EnvelopeLibraryEntry(int _number);
 
-    // Point operations for EnvLibDrawingArea
-    void addPoint(const QPointF& point);
-    void removePoint(int index);
-    void movePoint(int index, const QPointF& point);
-    void insertPoint(int index, const QPointF& point);
-    QPointF getPoint(int index) const;
-    int findPoint(const QPointF& point) const;
-    int getPointCount() const;
+  /**
+   * @brief Copy-construct an entry from an existing one
+   * @param _originalEnvelope  entry to duplicate
+   * @param _number            new index
+   */
+  EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelope, int _number);
 
-    // Segment operations
-    void addSegment(int startIndex, int endIndex,
-                   EnvelopeSegmentType type = EnvelopeSegmentType::Linear,
-                   EnvelopeSegmentProperty property = EnvelopeSegmentProperty::None);
-    void removeSegment(int startIndex, int endIndex);
-    void setSegmentType(int startIndex, int endIndex, EnvelopeSegmentType type);
-    void setSegmentProperty(int startIndex, int endIndex, EnvelopeSegmentProperty property);
-    const EnvelopeSegment* getSegment(int startIndex, int endIndex) const;
+  /**
+   * @brief Build from an LASSIE Envelope object
+   * @param _envelope  source Envelope
+   * @param _number    new index
+   */
+  EnvelopeLibraryEntry(Envelope* _envelope, int _number);
 
-    // File operations
-    void saveToXml(QDomDocument& doc, QDomElement& element) const;
-    void loadFromXml(const QDomElement& element);
+  /** @brief Destructor (cleanup segments/nodes if desired) */
+  ~EnvelopeLibraryEntry();
 
-    // Getters and setters
-    QString getName() const { return name; }
-    void setName(const QString& newName) { name = newName; }
-    double getMinY() const { return minY; }
-    void setMinY(double value) { minY = value; }
-    double getMaxY() const { return maxY; }
-    void setMaxY(double value) { maxY = value; }
+  /**
+   * @brief Count how many entries in the doubly-linked list
+   * @return total entries including this
+   */
+  int count();
 
-private:
-    QString name;
-    double minY;
-    double maxY;
-    EnvelopeNode* firstNode;
-    std::vector<std::unique_ptr<EnvelopeSegment>> segments;
+  /**
+   * @brief Append a new, empty envelope entry after this one
+   * @return pointer to the new entry
+   */
+  EnvelopeLibraryEntry* createNewEnvelope();
+
+  /**
+   * @brief Append a duplicated envelope entry after this one
+   * @param _originalEnvelope  which entry to duplicate
+   * @return pointer to the new duplicate
+   */
+  EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);
+
+  /**
+   * @brief Get this entry's number as a QString
+   * @return number converted to QString
+   */
+  QString getNumberString() const;
 };
 
-// Register this type with Qt's meta-object system
-#include <QMetaType>
-Q_DECLARE_METATYPE(std::shared_ptr<EnvelopeLibraryEntry>)
-Q_DECLARE_METATYPE(EnvelopeLibraryEntry*)
-
-#endif // ENVELOPELIBRARYENTRY_H 
+#endif // ENVELOPE_LIBRARY_ENTRY_HPP
