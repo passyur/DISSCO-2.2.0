@@ -2,11 +2,13 @@
 #define PROJECTVIEW_HPP
 
 #include "mainwindow.hpp"
-#include "core/project_struct.hpp"
+#include "ProjectPropertiesDialog.hpp"
+#include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
 #include "EnvelopeLibraryEntry.h"
 
 class MainWindow;
+class ProjectPropertiesDialog;
 
 class ProjectView : public QObject {
     Q_OBJECT
@@ -28,8 +30,10 @@ class ProjectView : public QObject {
         // void showContents();
         // void hideContents();
 
-        /* function to write to the xml .dissco file */
+        /* functions to write to the xml .dissco file */
         void save();
+        QString inlineXml(QDomDocument& doc);
+
         /* function called when changes made to project */
         void modified();
 
@@ -44,6 +48,7 @@ class ProjectView : public QObject {
     private:
         /* storing main window */
         MainWindow* mainWindow;
+        ProjectPropertiesDialog* projectPropertiesDialog = nullptr;
         /* storing saved state of project */
         bool modifiedButNotSaved;
 

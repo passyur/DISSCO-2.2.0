@@ -19,7 +19,7 @@ target_link_libraries(CMOD PUBLIC ${SNDFILE_LIBRARY})
 target_link_libraries(CMOD PUBLIC ${XercesC_LIBRARY})
 # add_subdirectory(${CMAKE_SOURCE_DIR}/external-libs/muParser)
 target_link_libraries(CMOD PRIVATE MUPARSER)
-target_link_libraries(CMOD PRIVATE LASS)
+target_link_libraries(CMOD PUBLIC LASS)
 message(STATUS "libsndfile, libxerces-c, muParser, and LASS includes linked with target!")
 
 ### _external_ library checkers for informative errors ###

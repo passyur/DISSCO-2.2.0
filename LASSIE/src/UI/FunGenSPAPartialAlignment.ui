@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SPAPartialAlignment</class>
+ <widget class="QWidget" name="SpaPartialAlignment">
+  <layout class="QHBoxLayout" name="spaPartialAlignmentLayout">
+    <item>
+        <widget class="QLabel" name="spaPartialEnvelopeLabel">
+            <property name="text">
+            <string>Envelope:</string>
+            </property>
+        </widget>
+    </item>
+    <item>
+         <widget class="QLineEdit" name="spaPartialEnvelopeEdit"/>
+    </item>
+    <item>
+        <widget class="QPushButton" name="spaPartialFunButton">
+            <property name="text">
+            <string>fn</string>
+            </property>
+        </widget>
+    </item>
+    <item>
+        <widget class="QPushButton" name="spaPartialRemoveButton">
+            <property name="text">
+            <string>Rm.</string>
+            </property>
+        </widget>
+    </item>
+    <item>
+        <widget class="QPushButton" name="spaPartialInsertButton">
+            <property name="text">
+            <string>Ins.</string>
+            </property>
+        </widget>
+    </item>
+  </layout>
+ </widget>
+</ui>
+
+

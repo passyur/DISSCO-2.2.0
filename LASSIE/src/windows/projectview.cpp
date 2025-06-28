@@ -10,6 +10,7 @@
 #include <QXmlStreamWriter>
 #include<QDebug>
 #include <QTextStream>
+#include <QDomDocument>
 
 #include <QDialog>
 #include <QVBoxLayout>
@@ -22,7 +23,7 @@
 // #include "Define.h"
 #include "projectview.hpp"
 #include "mainwindow.hpp"
-#include "inst.hpp"
+#include "../inst.hpp"
 #include "EnvelopeLibraryEntry.h"
 #include "ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
@@ -132,7 +133,7 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
 // ProjectView::~ProjectView(){}
 
-/* Function to initialize project modifiers */
+/* Function to initialize project modifiers *///  REMOVE FUNCTION
 void ProjectView::initializeModifiers() {
     defaultNoteModifiers.insert(pair<string,bool>("-8va",true));
 	defaultNoteModifiers.insert(pair<string,bool>("+8va",true));
@@ -184,6 +185,14 @@ void ProjectView::initializeModifiers() {
     }
 }
 
+// Function to write XML Formatting
+QString ProjectView::inlineXml(QDomDocument& doc) {
+    QString str = doc.toString();
+    str.remove(QRegularExpression("[\\n\\t\\r]+"));
+    str.replace(QRegularExpression(">\\s+<"), "><");
+    return str;
+}
+
 /* Function that creates and saves the xml .dissco file */
 void ProjectView::save(){
 
@@ -220,7 +229,16 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Duration");	
-                xmlWriter.writeCharacters(duration);
+                QDomDocument tempDoc;
+                if (tempDoc.setContent(duration.trimmed()) && !tempDoc.documentElement().isNull()) {
+                    // Write raw XML inside <Duration>
+                    QString durationXML = inlineXml(tempDoc);
+                    xmlWriter.writeCharacters("");
+                    xmlWriter.device()->write(durationXML.toUtf8());
+                } else {
+                    // String/Number inside <Duration>
+                    xmlWriter.writeCharacters(duration);
+                }
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Synthesis");
@@ -320,38 +338,40 @@ void ProjectView::save(){
 }
 
 void ProjectView::setProperties() {
-    ProjectPropertiesDialog dialog(mainWindow);
+    if (!projectPropertiesDialog) {
+        projectPropertiesDialog = new ProjectPropertiesDialog(mainWindow);
+        connect(projectPropertiesDialog->ui->insertFunctionButton, &QPushButton::clicked, this, &ProjectView::propertiesInsertFunction);
+    }
 
-    dialog.ui->titleEntry->setText(project_title);
-    dialog.ui->flagEntry->setText(file_flag);
-    dialog.ui->numChannelsEntry->setText(num_channels);
-    dialog.ui->rateEntry->setText(sample_rate);
-    dialog.ui->sizeEntry->setText(sample_size);
-    dialog.ui->numThreadsEntry->setText(num_threads);
-    dialog.ui->synthesisCheckBox->setCheckState(synthesis ? Qt::Checked : Qt::Unchecked);
-    dialog.ui->scoreCheckBox->setCheckState(score ? Qt::Checked : Qt::Unchecked);
-    dialog.ui->staffCheckBox->setCheckState(grandStaff ? Qt::Checked : Qt::Unchecked);
-    dialog.ui->numStaffEntry->setText(num_staff);
-    dialog.ui->particelBox->setCheckState(output_particel ? Qt::Checked : Qt::Unchecked);
-    dialog.ui->topEventEntry->setText(top_event);
-    dialog.ui->durationEntry->setText(duration);
+    projectPropertiesDialog->ui->titleEntry->setText(project_title);
+    projectPropertiesDialog->ui->flagEntry->setText(file_flag);
+    projectPropertiesDialog->ui->numChannelsEntry->setText(num_channels);
+    projectPropertiesDialog->ui->rateEntry->setText(sample_rate);
+    projectPropertiesDialog->ui->sizeEntry->setText(sample_size);
+    projectPropertiesDialog->ui->numThreadsEntry->setText(num_threads);
+    projectPropertiesDialog->ui->synthesisCheckBox->setCheckState(synthesis ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->scoreCheckBox->setCheckState(score ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->staffCheckBox->setCheckState(grandStaff ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->numStaffEntry->setText(num_staff);
+    projectPropertiesDialog->ui->particelBox->setCheckState(output_particel ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->topEventEntry->setText(top_event);
+    projectPropertiesDialog->ui->durationEntry->setText(duration);
 
-    connect(dialog.ui->insertFunctionButton, &QPushButton::clicked, this, &ProjectView::propertiesInsertFunction);
-    
-    if (dialog.exec() == QDialog::Accepted) {
-        QString new_title = dialog.ui->titleEntry->text();
-        file_flag = dialog.ui->flagEntry->text();
-        num_channels = dialog.ui->numChannelsEntry->text();
-        sample_rate = dialog.ui->rateEntry->text();
-        sample_size = dialog.ui->sizeEntry->text();
-        num_threads = dialog.ui->numThreadsEntry->text();
-        synthesis = dialog.ui->synthesisCheckBox->isChecked();
-        score = dialog.ui->scoreCheckBox->isChecked();
-        grandStaff = dialog.ui->staffCheckBox->isChecked();
-        num_staff = dialog.ui->numStaffEntry->text();
-        output_particel = dialog.ui->particelBox->isChecked();
-        top_event = dialog.ui->topEventEntry->text();
-        duration = dialog.ui->durationEntry->text();
+
+    if (projectPropertiesDialog->exec() == QDialog::Accepted) {
+        QString new_title = projectPropertiesDialog->ui->titleEntry->text();
+        file_flag = projectPropertiesDialog->ui->flagEntry->text();
+        num_channels = projectPropertiesDialog->ui->numChannelsEntry->text();
+        sample_rate = projectPropertiesDialog->ui->rateEntry->text();
+        sample_size = projectPropertiesDialog->ui->sizeEntry->text();
+        num_threads = projectPropertiesDialog->ui->numThreadsEntry->text();
+        synthesis = projectPropertiesDialog->ui->synthesisCheckBox->isChecked();
+        score = projectPropertiesDialog->ui->scoreCheckBox->isChecked();
+        grandStaff = projectPropertiesDialog->ui->staffCheckBox->isChecked();
+        num_staff = projectPropertiesDialog->ui->numStaffEntry->text();
+        output_particel = projectPropertiesDialog->ui->particelBox->isChecked();
+        top_event = projectPropertiesDialog->ui->topEventEntry->text();
+        duration = projectPropertiesDialog->ui->durationEntry->text();
 
         if (new_title != project_title) {
             QString old_pathAndName = pathAndName;
@@ -364,19 +384,22 @@ void ProjectView::setProperties() {
 
         modifiedButNotSaved = true;
         modified();
-    } 
+        delete projectPropertiesDialog;
+        projectPropertiesDialog = NULL;
+    }
 }
 
 void ProjectView::propertiesInsertFunction() {
-    // functionReturnFloat
-    FunctionGenerator generator(mainWindow, functionReturnFloat);
-    if (generator.exec() == QDialog::Accepted) {
-        // QString result = generator.getResultString();
-        // if (!result.isEmpty()) {
-        //     // Update whatever field you need, e.g. duration line edit:
-        //     ui->durationEntry->setText(result);
-        // }
+    if (!projectPropertiesDialog) return;
+    FunctionGenerator* generator = new FunctionGenerator(mainWindow, functionReturnFloat, duration);
+    if (generator->exec() == QDialog::Accepted) {
+        QString result = generator->getResultString();
+        if (!result.isEmpty()) {
+            duration = result;
+            projectPropertiesDialog->ui->durationEntry->setText(duration);
+        }
     }
+    delete generator;
 }
 
 

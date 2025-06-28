@@ -232,16 +232,16 @@
     <widget class="QWidget" name="randomDensityPage">
       <layout class="QVBoxLayout" name="randomDensityFormLayout">
             <item>
-            <layout class="QHBoxLayout" name="randomDensityEnvIDFormLayout">
+            <layout class="QHBoxLayout" name="randomDensityEnvFormLayout">
                 <item>
-                    <widget class="QLabel" name="randomDensityEnvIDLabel">
+                    <widget class="QLabel" name="randomDensityEnvLabel">
                     <property name="text">
                     <string>Envelope Id:</string>
                     </property>
                     </widget>
                 </item>
                 <item>
-                    <widget class="QLineEdit" name="randomDensityEnvIDEdit"/>
+                    <widget class="QLineEdit" name="randomDensityEnvEdit"/>
                 </item>
             </layout>
             </item>
@@ -358,6 +358,7 @@
     <widget class="QWidget" name="decayPage">
       <layout class="QVBoxLayout" name="decayFormLayout">
         <item>
+        <widget class="QGroupBox" name="decayTypeGroup">
         <layout class="QHBoxLayout" name="decayTypeLayout">
             <item>
                 <widget class="QLabel" name="decayTypeLabel">
@@ -381,6 +382,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="decayBaseLayout">
@@ -471,6 +473,7 @@
     <widget class="QWidget" name="stochosPage">
       <layout class="QVBoxLayout" name="stochosFormLayout">
         <item>
+        <widget class="QGroupBox" name="stochosMethodGroup">
         <layout class="QHBoxLayout" name="stochosMethodLayout">
             <item>
                 <widget class="QLabel" name="stochosMethodLabel">
@@ -494,6 +497,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="stochosOffsetLayout">
@@ -517,7 +521,7 @@
             </property>
             <widget class="QWidget" name="stochosScrollWindowNodes">
                 <layout class="QVBoxLayout" name="stochosScrollLayout">
-                <!-- Nodes will be dynamically added here in code -->
+                    <!-- FunGenStochosSubAlignment.ui -->
                 </layout>
             </widget>
             </widget>
@@ -574,7 +578,7 @@
             </property>
             <widget class="QWidget" name="selectScrollWindowNodes">
                 <layout class="QVBoxLayout" name="selectScrollLayout">
-                <!-- Nodes will be dynamically added here in code -->
+                    <!-- FunGenSelectSubAlignment.ui -->
                 </layout>
             </widget>
             </widget>
@@ -689,6 +693,7 @@
         </layout>
         </item>
         <item>
+        <widget class="QGroupBox" name="valuePickElementsGroup">
         <layout class="QHBoxLayout" name="valuePickElementsLayout">
             <item>
                 <widget class="QLabel" name="valuePickElementsLabel">
@@ -726,6 +731,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="valuePickValuesElementsFormLayout">
@@ -756,6 +762,7 @@
         </layout>
         </item>
         <item>
+        <widget class="QGroupBox" name="valuePickWeightsGroup">
         <layout class="QHBoxLayout" name="valuePickWeightsLayout">
             <item>
                 <widget class="QLabel" name="valuePickWeightsLabel">
@@ -786,6 +793,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="valuePickValuesWeightsFormLayout">
@@ -802,6 +810,7 @@
         </layout>
         </item>
         <item>
+        <widget class="QGroupBox" name="valuePickTypeGroup">
         <layout class="QHBoxLayout" name="valuePickTypeLayout">
             <item>
                 <widget class="QLabel" name="valuePickTypeLabel">
@@ -825,6 +834,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
       </layout>
     </widget>
@@ -861,6 +871,7 @@
     <widget class="QWidget" name="getPatternPage">
       <layout class="QVBoxLayout" name="getPatternFormLayout">        
         <item>
+        <widget class="QGroupBox" name="getPatternMethodGroup">
         <layout class="QHBoxLayout" name="getPatternMethodLayout">
             <item>
                 <widget class="QLabel" name="getPatternMethodLabel">
@@ -905,6 +916,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="getPatternOriginFormLayout">
@@ -940,7 +952,7 @@
                 <widget class="QLineEdit" name="getPatternChooseEdit"/>
             </item>
             <item>
-                <widget class="QPushButton" name="InsertFn">
+                <widget class="QPushButton" name="getPatternChooseInsertFn">
                 <property name="text">
                     <string>Insert Function</string>
                 </property>
@@ -1124,19 +1136,19 @@
         </layout>
         </item>
         <item>
-        <layout class="QHBoxLayout" name="makeListHigherBoundLayout">
+        <layout class="QHBoxLayout" name="makeListSizeLayout">
             <item>
-                <widget class="QLabel" name="makeListHigherBoundLabel">
+                <widget class="QLabel" name="makeListSizeLabel">
                 <property name="text">
                 <string>Higher Bound:</string>
                 </property>
                 </widget>
             </item>
             <item>
-                <widget class="QLineEdit" name="makeListHigherBoundEdit"/>
+                <widget class="QLineEdit" name="makeListSizeEdit"/>
             </item>
             <item>
-                <widget class="QPushButton" name="makeListHigherBoundInsertFn">
+                <widget class="QPushButton" name="makeListSizeInsertFn">
                 <property name="text">
                     <string>Insert Function</string>
                 </property>
@@ -1151,6 +1163,7 @@
     <widget class="QWidget" name="spaPage">
       <layout class="QVBoxLayout" name="spaFormLayout">
         <item>
+        <widget class="QGroupBox" name="spaOptionsGroup">
         <layout class="QHBoxLayout" name="spaOptionsLayout">
             <item>
                 <widget class="QRadioButton" name="spaStereo">
@@ -1174,8 +1187,10 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
+        <widget class="QGroupBox" name="spaApplyGroup">
         <layout class="QHBoxLayout" name="spaApplyLayout">
             <item>
                 <widget class="QLabel" name="spaApplyLabel">
@@ -1184,29 +1199,30 @@
                 </property>
                 </widget>
             </item>
-            <item>
-                <widget class="QRadioButton" name="spaApplySound">
-                <property name="text">
-                    <string>Sound</string>
-                </property>
-                </widget>
-            </item>
-            <item>
-                <widget class="QRadioButton" name="spaApplyPartial">
-                <property name="text">
-                    <string>Partial</string>
-                </property>
-                </widget>
-            </item>
+                <item>
+                    <widget class="QRadioButton" name="spaApplySound">
+                    <property name="text">
+                        <string>Sound</string>
+                    </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QRadioButton" name="spaApplyPartial">
+                    <property name="text">
+                        <string>Partial</string>
+                    </property>
+                    </widget>
+                </item>
         </layout>
+        </widget>
         </item>
         <item>
         <widget class="QScrollArea" name="spaScrollWindow">
             <property name="widgetResizable"><bool>true</bool></property>
-            <widget class="QWidget" name="spaScrollWindowContents">
-            <layout class="QVBoxLayout" name="spaScrollWindowLayout">
+            <widget class="QWidget" name="spaScrollWindowContent">
+                <layout class="QHBoxLayout" name="spaScrollWindowLayout">    
                     <!-- FunGenSPAPartialAlignment.ui -->
-            </layout>
+                </layout> 
             </widget>
         </widget>
         </item>      
@@ -1238,6 +1254,7 @@
     <widget class="QWidget" name="makeFilterPage">
       <layout class="QVBoxLayout" name="makeFilterFormLayout">
         <item>
+        <widget class="QGroupBox" name="makeFilterOptionsGroup">
         <layout class="QHBoxLayout" name="makeFilterOptions1Layout">
             <item>
                 <widget class="QRadioButton" name="makeFilterLPF">
@@ -1267,10 +1284,6 @@
                 </property>
                 </widget>
             </item>
-        </layout>
-        </item>
-        <item>
-        <layout class="QHBoxLayout" name="makeFilterOptions2Layout">
             <item>
                 <widget class="QRadioButton" name="makeFilterBPF">
                 <property name="text">
@@ -1285,7 +1298,7 @@
                 </property>
                 </widget>
             </item>
-             <item>
+            <item>
                 <widget class="QRadioButton" name="makeFilterHSF">
                 <property name="text">
                     <string>High Shelf</string>
@@ -1293,6 +1306,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="makeFilterFrequencyLayout">
@@ -1411,6 +1425,7 @@
     <widget class="QWidget" name="expandPatternPage">
       <layout class="QVBoxLayout" name="expandPatternFormLayout">
         <item>
+        <widget class="QGroupBox" name="expandPatternMethodGroup">
         <layout class="QHBoxLayout" name="expandPatternMethodLayout">
             <item>
                 <widget class="QLabel" name="expandPatternMethodLabel">
@@ -1441,6 +1456,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="expandPatternModuloLayout">
@@ -1553,6 +1569,7 @@
     <widget class="QWidget" name="revPage">
       <layout class="QVBoxLayout" name="revFormLayout">
         <item>
+        <widget class="QGroupBox" name="revApplyGroup">
         <layout class="QHBoxLayout" name="revApplyLayout">
             <item>
                 <widget class="QLabel" name="revApplyLabel">
@@ -1576,19 +1593,21 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <widget class="QScrollArea" name="revScrollWindow">
             <property name="widgetResizable"><bool>true</bool></property>
-            <widget class="QWidget" name="revScrollWindowContents">
-            <layout class="QVBoxLayout" name="revScrollWindowLayout">
+            <widget class="QWidget" name="revScrollWindowContent">     
+                <layout class="QHBoxLayout" name="revScrollWindowLayout">    
                     <!-- FunGenREVPartialAlignment.ui -->
-            </layout>
+                </layout>    
             </widget>
         </widget>
         </item>      
       </layout>
     </widget>
+
 
 
     <widget class="QWidget" name="readRevFilePage">
@@ -1705,6 +1724,7 @@
         </layout>
         </item>
         <item>
+        <widget class="QGroupBox" name="makeSieveElementsGroup">
         <layout class="QHBoxLayout" name="makeSieveElementsLayout">
             <item>
                 <widget class="QLabel" name="makeSieveElementsLabel">
@@ -1735,13 +1755,14 @@
                 </widget>
             </item>
             <item>
-                <widget class="QRadioButton" name="makeSieveElementsFibb">
+                <widget class="QRadioButton" name="makeSieveElementsFib">
                 <property name="text">
                     <string>Fibonacci</string>
                 </property>
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="makeSieveElementsValuesLayout">
@@ -1772,6 +1793,7 @@
         </layout>
         </item>
         <item>
+        <widget class="QGroupBox" name="makeSieveWeightsGroup">
         <layout class="QHBoxLayout" name="makeSieveWeightsLayout">
             <item>
                 <widget class="QLabel" name="makeSieveWeightsLabel">
@@ -1802,6 +1824,7 @@
                 </widget>
             </item>
         </layout>
+        </widget>
         </item>
         <item>
         <layout class="QHBoxLayout" name="makeSieveWeightsValuesLayout">

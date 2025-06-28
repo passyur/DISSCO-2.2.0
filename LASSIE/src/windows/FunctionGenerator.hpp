@@ -64,6 +64,9 @@ typedef enum {
   NOT_A_FUNCTION
 }CMODFunction;
 
+class SPAPartialAlignment;
+class REVPartialAlignment;
+
 namespace Ui {
 class FunctionGenerator;
 }
@@ -83,35 +86,156 @@ public:
     
     // Store the type of combo box the generator should return
     FunctionReturnType returnType;
+    // Store the inputted string
+    QString originalString;
     // Store the result string
     QString result;
     // Returns the result string
     QString getResultString();
+    std::string static getFunctionString(FileValue* _value, FunctionReturnType _returnType);
+    std::string static getFunctionString(DOMElement* _thisFunctionElement);
     // Changes the combo box to the right type
     void handleFunctionChanged(int index);
 
     // Signal handlers
     // Random
+    void randomEntryChanged();
     void randomLowBoundFunButtonClicked();
+    void randomHighBoundFunButtonClicked();
+
+    // RandomInt
+    void randomIntEntryChanged();
+    void randomIntLowBoundFunButtonClicked();
+    void randomIntHighBoundFunButtonClicked();
+
+    // RandomOrderInt
+    void randomOrderIntEntryChanged();
+    void randomOrderIntLowBoundFunButtonClicked();
+    void randomOrderIntHighBoundFunButtonClicked();
+
+    // Randomizer
+    void randomizerEntryChanged();
+    void randomizerBaseFunButtonClicked();
+    void randomizerDeviationFunButtonClicked();
+
+    // RandomDensity
+    void randomDensityEntryChanged();
+
+    // Decay
+    void decayBaseFunButtonClicked();
+    void decayRateFunButtonClicked();
+    void decayIndexFunButtonClicked();
+    void decayEntryChanged();
+
+    // Inverse
+    void inverseFunButtonClicked();
+    void inverseEntryChanged();
+
+    // Markov
+    void markovEntryChanged();
+
+    // LN
+    void LNFunButtonClicked();
+    void LNEntryChanged();
+
+    // Fibonacci
+    void FibonacciFunButtonClicked();
+    void FibonacciEntryChanged();
+
+    // Select
+    void selectIndexFunButtonClicked();
+    void selectEntryChanged();
+
+    // Stochos
+    void stochosTextChanged();
 
     // ValuePick
+    void valuePickAbsRangeFunButtonClicked();
+    void valuePickLowFunButtonClicked();
+    void valuePickHighFunButtonClicked();
+    void valuePickDistFunButtonClicked();
     void valuePickTextChanged();
 
     // chooseL
+    void chooseLFunButtonClicked();
     void chooseLEntryChanged();
 
     // GetPattern
+    void getPatternOffsetFunButtonClicked();
+    void getPatternFunButtonClicked();
     void getPatternEntryChanged();
 
+    // MakeList
+    void makeListFunctionFunButtonClicked();
+    void makeListSizeFunButtonClicked();
+    void makeListTextChanged();
+
+    // EnvLib
+    void envLibEnvelopeFunButtonClicked();
+    void envLibScalingFactorFunButtonClicked();
+    void envLibTextChanged();
+
+    // MakeEnvelopes
+    void makeEnvelopeScalingFactorFunButtonClicked();
+    void makeEnvelopeXValueFunButtonClicked();
+    void makeEnvelopeYValueFunButtonClicked();
+    void makeEnvelopeTextChanged();
+
+    // MakePattern
+    void makePatternIntervalsFunButtonClicked();
+    void makePatternTextChanged();
+
     // ExpandPattern
+    void expandPatternModuloFunButtonClicked();
+    void expandPatternLowFunButtonClicked();
+    void expandPatternHighFunButtonClicked();
+    void expandPatternPatternFunButtonClicked();
     void expandPatternTextChanged();
 
-    // Envelopes
-    // void makeEnvelopeTextChanged();
+    // MakeFilter
+    void makeFilterFrequencyFunButtonClicked();
+    void makeFilterBandWidthFunButtonClicked();
+    void makeFilterDBGainFunButtonClicked();
+    void makeFilterTextChanged();
+
+    // REV
+    int REVApplyFlag; // 0 = sound, 1 = partial
+    int REVMethodFlag; // 0 = simple, 1 = medium, 2 = advanced
+    int REVNumOfPartials;
+    void REVApplyByRadioButtonClicked();
+    void REVTextChanged();
+    void appendNewNode(REVPartialAlignment* _newNode);
+    REVPartialAlignment* REVInsertPartial();
+    REVPartialAlignment* REVPartialAlignments;
+
+    // MakeSieve
+    void makeSieveLowFunButtonClicked();
+    void makeSieveHighFunButtonClicked();
+    void makeSieveTextChanged();
+
+    // SPA
+    int SPANumOfPartials;
+    // void SPAMethodRadioButtonClicked();
+    // void SPAApplyByRadioButtonClicked();
+    void SPATextChanged();
+    SPAPartialAlignment* SPAInsertPartial();
+    SPAPartialAlignment* SPAPartialAlignments;
+
+    // Spectrum Gen
+    void Spectrum_GenEnvelopeFunButtonClicked();
+    void Spectrum_GenDistanceFunButtonClicked();
+    void Spectrum_GenTextChanged();
+
+    // Read Files
     void readENVFileTextChanged();
+    void readSIVFileTextChanged();
+    void readPATFileTextChanged();
+    void readSPAFileTextChanged();
+    void readREVFileTextChanged();
+    void readFILFileTextChanged();
 
 private:
-    void setupUi();
+    void setupUi();    
     
 };
 

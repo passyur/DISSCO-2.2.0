@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>REVPartialAlignment</class>
+ <widget class="QWidget" name="RevPartialAlignment">
+    <layout class="QVBoxLayout" name="RevPartialAlignmentGroupLayout">
+    <item>
+    <widget class="QGroupBox" name="RevPartialAlignmentGroup">
+    <layout class="QVBoxLayout" name="revPartialAlignmentLayout">
+        <item>
+        <layout class="QHBoxLayout" name="revSoundTitleLayout">
+            <item>
+            <widget class="QLabel" name="revSoundLabel">
+                <property name="alignment"><set>Qt::AlignHCenter</set></property>
+                <property name="text"><string>Sound</string></property>
+            </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="revInsertPartialLayout">
+            <item>
+            <widget class="QPushButton" name="revInsertPartialButton">
+                <property name="text">
+                    <string>Insert a Partial After This One</string>
+                </property>
+            </widget>
+            </item>
+        </layout>
+        </item>
+         <item>
+        <layout class="QHBoxLayout" name="revRemovePartialLayout">
+            <item>
+            <widget class="QPushButton" name="revRemovePartialButton">
+                <property name="text">
+                    <string>Remove This Partial</string>
+                </property>
+            </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="revRoomSizeLayout">
+            <item>
+                <widget class="QLabel" name="revRoomSizeLabel">
+                    <property name="text">
+                    <string>Room Size:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="revRoomSizeEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="revRoomSizeFunButton">
+                    <property name="text">
+                    <string>Fn</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+    </layout>
+    </widget>
+    </item>
+    </layout>
+ </widget>
+</ui>
+
+
