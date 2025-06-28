@@ -13,63 +13,117 @@ class QLineEdit;
 class QMenu;
 class QAction;
 
+/**
+ * @brief Main window for managing envelope library entries
+ */
 class EnvelopeLibraryWindow : public QMainWindow {
     Q_OBJECT
 
-    friend class EnvLibDrawingArea; // Allow EnvLibDrawingArea to access private members
+    friend class EnvLibDrawingArea; ///< Allow EnvLibDrawingArea to access private members
 
 public:
-    // Constructor: builds the UI
+    /**
+     * @brief Constructor: builds the UI
+     * @param parent  parent widget
+     */
     EnvelopeLibraryWindow(QWidget* parent = nullptr);
-    // Destructor
+    
+    /**
+     * @brief Destructor
+     */
     ~EnvelopeLibraryWindow();
 
-    // Set the active project
+    /**
+     * @brief Set the active project
+     * @param project  project to set as active
+     */
     void setActiveProject(ProjectView* project);
-    // Create a brand‐new envelope
+    
+    /**
+     * @brief Create a brand‐new envelope
+     */
     void createNewEnvelope();
-    // Duplicate the selected envelope
+    
+    /**
+     * @brief Duplicate the selected envelope
+     */
     void duplicateEnvelope();
-    // Delete the selected envelope
+    
+    /**
+     * @brief Delete the selected envelope
+     */
     void deleteEnvelope();
-    // Programmatically update the X/Y entries
+    
+    /**
+     * @brief Programmatically update the X/Y entries
+     * @param x  x-coordinate value to set
+     * @param y  y-coordinate value to set
+     */
     void setEntries(const QString& x, const QString& y);
-    // Return the currently active envelope
+    
+    /**
+     * @brief Return the currently active envelope
+     * @return pointer to the currently active envelope
+     */
     EnvelopeLibraryEntry* getActiveEnvelope() const;
 
-    QLineEdit*              xEntry;           // X‐coordinate editor
-    QLineEdit*              yEntry;           // Y‐coordinate editor
+    QLineEdit*              xEntry;           ///< X‐coordinate editor
+    QLineEdit*              yEntry;           ///< Y‐coordinate editor
 
 protected slots:
-    // Called when a tree item is activated (double‐click or Enter)
+    /**
+     * @brief Called when a tree item is activated (double‐click or Enter)
+     * @param index  index of the activated item
+     */
     void objectActivated(const QModelIndex& index);
-    // Called when the selection changes in the envelope list
+    
+    /**
+     * @brief Called when the selection changes in the envelope list
+     * @param current   current selection index
+     * @param previous  previous selection index
+     */
     void onCursorChanged(const QModelIndex& current, const QModelIndex& previous);
-    // Show context menu on right‐click
+    
+    /**
+     * @brief Show context menu on right‐click
+     * @param pos  position where right-click occurred
+     */
     void onRightClick(const QPoint& pos);
-    // Called when either X or Y QLineEdit text changes
+    
+    /**
+     * @brief Called when either X or Y QLineEdit text changes
+     */
     void valueEntriesChanged();
 
 protected:
-    // Rebuild the entire envelope list from the project
+    /**
+     * @brief Rebuild the entire envelope list from the project
+     */
     void refreshEnvelopeList();
-    // Save via project controller (e.g. Ctrl+S)
+    
+    /**
+     * @brief Save via project controller (e.g. Ctrl+S)
+     */
     void fileSave();
-    // Catch key presses for shortcuts
+    
+    /**
+     * @brief Catch key presses for shortcuts
+     * @param event  key event to handle
+     */
     void keyPressEvent(QKeyEvent* event) override;
 
 private:
-    QTreeView*              envelopeLibrary;  // lists envelopes
-    QStandardItemModel*     refModel;         // model backing the tree
-    EnvLibDrawingArea*      drawingArea;      // custom canvas widget
+    QTreeView*              envelopeLibrary;  ///< lists envelopes
+    QStandardItemModel*     refModel;         ///< model backing the tree
+    EnvLibDrawingArea*      drawingArea;      ///< custom canvas widget
 
-    ProjectView*  activeProject{nullptr};
-    EnvelopeLibraryEntry*   activeEnvelope{nullptr};
+    ProjectView*  activeProject{nullptr};     ///< currently active project
+    EnvelopeLibraryEntry*   activeEnvelope{nullptr}; ///< currently active envelope
 
-    QMenu*                  popupMenu;        // right‐click menu
-    QAction*                actionAdd;        // "Create New Envelope"
-    QAction*                actionDuplicate;  // "Duplicate Envelope"
-    QAction*                actionSave;       // "Save" (Ctrl+S)
+    QMenu*                  popupMenu;        ///< right‐click menu
+    QAction*                actionAdd;        ///< "Create New Envelope"
+    QAction*                actionDuplicate;  ///< "Duplicate Envelope"
+    QAction*                actionSave;       ///< "Save" (Ctrl+S)
 };
 
 #endif // ENVELOPE_LIBRARY_WINDOW_HPP

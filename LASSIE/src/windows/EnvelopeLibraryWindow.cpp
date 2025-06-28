@@ -17,6 +17,10 @@
 #include <QFormLayout>
 #include <QSizePolicy>
 
+/**
+ * @brief Constructor: builds the UI
+ * @param parent  parent widget
+ */
 EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     : QMainWindow(parent)
 {
@@ -115,9 +119,15 @@ EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     drawingArea->repaint(); // Force repaint after window is shown
 }
 
+/**
+ * @brief Destructor
+ */
 EnvelopeLibraryWindow::~EnvelopeLibraryWindow() = default;
 
-// Set the active project and populate the list
+/**
+ * @brief Set the active project and populate the list
+ * @param project  project to set as active
+ */
 void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
 {
     drawingArea->clearGraph();
@@ -136,7 +146,9 @@ void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
     activeEnvelope = nullptr;
 }
 
-// Create a new envelope via the project controller
+/**
+ * @brief Create a new envelope via the project controller
+ */
 void EnvelopeLibraryWindow::createNewEnvelope()
 {
     if (!activeProject) return;
@@ -153,7 +165,9 @@ void EnvelopeLibraryWindow::createNewEnvelope()
     // This will trigger onCursorChanged and update the graph
 }
 
-// Duplicate the selected envelope
+/**
+ * @brief Duplicate the selected envelope
+ */
 void EnvelopeLibraryWindow::duplicateEnvelope()
 {
     QModelIndex idx = envelopeLibrary->currentIndex();
@@ -171,7 +185,9 @@ void EnvelopeLibraryWindow::duplicateEnvelope()
     refModel->appendRow(newItem);
 }
 
-// Delete the selected envelope
+/**
+ * @brief Delete the selected envelope
+ */
 void EnvelopeLibraryWindow::deleteEnvelope()
 {
     QModelIndex idx = envelopeLibrary->currentIndex();
@@ -187,13 +203,19 @@ void EnvelopeLibraryWindow::deleteEnvelope()
     refModel->removeRow(idx.row());
 }
 
-// Return the active envelope pointer
+/**
+ * @brief Return the active envelope pointer
+ * @return pointer to the currently active envelope
+ */
 EnvelopeLibraryEntry* EnvelopeLibraryWindow::getActiveEnvelope() const
 {
     return activeEnvelope;
 }
 
-// Handle double‐click/Enter on a tree item
+/**
+ * @brief Handle double‐click/Enter on a tree item
+ * @param index  index of the activated item
+ */
 void EnvelopeLibraryWindow::objectActivated(const QModelIndex& index)
 {
     if (!index.isValid()) return;
@@ -206,7 +228,11 @@ void EnvelopeLibraryWindow::objectActivated(const QModelIndex& index)
     drawingArea->update();
 }
 
-// Handle selection changes
+/**
+ * @brief Handle selection changes
+ * @param current   current selection index
+ * @param previous  previous selection index
+ */
 void EnvelopeLibraryWindow::onCursorChanged(const QModelIndex& current,
                                             const QModelIndex&)
 {
@@ -220,7 +246,10 @@ void EnvelopeLibraryWindow::onCursorChanged(const QModelIndex& current,
     drawingArea->update();
 }
 
-// Show right‐click context menu
+/**
+ * @brief Show right‐click context menu
+ * @param pos  position where right-click occurred
+ */
 void EnvelopeLibraryWindow::onRightClick(const QPoint& pos)
 {
     QModelIndex idx = envelopeLibrary->indexAt(pos);
@@ -228,19 +257,26 @@ void EnvelopeLibraryWindow::onRightClick(const QPoint& pos)
     popupMenu->exec(envelopeLibrary->viewport()->mapToGlobal(pos));
 }
 
-// Clear and rebuild the model
+/**
+ * @brief Clear and rebuild the model
+ */
 void EnvelopeLibraryWindow::refreshEnvelopeList()
 {
     refModel->removeRows(0, refModel->rowCount());
 }
 
-// Save via project controller
+/**
+ * @brief Save via project controller
+ */
 void EnvelopeLibraryWindow::fileSave()
 {
     if (activeProject) activeProject->save();
 }
 
-// Capture Ctrl+S
+/**
+ * @brief Capture Ctrl+S
+ * @param event  key event to handle
+ */
 void EnvelopeLibraryWindow::keyPressEvent(QKeyEvent* event)
 {
     if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_S) {
@@ -250,7 +286,9 @@ void EnvelopeLibraryWindow::keyPressEvent(QKeyEvent* event)
     QMainWindow::keyPressEvent(event);
 }
 
-// Called whenever X or Y entry changes
+/**
+ * @brief Called whenever X or Y entry changes
+ */
 void EnvelopeLibraryWindow::valueEntriesChanged()
 {
     if (!drawingArea) return;
@@ -259,7 +297,11 @@ void EnvelopeLibraryWindow::valueEntriesChanged()
         yEntry->text());
 }
 
-// Update the line edits from code
+/**
+ * @brief Update the line edits from code
+ * @param x  x-coordinate value to set
+ * @param y  y-coordinate value to set
+ */
 void EnvelopeLibraryWindow::setEntries(const QString& x, const QString& y)
 {
     xEntry->setText(x);

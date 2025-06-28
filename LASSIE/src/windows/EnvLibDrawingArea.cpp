@@ -8,6 +8,11 @@
 #include <QtGlobal>
 #include <cmath>
 
+/**
+ * @brief Constructor: set up state, enable mouse tracking, and build context menu
+ * @param _envelopeLibraryWindow  parent window reference
+ * @param parent  parent widget
+ */
 EnvLibDrawingArea::EnvLibDrawingArea(EnvelopeLibraryWindow* _envelopeLibraryWindow,
                                      QWidget* parent)
   : QWidget(parent),
@@ -22,7 +27,6 @@ EnvLibDrawingArea::EnvLibDrawingArea(EnvelopeLibraryWindow* _envelopeLibraryWind
 {
     // Enable mouse tracking so mouseMoveEvent fires without press
     setMouseTracking(true);
-    qDebug("EnvLibDrawingArea constructed, initial size: %dx%d", width(), height());
 
     // Build context-menu actions
     actionInsert = new QAction(tr("Insert Node"), this);
@@ -59,11 +63,17 @@ EnvLibDrawingArea::EnvLibDrawingArea(EnvelopeLibraryWindow* _envelopeLibraryWind
     m_pMenuPopup->addAction(actionSetExponential);
 }
 
+/**
+ * @brief Destructor: Qt parent-child cleanup handles everything
+ */
 EnvLibDrawingArea::~EnvLibDrawingArea()
 {
     // Qt parent-child cleanup handles everything
 }
 
+/**
+ * @brief Reset all internal fields to their defaults
+ */
 void EnvLibDrawingArea::resetFields()
 {
     activeNode = nullptr;
@@ -74,18 +84,30 @@ void EnvLibDrawingArea::resetFields()
     lowerY = 0.0;
 }
 
+/**
+ * @brief Trigger a redraw of the given envelope
+ * @param _envelope  envelope to display (unused parameter)
+ */
 void EnvLibDrawingArea::showGraph(EnvelopeLibraryEntry* /*_envelope*/)
 {
     // schedule a repaint
     update();
 }
 
+/**
+ * @brief Clear the drawing area (background will repaint white)
+ */
 void EnvLibDrawingArea::clearGraph()
 {
     // repaint background white
     update();
 }
 
+/**
+ * @brief Update the active node's coords from external input
+ * @param _x  x-coordinate value
+ * @param _y  y-coordinate value
+ */
 void EnvLibDrawingArea::setActiveNodeCoordinate(const QString& _x, const QString& _y)
 {
     // Update the selected node's x/y from user text fields
@@ -99,6 +121,10 @@ void EnvLibDrawingArea::setActiveNodeCoordinate(const QString& _x, const QString
     showGraph(env);
 }
 
+/**
+ * @brief Recompute upperY/lowerY based on envelope data
+ * @param _envelope  envelope to analyze
+ */
 void EnvLibDrawingArea::adjustBoundary(EnvelopeLibraryEntry* _envelope)
 {
     if (!_envelope) return;
@@ -125,10 +151,13 @@ void EnvLibDrawingArea::adjustBoundary(EnvelopeLibraryEntry* _envelope)
                   .arg(QString::number(lowerY, 'f', 3));
 }
 
+/**
+ * @brief Paint the envelope graph
+ * @param event  paint event (unused)
+ */
 void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
-    qDebug("paintEvent called");
     QPainter painter(this);
     painter.fillRect(rect(), Qt::white);
 
@@ -161,27 +190,16 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
 
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) {
-        qDebug("No active envelope");
         return;
     }
 
     adjustBoundary(env);
 
-    // Print head node info
-    if (env->head) {
-        qDebug("Head node: (%f, %f)", env->head->x, env->head->y);
-    } else {
-        qDebug("Envelope head is nullptr");
-    }
-
     // Draw each segment
     EnvLibEntrySeg* seg = env->head ? env->head->rightSeg : nullptr;
-    int segCount = 0;
     while (seg) {
-        segCount++;
         EnvLibEntryNode* L = seg->leftNode;
         EnvLibEntryNode* R = seg->rightNode;
-        qDebug("Segment %d: L(%f, %f) -> R(%f, %f)", segCount, L ? L->x : -1, L ? L->y : -1, R ? R->x : -1, R ? R->y : -1);
         double x1 = L->x * w*w / double(w+1);
         double y1 = h - getAdjustedY(L->y)*h*h / double(h+1);
         double x2 = R->x * w*w / double(w+1);
@@ -209,7 +227,6 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
 
         seg = R->rightSeg;
     }
-    qDebug("Total segments: %d", segCount);
 
     // highlight active node
     if (activeNode) {
@@ -220,6 +237,10 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
     }
 }
 
+/**
+ * @brief Track mouse movement (update coords display & drag)
+ * @param event  mouse move event
+ */
 void EnvLibDrawingArea::mouseMoveEvent(QMouseEvent* event)
 {
     int w = width(), h = height();
@@ -241,6 +262,10 @@ void EnvLibDrawingArea::mouseMoveEvent(QMouseEvent* event)
     QWidget::mouseMoveEvent(event);
 }
 
+/**
+ * @brief Handle presses (select node, start drag, show popup)
+ * @param event  mouse press event
+ */
 void EnvLibDrawingArea::mousePressEvent(QMouseEvent* event)
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -289,6 +314,10 @@ void EnvLibDrawingArea::mousePressEvent(QMouseEvent* event)
     QWidget::mousePressEvent(event);
 }
 
+/**
+ * @brief Handle releases (end drag)
+ * @param event  mouse release event
+ */
 void EnvLibDrawingArea::mouseReleaseEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
@@ -298,6 +327,10 @@ void EnvLibDrawingArea::mouseReleaseEvent(QMouseEvent* event)
     QWidget::mouseReleaseEvent(event);
 }
 
+/**
+ * @brief Fallback for context menu key events
+ * @param event  context menu event
+ */
 void EnvLibDrawingArea::contextMenuEvent(QContextMenuEvent* event)
 {
     // ensure correct sensitivity
@@ -305,6 +338,9 @@ void EnvLibDrawingArea::contextMenuEvent(QContextMenuEvent* event)
     m_pMenuPopup->exec(event->globalPos());
 }
 
+/**
+ * @brief Insert a new node at the mouse position
+ */
 void EnvLibDrawingArea::insertEnvelopeSegment()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -340,6 +376,9 @@ void EnvLibDrawingArea::insertEnvelopeSegment()
     showGraph(env);
 }
 
+/**
+ * @brief Set the segment at mouse position to fixed length
+ */
 void EnvLibDrawingArea::setFixed()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -358,6 +397,9 @@ void EnvLibDrawingArea::setFixed()
     showGraph(env);
 }
 
+/**
+ * @brief Set the segment at mouse position to flexible length
+ */
 void EnvLibDrawingArea::setFlexible()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -375,6 +417,9 @@ void EnvLibDrawingArea::setFlexible()
     showGraph(env);
 }
 
+/**
+ * @brief Set the segment at mouse position to linear interpolation
+ */
 void EnvLibDrawingArea::setLinear()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -392,6 +437,9 @@ void EnvLibDrawingArea::setLinear()
     showGraph(env);
 }
 
+/**
+ * @brief Set the segment at mouse position to spline interpolation
+ */
 void EnvLibDrawingArea::setSpline()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -409,6 +457,9 @@ void EnvLibDrawingArea::setSpline()
     showGraph(env);
 }
 
+/**
+ * @brief Set the segment at mouse position to exponential interpolation
+ */
 void EnvLibDrawingArea::setExponential()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -426,6 +477,9 @@ void EnvLibDrawingArea::setExponential()
     showGraph(env);
 }
 
+/**
+ * @brief Remove the currently active node
+ */
 void EnvLibDrawingArea::removeNode()
 {
     if (!activeNode || !activeNode->leftSeg || !activeNode->rightSeg) return;
@@ -441,6 +495,9 @@ void EnvLibDrawingArea::removeNode()
     showGraph(env);
 }
 
+/**
+ * @brief Actually move the active node during drag
+ */
 void EnvLibDrawingArea::moveNode()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
@@ -465,11 +522,21 @@ void EnvLibDrawingArea::moveNode()
     showGraph(env);
 }
 
+/**
+ * @brief Map true y → [0,1] for drawing
+ * @param y  true y-coordinate
+ * @return adjusted y-coordinate for drawing
+ */
 double EnvLibDrawingArea::getAdjustedY(double y) const
 {
     return y/(upperY-lowerY) + qAbs(lowerY)/(upperY-lowerY);
 }
 
+/**
+ * @brief Map [0,1] mouse y back to true y
+ * @param y  mouse y-coordinate [0,1]
+ * @return true y-coordinate
+ */
 double EnvLibDrawingArea::mouseAdjustY(double y) const
 {
     return y*(upperY-lowerY) + lowerY;

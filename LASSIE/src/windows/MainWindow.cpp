@@ -97,7 +97,6 @@ void MainWindow::newFile()
     if (!dir.exists(projectFolder)) {
         dir.mkdir(projectFolder);
     }
-
     QString fullFilePath = projectFolder + "/" + projectName + ".dissco";
     currentFile = fullFilePath;
 
@@ -108,7 +107,7 @@ void MainWindow::newFile()
     projects.push_back(projectView);
     projectView->setProperties();
     
-    // Connect envelope library to the new project
+    //nhi: connect envelope library to new project
     envelopeLibraryWindow->setActiveProject(projectView);
 
     ui->tabWidget->show();
@@ -158,8 +157,9 @@ void MainWindow::redo()
 
 void MainWindow::showEnvelopeLibraryWindow()
 {
+    //nhi: use show() instead of showEnvelopeLibrary()
     envelopeLibraryWindow->show();
-    // Connect to current project if available
+    //nhi: connect to current project if available
     if (projectView) {
         envelopeLibraryWindow->setActiveProject(projectView);
     }
@@ -167,6 +167,7 @@ void MainWindow::showEnvelopeLibraryWindow()
 
 void MainWindow::showMarkovWindow()
 {
+    //nhi: use show() instead of showMarkovLibrary()
     markovWindow->show();
 }
 
@@ -336,7 +337,7 @@ void MainWindow::createToolBars()
 
     projectToolBar = addToolBar(tr("Project"));
     projectToolBar->addAction(newObjAct);
-    // projectToolBar->addAction(showEnvelopeLibraryAct);
+    //nhi: envelope library action moved to view menu instead of project toolbar
     projectToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
     // editToolBar = addToolBar(tr("Edit"));
@@ -376,7 +377,7 @@ void MainWindow::loadFile(const QString &fileName)
     statusBar()->showMessage(tr("File loaded"), 2000);
     projectView->setProperties();
     
-    // Connect envelope library to the loaded project
+    //nhi: connect envelope library to loaded project
     envelopeLibraryWindow->setActiveProject(projectView);
 
     ui->tabWidget->show();
@@ -385,17 +386,27 @@ void MainWindow::loadFile(const QString &fileName)
 
 void MainWindow::saveFile(const QString &fileName)
 {
-    // TODO: Implement file saving
     currentFile = fileName;
     qDebug() << "Current File:" << currentFile;
-    setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
-    statusBar()->showMessage(tr("File saved"), 2000);
-    if (projectView == NULL) {
-        projectView = new ProjectView(this, fileName);
-        projects.push_back(projectView);
+    
+    //nhi: ensure directory exists before saving
+    QFileInfo fileInfo(fileName);
+    QDir dir = fileInfo.absoluteDir();
+    if (!dir.exists()) {
+        if (!dir.mkpath(".")) {
+            QMessageBox::critical(this, tr("Error"),
+                                tr("Failed to create directory:\n%1")
+                                .arg(dir.absolutePath()));
+            return;
+        }
     }
+    
     qDebug() << "In Main Window Save Function";
     projectView->save();
+    
+    //nhi: update window title and status after successful save
+    setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
+    statusBar()->showMessage(tr("File saved"), 2000);
 }
 
 void MainWindow::setUnsavedTitle(QString unsavedFile){

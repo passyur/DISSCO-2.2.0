@@ -28,6 +28,9 @@ qt_add_executable(LASSIE
     src/windows/ProjectViewController.cpp src/windows/ProjectViewController.hpp
     src/core/envelope_struct.cpp src/core/envelope_struct.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
+    # src/windows/ObjectWindow.cpp src/windows/ObjectWindow.hpp
+    # src/windows/PaletteViewController.cpp src/windows/PaletteViewController.hpp
+    # src/windows/EventAttributesViewController.cpp src/windows/EventAttributesViewController.hpp
     # src/core/IEvent.cpp src/core/IEvent.h
 )
 

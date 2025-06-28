@@ -29,6 +29,9 @@
 #include "../ui/ui_ProjectPropertiesDialog.h"
 #include "FunctionGenerator.hpp"
 #include "../ui/ui_FunctionGenerator.h"
+#include "ObjectWindow.hpp"
+#include "PaletteViewController.hpp"
+#include "../core/IEvent.h"
 // #include "muParser.h"
 
 
@@ -126,8 +129,49 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
     // initialize default note modifiers
     initializeModifiers();
-    // initialize envelope library entries with a default envelope
+    //nhi: create default envelope instead of NULL
     envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
+
+    // // Initialize PaletteViewController
+    // paletteView = new PaletteViewController(this);
+
+    // // Create ObjectWindow instances
+    // topWindow = new ObjectWindow(eventTop, this);
+    // highWindow = new ObjectWindow(eventHigh, this);
+    // midWindow = new ObjectWindow(eventMid, this);
+    // lowWindow = new ObjectWindow(eventLow, this);
+    // bottomWindow = new ObjectWindow(eventBottom, this);
+    // spectrumWindow = new ObjectWindow(eventSound, this);
+    // envWindow = new ObjectWindow(eventEnv, this);
+    // sivWindow = new ObjectWindow(eventSiv, this);
+    // spaWindow = new ObjectWindow(eventSpa, this);
+    // patWindow = new ObjectWindow(eventPat, this);
+    // revWindow = new ObjectWindow(eventRev, this);
+    // filWindow = new ObjectWindow(eventFil, this);
+    // noteWindow = new ObjectWindow(eventNote, this);
+    // meaWindow = new ObjectWindow(eventMea, this);
+
+    // // Create a default top event
+    // IEvent* newEvent = new IEvent();
+    // newEvent->setEventName("0");
+    // newEvent->setEventType(eventTop);
+    // paletteView->insertEvent(newEvent, "Top");
+
+    // // Show the ObjectWindows
+    // topWindow->show();
+    // highWindow->show();
+    // midWindow->show();
+    // lowWindow->show();
+    // bottomWindow->show();
+    // spectrumWindow->show();
+    // envWindow->show();
+    // sivWindow->show();
+    // spaWindow->show();
+    // patWindow->show();
+    // revWindow->show();
+    // filWindow->show();
+    // noteWindow->show();
+    // meaWindow->show();
 }
 
 
@@ -198,6 +242,17 @@ void ProjectView::save(){
     qDebug() << "In Project View Save Function";
 
     modifiedButNotSaved = false; // changes bool value because file is being saved
+
+    //nhi: ensure directory exists before creating file
+    QFileInfo fileInfo(pathAndName);
+    QDir dir = fileInfo.absoluteDir();
+    if (!dir.exists()) {
+        if (!dir.mkpath(".")) {
+            qDebug() << "Failed to create directory:" << dir.absolutePath();
+            return;
+        }
+    }
+
     // creates the file with the specified /path/name.dissco
     QFile file(pathAndName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -205,6 +260,7 @@ void ProjectView::save(){
         qDebug() << "Error reason:" << file.errorString();
         return;
     }
+    
     // QXmlStreamWriter class writes to the XML file
     QXmlStreamWriter xmlWriter(&file);
     xmlWriter.setAutoFormatting(true);
@@ -311,19 +367,32 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("EnvelopeLibrary");	
             /* STILL IN PROGRESS  */
-            // if (envelopeLibraryEntries !=NULL){
-            //     EnvelopeLibraryEntry* envLib = envelopeLibraryEntries;
-            //     int count = envLib->head->countNumOfNodes();
-            //     xmlWriter.writeCharacters(QString::number(count));
-            //     count = 1;
-            //     while (envLib!=NULL){
-            //         xmlWriter.writeCharacters("Envelope " + QString::number(count));
-            //     }
-            // }
+            //nhi: proper envelope library handling with attributes
+            if (envelopeLibraryEntries !=NULL){
+                EnvelopeLibraryEntry* envLib = envelopeLibraryEntries;
+                int count = 0;
+                while (envLib != NULL) {
+                    count++;
+                    xmlWriter.writeStartElement("Envelope");
+                    xmlWriter.writeAttribute("id", QString::number(count));
+                    xmlWriter.writeAttribute("name", QString("Envelope %1").arg(count));
+                    // Add envelope data here when available
+                    xmlWriter.writeEndElement();
+                    envLib = envLib->next;
+                }
+            }
         xmlWriter.writeEndElement();
 
         xmlWriter.writeStartElement("MarkovModelLibrary");	
             /* STILL IN PROGRESS  */
+            //nhi: proper Markov model handling with attributes
+            for (size_t i = 0; i < markovModels.size(); ++i) {
+                xmlWriter.writeStartElement("MarkovModel");
+                xmlWriter.writeAttribute("id", QString::number(i));
+                xmlWriter.writeAttribute("name", QString("Markov Model %1").arg(i));
+                // Add Markov model data here when available
+                xmlWriter.writeEndElement();
+            }
         xmlWriter.writeEndElement();
 
         xmlWriter.writeStartElement("Events");	
@@ -334,7 +403,6 @@ void ProjectView::save(){
         xmlWriter.writeEndElement();
     xmlWriter.writeEndElement();
     file.close();
-
 }
 
 void ProjectView::setProperties() {
@@ -447,3 +515,9 @@ void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {
         curr = curr->next;
     }
 }
+//nhi: show attributes
+// void ProjectView::showAttributes(IEvent* event) {
+//     // TODO: Implement event attributes display
+//     // This would typically show the event in an EventAttributesViewController
+//     qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
+// }

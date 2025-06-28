@@ -11,6 +11,8 @@
 #include <QDomDocument>
 
 class MainWindow;
+// class ObjectWindow;
+// class PaletteViewController;
 
 class ProjectView : public QObject {
     Q_OBJECT
@@ -72,6 +74,10 @@ class ProjectView : public QObject {
             }
         }
 
+        // ObjectWindow and Palette methods
+        // PaletteViewController* getPalette() { return paletteView; }
+        // void showAttributes(class IEvent* event);
+
     private:
         /* storing main window */
         MainWindow* mainWindow;
@@ -113,8 +119,28 @@ class ProjectView : public QObject {
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
 
+        //nhi: add Markov models vector
         /* Markov models */
         std::vector<MarkovModel<float>> markovModels;
+
+        // ObjectWindow instances
+        // ObjectWindow* topWindow;
+        // ObjectWindow* highWindow;
+        // ObjectWindow* midWindow;
+        // ObjectWindow* lowWindow;
+        // ObjectWindow* bottomWindow;
+        // ObjectWindow* spectrumWindow;
+        // ObjectWindow* envWindow;
+        // ObjectWindow* sivWindow;
+        // ObjectWindow* spaWindow;
+        // ObjectWindow* patWindow;
+        // ObjectWindow* revWindow;
+        // ObjectWindow* filWindow;
+        // ObjectWindow* noteWindow;
+        // ObjectWindow* meaWindow;
+
+        // PaletteViewController
+        // PaletteViewController* paletteView;
 };
 
 #endif
