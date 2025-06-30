@@ -8,7 +8,7 @@
 #include <QFileInfo>
 #include <QIODevice>
 #include <QXmlStreamWriter>
-#include<QDebug>
+#include <QDebug>
 #include <QTextStream>
 #include <QDomDocument>
 
@@ -130,7 +130,8 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     // initialize default note modifiers
     initializeModifiers();
     //nhi: create default envelope instead of NULL
-    envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
+    //envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
+    envelopeLibraryEntries = NULL;
 
     // // Initialize PaletteViewController
     // paletteView = new PaletteViewController(this);
@@ -365,22 +366,55 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();       
         xmlWriter.writeEndElement(); 
 
-        xmlWriter.writeStartElement("EnvelopeLibrary");	
-            /* STILL IN PROGRESS  */
-            //nhi: proper envelope library handling with attributes
+        xmlWriter.writeStartElement("EnvelopeLibrary");
+            QString stringBuffer = "";
             if (envelopeLibraryEntries !=NULL){
                 EnvelopeLibraryEntry* envLib = envelopeLibraryEntries;
-                int count = 0;
+                int count = envLib->count();
+                stringBuffer = stringBuffer + "\n" + QString::number(count) + "\n";
+                count = 1;
                 while (envLib != NULL) {
+                    stringBuffer = stringBuffer + "Envelope " + QString::number(count) + "\n";
+                    int lineNumber = envLib->head->countNumOfNodes();
+                    stringBuffer = stringBuffer + QString::number(lineNumber) + "\n";
+                    
+                    EnvLibEntryNode* currentNode;
+                    EnvLibEntrySeg* libSeg = envLib->head->rightSeg;
+                    while (libSeg != NULL){
+                        currentNode = libSeg->leftNode;
+                        stringBuffer = stringBuffer + QString::number(currentNode->x, 'f', 3);
+                        stringBuffer = stringBuffer + "     ";
+                        stringBuffer = stringBuffer + QString::number(currentNode->y, 'f', 3);
+                        stringBuffer = stringBuffer + "     ";
+
+                        if (libSeg->segmentType == envSegmentTypeLinear){
+                            stringBuffer = stringBuffer + "LINEAR              ";
+                        } else if (libSeg->segmentType == envSegmentTypeExponential){
+                            stringBuffer = stringBuffer + "EXPONENTIAL         ";
+                        } else {
+                            stringBuffer = stringBuffer + "CUBIC_SPLINE        ";
+                        }
+
+                        if (libSeg->segmentProperty == envSegmentPropertyFlexible){
+                            stringBuffer = stringBuffer + "FLEXIBLE    ";
+                        } else {
+                            stringBuffer = stringBuffer + "FIXED       ";
+                        }
+
+                        stringBuffer = stringBuffer + QString::number((libSeg->rightNode->x) - (currentNode->x), 'f', 3) + "\n";
+                        libSeg = libSeg->rightNode->rightSeg;
+                    }
+
+                    currentNode = currentNode->rightSeg->rightNode;
+                    stringBuffer = stringBuffer + QString::number(currentNode->x, 'f', 3) + "     ";
+                    stringBuffer = stringBuffer + QString::number(currentNode->y, 'f', 3) + "\n";
+                    
                     count++;
-                    xmlWriter.writeStartElement("Envelope");
-                    xmlWriter.writeAttribute("id", QString::number(count));
-                    xmlWriter.writeAttribute("name", QString("Envelope %1").arg(count));
-                    // Add envelope data here when available
-                    xmlWriter.writeEndElement();
                     envLib = envLib->next;
                 }
             }
+            stringBuffer = stringBuffer + "    ";
+            xmlWriter.writeCharacters(stringBuffer);
         xmlWriter.writeEndElement();
 
         xmlWriter.writeStartElement("MarkovModelLibrary");	
@@ -492,6 +526,15 @@ void ProjectView::modified(){
   if (modifiedButNotSaved){
     mainWindow->setUnsavedTitle(pathAndName);
   }
+}
+
+EnvelopeLibraryEntry* ProjectView::createNewEnvelope(){
+    if (envelopeLibraryEntries == NULL) {
+        envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
+        return envelopeLibraryEntries;
+    } else {
+        return envelopeLibraryEntries->createNewEnvelope();
+    }
 }
 // nhi: delete envelope
 void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {

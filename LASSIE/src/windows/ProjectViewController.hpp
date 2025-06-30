@@ -51,7 +51,7 @@ class ProjectView : public QObject {
 
         // nhi: add these functions to the project view controller
         EnvelopeLibraryEntry* getEnvelopeLibraryEntries() { return envelopeLibraryEntries; }
-        EnvelopeLibraryEntry* createNewEnvelope() { return envelopeLibraryEntries ? envelopeLibraryEntries->createNewEnvelope() : nullptr; }
+        EnvelopeLibraryEntry* createNewEnvelope();
         EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) { return envelopeLibraryEntries ? envelopeLibraryEntries->duplicateEnvelope(_originalEnvelope) : nullptr; }
         void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
