@@ -5,6 +5,7 @@
 
 #include <QFile>
 #include <QString>
+#include <QDir>
 #include <QFileInfo>
 #include <QIODevice>
 #include <QXmlStreamWriter>
