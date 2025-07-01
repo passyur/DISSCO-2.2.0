@@ -3,6 +3,7 @@ The 'project' object that keeps track of project details to deploy
 in the associated window (currently, the project view).
 */
 #include "project_struct.hpp"
+#include "event_struct.hpp"
 // #include "IEvent.h"
 
 #include "../windows/MainWindow.hpp"
@@ -18,11 +19,11 @@ in the associated window (currently, the project view).
 
 namespace XercesParser {
     using namespace xercesc;
-    std::string getFunctionString(DOMElement* _thisFunctionElement){
+    inline std::string getFunctionString(DOMElement* _thisFunctionElement){
         char* charBuffer;
 
         DOMCharacterData* textData;
-        string returnString;
+        std::string returnString;
         DOMNode* child = _thisFunctionElement->getFirstChild();
         if (child == NULL){ //not containing any child, return string
             return "";
@@ -42,7 +43,262 @@ namespace XercesParser {
         delete theSerializer;
         returnString = returnString.substr(tagLength+2, returnString.size() - tagLength * 2 - 5);
         return returnString;
-    } 
+    }
+
+    /// @brief For use when transcoding a basic `std::string` from a `DOMElement*` and assigning it to a `std::string` variable.
+    /// @param element the DOMElement to be transcoded from
+    /// @param lhs the string to be assigned to
+    inline void transcodeAndAssign(DOMElement *element, std::string& lhs){
+        DOMCharacterData *textdata = (DOMCharacterData*)(element->getFirstChild());
+        char *buffer;
+        buffer = XMLString::transcode(textdata->getData());
+        lhs = buffer;
+        XMLString::release(&buffer);
+    }
+
+    /// @brief Parse a `DOMElement` corresponding to a discrete package and return a corresponding `Package`
+    /// @param package_el the `DOMElement` pointing to the opening tag for the <Package/> attribute
+    /// @return the `Package` variable parsed from `package_el`
+    inline Package parseForPackage(DOMElement *package_el){
+        Package package;
+        DOMElement *name_el = package_el->getFirstElementChild();
+        transcodeAndAssign(name_el, package.event_name);
+
+        DOMElement *type_el = name_el->getNextElementSibling();
+        DOMCharacterData *textdata = (DOMCharacterData*)(type_el->getFirstChild());
+        char *buffer = XMLString::transcode(textdata->getData());
+        package.event_type = (Eventtype)std::atoi(buffer);
+        XMLString::release(&buffer);
+
+        DOMElement *weight_el = type_el->getNextElementSibling();
+        transcodeAndAssign(weight_el, package.weight);
+
+        DOMElement *attackenv_el = weight_el->getNextElementSibling();
+        transcodeAndAssign(attackenv_el, package.attack_envelope);
+
+        DOMElement *attackenvscale_el = attackenv_el->getNextElementSibling();
+        transcodeAndAssign(attackenvscale_el, package.attackenvelope_scale);
+
+        DOMElement *durationenv_el = attackenvscale_el->getNextElementSibling();
+        transcodeAndAssign(durationenv_el, package.duration_envelope);
+
+        DOMElement *durationenvscale_el = durationenv_el->getNextElementSibling();
+        transcodeAndAssign(durationenvscale_el, package.durationenvelope_scale);    
+
+        return package;
+    }
+
+    Layer parseForLayer(DOMElement *layer_el){
+        Layer layer; 
+        layer_el = layer_el->getFirstElementChild();
+        layer.by_layer = getFunctionString(layer_el);
+
+        DOMElement *package_el = layer_el->getNextElementSibling()->getFirstElementChild();
+        QList<Package> discrete_packages;
+        while(package_el != nullptr){
+            Package package = parseForPackage(package_el);
+            discrete_packages.append(package);
+            package_el = package_el->getNextElementSibling();
+        }
+        
+        return layer;
+    }
+
+    ExtraInfo parseExtraInfo(DOMElement *extrainfo_el){
+        ExtraInfo extrainfo;
+        DOMElement *freqinfo_el = extrainfo_el->getFirstElementChild();
+        DOMElement *freqflag_el = freqinfo_el->getFirstElementChild();
+        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)std::stoi(getFunctionString(freqflag_el));
+
+        DOMElement *freqcontflag_el = freqflag_el->getNextElementSibling();
+        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)std::stoi(getFunctionString(freqcontflag_el));
+
+        DOMElement *freqentry1_el = freqcontflag_el->getNextElementSibling();
+        extrainfo.freq_info.entry_1 = std::stoi(getFunctionString(freqentry1_el));
+
+        DOMElement *freqentry2_el = freqentry1_el->getNextElementSibling();
+        extrainfo.freq_info.entry_2 = std::stoi(getFunctionString(freqentry2_el));
+        
+        DOMElement *loudness_el = freqinfo_el->getNextElementSibling();
+        extrainfo.loudness = getFunctionString(loudness_el);
+
+        DOMElement *spa_el = loudness_el->getNextElementSibling();
+        extrainfo.spa = getFunctionString(spa_el);
+
+        DOMElement *reverb_el = spa_el->getNextElementSibling();
+        extrainfo.reverb = getFunctionString(reverb_el);
+
+
+
+    }
+
+    ExtraInfo parseHEvent(DOMElement *eventtype_el, HEvent& event){
+        DOMElement *name_el = eventtype_el->getNextElementSibling();
+        transcodeAndAssign(name_el, event.name);
+
+        DOMElement *maxchilddur_el = name_el->getNextElementSibling();
+        event.max_child_duration = getFunctionString(maxchilddur_el);
+
+        DOMElement *eduperbeat_el = maxchilddur_el->getNextElementSibling();
+        event.edu_perbeat = getFunctionString(eduperbeat_el);
+
+        DOMElement *timesig_el = eduperbeat_el->getNextElementSibling();
+        DOMElement *barval_el = timesig_el->getFirstElementChild();
+        event.timesig.bar_value = std::stoi(getFunctionString(barval_el));
+
+        DOMElement *noteval_el = barval_el->getNextElementSibling();
+        event.timesig.note_value = std::stoi(getFunctionString(noteval_el));
+
+        DOMElement *tempo_el = noteval_el->getNextElementSibling();
+        DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
+        event.tempo.method_flag = std::stoi(getFunctionString(tempomethodflag_el));
+
+        DOMElement *tempoprefix_el = tempomethodflag_el->getNextElementSibling();
+        event.tempo.prefix = (Tempoprefix)std::stoi(getFunctionString(tempoprefix_el));
+
+        DOMElement *temponoteval_el = tempoprefix_el->getNextElementSibling();
+        event.tempo.note_value = (Temponotevalue)std::stoi(getFunctionString(temponoteval_el));
+
+        DOMElement *tempofrentry1_el = temponoteval_el->getNextElementSibling();
+        event.tempo.frentry_1 = getFunctionString(tempofrentry1_el);
+
+        DOMElement *tempofrentry2_el = tempofrentry1_el->getNextElementSibling();
+        event.tempo.frentry_2 = getFunctionString(tempofrentry2_el);
+
+        DOMElement *tempovalue_el = tempofrentry2_el->getNextElementSibling();
+        event.tempo.valentry = getFunctionString(tempovalue_el);
+
+        DOMElement *numchildren_el = tempo_el->getNextElementSibling();
+        DOMElement *numchildrenmethodflag_el = numchildren_el->getFirstElementChild();
+        event.numchildren.method_flag = (Numchildrenflag)std::stoi(getFunctionString(numchildrenmethodflag_el));
+
+        DOMElement *curr = numchildrenmethodflag_el->getNextElementSibling();
+        event.numchildren.entry_1 = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.numchildren.entry_2 = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.numchildren.entry_3 = getFunctionString(curr);
+
+        DOMElement *childdef_el = numchildren_el->getNextElementSibling();
+        curr = childdef_el->getFirstElementChild();
+        event.child_event_def.entry_1 = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.entry_2 = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.entry_3 = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.attack_sieve = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.duration_sieve = getFunctionString(curr);
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.definition_flag = (Childdefnflag)std::stoi(getFunctionString(curr));
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.starttype_flag = (Childdeftimeflag)std::stoi(getFunctionString(curr));
+
+        curr = curr->getNextElementSibling();
+        event.child_event_def.durationtype_flag = (Childdeftimeflag)std::stoi(getFunctionString(curr));
+
+        DOMElement *layers_el = childdef_el->getNextElementSibling();
+        DOMElement *layer_el = layers_el->getFirstElementChild();
+        while(layer_el != nullptr){
+            Layer layer = parseForLayer(layers_el);
+            event.event_layers.append(layer);
+            layer_el = layer_el->getNextElementSibling();
+        }
+        
+        DOMElement *spa_el = layers_el->getNextElementSibling();
+        event.spa = getFunctionString(spa_el);
+        DOMElement *reverb_el = spa_el->getNextElementSibling();
+        event.reverb = getFunctionString(reverb_el);
+        DOMElement *filter_el = reverb_el->getNextElementSibling();
+        event.filter = getFunctionString(filter_el);
+
+        ExtraInfo extrainfo;
+        // if(event.type == bottom){
+        //     std::string prefix = bottomevent.event.name.substr(0,1);
+        //     int childtype_flag = -1;
+        //     if(prefix=="s")
+        //         childtype_flag = 0;
+        //     else if(prefix=="n")
+        //         childtype_flag = 1;
+        //     else
+        //         childtype_flag = 2;
+
+        //     extrainfo = std::stoi(getFuncti);
+        // }
+
+        return extrainfo;
+    }
+
+    std::string parseEvents(DOMElement *event_start){
+        XMLCh *xmldata = XMLString::transcode("orderInPalette");
+        std::string orderinpalette = XMLString::transcode(event_start->getAttribute(xmldata));
+        XMLString::release(&xmldata);
+        
+        DOMElement *eventtype_el = event_start->getFirstElementChild();
+        DOMCharacterData* textdata = (DOMCharacterData*)eventtype_el->getFirstChild();
+        char* buffer = XMLString::transcode(textdata->getData());
+        Eventtype type = (Eventtype)atoi(buffer);
+        XMLString::release(&buffer);
+
+        void *event;
+        switch(type){
+            case top || high || mid || low: {
+                HEvent eh;
+                eh.orderinpalette = orderinpalette;
+                eh.type = type;
+                parseHEvent(eventtype_el, eh);
+                break;
+            }
+            case bottom: {
+                BottomEvent eb;
+                eb.event.orderinpalette = orderinpalette;
+                eb.event.type = type;
+                // parseHEvent(eventtype_el, event);
+                // parseBottomEvent(eventtype_el, eb);
+                break;
+            }
+            case sound: {
+                SpectrumEvent espec;
+                espec.orderinpalette = orderinpalette;
+                break;
+            }
+            case env: {
+                EnvelopeEvent ee;
+                ee.orderinpalette = orderinpalette;
+                break;
+            }
+            case sieve: {
+                SieveEvent esi;
+                esi.orderinpalette = orderinpalette;
+                break;
+            }
+            case spa: {
+                SpaEvent espa;
+                espa.orderinpalette = orderinpalette;
+                break;
+            }
+            case pattern: {
+                PatternEvent ep;
+                ep.orderinpalette = orderinpalette;
+                break;
+            }
+            default:
+                qDebug() << "ERROR: parsing event gave event type outside defined types";
+        }
+
+
+
+
+    }
 }
 
 void ProjectManager::parse(Project *p, const QString& filepath){
@@ -249,6 +505,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     }
 #endif
 
+// #define EVENTS
 #ifdef EVENTS
     DOMElement *domEvents = currentElement->getNextElementSibling();
     DOMElement *eventElement = domEvents->getFirstElementChild();
