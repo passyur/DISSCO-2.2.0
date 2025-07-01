@@ -6,7 +6,7 @@
 #include <QMap>
 #include <QHash>
 #include <QObject>
-
+#include <xercesc/dom/DOMElement.hpp>
 #ifdef MARKOV
 #include "MarkovModel.h"
 #endif
@@ -46,7 +46,7 @@ class Project : public QObject {
          *  \returns 
         **/
         Project(const QString& _title = QString(), const QByteArray& _id = QByteArray());
-
+        std::string parseEvents(xercesc::DOMElement *event_start);
         /* the *.dissco file */
         QString filepath;
         QByteArray id;
@@ -134,8 +134,19 @@ class ProjectManager : public QObject {
         int save(Project*);
         int saveAs(Project*);
         
-        void set_curr_project(class Project*);
-        void send_curr_project_to_main(class Project*);
+        void set_curr_project(class Project* p) { curr_project_ = p; }
+        Project *get_curr_project() { return curr_project_; }
+
+        QList<HEvent>& get_curr_hevents() { return curr_project_->h_events; }
+        QList<BottomEvent>& get_curr_bottomevents() { return curr_project_->bottom_events; }
+        QList<SpectrumEvent>& get_curr_spectrumevents() { return curr_project_->spectrum_events; }
+        QList<NoteEvent>& get_curr_noteevents() { return curr_project_->note_events; }
+        QList<EnvelopeEvent>& get_curr_envelopeevents() { return curr_project_->envelope_events; }
+        QList<SieveEvent>& get_curr_sieveevents() { return curr_project_->sieve_events; }
+        QList<SpaEvent>& get_curr_spaevents() { return curr_project_->spa_events; }
+        QList<PatternEvent>& get_curr_patternevents() { return curr_project_->pattern_events; }
+        QList<ReverbEvent>& get_curr_reverbevents() { return curr_project_->reverb_events; }
+        QList<FilterEvent>& get_curr_filterevents() { return curr_project_->filter_events; }
 #ifdef TABEDITOR
         QList<Project*> get_projects() { return project_hash_.values(); }
         QList<QByteArray> get_project_IDs() { return project_hash_.keys(); }
