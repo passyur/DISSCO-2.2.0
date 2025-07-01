@@ -32,7 +32,8 @@
 #include "../ui/ui_FunctionGenerator.h"
 #include "ObjectWindow.hpp"
 #include "PaletteViewController.hpp"
-#include "../core/IEvent.h"
+#include "../core/event_struct.hpp"
+// #include "../core/IEvent.h"
 // #include "muParser.h"
 
 

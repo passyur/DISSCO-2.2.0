@@ -2,71 +2,12 @@
 #define FUNCTIONGENERATOR_HPP
 
 #include "../../../LASS/src/LASS.h"
-#include "../../../CMOD/src/CMOD.h"
+#include "../lassie.hpp"
 #include "../../../CMOD/src/Utilities.h"
-#include "../core/IEvent.h"
 
 #include <QDialog>
 #include <QWidget>
 #include <QString>
-
-typedef enum {
-  functionRandom,
-  functionRandomInt,
-  functionRandomOrderInt,
-  functionRandomSeed,
-  functionRandomizer,
-  functionRandomDensity,
-  functionInverse,
-  functionLN,
-  functionFibonacci,// not in used??
-  functionDecay,
-
-  functionMarkov, // generate from markov
-
-  functionStochos,
-  functionEnvLib,
-  functionSelect,
-  functionValuePick,
-
-  functionChooseL,
-  functionGetPattern,
-  functionExpandPattern,
-  functionAdjustPattern, // not in used??
-  functionMakeEnvelope,
-  functionMakeSieve,
-  functionMakePattern,
-  functionMakeList,
-  functionRawList,
-  functionReadENVFile,
-  functionReadSIVFile,
-  functionReadPATFile,
-  functionReadSPAFile,
-  functionReadREVFile,
-  functionReadFILFile,
-
-  functionSPA,
-
-  functionREV_Simple,
-  functionREV_Medium,
-  functionREV_Advanced,
-
-  functionMakeFilter,
-
-  function_staticCURRENT_TYPE,
-  function_staticCURRENT_CHILD_NUM,
-  function_staticCURRENT_PARTIAL_NUM,
-  function_staticCURRENT_DENSITY,
-  function_staticCURRENT_SEGMENT,
-  function_staticAVAILABLE_EDU,
-  function_staticCURRENT_LAYER,
-  function_staticPREVIOUS_CHILD_DURATION,
-
-  functionSpectrum_Gen,
-
-  NOT_A_FUNCTION
-} CMODFunction;
-
 
 class SPAPartialAlignment;
 class REVPartialAlignment;
@@ -96,7 +37,6 @@ public:
     QString result;
     // Returns the result string
     QString getResultString();
-    std::string static getFunctionString(FileValue* _value, FunctionReturnType _returnType);
     std::string static getFunctionString(DOMElement* _thisFunctionElement);
     // Changes the combo box to the right type
     void handleFunctionChanged(int index);
