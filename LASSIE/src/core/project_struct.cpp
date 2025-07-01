@@ -19,7 +19,7 @@ in the associated window (currently, the project view).
 
 namespace XercesParser {
     using namespace xercesc;
-    inline std::string getFunctionString(DOMElement* _thisFunctionElement){
+    inline QString getFunctionString(DOMElement* _thisFunctionElement){
         char* charBuffer;
 
         DOMCharacterData* textData;
@@ -42,17 +42,17 @@ namespace XercesParser {
 
         delete theSerializer;
         returnString = returnString.substr(tagLength+2, returnString.size() - tagLength * 2 - 5);
-        return returnString;
+        return QString::fromStdString(returnString);
     }
 
     /// @brief For use when transcoding a basic `std::string` from a `DOMElement*` and assigning it to a `std::string` variable.
     /// @param element the DOMElement to be transcoded from
     /// @param lhs the string to be assigned to
-    inline void transcodeAndAssign(DOMElement *element, std::string& lhs){
+    inline void transcodeAndAssign(DOMElement *element, QString& lhs){
         DOMCharacterData *textdata = (DOMCharacterData*)(element->getFirstChild());
         char *buffer;
         buffer = XMLString::transcode(textdata->getData());
-        lhs = buffer;
+        lhs = QString::fromStdString(buffer);
         XMLString::release(&buffer);
     }
 
@@ -108,16 +108,16 @@ namespace XercesParser {
         ExtraInfo extrainfo;
         DOMElement *freqinfo_el = extrainfo_el->getFirstElementChild();
         DOMElement *freqflag_el = freqinfo_el->getFirstElementChild();
-        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)std::stoi(getFunctionString(freqflag_el));
+        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)getFunctionString(freqflag_el).toUInt();
 
         DOMElement *freqcontflag_el = freqflag_el->getNextElementSibling();
-        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)std::stoi(getFunctionString(freqcontflag_el));
+        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)getFunctionString(freqcontflag_el).toUInt();
 
         DOMElement *freqentry1_el = freqcontflag_el->getNextElementSibling();
-        extrainfo.freq_info.entry_1 = std::stoi(getFunctionString(freqentry1_el));
+        extrainfo.freq_info.entry_1 = getFunctionString(freqentry1_el);
 
         DOMElement *freqentry2_el = freqentry1_el->getNextElementSibling();
-        extrainfo.freq_info.entry_2 = std::stoi(getFunctionString(freqentry2_el));
+        extrainfo.freq_info.entry_2 = getFunctionString(freqentry2_el);
         
         DOMElement *loudness_el = freqinfo_el->getNextElementSibling();
         extrainfo.loudness = getFunctionString(loudness_el);
@@ -127,9 +127,6 @@ namespace XercesParser {
 
         DOMElement *reverb_el = spa_el->getNextElementSibling();
         extrainfo.reverb = getFunctionString(reverb_el);
-
-
-
     }
 
     ExtraInfo parseHEvent(DOMElement *eventtype_el, HEvent& event){
@@ -144,20 +141,20 @@ namespace XercesParser {
 
         DOMElement *timesig_el = eduperbeat_el->getNextElementSibling();
         DOMElement *barval_el = timesig_el->getFirstElementChild();
-        event.timesig.bar_value = std::stoi(getFunctionString(barval_el));
+        event.timesig.bar_value = getFunctionString(barval_el).toUInt();
 
         DOMElement *noteval_el = barval_el->getNextElementSibling();
-        event.timesig.note_value = std::stoi(getFunctionString(noteval_el));
+        event.timesig.note_value = getFunctionString(noteval_el).toUInt();
 
         DOMElement *tempo_el = noteval_el->getNextElementSibling();
         DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
-        event.tempo.method_flag = std::stoi(getFunctionString(tempomethodflag_el));
+        event.tempo.method_flag = (Numchildrenflag)getFunctionString(tempomethodflag_el).toUInt();
 
         DOMElement *tempoprefix_el = tempomethodflag_el->getNextElementSibling();
-        event.tempo.prefix = (Tempoprefix)std::stoi(getFunctionString(tempoprefix_el));
+        event.tempo.prefix = (Tempoprefix)getFunctionString(tempoprefix_el).toUInt();
 
         DOMElement *temponoteval_el = tempoprefix_el->getNextElementSibling();
-        event.tempo.note_value = (Temponotevalue)std::stoi(getFunctionString(temponoteval_el));
+        event.tempo.note_value = (Temponotevalue)getFunctionString(temponoteval_el).toUInt();
 
         DOMElement *tempofrentry1_el = temponoteval_el->getNextElementSibling();
         event.tempo.frentry_1 = getFunctionString(tempofrentry1_el);
@@ -170,7 +167,7 @@ namespace XercesParser {
 
         DOMElement *numchildren_el = tempo_el->getNextElementSibling();
         DOMElement *numchildrenmethodflag_el = numchildren_el->getFirstElementChild();
-        event.numchildren.method_flag = (Numchildrenflag)std::stoi(getFunctionString(numchildrenmethodflag_el));
+        event.numchildren.method_flag = (Numchildrenflag)getFunctionString(numchildrenmethodflag_el).toUInt();
 
         DOMElement *curr = numchildrenmethodflag_el->getNextElementSibling();
         event.numchildren.entry_1 = getFunctionString(curr);
@@ -198,13 +195,13 @@ namespace XercesParser {
         event.child_event_def.duration_sieve = getFunctionString(curr);
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.definition_flag = (Childdefnflag)std::stoi(getFunctionString(curr));
+        event.child_event_def.definition_flag = (Childdefnflag)getFunctionString(curr).toUInt();
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.starttype_flag = (Childdeftimeflag)std::stoi(getFunctionString(curr));
+        event.child_event_def.starttype_flag = (Childdeftimeflag)getFunctionString(curr).toUInt();
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.durationtype_flag = (Childdeftimeflag)std::stoi(getFunctionString(curr));
+        event.child_event_def.durationtype_flag = (Childdeftimeflag)getFunctionString(curr).toUInt();
 
         DOMElement *layers_el = childdef_el->getNextElementSibling();
         DOMElement *layer_el = layers_el->getFirstElementChild();
@@ -232,75 +229,87 @@ namespace XercesParser {
         //     else
         //         childtype_flag = 2;
 
-        //     extrainfo = std::stoi(getFuncti);
+        //     extrainfo = QString::toUInt(getFuncti);
         // }
 
         return extrainfo;
     }
 
-    std::string parseEvents(DOMElement *event_start){
-        XMLCh *xmldata = XMLString::transcode("orderInPalette");
-        std::string orderinpalette = XMLString::transcode(event_start->getAttribute(xmldata));
-        XMLString::release(&xmldata);
-        
-        DOMElement *eventtype_el = event_start->getFirstElementChild();
-        DOMCharacterData* textdata = (DOMCharacterData*)eventtype_el->getFirstChild();
-        char* buffer = XMLString::transcode(textdata->getData());
-        Eventtype type = (Eventtype)atoi(buffer);
-        XMLString::release(&buffer);
-
-        void *event;
-        switch(type){
-            case top || high || mid || low: {
-                HEvent eh;
-                eh.orderinpalette = orderinpalette;
-                eh.type = type;
-                parseHEvent(eventtype_el, eh);
-                break;
-            }
-            case bottom: {
-                BottomEvent eb;
-                eb.event.orderinpalette = orderinpalette;
-                eb.event.type = type;
-                // parseHEvent(eventtype_el, event);
-                // parseBottomEvent(eventtype_el, eb);
-                break;
-            }
-            case sound: {
-                SpectrumEvent espec;
-                espec.orderinpalette = orderinpalette;
-                break;
-            }
-            case env: {
-                EnvelopeEvent ee;
-                ee.orderinpalette = orderinpalette;
-                break;
-            }
-            case sieve: {
-                SieveEvent esi;
-                esi.orderinpalette = orderinpalette;
-                break;
-            }
-            case spa: {
-                SpaEvent espa;
-                espa.orderinpalette = orderinpalette;
-                break;
-            }
-            case pattern: {
-                PatternEvent ep;
-                ep.orderinpalette = orderinpalette;
-                break;
-            }
-            default:
-                qDebug() << "ERROR: parsing event gave event type outside defined types";
-        }
-
-
-
-
-    }
+    
 }
 
+std::string Project::parseEvents(xercesc::DOMElement *event_start){
+    using namespace xercesc;
+    XMLCh *xmldata = XMLString::transcode("orderInPalette");
+    std::string orderinpalette = XMLString::transcode(event_start->getAttribute(xmldata));
+    XMLString::release(&xmldata);
+    
+    DOMElement *eventtype_el = event_start->getFirstElementChild();
+    DOMCharacterData* textdata = (DOMCharacterData*)eventtype_el->getFirstChild();
+    char* buffer = XMLString::transcode(textdata->getData());
+    Eventtype type = (Eventtype)std::stoi(buffer);
+    XMLString::release(&buffer);
+
+    void *event;
+    switch(type){
+        case top:
+        case high:
+        case mid:
+        case low: {
+            HEvent eh;
+            eh.orderinpalette =QString::fromStdString(orderinpalette);
+            eh.type = type;
+            XercesParser::parseHEvent(eventtype_el, eh);
+            h_events.append(eh);
+            break;
+        }
+        case bottom: {
+            BottomEvent eb;
+            eb.event.orderinpalette = QString::fromStdString(orderinpalette);
+            eb.event.type = type;
+            // parseHEvent(eventtype_el, event);
+            // parseBottomEvent(eventtype_el, eb);
+            bottom_events.append(eb);
+            break;
+        }
+        case sound: {
+            SpectrumEvent espec;
+            espec.orderinpalette = QString::fromStdString(orderinpalette);
+            spectrum_events.append(espec);
+            break;
+        }
+        case env: {
+            EnvelopeEvent ee;
+            ee.orderinpalette = QString::fromStdString(orderinpalette);
+            envelope_events.append(ee);
+            break;
+        }
+        case sieve: {
+            SieveEvent esi;
+            esi.orderinpalette = QString::fromStdString(orderinpalette);
+            sieve_events.append(esi);
+            break;
+        }
+        case spa: {
+            SpaEvent espa;
+            espa.orderinpalette = QString::fromStdString(orderinpalette);
+            spa_events.append(espa);
+            break;
+        }
+        case pattern: {
+            PatternEvent ep;
+            ep.orderinpalette = QString::fromStdString(orderinpalette);
+            pattern_events.append(ep);
+            break;
+        }
+        default:
+            qDebug() << "ERROR: parsing event gave event type outside defined types";
+    }
+
+
+
+    return "";
+}
 void ProjectManager::parse(Project *p, const QString& filepath){
     using namespace xercesc;
     XMLPlatformUtils::Initialize();
@@ -320,17 +329,17 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     //fileFlag
     DOMElement* element = configuration->getFirstElementChild();
     element = element->getNextElementSibling(); // skip Title attribute
-    p->file_flag = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->file_flag = XercesParser::getFunctionString(element);
     //topEvent
     element = element->getNextElementSibling();
-    p->top_event = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->top_event = XercesParser::getFunctionString(element);
 
     // pieceStartTime
     element = element->getNextElementSibling(); //skipped
 
     //duration
     element = element->getNextElementSibling();
-    p->duration = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->duration = XercesParser::getFunctionString(element);
 
     //synthesis
     element = element->getNextElementSibling();
@@ -355,23 +364,23 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
         //numOfStaff
     element = element->getNextElementSibling();
-    p->num_staffs = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->num_staffs = XercesParser::getFunctionString(element);
 
     //numOfChannels
     element = element->getNextElementSibling();
-    p->num_channels = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->num_channels = XercesParser::getFunctionString(element);
 
     //sampleRate
     element = element->getNextElementSibling();
-    p->sample_rate = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->sample_rate = XercesParser::getFunctionString(element);
 
     //sampleSize
     element = element->getNextElementSibling();
-    p->sample_size = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->sample_size = XercesParser::getFunctionString(element);
 
     //numOfThreads
     element = element->getNextElementSibling();
-    p->num_threads = QString::fromStdString(XercesParser::getFunctionString(element));
+    p->num_threads = XercesParser::getFunctionString(element);
 
     // Output Particel
     element = element->getNextElementSibling();
@@ -601,6 +610,8 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
 
     Project *project = create(info.fileName(), id);
     project->filepath = filepath;
+    
+    curr_project_ = project;
 
     parse(project, filepath);
     
