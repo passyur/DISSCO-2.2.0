@@ -46,7 +46,7 @@ class Project : public QObject {
          *  \returns 
         **/
         Project(const QString& _title = QString(), const QByteArray& _id = QByteArray());
-        std::string parseEvents(xercesc::DOMElement *event_start);
+        void parseEvents(xercesc::DOMElement *event_start);
         /* the *.dissco file */
         QString filepath;
         QByteArray id;
@@ -85,7 +85,6 @@ class Project : public QObject {
         QList<PatternEvent> pattern_events;
         QList<ReverbEvent> reverb_events;
         QList<FilterEvent> filter_events;
-
         EnvelopeLibraryEntry *elentry = nullptr;
 #ifdef MARKOV
         QList<MarkovModel<float>*> markovModels;
