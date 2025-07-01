@@ -66,6 +66,10 @@ EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     xEntry->setPlaceholderText("X value");
     yEntry->setPlaceholderText("Y value");
 
+    // Connect X/Y entry fields to update node positions when text changes
+    connect(xEntry, &QLineEdit::textChanged, this, &EnvelopeLibraryWindow::valueEntriesChanged);
+    connect(yEntry, &QLineEdit::textChanged, this, &EnvelopeLibraryWindow::valueEntriesChanged);
+
     // Instead, create a horizontal layout for X/Y fields and legend:
     QHBoxLayout* xyLegendLayout = new QHBoxLayout();
     QWidget* xyWidget = new QWidget(this);
@@ -74,7 +78,7 @@ EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     xyForm->addRow("Y value:", yEntry);
     xyWidget->setLayout(xyForm);
     xyLegendLayout->addWidget(xyWidget, 0, Qt::AlignLeft);
-    QLabel* legend = new QLabel("Right click the graph to see available actions or click-and-drag a node to adjust the envelope.\nThick segment = Flexible; Thin segment = Fixed.\nBlue = Linear; Green = Spline; Red = Exponential.", this);
+    QLabel* legend = new QLabel("Right click the graph to see available actions or click-and-drag a node to adjust the envelope.\nThick segment = Flexible; Thin segment = Fixed.\nBlue = Linear; Green = Spline; Red = Exponential (curved).\nYou can also type X and Y values directly to position nodes.", this);
     legend->setWordWrap(true);
     legend->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     xyLegendLayout->addWidget(legend, 1);
@@ -292,9 +296,17 @@ void EnvelopeLibraryWindow::keyPressEvent(QKeyEvent* event)
 void EnvelopeLibraryWindow::valueEntriesChanged()
 {
     if (!drawingArea) return;
-    drawingArea->setActiveNodeCoordinate(
-        xEntry->text(),
-        yEntry->text());
+    
+    // Only update if we have valid numeric input
+    bool xOk, yOk;
+    double xVal = xEntry->text().toDouble(&xOk);
+    double yVal = yEntry->text().toDouble(&yOk);
+    
+    if (xOk && yOk) {
+        drawingArea->setActiveNodeCoordinate(
+            xEntry->text(),
+            yEntry->text());
+    }
 }
 
 /**
@@ -304,6 +316,14 @@ void EnvelopeLibraryWindow::valueEntriesChanged()
  */
 void EnvelopeLibraryWindow::setEntries(const QString& x, const QString& y)
 {
+    // Temporarily disconnect signals to prevent infinite loops
+    disconnect(xEntry, &QLineEdit::textChanged, this, &EnvelopeLibraryWindow::valueEntriesChanged);
+    disconnect(yEntry, &QLineEdit::textChanged, this, &EnvelopeLibraryWindow::valueEntriesChanged);
+    
     xEntry->setText(x);
     yEntry->setText(y);
+    
+    // Reconnect signals
+    connect(xEntry, &QLineEdit::textChanged, this, &EnvelopeLibraryWindow::valueEntriesChanged);
+    connect(yEntry, &QLineEdit::textChanged, this, &EnvelopeLibraryWindow::valueEntriesChanged);
 } 
