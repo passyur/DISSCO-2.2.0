@@ -12,6 +12,7 @@
 #endif
 
 #include "../windows/EnvelopeLibraryEntry.hpp"
+#include "event_struct.hpp"
 // #include "IEvent.h"
 
 /*
@@ -73,6 +74,18 @@ class Project : public QObject {
         bool output_particel = false;
         bool empty_project = false;
 
+        /* event details */
+        QList<HEvent> h_events;
+        QList<BottomEvent> bottom_events;
+        QList<SpectrumEvent> spectrum_events;
+        QList<NoteEvent> note_events;
+        QList<EnvelopeEvent> envelope_events;
+        QList<SieveEvent> sieve_events;
+        QList<SpaEvent> spa_events;
+        QList<PatternEvent> pattern_events;
+        QList<ReverbEvent> reverb_events;
+        QList<FilterEvent> filter_events;
+
         EnvelopeLibraryEntry *elentry = nullptr;
 #ifdef MARKOV
         QList<MarkovModel<float>*> markovModels;
@@ -81,7 +94,28 @@ class Project : public QObject {
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
         /* dict of known default modifiers */
-        QMap<QString, bool> default_note_modifiers{{"+8va", true}, {"-8va", true}, {"accent", true}, {"coda", true}, {"downbow", true}, {"downmordent", true}, {"downprall", true}, {"espressivo", true}, {"fermata", true}, {"flageolet", true}, {"halfopen", true}, {"lheel", true}, {"lineprall", true}, {"longfermata", true}, {"ltoe", true}, {"marcato", true}, {"mordent", true}, {"null", true}, {"open", true}, {"portato", true}, {"prall", true}, {"pralldown", true}, {"prallmordent", true}, {"prallprall", true}, {"prallup", true}, {"reverseturn", true}, {"rheel", true}, {"rtoe", true}, {"segno", true}, {"shortfermata", true}, {"snappizzicato", true}, {"staccatissimo", true}, {"staccato", true}, {"stopped", true}, {"tenuto", true}, {"trill", true}, {"turn", true}, {"upbow", true}, {"upmordent", true}, {"upprall", true}, {"varcoda", true}, {"verylongfermata", true}};
+        QMap<QString, bool> default_note_modifiers{
+            {"+8va", true},          {"-8va", true},
+            {"accent", true},        {"coda", true},
+            {"downbow", true},       {"downmordent", true},
+            {"downprall", true},     {"espressivo", true},
+            {"fermata", true},       {"flageolet", true},
+            {"halfopen", true},      {"lheel", true},
+            {"lineprall", true},     {"longfermata", true},
+            {"ltoe", true},          {"marcato", true},
+            {"mordent", true},       {"null", true},
+            {"open", true},          {"portato", true},
+            {"prall", true},         {"pralldown", true},
+            {"prallmordent", true},  {"prallprall", true},
+            {"prallup", true},       {"reverseturn", true},
+            {"rheel", true},         {"rtoe", true},
+            {"segno", true},         {"shortfermata", true},
+            {"snappizzicato", true}, {"staccatissimo", true},
+            {"staccato", true},      {"stopped", true},
+            {"tenuto", true},        {"trill", true},
+            {"turn", true},          {"upbow", true},
+            {"upmordent", true},     {"upprall", true},
+            {"varcoda", true},       {"verylongfermata", true}};
 };
 
 class ProjectManager : public QObject {

@@ -1,13 +1,12 @@
 #ifndef EVENTATTRIBUTESVIEWCONTROLLER_HPP
 #define EVENTATTRIBUTESVIEWCONTROLLER_HPP
 
-#include "LASSIE.h"
+#include "../lassie.hpp"
 #include <QFrame>
 #include <QList>
 #include <QString>
 
 class SharedPointers;
-class IEvent;
 class ProjectView;
 class EventBottomModifier;
 class SpectrumPartial;

@@ -1,7 +1,7 @@
 #include "PaletteViewController.hpp"
 #include "ProjectViewController.hpp"
 #include "ObjectWindow.hpp"
-#include "../core/IEvent.h"
+#include "../core/event_struct.hpp"
 
 #include <QVBoxLayout>
 #include <QLabel>

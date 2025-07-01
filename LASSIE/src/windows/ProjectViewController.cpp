@@ -5,6 +5,7 @@
 
 #include <QFile>
 #include <QString>
+#include <QDir>
 #include <QFileInfo>
 #include <QIODevice>
 #include <QXmlStreamWriter>
@@ -33,8 +34,9 @@
 #include "../ui/ui_FunctionGenerator.h"
 #include "ObjectWindow.hpp"
 #include "PaletteViewController.hpp"
-#include "../core/IEvent.h"
+#include "../core/event_struct.hpp"
 #include "EventAttributesViewController.hpp"
+// #include "../core/IEvent.h"
 // #include "muParser.h"
 
 

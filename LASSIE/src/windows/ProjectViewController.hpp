@@ -7,7 +7,6 @@
 #include "../../LASS/src/LASS.h"
 #include "EnvelopeLibraryEntry.hpp"
 #include "../../CMOD/src/Markov.h"
-#include "../core/IEvent.h"
 
 #include <QDomDocument>
 

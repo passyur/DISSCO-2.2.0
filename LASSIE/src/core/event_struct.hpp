@@ -1,81 +1,267 @@
 #ifndef EVENTSTRUCT_HPP
 #define EVENTSTRUCT_HPP
 
-// #include <QList>
-#include <QtCore/qlist.h>
+/* 
+   event_struct.hpp defines the composite data types and enums corresponding to
+   the Event attributes in the DISSCO Xml spec. To extend the DISSCO Xml spec as
+   reflected in LASSIE: add to the corresponding struct, add to the parser, add
+   to the UI files in the corresponding window, and add to the save function. 
+*/
 
-class EventEntry {
-    public:
-        QList<EventLayer*> layers;
+#include <QList>
+#include <QString>
+
+typedef enum {
+    none,
+    dotted,
+    doubledotted,
+    triple,
+    quintuple,
+    sextuple,
+    septuple
+} Tempoprefix;
+
+typedef enum {
+    whole,
+    half,
+    quarter,
+    eighth,
+    sixteenth,
+    thirtysecond
+} Temponotevalue;
+
+typedef enum {
+    top,
+    high,
+    mid,
+    low,
+    bottom,
+    sound, /* i.e., Spectrum */
+    env,
+    sieve,
+    spa,
+    pattern,
+    reverb,
+    folder,
+    note,
+    filter,
+    mea,
+    spec /* NOT ACTUALLY USED */
+} Eventtype;
+
+typedef struct TimeSignature TimeSignature;
+struct TimeSignature {
+    unsigned bar_value;
+    unsigned note_value;
 };
 
-class BottomEventExtraInfo {
-  public:
-    BottomEventExtraInfo();
-    BottomEventExtraInfo(BottomEventExtraInfo* _original);
-    BottomEventExtraInfo(int _childTypeFlag); //called when parsing files.
-    BottomEventExtraInfo(int _childTypeFlag, DOMElement* _thisElement);
-    ~BottomEventExtraInfo();
-    int getFrequencyFlag(); // 0 = Well_tempered, 1 = Fundamental, 2 = Continuum
-    void setFrequencyFlag(int _flag);
-    int getFrequencyContinuumFlag();// 0 = hertz, 1 = power of two
-    void setFrequencyContinuumFlag(int _flag);
+typedef struct Tempo Tempo;
+struct Tempo {
+    unsigned method_flag; // true = as fraction, false = as note value
+    Tempoprefix prefix;
+    Temponotevalue note_value;
+    std::string frentry_1;
+    std::string frentry_2;
+    std::string valentry;
+};
 
-    std::string  getFrequencyEntry1();
-    void  setFrequencyEntry1(std::string _string);
-    std::string  getFrequencyEntry2();
-    void  setFrequencyEntry2(std::string _string);
-    std::string  getLoudness();
-    void  setLoudness(std::string _string);
-    std::string  getSpatialization();
-    void  setSpatialization(std::string _string);
-    std::string  getReverb();
-    void  setReverb(std::string _string);
-    std::string  getFilter();
-    void  setFilter(std::string _string);
-    std::string  getModifierGroup();
-    void  setModifierGroup(std::string _string);
-    EventBottomModifier* getModifiers();
-    EventBottomModifier* addModifier();
-    void removeModifier(EventBottomModifier* _modifier);
-    void setChildTypeFlag(int _type);
-    int getChildTypeFlag();
+typedef enum {
+    fixed,
+    density,
+    bylayer
+} Numchildrenflag;
 
-    EventBottomModifier* modifiers;
-    bool haveString(string _string);
-    static EventBottomModifier* buildModifiersFromDOMElement(DOMElement* _thisModifierElement);
+typedef struct NumChildren NumChildren;
+struct NumChildren {
+    Numchildrenflag method_flag;
+    std::string entry_1;
+    std::string entry_2;
+    std::string entry_3;
+};
 
-  private:
-    int frequencyFlag; // 0 = Well_tempered, 1 = Fundamental, 2 = Continuum
-    int frequencyContinuumFlag; //0 = hertz, 1 =] power of two
-    int childTypeFlag; // 0 = sound, 1 = note, 2 = visual
-    std::string frequencyEntry1;
-    std::string frequencyEntry2;
+typedef enum {
+    continuumdef,
+    sweep,
+    discrete
+} Childdefnflag;
+
+typedef enum {
+    percentage,
+    units,
+    seconds
+} Childdeftimeflag;
+
+typedef struct ChildDef ChildDef;
+struct ChildDef {
+    std::string entry_1;
+    std::string entry_2;
+    std::string entry_3;
+    std::string attack_sieve;
+    std::string duration_sieve;
+    Childdefnflag definition_flag;
+    Childdeftimeflag starttype_flag;
+    Childdeftimeflag durationtype_flag;
+};
+
+typedef struct Package Package;
+struct Package {
+    std::string event_name;
+    Eventtype event_type;
+    std::string weight;
+    std::string attack_envelope;
+    std::string attackenvelope_scale;
+    std::string duration_envelope;
+    std::string durationenvelope_scale;
+};
+
+/* oddly, there's a ByLayer tag, which to me, appears to never contain anything
+ * -Jacob, 06/28/25 */
+typedef struct Layer Layer;
+struct Layer {
+    std::string by_layer;
+    QList<Package> discrete_packages;
+};
+
+typedef enum {
+    welltempered,
+    fundamental,
+    continuum
+} Freqinfofreqflag;
+
+typedef enum {
+    hertz,
+    power_of_two
+} Freqinfocontflag;
+
+typedef struct FreqInfo FreqInfo;
+struct FreqInfo {
+    Freqinfofreqflag freq_flag;
+    Freqinfocontflag continuum_flag;
+    std::string entry_1;
+    std::string entry_2;
+};
+
+typedef struct Modifier Modifier;
+struct Modifier {
+    unsigned type;
+    bool applyhow_flag;
+    std::string probability;
+    std::string amplitude;
+    std::string rate;
+    std::string width;
+    std::string detune_spread;
+    std::string detune_direction;
+    std::string detune_velocity;
+    std::string group_name;
+    std::string partialresult_string;
+};
+
+typedef struct ExtraInfo ExtraInfo;
+struct ExtraInfo {
+    FreqInfo freq_info;
     std::string loudness;
-    std::string spatialization;
+    std::string spa;
     std::string reverb;
     std::string filter;
-    std::string modifierGroup; // ZIYUAN CHEN, July 2023
+    std::string modifier_group;
+    QList<Modifier> modifiers;
 };
 
-// Envelope
-class EnvelopeExtraInfo {
-    public:
-        EnvelopeExtraInfo(EnvelopeExtraInfo* _original){
-            envelopeBuilder = _original->envelopeBuilder;}
-        EnvelopeExtraInfo(){envelopeBuilder = "";}
-        ~EnvelopeExtraInfo(){}
-        std::string getEnvelopeBuilder();
-        void setEnvelopeBuilder(std::string _string);
-        bool haveString(std::string _string);
-
-    private:
-        std::string envelopeBuilder;
-
+/* HEvents are Top, High, Mid, Low, or Bottom events */
+typedef struct HEvent HEvent;
+struct HEvent {
+    std::string orderinpalette;
+    Eventtype type;
+    std::string name;
+    std::string max_child_duration;
+    std::string edu_perbeat;
+    TimeSignature timesig;
+    Tempo tempo;
+    NumChildren numchildren;
+    ChildDef child_event_def;
+    QList<Layer> event_layers;
+    std::string spa;
+    std::string reverb;
+    std::string filter;
+    QList<Modifier> modifiers;
 };
 
-class EventEntry {
-    
+typedef struct BottomEvent BottomEvent;
+struct BottomEvent {
+    HEvent event;
+    ExtraInfo extra_info;
+};
+
+typedef struct Spectrum Spectrum;
+struct Spectrum {
+    QList<std::string> partials;
+};
+
+typedef struct SpectrumEvent SpectrumEvent;
+struct SpectrumEvent {
+    /* implicitly, if we did have an Eventtype variable, it would == 5. */
+    std::string orderinpalette;
+    std::string name;
+    std::string num_partials;
+    std::string deviation;
+    std::string generate_spectrum;
+    Spectrum spectrum;
+};
+
+typedef struct NoteInfo NoteInfo;
+struct NoteInfo {
+    std::string staffs;
+    QList<std::string> modifiers; /* not to be confused with struct Modifier! */
+};
+
+typedef struct NoteEvent NoteEvent;
+struct NoteEvent {
+    std::string orderinpalette;
+    std::string name;
+    NoteInfo note_info;
+};
+
+typedef struct EnvelopeEvent EnvelopeEvent;
+struct EnvelopeEvent {
+    /* eventtype == 6 */
+    std::string orderinpalette;
+    std::string name;
+    std::string envelope_builder;
+};
+
+typedef struct SieveEvent SieveEvent;
+struct SieveEvent {
+    std::string orderinpalette;
+    std::string name;
+    std::string sieve_builder;
+};
+
+typedef struct SpaEvent SpaEvent;
+struct SpaEvent {
+    std::string orderinpalette;
+    std::string name;
+    std::string spatialization;
+};
+
+typedef struct PatternEvent PatternEvent;
+struct PatternEvent {
+    std::string orderinpalette;
+    std::string name;
+    std::string pattern_builder;
+};
+
+typedef struct ReverbEvent ReverbEvent;
+struct ReverbEvent {
+    std::string orderinpalette;
+    std::string name;
+    std::string reverberation;
+};
+
+typedef struct FilterEvent FilterEvent;
+struct FilterEvent {
+    std::string orderinpalette;
+    std::string name;
+    std::string filter_builder;
 };
 
 #endif

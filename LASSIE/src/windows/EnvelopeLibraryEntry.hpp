@@ -2,7 +2,6 @@
 #define ENVELOPE_LIBRARY_ENTRY_HPP
 
 #include <QString>
-#include "LASSIE.h"
 #include "../../LASS/src/Envelope.h"
 
 /**
