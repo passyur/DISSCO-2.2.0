@@ -50,8 +50,7 @@ namespace XercesParser {
     /// @param lhs the string to be assigned to
     inline void transcodeAndAssign(DOMElement *element, QString& lhs){
         DOMCharacterData *textdata = (DOMCharacterData*)(element->getFirstChild());
-        char *buffer;
-        buffer = XMLString::transcode(textdata->getData());
+        char *buffer = XMLString::transcode(textdata->getData());;
         lhs = QString::fromStdString(buffer);
         XMLString::release(&buffer);
     }
@@ -104,32 +103,7 @@ namespace XercesParser {
         return layer;
     }
 
-    ExtraInfo parseExtraInfo(DOMElement *extrainfo_el){
-        ExtraInfo extrainfo;
-        DOMElement *freqinfo_el = extrainfo_el->getFirstElementChild();
-        DOMElement *freqflag_el = freqinfo_el->getFirstElementChild();
-        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)getFunctionString(freqflag_el).toUInt();
-
-        DOMElement *freqcontflag_el = freqflag_el->getNextElementSibling();
-        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)getFunctionString(freqcontflag_el).toUInt();
-
-        DOMElement *freqentry1_el = freqcontflag_el->getNextElementSibling();
-        extrainfo.freq_info.entry_1 = getFunctionString(freqentry1_el);
-
-        DOMElement *freqentry2_el = freqentry1_el->getNextElementSibling();
-        extrainfo.freq_info.entry_2 = getFunctionString(freqentry2_el);
-        
-        DOMElement *loudness_el = freqinfo_el->getNextElementSibling();
-        extrainfo.loudness = getFunctionString(loudness_el);
-
-        DOMElement *spa_el = loudness_el->getNextElementSibling();
-        extrainfo.spa = getFunctionString(spa_el);
-
-        DOMElement *reverb_el = spa_el->getNextElementSibling();
-        extrainfo.reverb = getFunctionString(reverb_el);
-    }
-
-    ExtraInfo parseHEvent(DOMElement *eventtype_el, HEvent& event){
+    DOMElement* parseHEvent(DOMElement *eventtype_el, HEvent& event){
         DOMElement *name_el = eventtype_el->getNextElementSibling();
         transcodeAndAssign(name_el, event.name);
 
@@ -218,27 +192,233 @@ namespace XercesParser {
         DOMElement *filter_el = reverb_el->getNextElementSibling();
         event.filter = getFunctionString(filter_el);
 
+        return filter_el;
+    }
+
+    Modifier parseForModifier(DOMElement *modifier_el){
+        Modifier modifier;
+        DOMElement *type_el = modifier_el->getFirstElementChild();
+        modifier.type = getFunctionString(type_el).toUInt();
+
+        DOMElement *applyhow_el = type_el->getNextElementSibling();
+        modifier.applyhow_flag = (getFunctionString(applyhow_el) == "0");
+
+        DOMElement *probability_el = applyhow_el->getNextElementSibling();
+        modifier.probability = getFunctionString(probability_el);
+
+        DOMElement *amplitude_el = applyhow_el->getNextElementSibling();
+        modifier.amplitude = getFunctionString(amplitude_el);
+
+        DOMElement *rate_el = amplitude_el->getNextElementSibling();
+        modifier.rate = getFunctionString(rate_el);
+
+        DOMElement *width_el = rate_el->getNextElementSibling();
+        modifier.width = getFunctionString(width_el);
+
+        DOMElement *detune_spread_el = width_el->getNextElementSibling();
+        modifier.detune_spread = getFunctionString(detune_spread_el);
+
+        DOMElement *detune_direction_el = detune_spread_el->getNextElementSibling();
+        modifier.detune_direction = getFunctionString(detune_direction_el);
+
+        DOMElement *detune_velocity_el = detune_direction_el->getNextElementSibling();
+        modifier.detune_velocity = getFunctionString(detune_velocity_el);
+
+        DOMElement *group_name_el = detune_velocity_el->getNextElementSibling();
+        modifier.group_name = getFunctionString(group_name_el);
+
+        DOMElement *partialresultstring_el = group_name_el->getNextElementSibling();
+        modifier.partialresult_string = getFunctionString(partialresultstring_el);
+
+        return modifier;
+    }
+
+    void parseEndOfHEvent(DOMElement *filter_el, HEvent& event){
+        DOMElement *modifiers_el = filter_el->getNextElementSibling();
+        DOMElement *modifier_el = modifiers_el->getFirstElementChild();
+        while(modifier_el != nullptr){
+            event.modifiers.append(parseForModifier(modifier_el));
+            modifier_el = modifier_el->getNextElementSibling();
+        }
+    }
+
+    /// @brief Parses <ExtraInfo/> for `ExtraInfo` struct; does _not_ set childtype_flag.
+    /// @param extrainfo_el `DOMElement*` for <ExtraInfo/>
+    /// @return resulting `ExtraInfo`
+    ExtraInfo parseExtraInfo(DOMElement *extrainfo_el){
         ExtraInfo extrainfo;
-        // if(event.type == bottom){
-        //     std::string prefix = bottomevent.event.name.substr(0,1);
-        //     int childtype_flag = -1;
-        //     if(prefix=="s")
-        //         childtype_flag = 0;
-        //     else if(prefix=="n")
-        //         childtype_flag = 1;
-        //     else
-        //         childtype_flag = 2;
+        DOMElement *freqinfo_el = extrainfo_el->getFirstElementChild();
+        DOMElement *freqflag_el = freqinfo_el->getFirstElementChild();
+        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)getFunctionString(freqflag_el).toUInt();
 
-        //     extrainfo = QString::toUInt(getFuncti);
-        // }
+        DOMElement *freqcontflag_el = freqflag_el->getNextElementSibling();
+        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)getFunctionString(freqcontflag_el).toUInt();
 
+        DOMElement *freqentry1_el = freqcontflag_el->getNextElementSibling();
+        extrainfo.freq_info.entry_1 = getFunctionString(freqentry1_el);
+
+        DOMElement *freqentry2_el = freqentry1_el->getNextElementSibling();
+        extrainfo.freq_info.entry_2 = getFunctionString(freqentry2_el);
+        
+        DOMElement *loudness_el = freqinfo_el->getNextElementSibling();
+        extrainfo.loudness = getFunctionString(loudness_el);
+
+        DOMElement *spa_el = loudness_el->getNextElementSibling();
+        extrainfo.spa = getFunctionString(spa_el);
+
+        DOMElement *reverb_el = spa_el->getNextElementSibling();
+        extrainfo.reverb = getFunctionString(reverb_el);
+
+        DOMElement *filter_el = reverb_el->getNextElementSibling();
+        extrainfo.filter = getFunctionString(filter_el);
+
+        DOMElement *modifiergroup_el = filter_el->getNextElementSibling();
+        extrainfo.modifier_group = getFunctionString(modifiergroup_el);
+
+        DOMElement *modifiers_el = modifiergroup_el->getNextElementSibling();
+        DOMElement *modifier_el = modifiers_el->getFirstElementChild();
+        while(modifier_el != nullptr){
+            extrainfo.modifiers.append(parseForModifier(modifier_el));
+            modifier_el = modifier_el->getNextElementSibling();
+        }
+        
         return extrainfo;
     }
 
-    
+    void parseEndOfBottomEvent(DOMElement *filter_el, BottomEvent& bottom_event){
+        DOMElement *extrainfo_el = filter_el->getNextElementSibling();
+        bottom_event.extra_info = parseExtraInfo(extrainfo_el);
+
+        QString prefix = bottom_event.event.name[0];
+        unsigned childtype_flag;
+        if(prefix=="s")
+            childtype_flag = 0;
+        else if(prefix=="n")
+            childtype_flag = 1;
+        else
+            childtype_flag = 2;
+        
+        bottom_event.extra_info.childtype_flag = childtype_flag;
+    }
+
+    Spectrum parseForSpectrum(DOMElement *spectrum_el) {
+        Spectrum spectrum;
+        DOMElement *partial_el = spectrum_el->getFirstElementChild();
+        while (partial_el) {
+            spectrum.partials.append(getFunctionString(partial_el));
+            partial_el = partial_el->getNextElementSibling();
+        }
+        return spectrum;
+    }
+
+    void parseSpectrumEvent(DOMElement *orderinpalette_el, SpectrumEvent& event) {
+        DOMElement *child = orderinpalette_el->getNextElementSibling();
+        event.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        event.num_partials = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        event.deviation = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        event.generate_spectrum = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        event.spectrum = parseForSpectrum(child);
+    }
+
+    NoteInfo parseForNoteInfo(DOMElement *noteinfo_el) {
+        NoteInfo ni;
+        DOMElement *staffs_el = noteinfo_el->getFirstElementChild();
+        ni.staffs = getFunctionString(staffs_el);
+
+        DOMElement *modifiers_el = staffs_el->getNextElementSibling();
+        DOMElement *modifier_el = modifiers_el->getFirstElementChild();
+        while(modifier_el != nullptr){
+            ni.modifiers.append(getFunctionString(modifier_el));
+            modifier_el = modifier_el->getNextElementSibling();
+        }
+
+        return ni;
+    }
+
+    void parseNoteEvent(DOMElement *event_el, NoteEvent& event) {
+        DOMElement *child = event_el->getNextElementSibling();
+        event.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        event.note_info = parseForNoteInfo(child);
+    }
+
+    void parseEnvelopeEvent(DOMElement* event_el, EnvelopeEvent& ev) {
+        DOMElement *child = event_el->getFirstElementChild();
+        ev.orderinpalette = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.envelope_builder = getFunctionString(child);
+    }
+
+    void parseSieveEvent(DOMElement* event_el, SieveEvent& ev) {
+        DOMElement *child = event_el->getFirstElementChild();
+        ev.orderinpalette = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.sieve_builder = getFunctionString(child);
+    }
+
+    void parseSpaEvent(DOMElement* event_el, SpaEvent& ev) {
+        DOMElement *child = event_el->getFirstElementChild();
+        ev.orderinpalette = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.spatialization = getFunctionString(child);
+    }
+
+    void parsePatternEvent(DOMElement* event_el, PatternEvent& ev) {
+        DOMElement *child = event_el->getFirstElementChild();
+        ev.orderinpalette = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.pattern_builder = getFunctionString(child);
+    }
+
+    void parseReverbEvent(DOMElement* event_el, ReverbEvent& ev) {
+        DOMElement *child = event_el->getFirstElementChild();
+        ev.orderinpalette = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.reverberation = getFunctionString(child);
+    }
+
+    void parseFilterEvent(DOMElement* event_el, FilterEvent& ev) {
+        DOMElement *child = event_el->getFirstElementChild();
+        ev.orderinpalette = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.name = getFunctionString(child);
+
+        child = child->getNextElementSibling();
+        ev.filter_builder = getFunctionString(child);
+    }
 }
 
-std::string Project::parseEvents(xercesc::DOMElement *event_start){
+void Project::parseEvents(xercesc::DOMElement *event_start){
     using namespace xercesc;
     XMLCh *xmldata = XMLString::transcode("orderInPalette");
     std::string orderinpalette = XMLString::transcode(event_start->getAttribute(xmldata));
@@ -257,9 +437,10 @@ std::string Project::parseEvents(xercesc::DOMElement *event_start){
         case mid:
         case low: {
             HEvent eh;
-            eh.orderinpalette =QString::fromStdString(orderinpalette);
+            eh.orderinpalette = QString::fromStdString(orderinpalette);
             eh.type = type;
-            XercesParser::parseHEvent(eventtype_el, eh);
+            DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eh);
+            XercesParser::parseEndOfHEvent(filter_el, eh);
             h_events.append(eh);
             break;
         }
@@ -267,48 +448,70 @@ std::string Project::parseEvents(xercesc::DOMElement *event_start){
             BottomEvent eb;
             eb.event.orderinpalette = QString::fromStdString(orderinpalette);
             eb.event.type = type;
-            // parseHEvent(eventtype_el, event);
-            // parseBottomEvent(eventtype_el, eb);
+            DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eb.event);
+            XercesParser::parseEndOfBottomEvent(filter_el, eb);
             bottom_events.append(eb);
             break;
         }
         case sound: {
             SpectrumEvent espec;
             espec.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseSpectrumEvent(eventtype_el, espec);
             spectrum_events.append(espec);
+            break;
+        }
+        case note: {
+            NoteEvent en;
+            en.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseNoteEvent(eventtype_el, en);
+            note_events.append(en);
             break;
         }
         case env: {
             EnvelopeEvent ee;
             ee.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseEnvelopeEvent(eventtype_el, ee);
             envelope_events.append(ee);
             break;
         }
         case sieve: {
             SieveEvent esi;
             esi.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseSieveEvent(eventtype_el, esi);
             sieve_events.append(esi);
             break;
         }
         case spa: {
             SpaEvent espa;
             espa.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseSpaEvent(eventtype_el, espa);
             spa_events.append(espa);
             break;
         }
         case pattern: {
             PatternEvent ep;
             ep.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parsePatternEvent(eventtype_el, ep);
             pattern_events.append(ep);
+            break;
+        }
+        case reverb: {
+            ReverbEvent er;
+            er.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseReverbEvent(eventtype_el, er);
+            reverb_events.append(er);
+            break;
+        }
+        case filter: {
+            FilterEvent ef;
+            ef.orderinpalette = QString::fromStdString(orderinpalette);
+            XercesParser::parseFilterEvent(eventtype_el, ef);
+            filter_events.append(ef);
             break;
         }
         default:
             qDebug() << "ERROR: parsing event gave event type outside defined types";
     }
-
-
-
-    return "";
 }
 void ProjectManager::parse(Project *p, const QString& filepath){
     using namespace xercesc;
@@ -514,22 +717,20 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     }
 #endif
 
-// #define EVENTS
+#define EVENTS
 #ifdef EVENTS
     DOMElement *domEvents = currentElement->getNextElementSibling();
     DOMElement *eventElement = domEvents->getFirstElementChild();
 
     while (eventElement != NULL){
-        IEvent* newEvent = new IEvent(eventElement);
-        // paletteView->insertEvent(newEvent, newEvent->getEventTypeString());
-        p->events.push_back(newEvent);
+        p->parseEvents(eventElement);
         eventElement = eventElement->getNextElementSibling();
     }
 
-    auto eventsIter = p->events.begin();
-    for (; eventsIter != p->events.end(); ++eventsIter){
-        (*eventsIter)->link(p);
-    }
+    // auto eventsIter = p->events.begin();
+    // for (; eventsIter != p->events.end(); ++eventsIter){
+    //     (*eventsIter)->link(p);
+    // }
 #endif
 }
 
