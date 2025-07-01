@@ -34,6 +34,10 @@ class MainWindow : public QMainWindow
         ~MainWindow();
         void setUnsavedTitle(QString unsavedFile);
 
+        std::unique_ptr<Ui::MainWindow> ui;
+        std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
+        std::unique_ptr<MarkovModelLibraryWindow> markovWindow;
+
     public slots:
         void showStatusMessage(const QString& message);
 
@@ -67,9 +71,6 @@ class MainWindow : public QMainWindow
         void loadFile(const QString &fileName);
         void saveFile(const QString &fileName);
 
-        std::unique_ptr<Ui::MainWindow> ui;
-        std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
-        std::unique_ptr<MarkovModelLibraryWindow> markovWindow;
 
         QString currentFile;
         

@@ -3,7 +3,7 @@
 #include "PaletteViewController.hpp"
 #include "../../CMOD/src/Libraries.h"
 #include "ProjectViewController.hpp"
-#include "MainWindow.h"
+#include "MainWindow.hpp"
 #include <QResizeEvent>
 #include <QDebug>
 
@@ -188,7 +188,9 @@ void ObjectWindow::resizeEvent(QResizeEvent* event) {
 void ObjectWindow::print() {
     qDebug() << windowTitle() << ":";
     for (auto pkg = objects; pkg; pkg = pkg->next) {
-        qDebug() << pkg->ievent->getEventName().c_str();
+        // PLACEHOLDER BC IEVENT getEventName NOT MADE YET
+        qDebug() << "obj window print";
+        //qDebug() << pkg->ievent->getEventName().c_str();
     }
 }
 
@@ -212,7 +214,9 @@ void ObjectWindow::sizeChange(int newNumOfColumns) {
     for (auto pkg = objects; pkg; pkg = pkg->next) {
         // Set button text to event name
         if (pkg->ievent) {
-            pkg->setText(QString::fromStdString(pkg->ievent->getEventName()));
+            // PLACEHOLDER BC IEVENT getEventName NOT MADE YET
+            pkg->setText("size change event name");
+            //pkg->setText(QString::fromStdString(pkg->ievent->getEventName()));
         }
         gridLayout->addWidget(pkg, row, col);
         if (++col >= currentNumOfColumns) {
@@ -241,7 +245,9 @@ void ObjectWindow::numOfObjectsChange() {
     for (auto pkg = objects; pkg; pkg = pkg->next) {
         // Set button text to event name
         if (pkg->ievent) {
-            pkg->setText(QString::fromStdString(pkg->ievent->getEventName()));
+            // PLACEHOLDER BC IEVENT getEventName NOT MADE YET
+            pkg->setText("num of obj changed event name");
+            //pkg->setText(QString::fromStdString(pkg->ievent->getEventName()));
         }
         gridLayout->addWidget(pkg, row, col);
         if (++col >= currentNumOfColumns) {
@@ -279,5 +285,5 @@ void ObjectWindowObjectPackage::clear() {
 }
 
 void ObjectWindowObjectPackage::showContent() {
-    projectView->showAttributes(ievent);
+    //projectView->showAttributes(ievent);
 }

@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EventAttributesViewController</class>
+   <widget class="QFrame" name="myFrame">
+    <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
+    <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+    <layout class="QVBoxLayout" name="verticalFrameLayout">
+        
+        <!-- <item>
+          <widget class="QStackedWidget" name="stackedWidget">
+            <property name="currentIndex">
+              <number>0</number>
+            </property>
+
+            <widget class="QWidget" name="emptyPage"/>
+            <widget class="QWidget" name="standardPage"/>
+            <widget class="QWidget" name="soundPage"/>
+            <widget class="QWidget" name="envPage"/>
+            <widget class="QWidget" name="sievePage"/>
+            <widget class="QWidget" name="spaPage"/>
+            <widget class="QWidget" name="patPage"/>
+            <widget class="QWidget" name="revPage"/>
+            <widget class="QWidget" name="filPage"/>
+            <widget class="QWidget" name="meaPage"/>
+            <widget class="QWidget" name="notePage"/>
+          </widget>
+        </item> -->
+
+        <item>
+          <widget class="QLabel" name="attributesLabel">
+              <property name="text"><string>Attributes</string></property>
+          </widget>
+        </item>
+        <item>
+          <widget class="QLabel" name="ieventTypeLabel"></widget>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="nameEntryLayout">
+            <item>
+                <widget class="QLabel" name="nameEntryLabel">
+                <property name="text"><string>Event Name:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="nameEntry"/>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="unitsPerSecondLayout">
+            <item>
+                <widget class="QLabel" name="unitsPerSecondLabel">
+                <property name="text"><string>EDU Per Beat:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="unitsPerSecondEntry"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="unitsPerSecondFunButton">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="timeSigRow">
+          <item>
+            <widget class="QLabel" name="attributesStandardTimeSignature">
+              <property name="text"><string>Time Signature:</string></property>
+            </widget>
+          </item>
+          <item>
+          <layout class="QVBoxLayout" name="AttributestimeSignatureVBox">
+              <item>
+                <widget class="QLineEdit" name="timeSig1Entry">
+                  <property name="minimumWidth"><number>50</number></property>
+                  <property name="maximumWidth"><number>50</number></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QFrame" name="separatorFrame">
+                  <property name="frameShape"><enum>QFrame::HLine</enum></property>
+                  <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+                  <property name="minimumWidth"><number>50</number></property>
+                  <property name="maximumWidth"><number>50</number></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLineEdit" name="timeSig2Entry">
+                  <property name="minimumWidth"><number>50</number></property>
+                  <property name="maximumWidth"><number>50</number></property>
+                </widget>
+              </item>
+          </layout>
+          </item>
+          <item>
+            <spacer name="timeSigSpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+            </spacer>
+          </item>
+        </layout>
+        </item>
+        <item>
+          <widget class="QFrame" name="line_0">
+            <property name="frameShape"><enum>QFrame::HLine</enum></property>
+            <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+          </widget>
+        </item>
+        <item>
+          <widget class="QGroupBox" name="tempoGroup">
+          <property name="minimumHeight"><number>50</number></property>
+          <property name="maximumHeight"><number>50</number></property>
+          <layout class="QHBoxLayout" name="tempoLayout">
+              <item>
+                  <widget class="QLabel" name="tempoLabel">
+                  <property name="text"><string>Tempo:</string></property>
+                  </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="tempoAsNoteValueRadio">
+                <property name="text"><string>as Note Value</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="tempoAsFractionRadio">
+                <property name="text"><string>Beats / Seconds</string></property>
+                </widget>
+              </item>
+          </layout>
+          </widget>
+        </item>
+        <item>
+          <widget class="QStackedWidget" name="tempoSecondaryStack">
+            <property name="currentIndex"><number>0</number></property>
+
+                <widget class="QWidget" name="emptyTempoPage">
+                    <layout class="QHBoxLayout" name="emptyTempoLayout">
+                        <item>
+                            <widget class="QLabel" name="emptyTempoLabel">
+                            <property name="text"><string></string></property>
+                            </widget>
+                        </item>
+                    </layout>
+                </widget>
+                <widget class="QWidget" name="tempoValuePage">
+                <layout class="QHBoxLayout" name="outerTempoLayout1">
+                  <item>
+                    <widget class="QWidget" name="tempoMainWidget1">
+                      <property name="minimumWidth"><number>300</number></property>
+                      <layout class="QHBoxLayout" name="tempoMainLayout1">
+                        <item>
+                          <spacer name="tempoSpacer">
+                            <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                            <property name="sizeHint" stdset="0"><size><width>50</width><height>20</height></size></property>
+                          </spacer>
+                        </item>
+                        <item>
+                          <widget class="QWidget" name="tempoControlsWidget1">
+                            <layout class="QHBoxLayout" name="tempoControlsLayout1">
+                              <item>
+                                <widget class="QComboBox" name="tempoNotePrefixCombo1"/>
+                              </item>
+                              <item>
+                                <widget class="QComboBox" name="tempoNoteCombo1"/>
+                              </item>
+                              <item>
+                                <widget class="QLabel" name="tempoEqualsLabel">
+                                  <property name="text">
+                                    <string>=</string>
+                                  </property>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QLineEdit" name="tempoValueEntry1">
+                                  <property name="minimumWidth">
+                                    <number>150</number>
+                                  </property>
+                                </widget>
+                              </item>
+                            </layout>
+                          </widget>
+                        </item>
+                      </layout>
+                    </widget>
+                  </item>
+                </layout>
+                </widget>
+                <widget class="QWidget" name="tempoFractionPage">
+                <layout class="QHBoxLayout" name="outerTempoLayout">
+                  <item>
+                    <widget class="QWidget" name="tempoMainWidget2">
+                      <property name="minimumWidth"><number>300</number></property>
+                      <layout class="QHBoxLayout" name="tempoMainLayout2">
+                        <item>
+                          <widget class="QLineEdit" name="tempoValueEntry2">
+                              <property name="minimumWidth"><number>170</number></property>
+                              <property name="maximumWidth"><number>170</number></property>
+                          </widget>
+                        </item>
+                        <item>
+                          <widget class="QWidget" name="tempoControlsWidget2">
+                            <layout class="QHBoxLayout" name="tempoControlsLayout2">
+                              <item>
+                                <widget class="QComboBox" name="tempoNotePrefixCombo2"/>
+                              </item>
+                              <item>
+                                <widget class="QComboBox" name="tempoNoteCombo2"/>
+                              </item>
+                              <item>
+                                <widget class="QLabel" name="tempoInLabel">
+                                  <property name="text">
+                                    <string>in</string>
+                                  </property>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QLineEdit" name="tempoValueEntry3">
+                                  <property name="minimumWidth">
+                                    <number>150</number>
+                                  </property>
+                                </widget>
+                              </item>
+                            </layout>
+                          </widget>
+                        </item>
+                      </layout>
+                    </widget>
+                  </item>
+                </layout>
+                </widget>
+          </widget>
+        </item>
+        <item>
+          <widget class="QFrame" name="line_1">
+            <property name="frameShape"><enum>QFrame::HLine</enum></property>
+            <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+          </widget>
+        </item>
+        <item>
+          <widget class="QGroupBox" name="attributesStandardNumChildrenGroup">
+          <property name="minimumHeight"><number>50</number></property>
+          <property name="maximumHeight"><number>50</number></property>
+          <layout class="QHBoxLayout" name="attributesStandardNumChildrenLayout">
+              <item>
+                  <widget class="QLabel" name="attributesStandardNumChildrenLabel">
+                  <property name="text"><string>Number of Children:</string></property>
+                  </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="densityButton">
+                <property name="text"><string>Density</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="fixedButton">
+                <property name="text"><string>Fixed</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="byLayerButton">
+                <property name="text"><string>By Layer</string></property>
+                </widget>
+              </item>
+          </layout>
+          </widget>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="numOfChildayout1">
+            <item>
+                <widget class="QLabel" name="numOfChildLabel1">
+                <property name="text"><string>Number of Children To Create:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="childCountEntry1"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="numOfChildFunButton1">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="numOfChildayout2">
+            <item>
+                <widget class="QLineEdit" name="childCountEntry2"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="numOfChildFunButton2">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="numOfChildayout3">
+            <item>
+                <widget class="QLineEdit" name="childCountEntry3"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="numOfChildFunButton3">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+
+        <item>
+          <widget class="QFrame" name="line_2">
+            <property name="frameShape"><enum>QFrame::HLine</enum></property>
+            <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+          </widget>
+        </item>
+        <item>
+          <widget class="QGroupBox" name="attributesChildEventDefGroup">
+          <property name="minimumHeight"><number>50</number></property>
+          <property name="maximumHeight"><number>50</number></property>
+          <layout class="QHBoxLayout" name="attributesChildEventDefLayout">
+              <item>
+                  <widget class="QLabel" name="attributesChildEventDefLabel">
+                  <property name="text"><string>Children Events Definition:</string></property>
+                  </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="continuumButton">
+                <property name="text"><string>Continuum</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="sweepButton">
+                <property name="text"><string>Sweep</string></property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QRadioButton" name="discreteButton">
+                <property name="text"><string>Discrete</string></property>
+                </widget>
+              </item>
+          </layout>
+          </widget>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="childEventDefStartTimeLayout">
+            <item>
+                <widget class="QLabel" name="childEventDefStartTimeLabel">
+                <property name="text"><string>Child Start Time:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="childDefEntry1"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="childEventDefStartTimeFunButton">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item>
+            <spacer name="childEventDeStartTypeSpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+            </spacer>
+          </item>
+          <item>
+            <widget class="QGroupBox" name="childEventDefStartTypeGroup">
+            <property name="minimumHeight"><number>50</number></property>
+            <property name="maximumHeight"><number>50</number></property>
+            <property name="minimumWidth"><number>450</number></property>
+            <property name="maximumWidth"><number>450</number></property>
+            <layout class="QHBoxLayout" name="childEventDefStartTypeLayout">
+                <item>
+                  <widget class="QRadioButton" name="startTypePercentRadio">
+                  <property name="text"><string>Fraction</string></property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QRadioButton" name="startTypeUnitsRadio">
+                  <property name="text"><string>EDUs</string></property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QRadioButton" name="startTypeSecondsRadio">
+                  <property name="text"><string>Seconds</string></property>
+                  </widget>
+                </item>
+            </layout>
+            </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="childEventDefChildTypeLayout">
+            <item>
+                <widget class="QLabel" name="childEventDefChildTypeLabel">
+                <property name="text"><string>Child Type:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="childDefEntry2"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="childEventDefChildTypeFunButton">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="childEventDefDurationLayout">
+            <item>
+                <widget class="QLabel" name="childEventDefDurationLabel">
+                <property name="text"><string>Child Duration:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="childDefEntry3"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="childEventDefDurationFunButton">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item>
+            <spacer name="childEventDefDurationTypeSpacer">
+              <property name="orientation"><enum>Qt::Horizontal</enum></property>
+            </spacer>
+          </item>
+          <item>
+            <widget class="QGroupBox" name="childEventDefDurationTypeGroup">
+            <property name="minimumHeight"><number>50</number></property>
+            <property name="maximumHeight"><number>50</number></property>
+            <property name="minimumWidth"><number>450</number></property>
+            <property name="maximumWidth"><number>450</number></property>
+            <layout class="QHBoxLayout" name="childEventDefDurationTypeLayout">
+                <item>
+                  <widget class="QRadioButton" name="durationTypePercentRadio">
+                  <property name="text"><string>Fraction</string></property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QRadioButton" name="durationTypeUnitsRadio">
+                  <property name="text"><string>EDUs</string></property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QRadioButton" name="durationTypeSecondsRadio">
+                  <property name="text"><string>Seconds</string></property>
+                  </widget>
+                </item>
+            </layout>
+            </widget>
+          </item>
+        </layout>
+        </item>
+
+        <item>
+          <widget class="QFrame" name="line_3">
+            <property name="frameShape"><enum>QFrame::HLine</enum></property>
+            <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+          </widget>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="maxChildDurLayout">
+            <item>
+                <widget class="QLabel" name="maxChildDurLabel">
+                <property name="text"><string>Max Child Duration:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="maxChildDurEntry"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="maxChildDurFunButton">
+                <property name="text">
+                    <string>Insert Function</string>
+                </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+  
+
+       
+
+     </layout>
+   </widget>
+ <resources/>
+ <connections/>
+</ui>

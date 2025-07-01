@@ -5,6 +5,8 @@
 #include <QMap>
 #include <QString>
 #include <vector>
+#include <QTreeView>
+#include <QStandardItemModel>
 
 class ProjectView;
 class IEvent;
@@ -26,6 +28,9 @@ public:
     // Remove an event from the palette
     void removeEvent(IEvent* event, const QString& type);
 
+    // Opens Object Window
+    void objectActivated(const QModelIndex &index);
+
 private:
     ProjectView* projectView;
     
@@ -34,6 +39,9 @@ private:
     
     // Convert event type string to EventType enum
     int getEventTypeFromString(const QString& type);
+
+    QTreeView* treeView;
+    QStandardItemModel* model;
 };
 
 #endif // PALETTEVIEWCONTROLLER_HPP
