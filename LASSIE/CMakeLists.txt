@@ -38,10 +38,8 @@ target_link_libraries(LASSIE PRIVATE
     Qt6::Widgets
     Qt6::Core
     Qt6::Xml
-    LASS
+    CMOD
 )
-
-target_link_libraries(LASSIE PRIVATE CMOD)
 
 include(GNUInstallDirs)
 target_include_directories(LASSIE PRIVATE
