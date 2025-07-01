@@ -7,12 +7,15 @@
 #include "../../LASS/src/LASS.h"
 #include "EnvelopeLibraryEntry.hpp"
 #include "../../CMOD/src/Markov.h"
+#include "../core/IEvent.h"
 
 #include <QDomDocument>
 
 class MainWindow;
-// class ObjectWindow;
-// class PaletteViewController;
+class EnvelopeLibraryEntry;
+class EventAttributesViewController;
+class ObjectWindow;
+class PaletteViewController;
 
 class ProjectView : public QObject {
     Q_OBJECT
@@ -49,10 +52,10 @@ class ProjectView : public QObject {
         /* set properties pop up function */
         void setProperties();
 
-        // nhi: add these functions to the project view controller
-        EnvelopeLibraryEntry* getEnvelopeLibraryEntries() { return envelopeLibraryEntries; }
+         /* functions for modifying the Envelope list */
+        EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
         EnvelopeLibraryEntry* createNewEnvelope();
-        EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) { return envelopeLibraryEntries ? envelopeLibraryEntries->duplicateEnvelope(_originalEnvelope) : nullptr; }
+        EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);
         void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
         // nhi: Markov model methods
@@ -75,11 +78,12 @@ class ProjectView : public QObject {
         }
 
         // ObjectWindow and Palette methods
-        // PaletteViewController* getPalette() { return paletteView; }
-        // void showAttributes(class IEvent* event);
+        PaletteViewController* getPalette() { return paletteView; }
+        void showAttributes(QString objectName); // using QString for testing
+        //void showAttributes(class IEvent* event);
 
     private:
-        /* storing main window */
+        /* storing main window and propertials dialog pointers */
         MainWindow* mainWindow;
         ProjectPropertiesDialog* projectPropertiesDialog;
         
@@ -124,23 +128,26 @@ class ProjectView : public QObject {
         std::vector<MarkovModel<float>> markovModels;
 
         // ObjectWindow instances
-        // ObjectWindow* topWindow;
-        // ObjectWindow* highWindow;
-        // ObjectWindow* midWindow;
-        // ObjectWindow* lowWindow;
-        // ObjectWindow* bottomWindow;
-        // ObjectWindow* spectrumWindow;
-        // ObjectWindow* envWindow;
-        // ObjectWindow* sivWindow;
-        // ObjectWindow* spaWindow;
-        // ObjectWindow* patWindow;
-        // ObjectWindow* revWindow;
-        // ObjectWindow* filWindow;
-        // ObjectWindow* noteWindow;
-        // ObjectWindow* meaWindow;
+        ObjectWindow* topWindow;
+        ObjectWindow* highWindow;
+        ObjectWindow* midWindow;
+        ObjectWindow* lowWindow;
+        ObjectWindow* bottomWindow;
+        ObjectWindow* spectrumWindow;
+        ObjectWindow* envWindow;
+        ObjectWindow* sivWindow;
+        ObjectWindow* spaWindow;
+        ObjectWindow* patWindow;
+        ObjectWindow* revWindow;
+        ObjectWindow* filWindow;
+        ObjectWindow* noteWindow;
+        ObjectWindow* meaWindow;
 
-        // PaletteViewController
-        // PaletteViewController* paletteView;
+        // PaletteViewController pointer
+        PaletteViewController* paletteView;
+
+        // EventAttributesViewController pointer
+        EventAttributesViewController* eventAttributesView;
 };
 
 #endif

@@ -42,6 +42,7 @@ MainWindow::MainWindow(Inst* m)
     ui->setupUi(this);
 
     ui->tabWidget->hide();
+    ui->paletteWidget->hide();
     
     createActions();
     enableProjectActions(false);
@@ -111,6 +112,7 @@ void MainWindow::newFile()
     envelopeLibraryWindow->setActiveProject(projectView);
 
     ui->tabWidget->show();
+    ui->paletteWidget->show();
     enableProjectActions(true);
 }
 
@@ -287,6 +289,8 @@ void MainWindow::createActions()
 void MainWindow::enableProjectActions(bool enabled) {
     saveAct->setEnabled(enabled);
     saveAsAct->setEnabled(enabled);
+    showEnvelopeLibraryAct->setEnabled(enabled);
+    showMarkovAct->setEnabled(enabled);
     newObjAct->setEnabled(enabled);
     setPropAct->setEnabled(enabled);
     runAct->setEnabled(enabled);
@@ -381,6 +385,7 @@ void MainWindow::loadFile(const QString &fileName)
     envelopeLibraryWindow->setActiveProject(projectView);
 
     ui->tabWidget->show();
+    ui->paletteWidget->show();
     enableProjectActions(true);
 }
 

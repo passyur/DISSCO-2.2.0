@@ -19,10 +19,12 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QScrollArea>
 
 // #include "Define.h"
 #include "ProjectViewController.hpp"
 #include "MainWindow.hpp"
+#include "../ui/ui_mainwindow.h"
 #include "../inst.hpp"
 #include "EnvelopeLibraryEntry.hpp"
 #include "ProjectPropertiesDialog.hpp"
@@ -32,6 +34,7 @@
 #include "ObjectWindow.hpp"
 #include "PaletteViewController.hpp"
 #include "../core/IEvent.h"
+#include "EventAttributesViewController.hpp"
 // #include "muParser.h"
 
 
@@ -134,23 +137,32 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     envelopeLibraryEntries = NULL;
 
     // // Initialize PaletteViewController
-    // paletteView = new PaletteViewController(this);
+    paletteView = new PaletteViewController(this);
+    mainWindow->ui->paletteLayout->addWidget(paletteView);
+
+    // Initialize Events Attribute View Controller
+    QScrollArea* eventsScrollArea = new QScrollArea(mainWindow->ui->attributesTab);
+    eventsScrollArea->setWidgetResizable(true);
+    eventAttributesView = new EventAttributesViewController(this);
+    eventsScrollArea->setWidget(eventAttributesView);
+    QVBoxLayout* eventTablayout = new QVBoxLayout(mainWindow->ui->attributesTab);
+    eventTablayout->addWidget(eventsScrollArea);
 
     // // Create ObjectWindow instances
-    // topWindow = new ObjectWindow(eventTop, this);
-    // highWindow = new ObjectWindow(eventHigh, this);
-    // midWindow = new ObjectWindow(eventMid, this);
-    // lowWindow = new ObjectWindow(eventLow, this);
-    // bottomWindow = new ObjectWindow(eventBottom, this);
-    // spectrumWindow = new ObjectWindow(eventSound, this);
-    // envWindow = new ObjectWindow(eventEnv, this);
-    // sivWindow = new ObjectWindow(eventSiv, this);
-    // spaWindow = new ObjectWindow(eventSpa, this);
-    // patWindow = new ObjectWindow(eventPat, this);
-    // revWindow = new ObjectWindow(eventRev, this);
-    // filWindow = new ObjectWindow(eventFil, this);
-    // noteWindow = new ObjectWindow(eventNote, this);
-    // meaWindow = new ObjectWindow(eventMea, this);
+    topWindow = new ObjectWindow(eventTop, this);
+    highWindow = new ObjectWindow(eventHigh, this);
+    midWindow = new ObjectWindow(eventMid, this);
+    lowWindow = new ObjectWindow(eventLow, this);
+    bottomWindow = new ObjectWindow(eventBottom, this);
+    spectrumWindow = new ObjectWindow(eventSound, this);
+    envWindow = new ObjectWindow(eventEnv, this);
+    sivWindow = new ObjectWindow(eventSiv, this);
+    spaWindow = new ObjectWindow(eventSpa, this);
+    patWindow = new ObjectWindow(eventPat, this);
+    revWindow = new ObjectWindow(eventRev, this);
+    filWindow = new ObjectWindow(eventFil, this);
+    noteWindow = new ObjectWindow(eventNote, this);
+    meaWindow = new ObjectWindow(eventMea, this);
 
     // // Create a default top event
     // IEvent* newEvent = new IEvent();
@@ -158,21 +170,6 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     // newEvent->setEventType(eventTop);
     // paletteView->insertEvent(newEvent, "Top");
 
-    // // Show the ObjectWindows
-    // topWindow->show();
-    // highWindow->show();
-    // midWindow->show();
-    // lowWindow->show();
-    // bottomWindow->show();
-    // spectrumWindow->show();
-    // envWindow->show();
-    // sivWindow->show();
-    // spaWindow->show();
-    // patWindow->show();
-    // revWindow->show();
-    // filWindow->show();
-    // noteWindow->show();
-    // meaWindow->show();
 }
 
 
@@ -528,12 +525,21 @@ void ProjectView::modified(){
   }
 }
 
+/* Envelope Library Functions */
+EnvelopeLibraryEntry* ProjectView::getEnvelopeLibraryEntries(){
+	return envelopeLibraryEntries;
+}
 EnvelopeLibraryEntry* ProjectView::createNewEnvelope(){
     if (envelopeLibraryEntries == NULL) {
         envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
         return envelopeLibraryEntries;
     } else {
         return envelopeLibraryEntries->createNewEnvelope();
+    }
+}
+EnvelopeLibraryEntry* ProjectView::duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) {
+    if (envelopeLibraryEntries != NULL) {
+        return envelopeLibraryEntries->duplicateEnvelope(_originalEnvelope);
     }
 }
 // nhi: delete envelope
@@ -559,8 +565,25 @@ void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {
     }
 }
 //nhi: show attributes
-// void ProjectView::showAttributes(IEvent* event) {
-//     // TODO: Implement event attributes display
-//     // This would typically show the event in an EventAttributesViewController
-//     qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
-// }
+// void ProjectView::showAttributes(IEvent* event) { // using QString for testing
+void ProjectView:: showAttributes(QString objectName) {
+    // TODO: Implement event attributes display
+    // This would typically show the event in an EventAttributesViewController
+    //qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
+
+    // Show the ObjectWindows
+    if (objectName == "Top" ){ topWindow->show(); }
+    else if (objectName == "High" ){ highWindow->show(); }
+    else if (objectName == "Mid" ){ midWindow->show(); }
+    else if (objectName == "Low" ){ lowWindow->show(); }
+    else if (objectName == "Bottom" ){ bottomWindow->show(); }
+    else if (objectName == "Spectrum" ){ spectrumWindow->show(); }
+    else if (objectName == "Note" ){ noteWindow->show(); }
+    else if (objectName == "Envelope" ){ envWindow->show(); }
+    else if (objectName == "Sieve" ){ sivWindow->show(); }
+    else if (objectName == "Spatialization" ){ spaWindow->show(); }
+    else if (objectName == "Pattern" ){ patWindow->show(); }
+    else if (objectName == "Reverb" ){ revWindow->show(); }
+    else if (objectName == "Filter" ){ filWindow->show(); }
+    else if (objectName == "Measurement" ){ meaWindow->show(); }
+}
