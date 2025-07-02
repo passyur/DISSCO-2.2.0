@@ -24,7 +24,6 @@
 #include <QTreeView>
 #include <QStandardItem>
 
-// #include "Define.h"
 #include "ProjectViewController.hpp"
 #include "MainWindow.hpp"
 #include "../ui/ui_mainwindow.h"
