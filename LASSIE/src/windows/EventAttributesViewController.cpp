@@ -31,6 +31,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::byLayerButtonClicked);
 
     // --- connect child‐event‐definition buttons ---
+    ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->childEventDefDiscretePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     connect(ui->continuumButton, &QRadioButton::clicked,
             this, &EventAttributesViewController::continuumButtonClicked);
     connect(ui->sweepButton, &QRadioButton::clicked,
@@ -57,11 +59,11 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::childEventDefChildTypeFunButtonClicked);
     connect(ui->childEventDefDurationFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::childEventDefDurationFunButtonClicked);
-/*    connect(ui->childEventAttackSieveFunButton, &QPushButton::clicked,
+    connect(ui->childEventAttackSieveFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::childEventAttackSieveButtonClicked);
     connect(ui->childEventDurationSieveFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::childEventDurationSieveButtonClicked);
-    connect(ui->spectrumDeviationFunButton, &QPushButton::clicked,
+/*    connect(ui->spectrumDeviationFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::deviationFunButtonClicked);
     connect(ui->spectrumGenerateFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::generatespectrumFunButtonClicked);
@@ -101,6 +103,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::addPartialButtonClicked);
 
  */   // --- tempo controls ---
+    ui->tempoValuePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->tempoFractionPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     connect(ui->tempoAsNoteValueRadio, &QRadioButton::clicked,
             this, &EventAttributesViewController::tempoAsNoteValueButtonClicked);
     connect(ui->tempoAsFractionRadio, &QRadioButton::clicked,
@@ -495,26 +499,41 @@ void EventAttributesViewController::showCurrentEventData() {
 */
 void EventAttributesViewController::fixedButtonClicked() {
     densityButtonClicked(); // just reuse UI enabling
-    // ui->childCountEntry2->setEnabled(false);
-    // ui->childCountEntry3->setEnabled(false);
+    ui->numOfChildLabel1->setText("Number of Children To Create:");
+    ui->numOfChildLabel2->setText("");
+    ui->numOfChildLabel3->setText("");
+    ui->childCountEntry2->setEnabled(false);
+    ui->childCountEntry3->setEnabled(false);
     // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::densityButtonClicked() {
-    // ui->childCountEntry1->setEnabled(true);
-    // ui->childCountEntry2->setEnabled(true);
-    // ui->childCountEntry3->setEnabled(true);
+    ui->numOfChildLabel1->setText("Density:");
+    ui->numOfChildLabel2->setText("Area:");
+    ui->numOfChildLabel3->setText("Under One:");
+    ui->childCountEntry1->setEnabled(true);
+    ui->childCountEntry2->setEnabled(true);
+    ui->childCountEntry3->setEnabled(true);
     // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::byLayerButtonClicked() {
-    // ui->childCountEntry1->setEnabled(false);
-    // ui->childCountEntry2->setEnabled(false);
-    // ui->childCountEntry3->setEnabled(false);
+    ui->numOfChildLabel1->setText("");
+    ui->numOfChildLabel2->setText("");
+    ui->numOfChildLabel3->setText("");
+    ui->childCountEntry1->setEnabled(false);
+    ui->childCountEntry2->setEnabled(false);
+    ui->childCountEntry3->setEnabled(false);
     // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(true);
 }
 
 void EventAttributesViewController::continuumButtonClicked() {
+    ui->childEventDefStack->setCurrentWidget(ui->childEventDefContSweepPage);
+    ui->emptyChildEventDefPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->childEventDefDiscretePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->childEventDefContSweepPage->adjustSize();
+    ui->childEventDefStack->adjustSize();
     // ui->childDefEntry1->setEnabled(true);
     // ui->childDefEntry2->setEnabled(true);
     // ui->childDefEntry3->setEnabled(true);
@@ -533,6 +552,12 @@ void EventAttributesViewController::sweepButtonClicked() {
 }
 
 void EventAttributesViewController::discreteButtonClicked() {
+    ui->childEventDefStack->setCurrentWidget(ui->childEventDefDiscretePage);
+    ui->emptyChildEventDefPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->childEventDefDiscretePage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->childEventDefDiscretePage->adjustSize();
+    ui->childEventDefStack->adjustSize();
     // ui->childDefEntry1->setEnabled(false);
     // ui->childDefEntry2->setEnabled(false);
     // ui->childDefEntry3->setEnabled(false);
@@ -577,7 +602,7 @@ void EventAttributesViewController::childEventDefChildTypeFunButtonClicked() {
 void EventAttributesViewController::childEventDefDurationFunButtonClicked() {
     insertFunctionString(childEventDefDurationFunButton);
 }
-/*
+
 void EventAttributesViewController::childEventAttackSieveButtonClicked() {
     insertFunctionString(childEventDefAttackSieveFunButton);
 }
@@ -585,7 +610,7 @@ void EventAttributesViewController::childEventAttackSieveButtonClicked() {
 void EventAttributesViewController::childEventDurationSieveButtonClicked() {
     insertFunctionString(childEventDefDurationSieveFunButton);
 }
-
+/*
 void EventAttributesViewController::deviationFunButtonClicked() {
     insertFunctionString(spectrumDeviationFunButton);
 }
@@ -687,14 +712,14 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
         target = ui->childDefEntry3;
         gen = new FunctionGenerator(nullptr, functionReturnFloat, target->text());
         break;
-    // case childEventDefAttackSieveFunButton:
-    //     target = ui->attackSieveEntry;
-    //     gen = new FunctionGenerator(functionReturnSIV, target->text());
-    //     break;
-    // case childEventDefDurationSieveFunButton:
-    //     target = ui->durationSieveEntry;
-    //     gen = new FunctionGenerator(functionReturnSIV, target->text());
-    //     break;
+    case childEventDefAttackSieveFunButton:
+        target = ui->attackSieveEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnSIV, target->text());
+        break;
+    case childEventDefDurationSieveFunButton:
+        target = ui->durationSieveEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnSIV, target->text());
+        break;
     // case spectrumDeviationFunButton:
     //     target = ui->spectrumDeviationEntry;
     //     gen = new FunctionGenerator(functionReturnFloat, target->text());
@@ -761,6 +786,11 @@ void EventAttributesViewController::addPartialButtonClicked() {
 */
 void EventAttributesViewController::tempoAsNoteValueButtonClicked() {
     ui->tempoSecondaryStack->setCurrentWidget(ui->tempoValuePage);
+    ui->emptyTempoPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->tempoFractionPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->tempoValuePage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->tempoValuePage->adjustSize();
+    ui->tempoSecondaryStack->adjustSize();
     // bool modified = true;  // flag from original
     // if (!modified) {
     //     ui->tempoValueEntry->setText(ui->tempoValueEntry->text());
@@ -774,6 +804,11 @@ void EventAttributesViewController::tempoAsNoteValueButtonClicked() {
 
 void EventAttributesViewController::tempoAsFractionButtonClicked() {
     ui->tempoSecondaryStack->setCurrentWidget(ui->tempoFractionPage);
+    ui->emptyTempoPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->tempoValuePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->tempoFractionPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->tempoFractionPage->adjustSize();
+    ui->tempoSecondaryStack->adjustSize();
     // leave text as is
 }
 /*

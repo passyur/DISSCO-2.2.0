@@ -84,8 +84,8 @@ private slots:
     void childEventDefStartTimeFunButtonClicked();
     void childEventDefChildTypeFunButtonClicked();
     void childEventDefDurationFunButtonClicked();
-    // void childEventAttackSieveButtonClicked();
-    // void childEventDurationSieveButtonClicked();
+    void childEventAttackSieveButtonClicked();
+    void childEventDurationSieveButtonClicked();
     // void deviationFunButtonClicked();
     // void generatespectrumFunButtonClicked();
 
