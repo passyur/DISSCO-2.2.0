@@ -96,7 +96,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::fundamentalRadioButtonClicked);
     connect(ui->continuumRadio, &QRadioButton::clicked,
             this, &EventAttributesViewController::continuumRadioButtonClicked);
-
+          
     connect(ui->BSWellTemperedButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSWellTemperedButtonClicked);
     connect(ui->BSFunFreqButton1, &QPushButton::clicked,
@@ -105,7 +105,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::BSFunFreqButton2Clicked);
     connect(ui->BSContinuumButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSContinuumButtonClicked);
-    
+
 /*
     // --- additional controls ---
     connect(ui->addNewLayerButton, &QPushButton::clicked,
@@ -115,7 +115,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     connect(ui->addPartialButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addPartialButtonClicked);
 
-*/    // --- tempo controls ---
+ */   // --- tempo controls ---
     ui->tempoValuePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->tempoFractionPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     connect(ui->tempoAsNoteValueRadio, &QRadioButton::clicked,
@@ -129,7 +129,9 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
 */
     setFocusPolicy(Qt::StrongFocus);
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
-    showCurrentEventData();
+
+    LayerBox* box = new LayerBox(this, e_projectView);
+    ui->layersLayout->addWidget(box);
 }
 
 EventAttributesViewController::~EventAttributesViewController() {
@@ -146,13 +148,11 @@ LayerBox::LayerBox(EventAttributesViewController* parentController,
       m_projectView(projectView)
      // m_layerModel(layerModel)
 {
-    // Main layout
     m_mainLayout = new QVBoxLayout();
     this->setLayout(m_mainLayout);
     this->setFrameShape(QFrame::StyledPanel);
     this->setLineWidth(1);
 
-    // HBox with label, entry, buttons
     auto* weightHBox = new QHBoxLayout;
     auto* weightLabel = new QLabel("Number of children in this layer:");
     m_weightEntry = new QLineEdit;
@@ -171,7 +171,6 @@ LayerBox::LayerBox(EventAttributesViewController* parentController,
 
     m_mainLayout->addLayout(weightHBox);
 
-    // Tree view
     m_treeView = new QTreeView;
     m_model = new QStandardItemModel;
     m_model->setHorizontalHeaderLabels({"Child Type", "Class", "Name"});
@@ -179,43 +178,30 @@ LayerBox::LayerBox(EventAttributesViewController* parentController,
     m_treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    // Optional: fill in sample row
-    /*
-    QList<QStandardItem*> rowItems;
-    rowItems << new QStandardItem("1")
-             << new QStandardItem("EventClass")
-             << new QStandardItem("EventName");
-    m_model->appendRow(rowItems);
-    */
-
     m_mainLayout->addWidget(m_treeView);
 
-    // Optional: fixed size estimate (like GTK version’s `set_size_request`)
     this->setMinimumHeight(200);
 }
 
-LayerBox::~LayerBox() {
-    // Qt will delete child widgets automatically
-}
+LayerBox::~LayerBox() {}
 
+void EventAttributesViewController::showAttributesOfEvent(Eventtype event) { // (IEvent* event)
+    // if (!event) {
+    //     m_currentlyShownEvent = nullptr;
+    //     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+    //     // clear dynamic widgets
+    //     ui->layersLayout->deleteLater();
+    //     ui->modifiersLayout->deleteLater();
+    //     ui->partialsLayout->deleteLater();
+    //     return;
+    // }
 
-/*
-void EventAttributesViewController::showAttributesOfEvent(IEvent* event) {
-    if (!event) {
-        m_currentlyShownEvent = nullptr;
-        ui->stackedWidget->setCurrentWidget(ui->emptyPage);
-        // clear dynamic widgets
-        ui->layersLayout->deleteLater();
-        ui->modifiersLayout->deleteLater();
-        ui->partialsLayout->deleteLater();
-        return;
-    }
-
-    saveCurrentShownEventData();
+    // saveCurrentShownEventData();
+    // m_currentlyShownEvent = event;
     m_currentlyShownEvent = event;
     showCurrentEventData();
 }
-
+/*
 void EventAttributesViewController::saveCurrentShownEventData() {
     if (!m_currentlyShownEvent) return;
 
@@ -379,14 +365,12 @@ void EventAttributesViewController::showCurrentEventData() {
     // }
 
     // choose page
-    //int type = m_currentlyShownEvent->getEventType();
-    int type = 0;
+    // int type = m_currentlyShownEvent->getEventType();
+    int type = m_currentlyShownEvent;
     switch (type) {
-    case eventTop: case eventHigh: case eventMid: case eventLow: case eventBottom: {
+    case top: case high: case mid: case low: case bottom: {
         ui->stackedWidget->setCurrentWidget(ui->standardPage);
-        LayerBox* box = new LayerBox(this, e_projectView);
-        ui->layersLayout->addWidget(box);
-        if (type == eventBottom) {  
+        if (type == bottom) {  
             ui->frequencyContainer->setVisible(true);
             ui->loudnessContainer->setVisible(true);
             ui->modGroupContainer->setVisible(true);
@@ -398,39 +382,39 @@ void EventAttributesViewController::showCurrentEventData() {
         }
         break;
     }
-    case eventSound:
+    case sound:
         ui->stackedWidget->setCurrentWidget(ui->soundPage);
         break;
-    case eventEnv:
+    case env:
         ui->stackedWidget->setCurrentWidget(ui->envPage);
         break;
-    case eventSiv:
+    case sieve:
         ui->stackedWidget->setCurrentWidget(ui->sievePage);
         break;
-    case eventSpa:
+    case spa:
         ui->stackedWidget->setCurrentWidget(ui->spaPage);
         break;
-    case eventPat:
+    case pattern:
         ui->stackedWidget->setCurrentWidget(ui->patPage);
         break;
-    case eventRev:
+    case reverb:
         ui->stackedWidget->setCurrentWidget(ui->revPage);
         break;
-    case eventFil:
+    case filter:
         ui->stackedWidget->setCurrentWidget(ui->filPage);
         break;
-    case eventMea:
+    case mea:
         ui->stackedWidget->setCurrentWidget(ui->meaPage);
         break;
-    case eventNote:
+    case note:
         ui->stackedWidget->setCurrentWidget(ui->notePage);
         break;
     default:
         ui->stackedWidget->setCurrentWidget(ui->emptyPage);
     }
 
-    // populate fields
     /*
+    // populate fields
     ui->nameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
 
     if (type <= eventBottom) {
@@ -590,7 +574,7 @@ void EventAttributesViewController::showCurrentEventData() {
 }
 
 void EventAttributesViewController::fixedButtonClicked() {
-    densityButtonClicked(); // just reuse UI enabling
+    densityButtonClicked();
     ui->numOfChildLabel1->setText("Number of Children To Create:");
     ui->numOfChildLabel2->setText("");
     ui->numOfChildLabel3->setText("");
@@ -745,7 +729,7 @@ void EventAttributesViewController::generatespectrumFunButtonClicked() {
 }
 */
 void EventAttributesViewController::attributesStandardRevButtonClicked() {
-    insertFunctionString(attributesRevFunButton); // assuming typo, adjust accordingly
+    insertFunctionString(attributesRevFunButton);
 }
 
 void EventAttributesViewController::attributesStandardFilButtonClicked() {
@@ -776,7 +760,7 @@ void EventAttributesViewController::BSFilterButtonClicked() {
 }
 */
 void EventAttributesViewController::BSModifierGroupButtonClicked() {
-    //if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
+    // if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
     insertFunctionString(BSModGroupFunButton);
 }
 
@@ -889,7 +873,7 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
     //     target = ui->spectrumGenEntry;
     //     gen = new FunctionGenerator(functionReturnSPE, target->text());
     //     break;
-    
+
     default:
         return;
     }

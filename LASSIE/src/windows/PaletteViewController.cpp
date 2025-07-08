@@ -24,65 +24,68 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     treeView->setModel(model);
     layout->addWidget(treeView, 1);
 
-    // Adds items to tree view HERE FOR NOW BC NEED IEVENT WORKING
-    QStandardItem* folderTop = new QStandardItem("Folder");
+    // Adds folder events to tree view
+    folderTop = new QStandardItem("Folder");
     QStandardItem* nameTop = new QStandardItem("Top");
     model->appendRow({folderTop, nameTop});
 
-    QStandardItem* folderHigh = new QStandardItem("Folder");
+    folderHigh = new QStandardItem("Folder");
     QStandardItem* nameHigh = new QStandardItem("High");
     model->appendRow({folderHigh, nameHigh});
 
-    QStandardItem* folderMid = new QStandardItem("Folder");
+    folderMid = new QStandardItem("Folder");
     QStandardItem* nameMid = new QStandardItem("Mid");
     model->appendRow({folderMid, nameMid});
 
-    QStandardItem* folderLow = new QStandardItem("Folder");
+    folderLow = new QStandardItem("Folder");
     QStandardItem* nameLow = new QStandardItem("Low");
     model->appendRow({folderLow, nameLow});
 
-    QStandardItem* folderBottom = new QStandardItem("Folder");
+    folderBottom = new QStandardItem("Folder");
     QStandardItem* nameBottom = new QStandardItem("Bottom");
     model->appendRow({folderBottom, nameBottom});
 
-    QStandardItem* folderSpectrum = new QStandardItem("Folder");
+    folderSpectrum = new QStandardItem("Folder");
     QStandardItem* nameSpectrum = new QStandardItem("Spectrum");
     model->appendRow({folderSpectrum, nameSpectrum});
 
-    QStandardItem* folderNote = new QStandardItem("Folder");
+    folderNote = new QStandardItem("Folder");
     QStandardItem* nameNote = new QStandardItem("Note");
     model->appendRow({folderNote, nameNote});
 
-    QStandardItem* folderEnv = new QStandardItem("Folder");
+    folderEnv = new QStandardItem("Folder");
     QStandardItem* nameEnv = new QStandardItem("Envelope");
     model->appendRow({folderEnv, nameEnv});
 
-    QStandardItem* folderSiv = new QStandardItem("Folder");
+    folderSiv = new QStandardItem("Folder");
     QStandardItem* nameSiv = new QStandardItem("Sieve");
     model->appendRow({folderSiv, nameSiv});
 
-    QStandardItem* folderSpa = new QStandardItem("Folder");
+    folderSpa = new QStandardItem("Folder");
     QStandardItem* nameSpa = new QStandardItem("Spatialization");
     model->appendRow({folderSpa, nameSpa});
 
-    QStandardItem* folderPat = new QStandardItem("Folder");
+    folderPat = new QStandardItem("Folder");
     QStandardItem* namePat = new QStandardItem("Pattern");
     model->appendRow({folderPat, namePat});
 
-    QStandardItem* folderRev = new QStandardItem("Folder");
+    folderRev = new QStandardItem("Folder");
     QStandardItem* nameRev = new QStandardItem("Reverb");
     model->appendRow({folderRev, nameRev});
 
-    QStandardItem* folderFil = new QStandardItem("Folder");
+    folderFil = new QStandardItem("Folder");
     QStandardItem* nameFil = new QStandardItem("Filter");
     model->appendRow({folderFil, nameFil});
 
-    QStandardItem* folderMea = new QStandardItem("Folder");
+    folderMea = new QStandardItem("Folder");
     QStandardItem* nameMea = new QStandardItem("Measurement");
     model->appendRow({folderMea, nameMea});
 
     // Calls objectActivated
     connect(treeView, &QTreeView::doubleClicked, this, &PaletteViewController::objectActivated);
+
+    treeView->expandAll();
+
 
     // Initialize empty vectors for each event type
     eventsByType["Top"] = std::vector<IEvent*>();
@@ -105,9 +108,28 @@ PaletteViewController::~PaletteViewController() = default;
 
 void PaletteViewController::objectActivated(const QModelIndex &index){
     if (!index.isValid()) { return; }
+
     QModelIndex selectedIndex = index;
-    QString objectName = model->itemFromIndex(index.sibling(index.row(), 1))->text();
-    projectView->showAttributes(objectName);
+    QStandardItem* item = model->itemFromIndex(selectedIndex);
+    QStandardItem* parent = item->parent();
+
+    QString eventType;
+    QString eventName;
+
+    if (!parent) {
+        eventType = model->itemFromIndex(index.sibling(index.row(), 1))->text();
+        eventName = NULL;
+        qDebug() << "Double-clicked a TOP-LEVEL item (folder)";
+        qDebug() << "Type:" << eventType << "Name:" << eventName;
+    } else {
+        eventType = model->itemFromIndex(index.sibling(index.row(), 0))->text();;
+        eventName = model->itemFromIndex(index.sibling(index.row(), 1))->text();
+        
+        qDebug() << "Double-clicked a CHILD item:";
+        qDebug() << "Type:" << eventType << "Name:" << eventName;
+    }
+    
+    projectView->showAttributes(eventType, eventName);
 }
 
 ObjectWindowObjectPackage* PaletteViewController::getObjectsLinkedList(const QString& type)

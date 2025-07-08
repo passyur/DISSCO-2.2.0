@@ -82,7 +82,7 @@ class ProjectView : public QObject {
 
         // ObjectWindow and Palette methods
         PaletteViewController* getPalette() { return paletteView; }
-        void showAttributes(QString objectName); // using QString for testing
+        void showAttributes(QString eventType, QString eventName);
         //void showAttributes(class IEvent* event);
 
     private:

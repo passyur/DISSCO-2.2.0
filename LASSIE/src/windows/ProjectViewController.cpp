@@ -21,6 +21,8 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QTreeView>
+#include <QStandardItem>
 
 // #include "Define.h"
 #include "ProjectViewController.hpp"
@@ -168,7 +170,15 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     noteWindow = new ObjectWindow(eventNote, this);
     meaWindow = new ObjectWindow(eventMea, this);
 
-    // // Create a default top event
+    // Create a default top event
+    QStandardItem* defaultObjectType = new QStandardItem("Top");
+    QStandardItem* defaultObjectName = new QStandardItem(top_event);
+    paletteView->folderTop->appendRow({defaultObjectType, defaultObjectName});
+    // HEvent newEvent;
+    // newEvent.name = defaultObjectName;
+    // newEvent.type = top;
+    // project->h_events.append(newEvent);
+
     // IEvent* newEvent = new IEvent();
     // newEvent->setEventName("0");
     // newEvent->setEventType(eventTop);
@@ -511,6 +521,77 @@ void ProjectView::insertObject() {
     }
 
     if (newObject->exec() == QDialog::Accepted) {
+        if (newObject->ui->buttonTop->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Top");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderTop->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonHigh->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("High");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderHigh->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonMid->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Mid");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderMid->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonLow->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Low");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderLow->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonBottom->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Bottom");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderBottom->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonSpectrum->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Spectrum");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonNote->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Note");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderNote->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonEnv->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Envelope");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderEnv->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonSiv->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Sieve");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderSiv->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonSpa->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Spatialization");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderSpa->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonPat->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Pattern");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderPat->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonRev->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Reverb");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderRev->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonFil->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Filter");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderFil->appendRow({newObjectType, newObjectName});
+        }
+        else if (newObject->ui->buttonMea->isChecked()) {
+            QStandardItem* newObjectType = new QStandardItem("Measurement");
+            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+            paletteView->folderMea->appendRow({newObjectType, newObjectName});
+        }
+        
         modifiedButNotSaved = true;
         modified();
         delete newObject;
@@ -583,24 +664,67 @@ void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {
 }
 //nhi: show attributes
 // void ProjectView::showAttributes(IEvent* event) { // using QString for testing
-void ProjectView:: showAttributes(QString objectName) {
+void ProjectView::showAttributes(QString eventType, QString eventName) {
     // TODO: Implement event attributes display
     // This would typically show the event in an EventAttributesViewController
     //qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
 
     // Show the ObjectWindows
-    if (objectName == "Top" ){ topWindow->show(); }
-    else if (objectName == "High" ){ highWindow->show(); }
-    else if (objectName == "Mid" ){ midWindow->show(); }
-    else if (objectName == "Low" ){ lowWindow->show(); }
-    else if (objectName == "Bottom" ){ bottomWindow->show(); }
-    else if (objectName == "Spectrum" ){ spectrumWindow->show(); }
-    else if (objectName == "Note" ){ noteWindow->show(); }
-    else if (objectName == "Envelope" ){ envWindow->show(); }
-    else if (objectName == "Sieve" ){ sivWindow->show(); }
-    else if (objectName == "Spatialization" ){ spaWindow->show(); }
-    else if (objectName == "Pattern" ){ patWindow->show(); }
-    else if (objectName == "Reverb" ){ revWindow->show(); }
-    else if (objectName == "Filter" ){ filWindow->show(); }
-    else if (objectName == "Measurement" ){ meaWindow->show(); }
+    if (eventType == "Top" ){ 
+        if (eventName == "") { topWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(top); }
+    }
+    else if (eventType == "High" ){
+        if (eventName == "") { highWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(high); }
+    }
+    else if (eventType == "Mid" ){
+        if (eventName == "") { midWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(mid); }
+    }
+    else if (eventType == "Low" ){ 
+        if (eventName == "") { lowWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(low); }
+    }
+    else if (eventType == "Bottom" ){ 
+        if (eventName == "") { bottomWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(bottom); }
+    }
+    else if (eventType == "Spectrum" ){
+        if (eventName == "") { spectrumWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(sound); }
+    }
+    else if (eventType == "Note" ){
+        if (eventName == "") { noteWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(note); }
+    }
+    else if (eventType == "Envelope" ){
+        if (eventName == "") { envWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(env); }
+    }
+    else if (eventType == "Sieve" ){
+        if (eventName == "") { sivWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(sieve); }
+    }
+    else if (eventType == "Spatialization" ){
+       if (eventName == "") { spaWindow->show(); }
+       else { eventAttributesView->showAttributesOfEvent(spa); }
+    }
+    else if (eventType == "Pattern" ){
+        if (eventName == "") { patWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(pattern); }
+    }
+    else if (eventType == "Reverb" ){
+        if (eventName == "") { revWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(reverb); }
+    }
+    else if (eventType == "Filter" ){
+        if (eventName == "") { filWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(filter); }
+    }
+    else if (eventType == "Measurement" ){
+        if (eventName == "") { meaWindow->show(); }
+        else { eventAttributesView->showAttributesOfEvent(mea); }
+    }
+    
 }

@@ -31,6 +31,22 @@ public:
     // Opens Object Window
     void objectActivated(const QModelIndex &index);
 
+    // Object Folders under tree view
+    QStandardItem* folderTop;
+    QStandardItem* folderHigh;
+    QStandardItem* folderMid;
+    QStandardItem* folderLow;
+    QStandardItem* folderBottom;
+    QStandardItem* folderSpectrum;
+    QStandardItem* folderNote;
+    QStandardItem* folderEnv;
+    QStandardItem* folderSiv;
+    QStandardItem* folderSpa;
+    QStandardItem* folderPat;
+    QStandardItem* folderRev;
+    QStandardItem* folderFil;
+    QStandardItem* folderMea;
+
 private:
     ProjectView* projectView;
     
@@ -40,8 +56,10 @@ private:
     // Convert event type string to EventType enum
     int getEventTypeFromString(const QString& type);
 
+    // Tree View
     QTreeView* treeView;
     QStandardItemModel* model;
+
 };
 
 #endif // PALETTEVIEWCONTROLLER_HPP
