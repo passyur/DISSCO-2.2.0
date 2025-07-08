@@ -5,6 +5,15 @@
 #include <QFrame>
 #include <QList>
 #include <QString>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTreeView>
+#include <QStandardItemModel>
+#include <QAbstractItemView>
+
 
 class SharedPointers;
 class ProjectView;
@@ -30,7 +39,16 @@ typedef enum {
     childEventDefAttackSieveFunButton,
     childEventDefDurationSieveFunButton,
     spectrumDeviationFunButton,
-    spectrumGenerateFunButton
+    spectrumGenerateFunButton,
+    attributesSpaFunButton,
+    attributesRevFunButton,
+    attributesFilFunButton,
+    BSLoudnessFunButton,
+    BSModGroupFunButton,
+    BSWellTemperedFunButton,
+    BSFunFreq1FunButton,
+    BSFunFreq2FunButton,
+    BSContinuumFunButton
 } FunctionButton;
 
 // forward enums from original GTK version - now defined in LASSIE.h
@@ -46,6 +64,7 @@ public:
     // explicit EventAttributesViewController(SharedPointers* sharedPointers,
     //                                        QWidget* parent = nullptr);                                       
     ~EventAttributesViewController() override;
+    ProjectView* e_projectView;
 
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
@@ -90,18 +109,22 @@ private slots:
     // void generatespectrumFunButtonClicked();
 
     // // bottom-sub attribute function buttons
-    // void attributesStandardRevButtonClicked();
-    // void attributesStandardFilButtonClicked();
-    // void attributesStandardSpaButtonClicked();
-    // void BSLoudnessButtonClicked();
+    void attributesStandardRevButtonClicked();
+    void attributesStandardFilButtonClicked();
+    void attributesStandardSpaButtonClicked();
+    void BSLoudnessButtonClicked();
     // void BSSpatializationButtonClicked();
     // void BSReverbButtonClicked();
     // void BSFilterButtonClicked();
-    // void BSModifierGroupButtonClicked();
-    // void BSWellTemperedButtonClicked();
-    // void BSFunFreqButton1Clicked();
-    // void BSFunFreqButton2Clicked();
-    // void BSContinuumButtonClicked();
+    void BSModifierGroupButtonClicked();
+
+    void wellTemperedRadioButtonClicked();
+    void fundamentalRadioButtonClicked();
+    void continuumRadioButtonClicked();
+    void BSWellTemperedButtonClicked();
+    void BSFunFreqButton1Clicked();
+    void BSFunFreqButton2Clicked();
+    void BSContinuumButtonClicked();
 
     // // main actions
     // void addNewLayerButtonClicked();
@@ -128,7 +151,7 @@ private:
 
     // // internal helpers
     // void saveCurrentShownEventData();
-    // void showCurrentEventData();
+    void showCurrentEventData();
     void insertFunctionString(FunctionButton fn);
     // void refreshChildTypeInLayer();
     // bool deleteLayer(class LayerBox* box);
@@ -137,52 +160,53 @@ private:
     // QString generateTempoStringByFraction() const;
 };
 
-// // LayerBox: represents a single layer's UI and logic
-// class LayerBox : public QFrame {
-//     Q_OBJECT
+// LayerBox: represents a single layer's UI and logic
+class LayerBox : public QFrame {
+    Q_OBJECT
 
-// public:
-//     LayerBox(EventAttributesViewController* parentController,
-//              ProjectView*         projectView,
-//              EventLayer*                    layerModel,
-//              bool                           showDiscreteColumns);
-//     ~LayerBox() override;
+public:
+    LayerBox(EventAttributesViewController* parentController,
+             ProjectView*         projectView
+            //  EventLayer*                    layerModel,
+            //  bool                           showDiscreteColumns
+             );
+    ~LayerBox() override;
 
-//     /*! \brief refresh child‐type index numbers, returns next index */
-//     int refreshChildTypeIndex(int start);
+    // /*! \brief refresh child‐type index numbers, returns next index */
+    // int refreshChildTypeIndex(int start);
 
-//     /*! \brief enable or disable the "by‐layer" weight field */
-//     void setWeightEnabled(bool enabled);
+    // /*! \brief enable or disable the "by‐layer" weight field */
+    // void setWeightEnabled(bool enabled);
 
-//     /*! \brief write back the weight field into the underlying EventLayer */
-//     void applyWeightToModel();
+    // /*! \brief write back the weight field into the underlying EventLayer */
+    // void applyWeightToModel();
 
-//     /*! \brief delete this layer from UI and model */
-//     void deleteObject();
+    // /*! \brief delete this layer from UI and model */
+    // void deleteObject();
 
-// signals:
-//     void requestRefresh();
+signals:
+    // void requestRefresh();
 
-// private slots:
-//     void onWeightFunctionClicked();
-//     void onDeleteLayerClicked();
+private slots:
+    void onWeightFunctionClicked() {};
+    void onDeleteLayerClicked() {};
 
-// protected:
-//     bool event(QEvent* e) override;
+protected:
+    // bool event(QEvent* e) override;
 
-// private:
-//     EventAttributesViewController* m_attributesView;
-//     ProjectView*         m_projectView;
-//     EventLayer*                    m_layerModel;
+private:
+    EventAttributesViewController* m_attributesView;
+    ProjectView*         m_projectView;
+    // EventLayer*                    m_layerModel;
 
-//     // UI elements
-//     QVBoxLayout*                   m_mainLayout;
-//     QTreeView*                     m_treeView;
-//     QStandardItemModel*            m_model;
-//     QLineEdit*                     m_weightEntry;
-//     QPushButton*                   m_weightFuncButton;
-//     QPushButton*                   m_deleteLayerButton;
-// };
+    // UI elements
+    QVBoxLayout*                   m_mainLayout;
+    QTreeView*                     m_treeView;
+    QStandardItemModel*            m_model;
+    QLineEdit*                     m_weightEntry;
+    QPushButton*                   m_weightFuncButton;
+    QPushButton*                   m_deleteLayerButton;
+};
 
 // // BottomEventModifierAlignment: UI + logic for a single modifier
 // class BottomEventModifierAlignment : public QWidget {

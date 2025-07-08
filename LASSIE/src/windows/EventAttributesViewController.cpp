@@ -21,6 +21,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui(new Ui::EventAttributesViewController)
 {
     ui->setupUi(this);
+    e_projectView = projectView;
 
     // --- connect child‐count mode buttons ---
     connect(ui->fixedButton, &QRadioButton::clicked,
@@ -68,7 +69,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     connect(ui->spectrumGenerateFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::generatespectrumFunButtonClicked);
 
-    // --- bottom‐sub‐attribute function buttons ---
+*/    // --- bottom‐sub‐attribute function buttons ---
     connect(ui->attributesStandardRevButton, &QPushButton::clicked,
             this, &EventAttributesViewController::attributesStandardRevButtonClicked);
     connect(ui->attributesStandardFilButton, &QPushButton::clicked,
@@ -77,14 +78,25 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::attributesStandardSpaButtonClicked);
     connect(ui->BSLoudnessButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSLoudnessButtonClicked);
-    connect(ui->BSSpatializationButton, &QPushButton::clicked,
+/*    connect(ui->BSSpatializationButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSSpatializationButtonClicked);
     connect(ui->BSReverbButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSReverbButtonClicked);
     connect(ui->BSFilterButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSFilterButtonClicked);
-    connect(ui->BSModifierGroupButton, &QPushButton::clicked,
+*/    connect(ui->BSModifierGroupButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSModifierGroupButtonClicked);
+
+    ui->BSWellTemperedPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSFundamentalPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSContinuumPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    connect(ui->wellTemperedRadio, &QRadioButton::clicked,
+            this, &EventAttributesViewController::wellTemperedRadioButtonClicked);
+    connect(ui->fundamentalRadio, &QRadioButton::clicked,
+            this, &EventAttributesViewController::fundamentalRadioButtonClicked);
+    connect(ui->continuumRadio, &QRadioButton::clicked,
+            this, &EventAttributesViewController::continuumRadioButtonClicked);
+
     connect(ui->BSWellTemperedButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSWellTemperedButtonClicked);
     connect(ui->BSFunFreqButton1, &QPushButton::clicked,
@@ -93,7 +105,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::BSFunFreqButton2Clicked);
     connect(ui->BSContinuumButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSContinuumButtonClicked);
-
+    
+/*
     // --- additional controls ---
     connect(ui->addNewLayerButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addNewLayerButtonClicked);
@@ -102,7 +115,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     connect(ui->addPartialButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addPartialButtonClicked);
 
- */   // --- tempo controls ---
+*/    // --- tempo controls ---
     ui->tempoValuePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->tempoFractionPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     connect(ui->tempoAsNoteValueRadio, &QRadioButton::clicked,
@@ -113,15 +126,79 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::tempoAsNoteValueEntryChanged);
     connect(ui->tempoFractionEntry1, &QLineEdit::textChanged,
             this, &EventAttributesViewController::tempoAsNoteValueEntryChanged);
-
+*/
     setFocusPolicy(Qt::StrongFocus);
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
-*/
+    showCurrentEventData();
 }
 
 EventAttributesViewController::~EventAttributesViewController() {
     // Qt will delete child widgets automatically
 }
+
+LayerBox::LayerBox(EventAttributesViewController* parentController,
+                   ProjectView* projectView
+                   //EventLayer* layerModel,
+                    // bool showDiscreteColumns
+                   )
+    : QFrame(nullptr),
+      m_attributesView(parentController),
+      m_projectView(projectView)
+     // m_layerModel(layerModel)
+{
+    // Main layout
+    m_mainLayout = new QVBoxLayout();
+    this->setLayout(m_mainLayout);
+    this->setFrameShape(QFrame::StyledPanel);
+    this->setLineWidth(1);
+
+    // HBox with label, entry, buttons
+    auto* weightHBox = new QHBoxLayout;
+    auto* weightLabel = new QLabel("Number of children in this layer:");
+    m_weightEntry = new QLineEdit;
+    m_weightFuncButton = new QPushButton("Insert Function");
+    m_deleteLayerButton = new QPushButton("Delete This Layer");
+
+    connect(m_weightFuncButton, &QPushButton::clicked,
+            this, &LayerBox::onWeightFunctionClicked);
+    connect(m_deleteLayerButton, &QPushButton::clicked,
+            this, &LayerBox::onDeleteLayerClicked);
+
+    weightHBox->addWidget(weightLabel);
+    weightHBox->addWidget(m_weightEntry);
+    weightHBox->addWidget(m_weightFuncButton);
+    weightHBox->addWidget(m_deleteLayerButton);
+
+    m_mainLayout->addLayout(weightHBox);
+
+    // Tree view
+    m_treeView = new QTreeView;
+    m_model = new QStandardItemModel;
+    m_model->setHorizontalHeaderLabels({"Child Type", "Class", "Name"});
+    m_treeView->setModel(m_model);
+    m_treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    // Optional: fill in sample row
+    /*
+    QList<QStandardItem*> rowItems;
+    rowItems << new QStandardItem("1")
+             << new QStandardItem("EventClass")
+             << new QStandardItem("EventName");
+    m_model->appendRow(rowItems);
+    */
+
+    m_mainLayout->addWidget(m_treeView);
+
+    // Optional: fixed size estimate (like GTK version’s `set_size_request`)
+    this->setMinimumHeight(200);
+}
+
+LayerBox::~LayerBox() {
+    // Qt will delete child widgets automatically
+}
+
+
 /*
 void EventAttributesViewController::showAttributesOfEvent(IEvent* event) {
     if (!event) {
@@ -287,26 +364,40 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         }
     }
 }
-
+*/
 void EventAttributesViewController::showCurrentEventData() {
     // clear dynamic widgets
-    qDeleteAll(m_layerBoxesStorage);
-    m_layerBoxesStorage.clear();
-    if (m_modifiers) {
-        delete m_modifiers;
-        m_modifiers = nullptr;
-    }
-    if (m_soundPartialHboxes) {
-        m_soundPartialHboxes->clear();
-        m_soundPartialHboxes = nullptr;
-    }
+    // qDeleteAll(m_layerBoxesStorage);
+    // m_layerBoxesStorage.clear();
+    // if (m_modifiers) {
+    //     delete m_modifiers;
+    //     m_modifiers = nullptr;
+    // }
+    // if (m_soundPartialHboxes) {
+    //     m_soundPartialHboxes->clear();
+    //     m_soundPartialHboxes = nullptr;
+    // }
 
     // choose page
-    int type = m_currentlyShownEvent->getEventType();
+    //int type = m_currentlyShownEvent->getEventType();
+    int type = 0;
     switch (type) {
-    case eventTop: case eventHigh: case eventMid: case eventLow: case eventBottom:
+    case eventTop: case eventHigh: case eventMid: case eventLow: case eventBottom: {
         ui->stackedWidget->setCurrentWidget(ui->standardPage);
+        LayerBox* box = new LayerBox(this, e_projectView);
+        ui->layersLayout->addWidget(box);
+        if (type == eventBottom) {  
+            ui->frequencyContainer->setVisible(true);
+            ui->loudnessContainer->setVisible(true);
+            ui->modGroupContainer->setVisible(true);
+        }
+        else {
+            ui->frequencyContainer->setVisible(false);
+            ui->loudnessContainer->setVisible(false);
+            ui->modGroupContainer->setVisible(false);
+        }
         break;
+    }
     case eventSound:
         ui->stackedWidget->setCurrentWidget(ui->soundPage);
         break;
@@ -339,6 +430,7 @@ void EventAttributesViewController::showCurrentEventData() {
     }
 
     // populate fields
+    /*
     ui->nameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
 
     if (type <= eventBottom) {
@@ -494,9 +586,9 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->staffNumberEntry->setText(QString::fromStdString(extra->getStaffNum()));
             buildNoteModifiersList();
         }
-    }
+    }*/
 }
-*/
+
 void EventAttributesViewController::fixedButtonClicked() {
     densityButtonClicked(); // just reuse UI enabling
     ui->numOfChildLabel1->setText("Number of Children To Create:");
@@ -571,6 +663,39 @@ void EventAttributesViewController::discreteButtonClicked() {
     // ui->durationTypeSecondsRadio->setEnabled(false);
 }
 
+void EventAttributesViewController::wellTemperedRadioButtonClicked() {
+    ui->frequencyStack->setCurrentWidget(ui->BSWellTemperedPage);
+    ui->emptyFrequencyPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSFundamentalPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSContinuumPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+
+    ui->BSWellTemperedPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->BSWellTemperedPage->adjustSize();
+    ui->frequencyStack->adjustSize();
+}
+
+void EventAttributesViewController::fundamentalRadioButtonClicked() {
+    ui->frequencyStack->setCurrentWidget(ui->BSFundamentalPage);
+    ui->emptyFrequencyPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSWellTemperedPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSContinuumPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+
+    ui->BSFundamentalPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->BSFundamentalPage->adjustSize();
+    ui->frequencyStack->adjustSize();
+}
+
+void EventAttributesViewController::continuumRadioButtonClicked() {
+    ui->frequencyStack->setCurrentWidget(ui->BSContinuumPage);
+    ui->emptyFrequencyPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSWellTemperedPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->BSFundamentalPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+
+    ui->BSContinuumPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->BSContinuumPage->adjustSize();
+    ui->frequencyStack->adjustSize();
+}
+
 void EventAttributesViewController::maxChildDurFunButtonClicked() {
     insertFunctionString(maxChildDurFunButton);
 }
@@ -618,23 +743,23 @@ void EventAttributesViewController::deviationFunButtonClicked() {
 void EventAttributesViewController::generatespectrumFunButtonClicked() {
     insertFunctionString(spectrumGenerateFunButton);
 }
-
+*/
 void EventAttributesViewController::attributesStandardRevButtonClicked() {
-    insertFunctionString(numOfBarFunButton); // assuming typo, adjust accordingly
+    insertFunctionString(attributesRevFunButton); // assuming typo, adjust accordingly
 }
 
 void EventAttributesViewController::attributesStandardFilButtonClicked() {
-    insertFunctionString(spectrumGenerateFunButton);
+    insertFunctionString(attributesFilFunButton);
 }
 
 void EventAttributesViewController::attributesStandardSpaButtonClicked() {
-    insertFunctionString(spectrumDeviationFunButton);
+    insertFunctionString(attributesSpaFunButton);
 }
 
 void EventAttributesViewController::BSLoudnessButtonClicked() {
-    insertFunctionString(spectrumDeviationFunButton);
+    insertFunctionString(BSLoudnessFunButton);
 }
-
+/*
 void EventAttributesViewController::BSSpatializationButtonClicked() {
     if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
     insertFunctionString(spectrumDeviationFunButton);
@@ -649,28 +774,28 @@ void EventAttributesViewController::BSFilterButtonClicked() {
     if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
     insertFunctionString(spectrumGenerateFunButton);
 }
-
+*/
 void EventAttributesViewController::BSModifierGroupButtonClicked() {
-    if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
-    insertFunctionString(spectrumGenerateFunButton);
+    //if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
+    insertFunctionString(BSModGroupFunButton);
 }
 
 void EventAttributesViewController::BSWellTemperedButtonClicked() {
-    insertFunctionString(spectrumDeviationFunButton);
+    insertFunctionString(BSWellTemperedFunButton);
 }
 
 void EventAttributesViewController::BSFunFreqButton1Clicked() {
-    insertFunctionString(spectrumDeviationFunButton);
+    insertFunctionString(BSFunFreq1FunButton);
 }
 
 void EventAttributesViewController::BSFunFreqButton2Clicked() {
-    insertFunctionString(spectrumGenerateFunButton);
+    insertFunctionString(BSFunFreq2FunButton);
 }
 
 void EventAttributesViewController::BSContinuumButtonClicked() {
-    insertFunctionString(spectrumGenerateFunButton);
+    insertFunctionString(BSContinuumFunButton);
 }
-*/
+
 void EventAttributesViewController::insertFunctionString(FunctionButton button) {
     QLineEdit* target = nullptr;
     FunctionGenerator* gen = nullptr;
@@ -720,6 +845,42 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
         target = ui->durationSieveEntry;
         gen = new FunctionGenerator(nullptr, functionReturnSIV, target->text());
         break;
+    case attributesSpaFunButton:
+        target = ui->spaEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnSPA, target->text());
+        break;
+    case attributesRevFunButton:
+        target = ui->revEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnREV, target->text());
+        break;
+    case attributesFilFunButton:
+        target = ui->filEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnFIL, target->text());
+        break;
+    case BSLoudnessFunButton:
+        target = ui->loudnessEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnFloat, target->text());
+        break;
+    case BSModGroupFunButton:
+        target = ui->modifierGroupEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnSPE, target->text());
+        break;
+    case BSWellTemperedFunButton:
+        target = ui->wellTemperedEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnFloat, target->text());
+        break;
+    case BSFunFreq1FunButton:
+        target = ui->funFreqEntry1;
+        gen = new FunctionGenerator(nullptr, functionReturnFloat, target->text());
+        break;
+    case BSFunFreq2FunButton:
+        target = ui->funFreqEntry2;
+        gen = new FunctionGenerator(nullptr, functionReturnSPE, target->text());
+        break;
+    case BSContinuumFunButton:
+        target = ui->continuumFreqEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnSPE, target->text());
+        break;
     // case spectrumDeviationFunButton:
     //     target = ui->spectrumDeviationEntry;
     //     gen = new FunctionGenerator(functionReturnFloat, target->text());
@@ -728,6 +889,7 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
     //     target = ui->spectrumGenEntry;
     //     gen = new FunctionGenerator(functionReturnSPE, target->text());
     //     break;
+    
     default:
         return;
     }

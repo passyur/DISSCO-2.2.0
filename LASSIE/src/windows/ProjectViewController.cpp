@@ -492,7 +492,6 @@ void ProjectView::setProperties() {
 
 void ProjectView::propertiesInsertFunction() {
     if (!projectPropertiesDialog) return;
-    //  functionReturnFloat
     FunctionGenerator* generator = new FunctionGenerator(mainWindow, functionReturnENV, duration);
     if (generator->exec() == QDialog::Accepted) {
         QString result = generator->getResultString();

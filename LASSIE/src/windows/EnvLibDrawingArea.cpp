@@ -114,8 +114,26 @@ void EnvLibDrawingArea::setActiveNodeCoordinate(const QString& _x, const QString
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env || !activeNode) return;
 
-    activeNode->x = _x.toDouble();
-    activeNode->y = _y.toDouble();
+    double newX = _x.toDouble();
+    double newY = _y.toDouble();
+    
+    // Apply boundary constraints
+    if (activeNode->leftSeg && activeNode->rightSeg) {
+        // Middle nodes: constrain X between adjacent nodes
+        double leftBound = activeNode->leftSeg->leftNode->x + 0.001;
+        double rightBound = activeNode->rightSeg->rightNode->x - 0.001;
+        newX = qBound(leftBound, newX, rightBound);
+    } else {
+        // Head/tail nodes: only constrain Y
+        newX = activeNode->x; // Keep X unchanged for head/tail
+    }
+    
+    // Constrain Y to be non-negative (positive values only)
+    newY = qMax(0.0, newY);
+    
+    activeNode->x = newX;
+    activeNode->y = newY;
+    
     envelopeLibraryWindow->activeProject->modified();
     adjustBoundary(env);
     showGraph(env);
@@ -131,19 +149,17 @@ void EnvLibDrawingArea::adjustBoundary(EnvelopeLibraryEntry* _envelope)
     EnvLibEntrySeg* segment = _envelope->head->rightSeg;
     double maxVal = 0.0, minVal = 0.0;
 
-    // Find ceil(max y) and floor(min y)
+    // Find actual max and min y values (not just ceil/floor)
     while (segment) {
         EnvLibEntryNode* nd = segment->rightNode;
-        if (nd->y > maxVal) maxVal = std::ceil(nd->y);
-        if (nd->y < minVal) minVal = std::floor(nd->y);
+        if (nd->y > maxVal) maxVal = nd->y;
+        if (nd->y < minVal) minVal = nd->y;
         segment = nd->rightSeg;
     }
 
-    if (maxVal==0 && minVal==0) {
-        upperY = 1.0; lowerY = 0.0;
-    }
-    if (maxVal > upperY) upperY = maxVal;
-    if (minVal < lowerY) lowerY = minVal;
+    // Always show at least 0-1 range, or extend to actual maximum
+    upperY = qMax(1.0, maxVal);
+    lowerY = 0.0; // Always start from 0 for positive values
 
     // Update boundary display
     QString txt = QString("%1\n\n\n\n\n\n\n\n\n\n\n\n%2")
@@ -178,15 +194,13 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
     }
     painter.restore();
 
-    // Draw axis labels (0.0 and 1.0 on left and right)
+    // Draw Y-axis labels only (removed X-axis labels)
     QFont font = painter.font();
     font.setPointSize(12);
     painter.setFont(font);
     painter.setPen(Qt::black);
-    painter.drawText(5, h-5, "0.0"); // bottom left
-    painter.drawText(5, 20, "1.0"); // top left
-    painter.drawText(w-35, h-5, "0.0"); // bottom right
-    painter.drawText(w-35, 20, "1.0"); // top right
+    painter.drawText(5, h-5, QString::number(lowerY, 'f', 3)); // bottom left
+    painter.drawText(5, 20, QString::number(upperY, 'f', 3)); // top left
 
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) {
@@ -217,7 +231,50 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
         pen.setWidth(seg->segmentProperty == envSegmentPropertyFixed ? 1 : 3);
         painter.setPen(pen);
 
-        painter.drawLine(QPointF(x1,y1), QPointF(x2,y2));
+        // Draw exponential curve for exponential segments
+        if (seg->segmentType == envSegmentTypeExponential) {
+            // Ensure x1 < x2 for the exponential calculation
+            double startx = x1, starty = y1, endx = x2, endy = y2;
+            if (startx > endx) {
+                std::swap(startx, endx);
+                std::swap(starty, endy);
+            }
+            
+            // Draw exponential curve using small line segments
+            const double step = 2.0; // Step size in pixels
+            double tempx = startx;
+            
+            // Use the exact LASS exponential formula:
+            // value = y1 + (y2 - y1) * ((1 - pow(base, (I * alpha))) / (1 - pow(base, alpha)))
+            const double base = 2.718282; // e
+            double alpha = 3.0;
+            if (starty > endy) {
+                alpha = -alpha; // Reverse curve direction
+            }
+            
+            while (tempx < endx - step) {
+                double I = (tempx - startx) / (endx - startx); // normalized time [0,1]
+                double exp_term = (1.0 - pow(base, I * alpha)) / (1.0 - pow(base, alpha));
+                double tempy = starty + (endy - starty) * exp_term;
+                
+                double nextx = tempx + step;
+                double nextI = (nextx - startx) / (endx - startx);
+                double next_exp_term = (1.0 - pow(base, nextI * alpha)) / (1.0 - pow(base, alpha));
+                double nexty = starty + (endy - starty) * next_exp_term;
+                
+                painter.drawLine(QPointF(tempx, tempy), QPointF(nextx, nexty));
+                tempx = nextx;
+            }
+            
+            // Draw final line to endpoint
+            double finalI = (tempx - startx) / (endx - startx);
+            double final_exp_term = (1.0 - pow(base, finalI * alpha)) / (1.0 - pow(base, alpha));
+            painter.drawLine(QPointF(tempx, starty + (endy - starty) * final_exp_term), 
+                           QPointF(endx, endy));
+        } else {
+            // Draw straight line for linear and spline segments
+            painter.drawLine(QPointF(x1,y1), QPointF(x2,y2));
+        }
 
         // draw endpoints
         painter.setBrush(Qt::black); // Black for node points
@@ -252,7 +309,8 @@ void EnvLibDrawingArea::mouseMoveEvent(QMouseEvent* event)
     x = qRound(x*1000)/1000.0;
     y = qRound(y*1000)/1000.0;
     x = qBound(0.0, x, 1.0);
-    y = qBound(lowerY, y, upperY);
+    // Constrain Y to be non-negative (positive values only)
+    y = qMax(0.0, y);
 
     if (mouseLeftButtonPressedDown) {
         mouseX = x;
@@ -350,6 +408,7 @@ void EnvLibDrawingArea::insertEnvelopeSegment()
     int w = width(), h = height();
     double ix = mouseX*(w+1)/double(w*w);
     double iy = 1.0 - mouseY*(h+1)/double(h*h);
+    iy = mouseAdjustY(iy); // Convert to actual Y value
     ix = qRound(ix*1000)/1000.0;
     iy = qRound(iy*1000)/1000.0;
 
@@ -508,10 +567,10 @@ void EnvLibDrawingArea::moveNode()
     double rb = activeNode->rightSeg ? activeNode->rightSeg->rightNode->x - 0.001 : 1.0;
 
     if (!activeNode->leftSeg || !activeNode->rightSeg) {
-        activeNode->y = mouseY;
+        activeNode->y = qMax(0.0, mouseY);
     } else {
         activeNode->x = qBound(lb, mouseX, rb);
-        activeNode->y = mouseY;
+        activeNode->y = qMax(0.0, mouseY); // Constrain to positive values only
     }
 
     envelopeLibraryWindow->setEntries(

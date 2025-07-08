@@ -144,7 +144,7 @@ struct FreqInfo {
 typedef struct Modifier Modifier;
 struct Modifier {
     unsigned type;
-    bool applyhow_flag;
+    bool applyhow_flag; // false == SOUND, true == PARTIAL
     QString probability;
     QString amplitude;
     QString rate;
@@ -158,6 +158,7 @@ struct Modifier {
 
 typedef struct ExtraInfo ExtraInfo;
 struct ExtraInfo {
+    unsigned childtype_flag;
     FreqInfo freq_info;
     QString loudness;
     QString spa;
