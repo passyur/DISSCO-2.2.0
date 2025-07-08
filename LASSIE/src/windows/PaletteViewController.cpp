@@ -119,14 +119,9 @@ void PaletteViewController::objectActivated(const QModelIndex &index){
     if (!parent) {
         eventType = model->itemFromIndex(index.sibling(index.row(), 1))->text();
         eventName = NULL;
-        qDebug() << "Double-clicked a TOP-LEVEL item (folder)";
-        qDebug() << "Type:" << eventType << "Name:" << eventName;
     } else {
         eventType = model->itemFromIndex(index.sibling(index.row(), 0))->text();;
         eventName = model->itemFromIndex(index.sibling(index.row(), 1))->text();
-        
-        qDebug() << "Double-clicked a CHILD item:";
-        qDebug() << "Type:" << eventType << "Name:" << eventName;
     }
     
     projectView->showAttributes(eventType, eventName);
