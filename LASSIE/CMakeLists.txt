@@ -14,24 +14,24 @@ set(CMAKE_AUTORCC ON)
 ### This will need to be updated as we add more windows/classes
 qt_add_executable(LASSIE
     src/main.cpp
-    src/windows/MainWindow.cpp src/windows/MainWindow.hpp src/UI/mainwindow.ui
+    src/windows/MainWindow.cpp src/windows/MainWindow.hpp src/ui/mainwindow.ui
     # src/windows/markovwindow.cpp src/windows/markovwindow.hpp
     src/windows/MarkovModelLibraryWindow.cpp src/windows/MarkovModelLibraryWindow.hpp
     src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp 
     src/windows/EnvLibDrawingArea.cpp src/windows/EnvLibDrawingArea.hpp 
     src/windows/EnvelopeLibraryEntry.cpp src/windows/EnvelopeLibraryEntry.hpp
-    src/windows/FunctionGenerator.cpp src/windows/FunctionGenerator.hpp src/UI/FunctionGenerator.ui
-    src/windows/REVPartialAlignment.cpp src/windows/REVPartialAlignment.hpp src/UI/FunGenREVPartialAlignment.ui
-    src/windows/SPAPartialAlignment.cpp src/windows/SPAPartialAlignment.hpp src/UI/FunGenSPAPartialAlignment.ui
-    src/windows/ProjectPropertiesDialog.cpp src/windows/ProjectPropertiesDialog.hpp src/UI/ProjectPropertiesDialog.ui
+    src/windows/FunctionGenerator.cpp src/windows/FunctionGenerator.hpp src/ui/FunctionGenerator.ui
+    src/windows/REVPartialAlignment.cpp src/windows/REVPartialAlignment.hpp src/ui/FunGenREVPartialAlignment.ui
+    src/windows/SPAPartialAlignment.cpp src/windows/SPAPartialAlignment.hpp src/ui/FunGenSPAPartialAlignment.ui
+    src/windows/ProjectPropertiesDialog.cpp src/windows/ProjectPropertiesDialog.hpp src/ui/ProjectPropertiesDialog.ui
     src/inst.hpp
     src/windows/ProjectViewController.cpp src/windows/ProjectViewController.hpp
     src/core/envelope_struct.cpp src/core/envelope_struct.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
     src/windows/ObjectWindow.cpp src/windows/ObjectWindow.hpp
     src/windows/PaletteViewController.cpp src/windows/PaletteViewController.hpp
-    src/windows/EventAttributesViewController.cpp src/windows/EventAttributesViewController.hpp src/UI/Attributes.ui
-    src/windows/FileNewObject.cpp src/windows/FileNewObject.hpp src/UI/FileNewObject.ui
+    src/windows/EventAttributesViewController.cpp src/windows/EventAttributesViewController.hpp src/ui/Attributes.ui
+    src/windows/FileNewObject.cpp src/windows/FileNewObject.hpp src/ui/FileNewObject.ui
     # src/core/IEvent.cpp src/core/IEvent.h
 )
 

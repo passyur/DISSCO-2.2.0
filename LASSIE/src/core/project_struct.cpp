@@ -11,7 +11,7 @@ in the associated window (currently, the project view).
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
-#include <QtLogging>
+// #include <QtLogging>
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XMLUni.hpp>

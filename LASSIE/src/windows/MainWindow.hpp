@@ -10,7 +10,7 @@
 #include <QAction>
 #include <memory>
 #include <QTextEdit>
-#include <QtLogging>
+// #include <QtLogging>
 #include <QStatusBar>
 
 #include "../inst.hpp"
