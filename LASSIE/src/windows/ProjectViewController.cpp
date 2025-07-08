@@ -369,7 +369,7 @@ void ProjectView::save(){
                     std::vector<string>::iterator iter2 = customNoteModifiers.begin();
                     while (iter2 != customNoteModifiers.end()){
                         xmlWriter.writeStartElement("Modifier");	
-                        xmlWriter.writeCharacters(*iter2);
+                        xmlWriter.writeCharacters(QString::fromStdString(*iter2));
                         xmlWriter.writeEndElement();   
                         iter2 ++;  
                     }
