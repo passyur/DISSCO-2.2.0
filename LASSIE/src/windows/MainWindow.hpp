@@ -56,6 +56,7 @@ class MainWindow : public QMainWindow
         void showEnvelopeLibraryWindow();
         void showMarkovWindow();
         void showPropertiesDialog();
+        void showFileNewObjectDialog();
 
     protected:
         void closeEvent(QCloseEvent *event) override;

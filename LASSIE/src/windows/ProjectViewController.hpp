@@ -3,6 +3,7 @@
 
 #include "MainWindow.hpp"
 #include "ProjectPropertiesDialog.hpp"
+#include "FileNewObject.hpp"
 #include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
 #include "EnvelopeLibraryEntry.hpp"
@@ -51,6 +52,9 @@ class ProjectView : public QObject {
         /* set properties pop up function */
         void setProperties();
 
+        /* new object pop up function */
+        void insertObject();   
+
          /* functions for modifying the Envelope list */
         EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
         EnvelopeLibraryEntry* createNewEnvelope();
@@ -82,9 +86,10 @@ class ProjectView : public QObject {
         //void showAttributes(class IEvent* event);
 
     private:
-        /* storing main window and propertials dialog pointers */
+        /* storing pointers */
         MainWindow* mainWindow;
         ProjectPropertiesDialog* projectPropertiesDialog;
+        FileNewObject* newObject;
         
         /* storing saved state of project */
         bool modifiedButNotSaved;

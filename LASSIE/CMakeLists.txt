@@ -31,6 +31,7 @@ qt_add_executable(LASSIE
     src/windows/ObjectWindow.cpp src/windows/ObjectWindow.hpp
     src/windows/PaletteViewController.cpp src/windows/PaletteViewController.hpp
     src/windows/EventAttributesViewController.cpp src/windows/EventAttributesViewController.hpp src/UI/Attributes.ui
+    src/windows/FileNewObject.cpp src/windows/FileNewObject.hpp src/UI/FileNewObject.ui
     # src/core/IEvent.cpp src/core/IEvent.h
 )
 

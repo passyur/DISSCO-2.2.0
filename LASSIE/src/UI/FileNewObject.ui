@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FileNewObject</class>
+ <widget class="QDialog" name="FileNewObject">
+  <property name="windowTitle">
+   <string>Create New Object</string>
+  </property>
+
+  <layout class="QVBoxLayout" name="objMainLayout">
+    <item>
+      <widget class="QLabel" name="objLabelTitle">
+       <property name="text">
+        <string>What type of object do you want to create?</string>
+       </property>
+       <property name="alignment"><set>Qt::AlignCenter</set></property>
+      </widget>
+    </item>
+
+    <item>
+    <widget class="QGroupBox" name="objectGroup">
+      <layout class="QVBoxLayout" name="objectGroupLayout">
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup2Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonTop">
+                <property name="text"><string>Top Event</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonHigh">
+                <property name="text"><string>High Event</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup4Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonMid">
+                <property name="text"><string>Mid Event</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonLow">
+                <property name="text"><string>Low Event</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup6Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonBottom">
+                <property name="text"><string>Bottom Event</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonSpectrum">
+                <property name="text"><string>Spectrum</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup8Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonNote">
+                <property name="text"><string>Note</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonEnv">
+                <property name="text"><string>Envelope</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup10Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonSiv">
+                <property name="text"><string>Sieve</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonSpa">
+                <property name="text"><string>Spatialization</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup12Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonPat">
+                <property name="text"><string>Pattern</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonRev">
+                <property name="text"><string>Reverb</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="objectGroup14Layout">
+            <item>
+                <widget class="QRadioButton" name="buttonFil">
+                <property name="text"><string>Filter</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QRadioButton" name="buttonMea">
+                <property name="text"><string>Measurement</string></property>
+                </widget>
+            </item>
+        </layout>
+      </item>
+      </layout>
+    </widget>
+    </item>
+
+    <item>
+        <layout class="QHBoxLayout" name="objNameLayout">
+            <item>
+                <widget class="QLabel" name="objNameLabel">
+                    <property name="text"><string>Object Name:</string></property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="objNameEntry"/>
+            </item>
+        </layout>
+    </item>
+
+   <item>
+    <widget class="QDialogButtonBox" name="objButtonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok|QDialogButtonBox::Cancel</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

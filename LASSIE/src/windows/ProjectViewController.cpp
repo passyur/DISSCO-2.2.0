@@ -36,6 +36,8 @@
 #include "PaletteViewController.hpp"
 #include "../core/event_struct.hpp"
 #include "EventAttributesViewController.hpp"
+#include "FileNewObject.hpp"
+#include "../ui/ui_FileNewObject.h"
 // #include "../core/IEvent.h"
 // #include "muParser.h"
 
@@ -501,6 +503,19 @@ void ProjectView::propertiesInsertFunction() {
         }
     }
     delete generator;
+}
+
+void ProjectView::insertObject() {
+    if (!newObject) {
+        newObject = new FileNewObject(mainWindow);
+    }
+
+    if (newObject->exec() == QDialog::Accepted) {
+        modifiedButNotSaved = true;
+        modified();
+        delete newObject;
+        newObject = NULL;
+    }
 }
 
 

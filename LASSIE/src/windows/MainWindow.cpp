@@ -178,6 +178,12 @@ void MainWindow::showPropertiesDialog()
     projectView->setProperties();
 }
 
+void MainWindow::showFileNewObjectDialog()
+{
+    projectView->insertObject();
+    
+}
+
 void MainWindow::readSettings()
 {
     QSettings settings;
@@ -252,6 +258,7 @@ void MainWindow::createActions()
     // Project actions
     newObjAct = new QAction(QIcon::fromTheme("list-add"), tr("New Object"), this);
     newObjAct->setStatusTip(tr("Create a new object"));
+    connect(newObjAct, &QAction::triggered, this, &MainWindow::showFileNewObjectDialog);
 
     setPropAct = new QAction(tr("Set Properties"), this);
     setPropAct->setStatusTip(tr("Set project properties"));
