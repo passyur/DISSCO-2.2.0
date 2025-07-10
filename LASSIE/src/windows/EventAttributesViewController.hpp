@@ -14,7 +14,6 @@
 #include <QStandardItemModel>
 #include <QAbstractItemView>
 
-
 #include "../core/event_struct.hpp"
 
 class SharedPointers;
@@ -161,6 +160,7 @@ private:
     // void buildNoteModifiersList();
     // QString generateTempoStringByNoteValue() const;
     // QString generateTempoStringByFraction() const;
+    void fixStackedWidgetLayout(QWidget* currPage);
 };
 
 // LayerBox: represents a single layer's UI and logic

@@ -55,13 +55,8 @@ MainWindow::MainWindow(Inst* m)
     setWindowTitle(tr("LASSIE"));
     setUnifiedTitleAndToolBarOnMac(true);
 
-    connect(ui->tabWidget, &QTabWidget::currentChanged, this, [this](int index) {
-        int envTabIndex = ui->tabWidget->indexOf(ui->envelopeTab);
-        if (index == envTabIndex) {
-            showEnvelopeLibraryWindow();
-        }
-    });
-    qDebug() << "In MAIN WINDOW CONSTRUCTOR AFTER CONNECT";
+    connect(ui->envButton, &QPushButton::clicked, this, &MainWindow::showEnvelopeLibraryWindow);
+    connect(ui->markovButton, &QPushButton::clicked, this, &MainWindow::showMarkovWindow);
 
 }
 

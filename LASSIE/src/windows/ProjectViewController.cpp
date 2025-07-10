@@ -144,15 +144,12 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
     // // Initialize PaletteViewController
     paletteView = new PaletteViewController(this);
-    mainWindow->ui->paletteLayout->addWidget(paletteView);
+    mainWindow->ui->paletteLayout->insertWidget(0, paletteView);
 
     // Initialize Events Attribute View Controller
-    QScrollArea* eventsScrollArea = new QScrollArea(mainWindow->ui->attributesTab);
-    eventsScrollArea->setWidgetResizable(true);
+    mainWindow->ui->eventsScrollArea->setWidgetResizable(true);
     eventAttributesView = new EventAttributesViewController(this);
-    eventsScrollArea->setWidget(eventAttributesView);
-    QVBoxLayout* eventTablayout = new QVBoxLayout(mainWindow->ui->attributesTab);
-    eventTablayout->addWidget(eventsScrollArea);
+    mainWindow->ui->eventsScrollArea->setWidget(eventAttributesView);
 
     // // Create ObjectWindow instances
     topWindow = new ObjectWindow(eventTop, this);
@@ -725,6 +722,8 @@ void ProjectView::showAttributes(QString eventType, QString eventName) {
     else if (eventType == "Measurement" ){
         if (eventName == "") { meaWindow->show(); }
         else { eventAttributesView->showAttributesOfEvent(mea); }
-    }
-    
+    } 
+
+    mainWindow->ui->eventsScrollArea->widget()->adjustSize();
+    mainWindow->ui->eventsScrollArea->updateGeometry();
 }

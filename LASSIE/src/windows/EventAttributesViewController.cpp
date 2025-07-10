@@ -21,6 +21,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui(new Ui::EventAttributesViewController)
 {
     ui->setupUi(this);
+    ui->stackedWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     e_projectView = projectView;
 
     // --- connect child‐count mode buttons ---
@@ -129,6 +130,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
 */
     setFocusPolicy(Qt::StrongFocus);
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+    fixStackedWidgetLayout(ui->emptyPage);
 
     LayerBox* box = new LayerBox(this, e_projectView);
     ui->layersLayout->addWidget(box);
@@ -136,6 +138,29 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
 
 EventAttributesViewController::~EventAttributesViewController() {
     // Qt will delete child widgets automatically
+}
+
+void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
+    QList<QWidget*> pages = {
+        ui->emptyPage,
+        ui->soundPage,
+        ui->envPage,
+        ui->sievePage,
+        ui->spaPage,
+        ui->patPage,
+        ui->revPage,
+        ui->filPage,
+        ui->meaPage,
+        ui->notePage
+    };
+    for (QWidget* page : pages) {
+        page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
+    if (currPage) {
+        currPage->adjustSize();
+        ui->stackedWidget->setFixedSize(600, currPage->sizeHint().height());
+    }
+    ui->stackedWidget->adjustSize();
 }
 
 LayerBox::LayerBox(EventAttributesViewController* parentController,
@@ -380,37 +405,48 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->loudnessContainer->setVisible(false);
             ui->modGroupContainer->setVisible(false);
         }
+        fixStackedWidgetLayout(ui->standardPage);
         break;
     }
     case sound:
         ui->stackedWidget->setCurrentWidget(ui->soundPage);
+        fixStackedWidgetLayout(ui->soundPage);
         break;
     case env:
         ui->stackedWidget->setCurrentWidget(ui->envPage);
+        fixStackedWidgetLayout(ui->envPage);
         break;
     case sieve:
         ui->stackedWidget->setCurrentWidget(ui->sievePage);
+        fixStackedWidgetLayout(ui->sievePage);
         break;
     case spa:
         ui->stackedWidget->setCurrentWidget(ui->spaPage);
+        fixStackedWidgetLayout(ui->spaPage);
         break;
     case pattern:
         ui->stackedWidget->setCurrentWidget(ui->patPage);
+        fixStackedWidgetLayout(ui->patPage);
         break;
     case reverb:
-        ui->stackedWidget->setCurrentWidget(ui->revPage);
+        ui->stackedWidget->setCurrentWidget(ui->revPage);     
+        fixStackedWidgetLayout(ui->revPage);  
         break;
     case filter:
         ui->stackedWidget->setCurrentWidget(ui->filPage);
+        fixStackedWidgetLayout(ui->filPage);
         break;
     case mea:
         ui->stackedWidget->setCurrentWidget(ui->meaPage);
+        fixStackedWidgetLayout(ui->meaPage);
         break;
     case note:
         ui->stackedWidget->setCurrentWidget(ui->notePage);
+        fixStackedWidgetLayout(ui->notePage);
         break;
     default:
         ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+        fixStackedWidgetLayout(ui->emptyPage);
     }
 
     /*

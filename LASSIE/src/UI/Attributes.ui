@@ -13,7 +13,15 @@
             </property>
 
             <widget class="QWidget" name="emptyPage"/>
+
             <widget class="QWidget" name="standardPage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
                 <layout class="QVBoxLayout" name="standardPageLayout">
                         <item>
                           <widget class="QLabel" name="attributesLabel">
@@ -914,15 +922,746 @@
                 
                 </layout>
             </widget>
-            <widget class="QWidget" name="soundPage"/>
-            <widget class="QWidget" name="envPage"/>
-            <widget class="QWidget" name="sievePage"/>
-            <widget class="QWidget" name="spaPage"/>
-            <widget class="QWidget" name="patPage"/>
-            <widget class="QWidget" name="revPage"/>
-            <widget class="QWidget" name="filPage"/>
+
+            <widget class="QWidget" name="soundPage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="soundPageLayout">
+                        <item>
+                        <layout class="QHBoxLayout" name="soundTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="soundTypeLabel">
+                            <property name="text"><string>Event Type: Spectrum</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="soundNameLayout">
+                            <item>
+                                <widget class="QLabel" name="soundNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="soundNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="spectrumNumPartialLayout">
+                            <item>
+                                <widget class="QLabel" name="spectrumNumPartialLabel">
+                                <property name="text"><string>Number of partials:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="spectrumNumPartialEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="spectrumDeviationLayout">
+                            <item>
+                                <widget class="QLabel" name="spectrumDeviationLabel">
+                                <property name="text"><string>Deviation:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="spectrumDeviationEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="spectrumGenLayout">
+                            <item>
+                                <widget class="QLabel" name="spectrumGenLabel">
+                                <property name="text"><string>Generate Spectrum:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="spectrumGenEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                          <widget class="QFrame" name="line_sound_0">
+                            <property name="frameShape"><enum>QFrame::HLine</enum></property>
+                            <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+                          </widget>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="partialsLayout">
+                            <item>
+                            <layout class="QHBoxLayout" name="partial1Layout">
+                                <item>
+                                    <widget class="QLabel" name="partial1Label">
+                                    <property name="text"><string>Partial 1:</string></property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <widget class="QLineEdit" name="partial1Entry"/>
+                                </item>
+                                <item>
+                                    <widget class="QPushButton" name="partial1FunButton">
+                                    <property name="text">
+                                        <string>Insert Function</string>
+                                    </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QVBoxLayout" name="addPartialLayout">
+                            <item>
+                                <widget class="QLabel" name="addPartialLabel">
+                                <property name="text"><string>Spectrum:</string></property>
+                                <property name="alignment"><set>Qt::AlignCenter</set></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="addPartialButton">
+                                <property name="text">
+                                    <string>Add Partial</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
+
+            <widget class="QWidget" name="envPage">
+               <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="envPageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="envTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="envTypeLabel">
+                            <property name="text"><string>Event Type: Envelope</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="envNameLayout">
+                            <item>
+                                <widget class="QLabel" name="envNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="envNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="envBuilderLayout">
+                            <item>
+                                <widget class="QLabel" name="envBuilderLabel">
+                                <property name="text"><string>Envelope Builder:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="envBuilderEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="envBuilderFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
+            <widget class="QWidget" name="sievePage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="sievePageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="sieveTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="sieveTypeLabel">
+                            <property name="text"><string>Event Type: Sieve</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="sieveNameLayout">
+                            <item>
+                                <widget class="QLabel" name="sieveNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="sieveNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="sieveBuilderLayout">
+                            <item>
+                                <widget class="QLabel" name="sieveBuilderLabel">
+                                <property name="text"><string>Sieve Builder:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="sieveBuilderEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="sieveBuilderFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
+            <widget class="QWidget" name="spaPage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="spaPageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="spaTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="spaTypeLabel">
+                            <property name="text"><string>Event Type: Spatialization</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="spaNameLayout">
+                            <item>
+                                <widget class="QLabel" name="spaNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="spaNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="spaBuilderLayout">
+                            <item>
+                                <widget class="QLabel" name="spaBuilderLabel">
+                                <property name="text"><string>Spatialization:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="spaBuilderEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="spaBuilderFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
+            <widget class="QWidget" name="patPage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="patPageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="patTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="patTypeLabel">
+                            <property name="text"><string>Event Type: Pattern</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="patNameLayout">
+                            <item>
+                                <widget class="QLabel" name="patNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="patNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="patBuilderLayout">
+                            <item>
+                                <widget class="QLabel" name="patBuilderLabel">
+                                <property name="text"><string>Pattern Builder:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="patBuilderEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="patBuilderFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
+            <widget class="QWidget" name="revPage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="revPageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="revTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="revTypeLabel">
+                            <property name="text"><string>Event Type: Reverb</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="revNameLayout">
+                            <item>
+                                <widget class="QLabel" name="revNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="revNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="revBuilderLayout">
+                            <item>
+                                <widget class="QLabel" name="revBuilderLabel">
+                                <property name="text"><string>Reverberation:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="revBuilderEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="revBuilderFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
+            <widget class="QWidget" name="filPage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="filPageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="filTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="filTypeLabel">
+                            <property name="text"><string>Event Type: Filter</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="filNameLayout">
+                            <item>
+                                <widget class="QLabel" name="filNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="filNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="filBuilderLayout">
+                            <item>
+                                <widget class="QLabel" name="filBuilderLabel">
+                                <property name="text"><string>Filter Builder:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="filBuilderEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="filBuilderFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
             <widget class="QWidget" name="meaPage"/>
-            <widget class="QWidget" name="notePage"/>
+            <widget class="QWidget" name="notePage">
+                <property name="minimumWidth"><number>600</number></property>
+                <property name="maximumWidth"><number>600</number></property>
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="notePageLayout">
+                    <item>
+                        <layout class="QHBoxLayout" name="noteTypeLayout">
+                          <item>
+                            <widget class="QLabel" name="noteTypeLabel">
+                            <property name="text"><string>Event Type: Note</string></property>
+                            </widget>
+                          </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteNameLayout">
+                            <item>
+                                <widget class="QLabel" name="noteNameLabel">
+                                <property name="text"><string>Event Name:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="noteNameEntry"/>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="staffNumberLayout">
+                            <item>
+                                <widget class="QLabel" name="staffNumberLabel">
+                                <property name="text"><string>Staff Number:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="staffNumberEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="staffNumberFunButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions3">
+                            <item>
+                              <widget class="QCheckBox" name="plus8vaCheckBox">
+                                <property name="text"><string>+8va</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="neg8vaCheckBox">
+                                <property name="text"><string>-8va</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="accentCheckBox">
+                                <property name="text"><string>accent</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions6">
+                            <item>
+                              <widget class="QCheckBox" name="codaCheckBox">
+                                <property name="text"><string>coda</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="downbowCheckBox">
+                                <property name="text"><string>downbow</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="downmordentCheckBox">
+                                <property name="text"><string>downmordent</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions9">
+                            <item>
+                              <widget class="QCheckBox" name="downprallCheckBox">
+                                <property name="text"><string>downprall</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="espressivoCheckBox">
+                                <property name="text"><string>espressivo</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="fermataCheckBox">
+                                <property name="text"><string>fermata</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions12">
+                            <item>
+                              <widget class="QCheckBox" name="flageoletCheckBox">
+                                <property name="text"><string>flageolet</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="halfopenCheckBox">
+                                <property name="text"><string>halfopen</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="lheelCheckBox">
+                                <property name="text"><string>lheel</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions15">
+                            <item>
+                              <widget class="QCheckBox" name="lineprallCheckBox">
+                                <property name="text"><string>lineprall</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="longfermataCheckBox">
+                                <property name="text"><string>longfermata</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="ltoeCheckBox">
+                                <property name="text"><string>ltoe</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions18">
+                            <item>
+                              <widget class="QCheckBox" name="marcatoCheckBox">
+                                <property name="text"><string>marcato</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="mordentCheckBox">
+                                <property name="text"><string>mordent</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="nullCheckBox">
+                                <property name="text"><string>null</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions21">
+                            <item>
+                              <widget class="QCheckBox" name="openCheckBox">
+                                <property name="text"><string>open</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="portatoCheckBox">
+                                <property name="text"><string>portato</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="prallCheckBox">
+                                <property name="text"><string>prall</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions24">
+                            <item>
+                              <widget class="QCheckBox" name="pralldownCheckBox">
+                                <property name="text"><string>pralldown</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="prallmordentCheckBox">
+                                <property name="text"><string>prallmordent</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="prallprallCheckBox">
+                                <property name="text"><string>prallprall</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions27">
+                            <item>
+                              <widget class="QCheckBox" name="prallupCheckBox">
+                                <property name="text"><string>prallup</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="reverseturnCheckBox">
+                                <property name="text"><string>reverseturn</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="rheelCheckBox">
+                                <property name="text"><string>rheel</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions30">
+                            <item>
+                              <widget class="QCheckBox" name="rtoeCheckBox">
+                                <property name="text"><string>rtoe</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="segnoCheckBox">
+                                <property name="text"><string>segno</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="shortfermataCheckBox">
+                                <property name="text"><string>shortfermata</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions33">
+                            <item>
+                              <widget class="QCheckBox" name="snappizzicatoCheckBox">
+                                <property name="text"><string>snappizzicato</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="staccatissimoCheckBox">
+                                <property name="text"><string>staccatissimo</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="staccatoCheckBox">
+                                <property name="text"><string>staccato</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions36">
+                            <item>
+                              <widget class="QCheckBox" name="stoppedCheckBox">
+                                <property name="text"><string>stopped</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="tenutoCheckBox">
+                                <property name="text"><string>tenuto</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="trillCheckBox">
+                                <property name="text"><string>trill</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions39">
+                            <item>
+                              <widget class="QCheckBox" name="turnCheckBox">
+                                <property name="text"><string>turn</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="upbowCheckBox">
+                                <property name="text"><string>upbow</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="upmordentCheckBox">
+                                <property name="text"><string>upmordent</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                        <item>
+                        <layout class="QHBoxLayout" name="noteOptions41">
+                            <item>
+                              <widget class="QCheckBox" name="upprallCheckBox">
+                                <property name="text"><string>upprall</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="varcodaCheckBox">
+                                <property name="text"><string>varcoda</string></property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QCheckBox" name="verylongfermataCheckBox">
+                                <property name="text"><string>verylongfermata</string></property>
+                              </widget>
+                            </item>                          
+                        </layout>
+                        </item>
+                </layout>
+            </widget>
           </widget>
         </item>
 

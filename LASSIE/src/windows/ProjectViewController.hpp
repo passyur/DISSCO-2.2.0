@@ -90,6 +90,8 @@ class ProjectView : public QObject {
         MainWindow* mainWindow;
         ProjectPropertiesDialog* projectPropertiesDialog;
         FileNewObject* newObject;
+        PaletteViewController* paletteView;
+        EventAttributesViewController* eventAttributesView;
         
         /* storing saved state of project */
         bool modifiedButNotSaved;
@@ -146,12 +148,6 @@ class ProjectView : public QObject {
         ObjectWindow* filWindow;
         ObjectWindow* noteWindow;
         ObjectWindow* meaWindow;
-
-        // PaletteViewController pointer
-        PaletteViewController* paletteView;
-
-        // EventAttributesViewController pointer
-        EventAttributesViewController* eventAttributesView;
 };
 
 #endif
