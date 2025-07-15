@@ -533,10 +533,12 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     DOMElement* element = configuration->getFirstElementChild();
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
+    qDebug() << "Fileflag: " << p->file_flag;
+
     //topEvent
     element = element->getNextElementSibling();
     p->top_event = XercesParser::getFunctionString(element);
-
+    qDebug() << "Top event: " << p->top_event;
     // pieceStartTime
     element = element->getNextElementSibling(); //skipped
 
@@ -616,6 +618,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
         XMLString::release(&buffer);
         modifier = modifier->getNextElementSibling();
     }
+    qDebug() << "Passed modifiers";
 
     DOMElement *envlibelement = noteModifiers->getNextElementSibling();
     char_data = (DOMCharacterData*) envlibelement->getFirstChild();
@@ -659,63 +662,65 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     delete envelopeLibrary;
 #endif
+    qDebug() << "Passed envelopes";
 
     DOMElement* currentElement = envlibelement;
 
     DOMElement* markovModelLibraryElement = envlibelement->getNextElementSibling();
-#ifdef MARKOV
-    std::string tagName = buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
-    XMLString::release(&buffer);
-    if (tagName == "MarkovModelLibrary") {
-        currentElement = markovModelLibraryElement;
-        DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
-        std::string data = buffer = XMLString::transcode(text->getWholeText());
-        XMLString::release(&buffer);
+// #ifdef MARKOV
+//     std::string tagName = buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
+//     XMLString::release(&buffer);
+//     if (tagName == "MarkovModelLibrary") {
+//         currentElement = markovModelLibraryElement;
+//         DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
+//         std::string data = buffer = XMLString::transcode(text->getWholeText());
+//         XMLString::release(&buffer);
 
-        // QTextStream ts(QString::fromStdString(data));
+//         // QTextStream ts(QString::fromStdString(data));
 
-        // // read the number of models
-        // int size;
-        // ts >> size;
-        // p->markovModels.resize(size);
+//         // // read the number of models
+//         // int size;
+//         // ts >> size;
+//         // p->markovModels.resize(size);
 
-        // // read individual models
-        // std::string modelText;
-        // QString line;
-        // getline(ts, line, '\n');
-        // for (int i = 0; i < size; i++) {
-        //     line = ts.readLine();
-        //     modelText = line + '\n';
-        //     for (int j = 0; j < 1; j++){
-        //         line = ts.readLine();
-        //         modelText += line + '\n';
-        //     }
-        //     line = ts.readLine();
-        //     modelText += line;
-        std::stringstream ss(data);
+//         // // read individual models
+//         // std::string modelText;
+//         // QString line;
+//         // getline(ts, line, '\n');
+//         // for (int i = 0; i < size; i++) {
+//         //     line = ts.readLine();
+//         //     modelText = line + '\n';
+//         //     for (int j = 0; j < 1; j++){
+//         //         line = ts.readLine();
+//         //         modelText += line + '\n';
+//         //     }
+//         //     line = ts.readLine();
+//         //     modelText += line;
+//         std::stringstream ss(data);
 
-        // read the number of models
-        long long size;
-        ss >> size;
-        p->markovModels.resize(size);
+//         // read the number of models
+//         long long size;
+//         ss >> size;
+//         p->markovModels.resize(size);
 
-        // read individual models
-        std::string modelText, line;
-        getline(ss, line, '\n');
-        for (int i = 0; i < size; i++) {
-            getline(ss, line, '\n');
-            modelText = line + '\n';
-            getline(ss, line, '\n');
-            modelText += line + '\n';
-            getline(ss, line, '\n');
-            modelText += line + '\n';
-            getline(ss, line, '\n');
-            modelText += line;
+//         // read individual models
+//         std::string modelText, line;
+//         getline(ss, line, '\n');
+//         for (int i = 0; i < size; i++) {
+//             getline(ss, line, '\n');
+//             modelText = line + '\n';
+//             getline(ss, line, '\n');
+//             modelText += line + '\n';
+//             getline(ss, line, '\n');
+//             modelText += line + '\n';
+//             getline(ss, line, '\n');
+//             modelText += line;
 
-            (p->markovModels[i]).from_str(modelText);
-        }
-    }
-#endif
+//             (p->markovModels[i]).from_str(modelText);
+//         }
+//     }
+// #endif
+    qDebug() << "Skipped markov";
 
 #define EVENTS
 #ifdef EVENTS
@@ -732,6 +737,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     //     (*eventsIter)->link(p);
     // }
 #endif
+    qDebug() << "Passed events";
 }
 
 
@@ -817,6 +823,7 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
 
     curr_project_ = project;
 
+    qDebug() << "Now parsing " << filepath;
     parse(project, filepath);
     
     return project;
