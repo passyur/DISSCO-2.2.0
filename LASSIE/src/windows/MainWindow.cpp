@@ -34,7 +34,6 @@ MainWindow::MainWindow(Inst* m)
     , envelopeLibraryWindow(std::make_unique<EnvelopeLibraryWindow>(this))
     , markovWindow(std::make_unique<MarkovModelLibraryWindow>(this))
 {
-    qDebug() << "In MAIN WINDOW CONSTRUCTOR BEFORE CONNECT";
     Q_ASSERT(instance_ == nullptr);
     instance_ = this;
     main_ = m;
@@ -122,6 +121,7 @@ void MainWindow::openFile()
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
     if (!fileName.isEmpty()) {
         loadFile(fileName);
+        // Project *p = Inst::get_project_manager()->open();
     }
 }
 

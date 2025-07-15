@@ -99,6 +99,20 @@ namespace PVCHelper {
 
 /* ProjectView constructor initializing values for XML file*/
 ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
+
+    Project *p = Inst::get_project_manager()->get_curr_project();
+    qDebug() << "In PV Constructor p:" << p;
+
+    QList<HEvent> pHevents = Inst::get_project_manager()->topevents();
+    HEvent defaultTop; // &defaultTop when modifying
+    defaultTop.type = top;
+    defaultTop.name = "0";
+    pHevents.push_back(defaultTop);
+    for (HEvent item : pHevents) {
+        qDebug() << "Hevent type:" << item.type;
+        qDebug() << "Hevent name:" << item.name;
+    }
+
     mainWindow = _mainWindow;
     modifiedButNotSaved = true;
 
