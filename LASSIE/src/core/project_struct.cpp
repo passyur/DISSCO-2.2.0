@@ -712,7 +712,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
             getline(ss, line, '\n');
             modelText += line;
 
-            (p->markovModels[i])->from_str(modelText);
+            (p->markovModels[i]).from_str(modelText);
         }
     }
 #endif
@@ -810,8 +810,11 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
     file.close();
 
     Project *project = create(info.fileName(), id);
-    project->filepath = filepath;
-    
+    QFileInfo fileinfo(filepath);
+    project->fileinfo = fileinfo;
+    project->dat_path = fileinfo.absolutePath();
+    project->lib_path = fileinfo.absoluteFilePath();
+
     curr_project_ = project;
 
     parse(project, filepath);

@@ -6,14 +6,17 @@
 #include <QMap>
 #include <QHash>
 #include <QObject>
-#include <xercesc/dom/DOMElement.hpp>
+#include "event_struct.hpp"
+#define ENVELOPE
+#include "EnvelopeLibraryEntry.hpp"
+#define MARKOV
 #ifdef MARKOV
 #include "MarkovModel.h"
 #endif
 
-#include "../windows/EnvelopeLibraryEntry.hpp"
-#include "event_struct.hpp"
-// #include "IEvent.h"
+#include <QFile>
+#include <QFileInfo>
+#include <xercesc/dom/DOMElement.hpp>
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -48,24 +51,25 @@ class Project : public QObject {
         Project(const QString& _title = QString(), const QByteArray& _id = QByteArray());
         void parseEvents(xercesc::DOMElement *event_start);
         /* the *.dissco file */
-        QString filepath;
+        QFileInfo fileinfo;
         QByteArray id;
 
         /* properties */
-
-        QString top_event;
-        QString title;
-        QString file_flag;
-        QString duration;
+        QString top_event = "0";
+        QString title; /* file name */
+        QString file_flag = "THMLBsnv";
+        QString duration = "";
         QString num_channels = "2";
         QString sample_rate = "44100";
         QString sample_size = "16";
         QString num_threads = "1";
-        QString num_staffs;
-        QString dat_path;
-        QString lib_path;
-        QString seed;
+        QString num_staffs = "1";
+        QString dat_path; /* excl filename */
+        QString lib_path; /* incl filename */
+        QString seed = "";
         QString measure;
+
+        bool modifiedButNotSaved = true;
 
         /* flags for CMOD */
         bool grand_staff = false;
@@ -86,7 +90,6 @@ class Project : public QObject {
         QList<ReverbEvent> reverb_events;
         QList<FilterEvent> filter_events;
         EnvelopeLibraryEntry *elentry = nullptr;
-#define MARKOV
 #ifdef MARKOV
         QList<MarkovModel<float>> markovModels;
 #endif
@@ -137,6 +140,7 @@ class ProjectManager : public QObject {
         void set_curr_project(class Project* p) { curr_project_ = p; }
         Project *get_curr_project() { return curr_project_; }
 
+        QFileInfo fileinfo()        { return curr_project_->fileinfo; }
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
         QString& topevent()         { return curr_project_->top_event; }
         QString& title()            { return curr_project_->title; }
@@ -152,6 +156,7 @@ class ProjectManager : public QObject {
         QString& seed()             { return curr_project_->seed; }
         QString& measure()          { return curr_project_->measure; }
 
+        bool& modified()            { return curr_project_->modifiedButNotSaved; }
         // bool& getters
         bool& grandstaff()          { return curr_project_->grand_staff; }
         bool& score()               { return curr_project_->score; }
@@ -170,9 +175,11 @@ class ProjectManager : public QObject {
         QList<ReverbEvent>& reverbevents() { return curr_project_->reverb_events; }
         QList<FilterEvent>& filterevents() { return curr_project_->filter_events; }
 
+        EnvelopeLibraryEntry* envlibentries() { return curr_project_->elentry; }
 #ifdef MARKOV
         QList<MarkovModel<float>>& markovmodels() { return curr_project_->markovModels; }
 #endif
+        QList<QString>& customnotemodifiers() { return curr_project_->custom_note_modifiers; }
 #ifdef TABEDITOR
         QList<Project*> get_projects() { return project_hash_.values(); }
         QList<QByteArray> get_project_IDs() { return project_hash_.keys(); }

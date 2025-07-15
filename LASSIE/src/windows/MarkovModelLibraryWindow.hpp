@@ -41,7 +41,7 @@ public:
 
 protected:
     // Save state back to model when hidden
-    void hideEvent(QHideEvent* event) override;
+    // void hideEvent(QHideEvent* event) override;
 
 private slots:
     // Called when the tree selection changes

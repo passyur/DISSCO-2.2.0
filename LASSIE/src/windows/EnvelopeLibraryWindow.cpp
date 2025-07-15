@@ -1,7 +1,7 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "EnvLibDrawingArea.hpp"
 #include "ProjectViewController.hpp"
-#include "EnvelopeLibraryEntry.hpp"
+#include "../core/EnvelopeLibraryEntry.hpp"
 
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -16,6 +16,8 @@
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QSizePolicy>
+
+#include "../utilities.hpp"
 
 /**
  * @brief Constructor: builds the UI
@@ -138,7 +140,8 @@ void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
     activeProject = project;
     refreshEnvelopeList();
 
-    EnvelopeLibraryEntry* entry = activeProject->getEnvelopeLibraryEntries();
+    ProjectManager *pm = Inst::get_project_manager();
+    EnvelopeLibraryEntry* entry = pm->envlibentries();
     while (entry) {
         // append each entry to the tree
         QStandardItem* item = new QStandardItem(entry->getNumberString());
@@ -156,8 +159,8 @@ void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
 void EnvelopeLibraryWindow::createNewEnvelope()
 {
     if (!activeProject) return;
-    EnvelopeLibraryEntry* newEnv = activeProject->createNewEnvelope();
-    activeProject->modified();
+    EnvelopeLibraryEntry *newEnv = EnvelopeUtilities::createNewEnvelopeHelper(Inst::get_project_manager()->envlibentries());
+    MUtilities::modified();
 
     QStandardItem* item = new QStandardItem(newEnv->getNumberString());
     item->setData(QVariant::fromValue<void*>(newEnv), Qt::UserRole);
@@ -181,8 +184,8 @@ void EnvelopeLibraryWindow::duplicateEnvelope()
     auto ptr = static_cast<EnvelopeLibraryEntry*>(origItem->data(Qt::UserRole).value<void*>());
     if (!ptr || !activeProject) return;
 
-    EnvelopeLibraryEntry* dupEnv = activeProject->duplicateEnvelope(ptr);
-    activeProject->modified();
+    EnvelopeLibraryEntry* dupEnv = EnvelopeUtilities::duplicateEnvelopeHelper(Inst::get_project_manager()->envlibentries(), ptr);
+    MUtilities::modified();
 
     QStandardItem* newItem = new QStandardItem(dupEnv->getNumberString());
     newItem->setData(QVariant::fromValue<void*>(dupEnv), Qt::UserRole);
@@ -201,8 +204,8 @@ void EnvelopeLibraryWindow::deleteEnvelope()
     auto ptr = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
     if (!ptr || !activeProject) return;
 
-    activeProject->deleteEnvelope(ptr);
-    activeProject->modified();
+    EnvelopeUtilities::deleteEnvelope(Inst::get_project_manager()->envlibentries(), ptr);
+    MUtilities::modified();
 
     refModel->removeRow(idx.row());
 }
