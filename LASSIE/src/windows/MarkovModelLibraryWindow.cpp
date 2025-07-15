@@ -77,7 +77,7 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
     m_listModel->removeRows(0, m_listModel->rowCount());
     if (!activeProject) return;
     auto& models = activeProject->getMarkovModels();
-    for (int i = 0; i < models.size(); ++i) {
+    for (int i = 0; i < (int) models.size(); ++i) {
         auto item = new QStandardItem(QString::number(i));
         m_listModel->appendRow(item);
     }

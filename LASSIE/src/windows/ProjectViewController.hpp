@@ -68,14 +68,14 @@ class ProjectView : public QObject {
             return markovModels.size() - 1; 
         }
         int duplicateMarkovModel(int idx) { 
-            if (idx >= 0 && idx < markovModels.size()) {
+            if (idx >= 0 && idx < (int) markovModels.size()) {
                 markovModels.push_back(markovModels[idx]); 
                 return markovModels.size() - 1;
             }
             return -1;
         }
         void removeMarkovModel(int idx) { 
-            if (idx >= 0 && idx < markovModels.size()) {
+            if (idx >= 0 && idx < (int) markovModels.size()) {
                 markovModels.erase(markovModels.begin() + idx);
             }
         }

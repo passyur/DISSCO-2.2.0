@@ -34,7 +34,6 @@ MainWindow::MainWindow(Inst* m)
     , envelopeLibraryWindow(std::make_unique<EnvelopeLibraryWindow>(this))
     , markovWindow(std::make_unique<MarkovModelLibraryWindow>(this))
 {
-    qDebug() << "In MAIN WINDOW CONSTRUCTOR BEFORE CONNECT";
     Q_ASSERT(instance_ == nullptr);
     instance_ = this;
     main_ = m;
@@ -99,6 +98,8 @@ void MainWindow::newFile()
     setUnsavedTitle(currentFile);
     statusBar()->showMessage(tr("File created"), 2000);
 
+    Project *p = Inst::get_project_manager()->create(fileName, NULL);
+    Inst::get_project_manager()->set_curr_project(p);
     projectView = new ProjectView(this, currentFile);
     projects.push_back(projectView);
     projectView->setProperties();
@@ -118,6 +119,7 @@ void MainWindow::openFile()
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
     if (!fileName.isEmpty()) {
         loadFile(fileName);
+        // Project *p = Inst::get_project_manager()->open();
     }
 }
 
