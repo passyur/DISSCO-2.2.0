@@ -168,7 +168,7 @@ struct ExtraInfo {
     QList<Modifier> modifiers;
 };
 
-/* HEvents are Top, High, Mid, Low, or Bottom events */
+/* HEvents are Top, High, Mid, or Low events */
 typedef struct HEvent HEvent;
 struct HEvent {
     QString orderinpalette;
