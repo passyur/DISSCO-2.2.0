@@ -2,6 +2,7 @@
 #include "ProjectViewController.hpp"
 #include "ObjectWindow.hpp"
 #include "../core/event_struct.hpp"
+#include "EnvelopeLibraryPaletteEvent.hpp"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -102,6 +103,41 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     eventsByType["Note"] = std::vector<IEvent*>();
     eventsByType["Filter"] = std::vector<IEvent*>();
     eventsByType["Measurement"] = std::vector<IEvent*>();
+
+    // --- nhi: Insert EnvelopeLibraryEntry objects into the palette ---
+    EnvelopeLibraryEntry* entry = projectView->getEnvelopeLibraryEntries();
+    while (entry) {
+        auto* paletteEvent = new EnvelopeLibraryPaletteEvent(entry);
+        insertEvent(reinterpret_cast<IEvent*>(paletteEvent), "Envelope");
+        // Optionally, add to the tree view for display
+        QStandardItem* typeItem = new QStandardItem("Envelope");
+        QStandardItem* nameItem = new QStandardItem(paletteEvent->getName());
+        // nhi: Make name editable
+        nameItem->setEditable(true); // Make name editable
+        // Store pointer to paletteEvent in item for lookup
+        nameItem->setData(QVariant::fromValue<void*>(paletteEvent), Qt::UserRole);
+        // end nhi
+    
+        folderEnv->appendRow({typeItem, nameItem});
+        entry = entry->next;
+    }
+    // --- END ---
+
+    // nhi: Connect to itemChanged to sync edits
+    connect(model, &QStandardItemModel::itemChanged, this, [this](QStandardItem* item) {
+        // Only handle edits in the Envelope folder, Name column
+        if (!item || item->parent() != folderEnv || item->column() != 1) return;
+        auto* paletteEvent = reinterpret_cast<EnvelopeLibraryPaletteEvent*>(item->data(Qt::UserRole).value<void*>());
+        if (paletteEvent) {
+            // Update the EnvelopeLibraryEntry's number string if needed
+            // (Assume name is the number string for now)
+            bool ok = false;
+            int newNum = item->text().toInt(&ok);
+            if (ok) paletteEvent->setNumber(newNum);
+            // Optionally, update other fields as needed
+        }
+    });
+    // end nhi
 }
 
 PaletteViewController::~PaletteViewController() = default;
@@ -191,4 +227,24 @@ int PaletteViewController::getEventTypeFromString(const QString& type)
     if (type == "Filter") return 13;
     if (type == "Measurement") return 14;
     return -1;
+} 
+// nhi: Refresh Envelope folder
+void PaletteViewController::refreshEnvelopeFolder() {
+    // Clear the Envelope folder in the tree view
+    folderEnv->removeRows(0, folderEnv->rowCount());
+    // Clear the events vector
+    eventsByType["Envelope"].clear();
+
+    // Re-insert all EnvelopeLibraryEntry objects
+    EnvelopeLibraryEntry* entry = projectView->getEnvelopeLibraryEntries();
+    while (entry) {
+        auto* paletteEvent = new EnvelopeLibraryPaletteEvent(entry);
+        insertEvent(reinterpret_cast<IEvent*>(paletteEvent), "Envelope");
+        QStandardItem* typeItem = new QStandardItem("Envelope");
+        QStandardItem* nameItem = new QStandardItem(paletteEvent->getName());
+        nameItem->setEditable(true);
+        nameItem->setData(QVariant::fromValue<void*>(paletteEvent), Qt::UserRole);
+        folderEnv->appendRow({typeItem, nameItem});
+        entry = entry->next;
+    }
 } 

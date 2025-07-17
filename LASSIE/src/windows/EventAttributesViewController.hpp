@@ -70,7 +70,7 @@ public:
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
     //  */
-    void showAttributesOfEvent(Eventtype event); //IEvent* event
+    void showAttributesOfEvent(IEvent* event); //IEvent* event
 
     // /*! \brief get the currently shown event */
     // IEvent* getCurrentEvent() const;
@@ -144,7 +144,7 @@ private:
     // // data/model
     // SharedPointers*              m_sharedPointers;
     // IEvent*                      m_currentlyShownEvent;
-    Eventtype                       m_currentlyShownEvent;
+    IEvent*                          m_currentlyShownEvent;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 

@@ -7,6 +7,7 @@
 #include <vector>
 #include <QTreeView>
 #include <QStandardItemModel>
+#include "EnvelopeLibraryPaletteEvent.hpp"
 
 class ProjectView;
 class IEvent;
@@ -30,6 +31,9 @@ public:
 
     // Opens Object Window
     void objectActivated(const QModelIndex &index);
+
+    // Refresh Envelope folder from EnvelopeLibraryEntry list
+    void refreshEnvelopeFolder();
 
     // Object Folders under tree view
     QStandardItem* folderTop;

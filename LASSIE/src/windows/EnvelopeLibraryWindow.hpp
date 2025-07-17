@@ -12,6 +12,7 @@ class QStandardItemModel;
 class QLineEdit;
 class QMenu;
 class QAction;
+class QLabel;
 
 /**
  * @brief Main window for managing envelope library entries
@@ -124,6 +125,8 @@ private:
     QAction*                actionAdd;        ///< "Create New Envelope"
     QAction*                actionDuplicate;  ///< "Duplicate Envelope"
     QAction*                actionSave;       ///< "Save" (Ctrl+S)
+
+    QLabel*                 eventNameLabel;   ///< Label to display the event name
 };
 
 #endif // ENVELOPE_LIBRARY_WINDOW_HPP

@@ -1051,7 +1051,7 @@
                         <layout class="QHBoxLayout" name="envTypeLayout">
                           <item>
                             <widget class="QLabel" name="envTypeLabel">
-                            <property name="text"><string>Event Type: Envelope</string></property>
+                            <property name="text"><string>Type: Envelope</string></property>
                             </widget>
                           </item>
                         </layout>
@@ -1060,11 +1060,13 @@
                         <layout class="QHBoxLayout" name="envNameLayout">
                             <item>
                                 <widget class="QLabel" name="envNameLabel">
-                                <property name="text"><string>Event Name:</string></property>
+                                <property name="text"><string>Name:</string></property>
                                 </widget>
                             </item>
                             <item>
-                                <widget class="QLineEdit" name="envNameEntry"/>
+                                <widget class="QLineEdit" name="envNameEntry">
+                                  <property name="readOnly"><bool>true</bool></property>
+                                </widget>
                             </item>
                         </layout>
                         </item>

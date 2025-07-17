@@ -210,19 +210,7 @@ LayerBox::LayerBox(EventAttributesViewController* parentController,
 
 LayerBox::~LayerBox() {}
 
-void EventAttributesViewController::showAttributesOfEvent(Eventtype event) { // (IEvent* event)
-    // if (!event) {
-    //     m_currentlyShownEvent = nullptr;
-    //     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
-    //     // clear dynamic widgets
-    //     ui->layersLayout->deleteLater();
-    //     ui->modifiersLayout->deleteLater();
-    //     ui->partialsLayout->deleteLater();
-    //     return;
-    // }
-
-    // saveCurrentShownEventData();
-    // m_currentlyShownEvent = event;
+void EventAttributesViewController::showAttributesOfEvent(IEvent* event) {
     m_currentlyShownEvent = event;
     showCurrentEventData();
 }
@@ -389,9 +377,12 @@ void EventAttributesViewController::showCurrentEventData() {
     //     m_soundPartialHboxes = nullptr;
     // }
 
-    // choose page
-    // int type = m_currentlyShownEvent->getEventType();
-    int type = m_currentlyShownEvent;
+    if (!m_currentlyShownEvent) {
+        ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+        fixStackedWidgetLayout(ui->emptyPage);
+        return;
+    }
+    int type = m_currentlyShownEvent->getEventType();
     switch (type) {
     case top: case high: case mid: case low: case bottom: {
         ui->stackedWidget->setCurrentWidget(ui->standardPage);
@@ -415,6 +406,7 @@ void EventAttributesViewController::showCurrentEventData() {
     case env:
         ui->stackedWidget->setCurrentWidget(ui->envPage);
         fixStackedWidgetLayout(ui->envPage);
+        ui->envNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
         break;
     case sieve:
         ui->stackedWidget->setCurrentWidget(ui->sievePage);

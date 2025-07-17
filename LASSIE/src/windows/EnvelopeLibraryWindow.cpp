@@ -1,7 +1,9 @@
+#include <QWidget>
 #include "EnvelopeLibraryWindow.hpp"
 #include "EnvLibDrawingArea.hpp"
 #include "ProjectViewController.hpp"
 #include "EnvelopeLibraryEntry.hpp"
+#include "PaletteViewController.hpp"
 
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -55,6 +57,14 @@ EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     envelopeLibrary->header()->setStretchLastSection(true);
     envelopeLibrary->setMinimumWidth(120); // Make the envelope list narrower
     layout->addWidget(envelopeLibrary);
+
+    // Add Event Name label
+    eventNameLabel = new QLabel(this);
+    eventNameLabel->setText(""); // Initially blank
+    QFont boldFont = eventNameLabel->font();
+    boldFont.setBold(true);
+    eventNameLabel->setFont(boldFont);
+    layout->addWidget(eventNameLabel);
 
     // Drawing area (moved below envelope list)
     drawingArea = new EnvLibDrawingArea(this);
@@ -167,6 +177,9 @@ void EnvelopeLibraryWindow::createNewEnvelope()
     QModelIndex newIndex = refModel->index(refModel->rowCount() - 1, 0);
     envelopeLibrary->setCurrentIndex(newIndex);
     // This will trigger onCursorChanged and update the graph
+
+    if (activeProject && activeProject->getPalette())
+        activeProject->getPalette()->refreshEnvelopeFolder();
 }
 
 /**
@@ -187,6 +200,9 @@ void EnvelopeLibraryWindow::duplicateEnvelope()
     QStandardItem* newItem = new QStandardItem(dupEnv->getNumberString());
     newItem->setData(QVariant::fromValue<void*>(dupEnv), Qt::UserRole);
     refModel->appendRow(newItem);
+
+    if (activeProject && activeProject->getPalette())
+        activeProject->getPalette()->refreshEnvelopeFolder();
 }
 
 /**
@@ -205,6 +221,9 @@ void EnvelopeLibraryWindow::deleteEnvelope()
     activeProject->modified();
 
     refModel->removeRow(idx.row());
+
+    if (activeProject && activeProject->getPalette())
+        activeProject->getPalette()->refreshEnvelopeFolder();
 }
 
 /**
@@ -226,6 +245,13 @@ void EnvelopeLibraryWindow::objectActivated(const QModelIndex& index)
     QStandardItem* item = refModel->itemFromIndex(index);
     activeEnvelope = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
 
+    // Update event name label
+    if (activeEnvelope) {
+        eventNameLabel->setText(QString("Event Name: %1").arg(activeEnvelope->getNumberString()));
+    } else {
+        eventNameLabel->setText("");
+    }
+
     drawingArea->resetFields();
     drawingArea->adjustBoundary(activeEnvelope);
     drawingArea->showGraph(activeEnvelope);
@@ -243,6 +269,13 @@ void EnvelopeLibraryWindow::onCursorChanged(const QModelIndex& current,
     if (!current.isValid()) return;
     QStandardItem* item = refModel->itemFromIndex(current);
     activeEnvelope = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
+
+    // Update event name label
+    if (activeEnvelope) {
+        eventNameLabel->setText(QString("Event Name: %1").arg(activeEnvelope->getNumberString()));
+    } else {
+        eventNameLabel->setText("");
+    }
 
     drawingArea->resetFields();
     drawingArea->adjustBoundary(activeEnvelope);
