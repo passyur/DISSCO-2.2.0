@@ -430,7 +430,6 @@ void Project::parseEvents(xercesc::DOMElement *event_start){
     Eventtype type = (Eventtype)std::stoi(buffer);
     XMLString::release(&buffer);
 
-    void *event;
     switch(type){
         case top:
         case high:
