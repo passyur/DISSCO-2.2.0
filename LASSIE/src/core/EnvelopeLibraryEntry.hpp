@@ -128,4 +128,52 @@ public:
   QString getNumberString() const;
 };
 
+namespace EnvelopeUtilities {
+    inline EnvelopeLibraryEntry* createNewEnvelopeHelper(EnvelopeLibraryEntry *entries){
+        // ProjectManager *pm = Inst::get_project_manager();
+        // EnvelopeLibraryEntry *entries = pm->envlibentries();
+        if(entries == nullptr){
+            entries = new EnvelopeLibraryEntry(1);
+            return entries;
+        }else{
+            return entries->EnvelopeLibraryEntry::createNewEnvelope();
+        }
+    }
+
+    /// \todo should be devolved to EnvelopeLibraryEntry instead of this deceptively named helper function
+    inline EnvelopeLibraryEntry* duplicateEnvelopeHelper(EnvelopeLibraryEntry *entries, EnvelopeLibraryEntry* _originalEnvelope) {
+        // ProjectManager *pm = Inst::get_project_manager();
+        // EnvelopeLibraryEntry *entries = pm->envlibentries();
+        if (entries != NULL)
+            return entries->duplicateEnvelope(_originalEnvelope);
+        
+        return nullptr;
+    }
+
+    // nhi: delete envelope
+    inline void deleteEnvelope(EnvelopeLibraryEntry *entries, EnvelopeLibraryEntry* toDelete) {
+        // ProjectManager *pm = Inst::get_project_manager();
+        // EnvelopeLibraryEntry *entries = pm->envlibentries();
+        if (!entries || !toDelete) return;
+        if (entries == toDelete) {
+            EnvelopeLibraryEntry* next = entries->next;
+            if (next) next->prev = nullptr;
+            delete entries;
+            entries = next;
+            return;
+        }
+        EnvelopeLibraryEntry* curr = entries;
+        while (curr && curr->next) {
+            if (curr->next == toDelete) {
+                EnvelopeLibraryEntry* del = curr->next;
+                curr->next = del->next;
+                if (del->next) del->next->prev = curr;
+                delete del;
+                return;
+            }
+            curr = curr->next;
+        }
+    }
+}
+
 #endif // ENVELOPE_LIBRARY_ENTRY_HPP

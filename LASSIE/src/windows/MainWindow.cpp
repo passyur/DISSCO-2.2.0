@@ -98,8 +98,8 @@ void MainWindow::newFile()
     setUnsavedTitle(currentFile);
     statusBar()->showMessage(tr("File created"), 2000);
 
-    Project *p = Inst::get_project_manager()->create(fileName, NULL);
-    Inst::get_project_manager()->set_curr_project(p);
+    Project *p = Inst::get_project_manager()->build(currentFile, NULL);
+    // Inst::get_project_manager()->set_curr_project(p);
     projectView = new ProjectView(this, currentFile);
     projects.push_back(projectView);
     projectView->setProperties();

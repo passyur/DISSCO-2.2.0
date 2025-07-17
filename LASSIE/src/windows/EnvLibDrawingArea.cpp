@@ -1,12 +1,14 @@
 #include "EnvLibDrawingArea.hpp"
 #include "EnvelopeLibraryWindow.hpp"
-#include "EnvelopeLibraryEntry.hpp"
+#include "../core/EnvelopeLibraryEntry.hpp"
 
 #include <QPainter>
 #include <QMouseEvent>
 #include <QContextMenuEvent>
 #include <QtGlobal>
 #include <cmath>
+
+#include "../utilities.hpp"
 
 /**
  * @brief Constructor: set up state, enable mouse tracking, and build context menu
@@ -134,7 +136,7 @@ void EnvLibDrawingArea::setActiveNodeCoordinate(const QString& _x, const QString
     activeNode->x = newX;
     activeNode->y = newY;
     
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
     adjustBoundary(env);
     showGraph(env);
 }
@@ -403,7 +405,7 @@ void EnvLibDrawingArea::insertEnvelopeSegment()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     int w = width(), h = height();
     double ix = mouseX*(w+1)/double(w*w);
@@ -442,7 +444,7 @@ void EnvLibDrawingArea::setFixed()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     double ix = mouseX*(width()+1)/double(width()*width());
     EnvLibEntryNode* L = env->head;
@@ -463,7 +465,7 @@ void EnvLibDrawingArea::setFlexible()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     double ix = mouseX*(width()+1)/double(width()*width());
     EnvLibEntryNode* L = env->head;
@@ -483,7 +485,7 @@ void EnvLibDrawingArea::setLinear()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     double ix = mouseX*(width()+1)/double(width()*width());
     EnvLibEntryNode* L = env->head;
@@ -503,7 +505,7 @@ void EnvLibDrawingArea::setSpline()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     double ix = mouseX*(width()+1)/double(width()*width());
     EnvLibEntryNode* L = env->head;
@@ -523,7 +525,7 @@ void EnvLibDrawingArea::setExponential()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     double ix = mouseX*(width()+1)/double(width()*width());
     EnvLibEntryNode* L = env->head;
@@ -549,7 +551,7 @@ void EnvLibDrawingArea::removeNode()
     activeNode = nullptr;
 
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
     adjustBoundary(env);
     showGraph(env);
 }
@@ -561,7 +563,7 @@ void EnvLibDrawingArea::moveNode()
 {
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env || !activeNode) return;
-    envelopeLibraryWindow->activeProject->modified();
+    MUtilities::modified();
 
     double lb = activeNode->leftSeg  ? activeNode->leftSeg->leftNode->x + 0.001 : 0.0;
     double rb = activeNode->rightSeg ? activeNode->rightSeg->rightNode->x - 0.001 : 1.0;

@@ -6,14 +6,17 @@
 #include <QMap>
 #include <QHash>
 #include <QObject>
-#include <xercesc/dom/DOMElement.hpp>
+#include "event_struct.hpp"
+#define ENVELOPE
+#include "EnvelopeLibraryEntry.hpp"
+#define MARKOV
 #ifdef MARKOV
 #include "MarkovModel.h"
 #endif
 
-#include "../windows/EnvelopeLibraryEntry.hpp"
-#include "event_struct.hpp"
-// #include "IEvent.h"
+#include <QFile>
+#include <QFileInfo>
+#include <xercesc/dom/DOMElement.hpp>
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -48,24 +51,25 @@ class Project : public QObject {
         Project(const QString& _title = QString(), const QByteArray& _id = QByteArray());
         void parseEvents(xercesc::DOMElement *event_start);
         /* the *.dissco file */
-        QString filepath;
+        QFileInfo fileinfo;
         QByteArray id;
 
         /* properties */
-
-        QString top_event;
-        QString title;
-        QString file_flag;
-        QString duration;
+        QString top_event = "0";
+        QString title; /* file name */
+        QString file_flag = "THMLBsnv";
+        QString duration = "";
         QString num_channels = "2";
         QString sample_rate = "44100";
         QString sample_size = "16";
         QString num_threads = "1";
-        QString num_staffs;
-        QString dat_path;
-        QString lib_path;
-        QString seed;
+        QString num_staffs = "1";
+        QString dat_path; /* excl filename */
+        QString lib_path; /* incl filename */
+        QString seed = "";
         QString measure;
+
+        bool modifiedButNotSaved = true;
 
         /* flags for CMOD */
         bool grand_staff = false;
@@ -87,7 +91,7 @@ class Project : public QObject {
         QList<FilterEvent> filter_events;
         EnvelopeLibraryEntry *elentry = nullptr;
 #ifdef MARKOV
-        QList<MarkovModel<float>*> markovModels;
+        QList<MarkovModel<float>> markovModels;
 #endif
         // QList<IEvent*> events;
         /* list of custom note modifiers, per user */
@@ -128,6 +132,7 @@ class ProjectManager : public QObject {
         Project* create(const QString& title = QString(), const QByteArray& id = QByteArray());
         /* validates and, if successful, opens the file and creates a Project from that file */
         Project* open(const QString& filepath, const QByteArray& id = QByteArray());
+        Project* build(const QString& filepath, const QByteArray& id = QByteArray());
         void parse(Project *p, const QString& filepath);
         void close(Project*);
         int save(Project*);
@@ -136,16 +141,46 @@ class ProjectManager : public QObject {
         void set_curr_project(class Project* p) { curr_project_ = p; }
         Project *get_curr_project() { return curr_project_; }
 
-        QList<HEvent>& get_curr_hevents() { return curr_project_->h_events; }
-        QList<BottomEvent>& get_curr_bottomevents() { return curr_project_->bottom_events; }
-        QList<SpectrumEvent>& get_curr_spectrumevents() { return curr_project_->spectrum_events; }
-        QList<NoteEvent>& get_curr_noteevents() { return curr_project_->note_events; }
-        QList<EnvelopeEvent>& get_curr_envelopeevents() { return curr_project_->envelope_events; }
-        QList<SieveEvent>& get_curr_sieveevents() { return curr_project_->sieve_events; }
-        QList<SpaEvent>& get_curr_spaevents() { return curr_project_->spa_events; }
-        QList<PatternEvent>& get_curr_patternevents() { return curr_project_->pattern_events; }
-        QList<ReverbEvent>& get_curr_reverbevents() { return curr_project_->reverb_events; }
-        QList<FilterEvent>& get_curr_filterevents() { return curr_project_->filter_events; }
+        QFileInfo fileinfo()        { return curr_project_->fileinfo; }
+        // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
+        QString& topevent()         { return curr_project_->top_event; }
+        QString& title()            { return curr_project_->title; }
+        QString& fileflag()         { return curr_project_->file_flag; }
+        QString& duration()         { return curr_project_->duration; }
+        QString& numchannels()      { return curr_project_->num_channels; }
+        QString& samplerate()       { return curr_project_->sample_rate; }
+        QString& samplesize()       { return curr_project_->sample_size; }
+        QString& numthreads()       { return curr_project_->num_threads; }
+        QString& numstaffs()        { return curr_project_->num_staffs; }
+        QString& datpath()          { return curr_project_->dat_path; }
+        QString& libpath()          { return curr_project_->lib_path; }
+        QString& seed()             { return curr_project_->seed; }
+        QString& measure()          { return curr_project_->measure; }
+
+        bool& modified()            { return curr_project_->modifiedButNotSaved; }
+        // bool& getters
+        bool& grandstaff()          { return curr_project_->grand_staff; }
+        bool& score()               { return curr_project_->score; }
+        bool& synthesis()           { return curr_project_->synthesis; }
+        bool& outputparticel()      { return curr_project_->output_particel; }
+        bool& emptyproject()        { return curr_project_->empty_project; }
+
+        QList<HEvent>& hevents() { return curr_project_->h_events; }
+        QList<BottomEvent>& bottomevents() { return curr_project_->bottom_events; }
+        QList<SpectrumEvent>& spectrumevents() { return curr_project_->spectrum_events; }
+        QList<NoteEvent>& noteevents() { return curr_project_->note_events; }
+        QList<EnvelopeEvent>& envelopeevents() { return curr_project_->envelope_events; }
+        QList<SieveEvent>& sieveevents() { return curr_project_->sieve_events; }
+        QList<SpaEvent>& spaevents() { return curr_project_->spa_events; }
+        QList<PatternEvent>& patternevents() { return curr_project_->pattern_events; }
+        QList<ReverbEvent>& reverbevents() { return curr_project_->reverb_events; }
+        QList<FilterEvent>& filterevents() { return curr_project_->filter_events; }
+
+        EnvelopeLibraryEntry* envlibentries() { return curr_project_->elentry; }
+#ifdef MARKOV
+        QList<MarkovModel<float>>& markovmodels() { return curr_project_->markovModels; }
+#endif
+        QList<QString>& customnotemodifiers() { return curr_project_->custom_note_modifiers; }
 #ifdef TABEDITOR
         QList<Project*> get_projects() { return project_hash_.values(); }
         QList<QByteArray> get_project_IDs() { return project_hash_.keys(); }

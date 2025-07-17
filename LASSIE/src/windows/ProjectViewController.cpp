@@ -24,12 +24,11 @@
 #include <QTreeView>
 #include <QStandardItem>
 
-// #include "Define.h"
 #include "ProjectViewController.hpp"
 #include "MainWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "../inst.hpp"
-#include "EnvelopeLibraryEntry.hpp"
+#include "../core/EnvelopeLibraryEntry.hpp"
 #include "ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
 #include "FunctionGenerator.hpp"
@@ -43,6 +42,7 @@
 // #include "../core/IEvent.h"
 // #include "muParser.h"
 
+#include "../utilities.hpp"
 
 namespace PVCHelper {
     /* called before appearing (see immediately succeeding f'n) the checkboxes; init'd when a user brings up the configure note modifier menu */
@@ -97,24 +97,17 @@ namespace PVCHelper {
     // 
 // }
 
-ProjectView::ProjectView(Project *proj){
-    Inst::instance()->get_project_manager();
-
-    empty_project = false;
-
-    seed = "";
-
-    // initializeModifiers();
-    // add(leftTwoPlusAttributes);
-}
-
 /* ProjectView constructor initializing values for XML file*/
 ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
-    Project *p = Inst::get_project_manager()->get_curr_project();
-    qDebug() << "In PV Constructor p:" << p;
+    ProjectManager *pm = Inst::get_project_manager();
+    qDebug() << "In PV Constructor p:" << pm->get_curr_project();
+    // pm->libpath() = _pathAndName;
+    qDebug() << "pm->title: " << pm->title();
+    qDebug() << "pm->libpath: " << pm->libpath();
+    qDebug() << "pm->fileinfo: " << pm->fileinfo();
 
-    QList<HEvent> pHevents = Inst::get_project_manager()->get_curr_hevents();
+    QList<HEvent> pHevents = pm->hevents();
     HEvent defaultTop; // &defaultTop when modifying
     defaultTop.type = top;
     defaultTop.name = "0";
@@ -126,35 +119,6 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
     mainWindow = _mainWindow;
     modifiedButNotSaved = true;
-
-    QFileInfo fileInfo(_pathAndName);
-    QString dirPath = fileInfo.absoluteFilePath();
-    QString pathOnly = fileInfo.absolutePath();
-    QString nameOnly = fileInfo.completeBaseName();
-
-    pathAndName = _pathAndName;
-    dat_path = pathOnly;
-    lib_path = dirPath;
-    project_title = nameOnly;
-    file_flag = "THMLBsnv"; 
-    duration = ""; 
-    num_channels = "2";
-    sample_rate = "44100";
-    sample_size = "24";
-    num_threads = "1";
-    num_staff = "1";
-    top_event = "0";
-    seed = "";
-    synthesis = true;
-	score = false;
-    grandStaff = false;
-    output_particel = false;
-
-    // initialize default note modifiers
-    initializeModifiers();
-    //nhi: create default envelope instead of NULL
-    //envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
-    envelopeLibraryEntries = NULL;
 
     // // Initialize PaletteViewController
     paletteView = new PaletteViewController(this);
@@ -183,7 +147,7 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
     // Create a default top event
     QStandardItem* defaultObjectType = new QStandardItem("Top");
-    QStandardItem* defaultObjectName = new QStandardItem(top_event);
+    QStandardItem* defaultObjectName = new QStandardItem(Inst::get_project_manager()->topevent());
     paletteView->folderTop->appendRow({defaultObjectType, defaultObjectName});
     // HEvent newEvent;
     // newEvent.name = defaultObjectName;
@@ -195,61 +159,6 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     // newEvent->setEventType(eventTop);
     // paletteView->insertEvent(newEvent, "Top");
 
-}
-
-
-// ProjectView::~ProjectView(){}
-
-/* Function to initialize project modifiers */
-void ProjectView::initializeModifiers() {
-    defaultNoteModifiers.insert(pair<string,bool>("-8va",true));
-	defaultNoteModifiers.insert(pair<string,bool>("+8va",true));
-	defaultNoteModifiers.insert(pair<string,bool>("accent",true));
-	defaultNoteModifiers.insert(pair<string,bool>("espressivo",true));
-	defaultNoteModifiers.insert(pair<string,bool>("marcato",true));
-	defaultNoteModifiers.insert(pair<string,bool>("portato",true));
-	defaultNoteModifiers.insert(pair<string,bool>("staccatissimo",true));
-	defaultNoteModifiers.insert(pair<string,bool>("staccato",true));
-	defaultNoteModifiers.insert(pair<string,bool>("tenuto",true));
-	defaultNoteModifiers.insert(pair<string,bool>("prall",true));
-	defaultNoteModifiers.insert(pair<string,bool>("prallup",true));
-	defaultNoteModifiers.insert(pair<string,bool>("pralldown",true));
-	defaultNoteModifiers.insert(pair<string,bool>("upprall",true));
-	defaultNoteModifiers.insert(pair<string,bool>("downprall",true));
-	defaultNoteModifiers.insert(pair<string,bool>("prallprall",true));
-	defaultNoteModifiers.insert(pair<string,bool>("lineprall",true));
-	defaultNoteModifiers.insert(pair<string,bool>("prallmordent",true));
-	defaultNoteModifiers.insert(pair<string,bool>("mordent",true));
-	defaultNoteModifiers.insert(pair<string,bool>("upmordent",true));
-	defaultNoteModifiers.insert(pair<string,bool>("downmordent",true));
-	defaultNoteModifiers.insert(pair<string,bool>("trill",true));
-	defaultNoteModifiers.insert(pair<string,bool>("turn",true));
-	defaultNoteModifiers.insert(pair<string,bool>("reverseturn",true));
-	defaultNoteModifiers.insert(pair<string,bool>("shortfermata",true));
-	defaultNoteModifiers.insert(pair<string,bool>("fermata",true));
-	defaultNoteModifiers.insert(pair<string,bool>("longfermata",true));
-	defaultNoteModifiers.insert(pair<string,bool>("verylongfermata",true));
-	defaultNoteModifiers.insert(pair<string,bool>("upbow",true));
-	defaultNoteModifiers.insert(pair<string,bool>("downbow",true));
-	defaultNoteModifiers.insert(pair<string,bool>("flageolet",true));
-	defaultNoteModifiers.insert(pair<string,bool>("open",true));
-	defaultNoteModifiers.insert(pair<string,bool>("halfopen",true));
-	defaultNoteModifiers.insert(pair<string,bool>("lheel",true));
-	defaultNoteModifiers.insert(pair<string,bool>("rheel",true));
-	defaultNoteModifiers.insert(pair<string,bool>("ltoe",true));
-	defaultNoteModifiers.insert(pair<string,bool>("rtoe",true));
-	defaultNoteModifiers.insert(pair<string,bool>("snappizzicato",true));
-	defaultNoteModifiers.insert(pair<string,bool>("stopped",true));
-	defaultNoteModifiers.insert(pair<string,bool>("segno",true));
-	defaultNoteModifiers.insert(pair<string,bool>("coda",true));
-	defaultNoteModifiers.insert(pair<string,bool>("varcoda",true));
-	defaultNoteModifiers.insert(pair<string,bool>("null",true));
-
-    std::map<string, bool>::iterator iter = defaultNoteModifiers.begin();
-    while (iter != defaultNoteModifiers.end()) {
-        (*iter).second = true;
-        iter++;
-    }
 }
 
 // Function to write XML Formatting
@@ -264,10 +173,11 @@ QString ProjectView::inlineXml(QDomDocument& doc) {
 void ProjectView::save(){
     qDebug() << "In Project View Save Function";
 
+    ProjectManager *pm = Inst::get_project_manager();
     modifiedButNotSaved = false; // changes bool value because file is being saved
 
-    //nhi: ensure directory exists before creating file
-    QFileInfo fileInfo(pathAndName);
+    // ensure directory exists before creating file
+    QFileInfo fileInfo = pm->fileinfo();
     QDir dir = fileInfo.absoluteDir();
     if (!dir.exists()) {
         if (!dir.mkpath(".")) {
@@ -277,7 +187,7 @@ void ProjectView::save(){
     }
 
     // creates the file with the specified /path/name.dissco
-    QFile file(pathAndName);
+    QFile file(pm->libpath());
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qDebug() << "Failed to open file:" << file.fileName();
         qDebug() << "Error reason:" << file.errorString();
@@ -292,15 +202,15 @@ void ProjectView::save(){
         xmlWriter.writeStartElement("ProjectConfiguration");
 
             xmlWriter.writeStartElement("Title");	
-                xmlWriter.writeCharacters(project_title);
+                xmlWriter.writeCharacters(pm->title());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("FileFlag");	
-                xmlWriter.writeCharacters(file_flag);
+                xmlWriter.writeCharacters(pm->fileflag());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("TopEvent");	
-                xmlWriter.writeCharacters(top_event);
+                xmlWriter.writeCharacters(pm->topevent());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("PieceStartTime");	
@@ -309,6 +219,7 @@ void ProjectView::save(){
 
             xmlWriter.writeStartElement("Duration");	
                 QDomDocument tempDoc;
+                QString duration = pm->duration();
                 if (tempDoc.setContent(duration.trimmed()) && !tempDoc.documentElement().isNull()) {
                     // Write raw XML inside <Duration>
                     QString durationXML = inlineXml(tempDoc);
@@ -321,66 +232,66 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Synthesis");
-                xmlWriter.writeCharacters(synthesis ? "True" : "False");
+                xmlWriter.writeCharacters(pm->synthesis() ? "True" : "False");
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Score");
-                xmlWriter.writeCharacters(score ? "True" : "False");
+                xmlWriter.writeCharacters(pm->score() ? "True" : "False");
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("GrandStaff");
-                xmlWriter.writeCharacters(grandStaff ? "True" : "False");
+                xmlWriter.writeCharacters(pm->grandstaff() ? "True" : "False");
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("NumberOfStaff");	
-                xmlWriter.writeCharacters(num_staff);
+                xmlWriter.writeCharacters(pm->numstaffs());
             xmlWriter.writeEndElement();   
 
             xmlWriter.writeStartElement("NumberOfChannels");	
-                xmlWriter.writeCharacters(num_channels);
+                xmlWriter.writeCharacters(pm->numchannels());
             xmlWriter.writeEndElement(); 
 
             xmlWriter.writeStartElement("SampleRate");	
-                xmlWriter.writeCharacters(sample_rate);
+                xmlWriter.writeCharacters(pm->samplerate());
             xmlWriter.writeEndElement(); 
 
             xmlWriter.writeStartElement("SampleSize");	
-                xmlWriter.writeCharacters(sample_size);
+                xmlWriter.writeCharacters(pm->samplesize());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("NumberOfThreads");	
-                xmlWriter.writeCharacters(num_threads);
+                xmlWriter.writeCharacters(pm->numthreads());
             xmlWriter.writeEndElement(); 
 
             xmlWriter.writeStartElement("OutputParticel");
-                xmlWriter.writeCharacters(output_particel ? "True" : "False");
+                xmlWriter.writeCharacters(pm->outputparticel() ? "True" : "False");
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Seed");	
-                xmlWriter.writeCharacters(seed);
+                xmlWriter.writeCharacters(pm->seed());
             xmlWriter.writeEndElement(); 
 
         xmlWriter.writeEndElement();
 
         xmlWriter.writeStartElement("NoteModifiers");
             xmlWriter.writeStartElement("DefaultModifiers");	
-                std::map<string, bool>::iterator iter = defaultNoteModifiers.begin();
-                while (iter != defaultNoteModifiers.end()){
-                    if ((*iter).second) { xmlWriter.writeCharacters("1"); }
+                auto iter = default_note_modifiers.begin();
+                while (iter != default_note_modifiers.end()){
+                    if ((*iter)) { xmlWriter.writeCharacters("1"); }
                     else { xmlWriter.writeCharacters("0"); }
                     iter++;
-                    if (iter!= defaultNoteModifiers.end()){
+                    if (iter!= default_note_modifiers.end()){
                         xmlWriter.writeCharacters(", ");
                     }
                 }
             xmlWriter.writeEndElement();	
             /* STILL IN PROGRESS  */
             xmlWriter.writeStartElement("CustomModifiers");	
-                if (customNoteModifiers.size() !=0){
-                    std::vector<string>::iterator iter2 = customNoteModifiers.begin();
-                    while (iter2 != customNoteModifiers.end()){
+                if (pm->customnotemodifiers().size() != 0){
+                    auto iter2 = pm->customnotemodifiers().begin();
+                    while (iter2 != pm->customnotemodifiers().end()){
                         xmlWriter.writeStartElement("Modifier");	
-                        xmlWriter.writeCharacters(QString::fromStdString(*iter2));
+                        xmlWriter.writeCharacters(*iter2);
                         xmlWriter.writeEndElement();   
                         iter2 ++;  
                     }
@@ -390,8 +301,8 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("EnvelopeLibrary");
             QString stringBuffer = "";
-            if (envelopeLibraryEntries !=NULL){
-                EnvelopeLibraryEntry* envLib = envelopeLibraryEntries;
+            if (pm->envlibentries() != NULL){
+                EnvelopeLibraryEntry* envLib = pm->envlibentries();
                 int count = envLib->count();
                 stringBuffer = stringBuffer + "\n" + QString::number(count) + "\n";
                 count = 1;
@@ -442,7 +353,7 @@ void ProjectView::save(){
         xmlWriter.writeStartElement("MarkovModelLibrary");	
             /* STILL IN PROGRESS  */
             //nhi: proper Markov model handling with attributes
-            for (size_t i = 0; i < markovModels.size(); ++i) {
+            for (int i = 0; i < pm->markovmodels().size(); ++i) {
                 xmlWriter.writeStartElement("MarkovModel");
                 xmlWriter.writeAttribute("id", QString::number(i));
                 xmlWriter.writeAttribute("name", QString("Markov Model %1").arg(i));
@@ -467,47 +378,48 @@ void ProjectView::setProperties() {
         connect(projectPropertiesDialog->ui->insertFunctionButton, &QPushButton::clicked, this, &ProjectView::propertiesInsertFunction);
     }
 
-    projectPropertiesDialog->ui->titleEntry->setText(project_title);
-    projectPropertiesDialog->ui->flagEntry->setText(file_flag);
-    projectPropertiesDialog->ui->numChannelsEntry->setText(num_channels);
-    projectPropertiesDialog->ui->rateEntry->setText(sample_rate);
-    projectPropertiesDialog->ui->sizeEntry->setText(sample_size);
-    projectPropertiesDialog->ui->numThreadsEntry->setText(num_threads);
-    projectPropertiesDialog->ui->synthesisCheckBox->setCheckState(synthesis ? Qt::Checked : Qt::Unchecked);
-    projectPropertiesDialog->ui->scoreCheckBox->setCheckState(score ? Qt::Checked : Qt::Unchecked);
-    projectPropertiesDialog->ui->staffCheckBox->setCheckState(grandStaff ? Qt::Checked : Qt::Unchecked);
-    projectPropertiesDialog->ui->numStaffEntry->setText(num_staff);
-    projectPropertiesDialog->ui->particelBox->setCheckState(output_particel ? Qt::Checked : Qt::Unchecked);
-    projectPropertiesDialog->ui->topEventEntry->setText(top_event);
-    projectPropertiesDialog->ui->durationEntry->setText(duration);
+    ProjectManager *pm = Inst::get_project_manager();
+
+    projectPropertiesDialog->ui->titleEntry->setText(pm->title());
+    projectPropertiesDialog->ui->flagEntry->setText(pm->fileflag());
+    projectPropertiesDialog->ui->numChannelsEntry->setText(pm->numchannels());
+    projectPropertiesDialog->ui->rateEntry->setText(pm->samplerate());
+    projectPropertiesDialog->ui->sizeEntry->setText(pm->samplesize());
+    projectPropertiesDialog->ui->numThreadsEntry->setText(pm->numthreads());
+    projectPropertiesDialog->ui->synthesisCheckBox->setCheckState(pm->synthesis() ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->scoreCheckBox->setCheckState(pm->score() ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->staffCheckBox->setCheckState(pm->grandstaff() ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->numStaffEntry->setText(pm->numstaffs());
+    projectPropertiesDialog->ui->particelBox->setCheckState(pm->outputparticel() ? Qt::Checked : Qt::Unchecked);
+    projectPropertiesDialog->ui->topEventEntry->setText(pm->topevent());
+    projectPropertiesDialog->ui->durationEntry->setText(pm->duration());
 
  
     if (projectPropertiesDialog->exec() == QDialog::Accepted) {
         QString new_title = projectPropertiesDialog->ui->titleEntry->text();
-        file_flag = projectPropertiesDialog->ui->flagEntry->text();
-        num_channels = projectPropertiesDialog->ui->numChannelsEntry->text();
-        sample_rate = projectPropertiesDialog->ui->rateEntry->text();
-        sample_size = projectPropertiesDialog->ui->sizeEntry->text();
-        num_threads = projectPropertiesDialog->ui->numThreadsEntry->text();
-        synthesis = projectPropertiesDialog->ui->synthesisCheckBox->isChecked();
-        score = projectPropertiesDialog->ui->scoreCheckBox->isChecked();
-        grandStaff = projectPropertiesDialog->ui->staffCheckBox->isChecked();
-        num_staff = projectPropertiesDialog->ui->numStaffEntry->text();
-        output_particel = projectPropertiesDialog->ui->particelBox->isChecked();
-        top_event = projectPropertiesDialog->ui->topEventEntry->text();
-        duration = projectPropertiesDialog->ui->durationEntry->text();
+        pm->fileflag() = projectPropertiesDialog->ui->flagEntry->text();
+        pm->numchannels() = projectPropertiesDialog->ui->numChannelsEntry->text();
+        pm->samplerate() = projectPropertiesDialog->ui->rateEntry->text();
+        pm->samplerate() = projectPropertiesDialog->ui->sizeEntry->text();
+        pm->numthreads() = projectPropertiesDialog->ui->numThreadsEntry->text();
+        pm->synthesis() = projectPropertiesDialog->ui->synthesisCheckBox->isChecked();
+        pm->score() = projectPropertiesDialog->ui->scoreCheckBox->isChecked();
+        pm->grandstaff() = projectPropertiesDialog->ui->staffCheckBox->isChecked();
+        pm->numstaffs() = projectPropertiesDialog->ui->numStaffEntry->text();
+        pm->outputparticel() = projectPropertiesDialog->ui->particelBox->isChecked();
+        pm->topevent() = projectPropertiesDialog->ui->topEventEntry->text();
+        pm->duration() = projectPropertiesDialog->ui->durationEntry->text();
 
-        if (new_title != project_title) {
-            QString old_pathAndName = pathAndName;
-            QString new_pathAndName = dat_path + "/" + new_title + ".dissco";
+        if (new_title != pm->title()) {
+            QString old_pathAndName = pm->libpath();
+            QString new_pathAndName = pm->datpath() + "/" + new_title + ".dissco";
             if (QFile::rename(old_pathAndName, new_pathAndName)) {
-                pathAndName = new_pathAndName;
-                project_title = new_title;
+                pm->libpath() = new_pathAndName;
+                pm->title() = new_title;
             }
         }
 
-        modifiedButNotSaved = true;
-        modified();
+        MUtilities::modified();
         delete projectPropertiesDialog;
         projectPropertiesDialog = NULL;
     }
@@ -515,12 +427,14 @@ void ProjectView::setProperties() {
 
 void ProjectView::propertiesInsertFunction() {
     if (!projectPropertiesDialog) return;
-    FunctionGenerator* generator = new FunctionGenerator(mainWindow, functionReturnENV, duration);
+    ProjectManager *pm = Inst::get_project_manager();
+    FunctionGenerator* generator = new FunctionGenerator(mainWindow, functionReturnFloat, pm->duration());
     if (generator->exec() == QDialog::Accepted) {
         QString result = generator->getResultString();
         if (!result.isEmpty()) {
-            duration = result;
-            projectPropertiesDialog->ui->durationEntry->setText(duration);
+            ProjectManager *pm = Inst::get_project_manager();
+            pm->duration() = result;
+            projectPropertiesDialog->ui->durationEntry->setText(pm->duration());
         }
     }
     delete generator;
@@ -604,37 +518,36 @@ void ProjectView::insertObject() {
         }
         
         modifiedButNotSaved = true;
-        modified();
+        MUtilities::modified();
         delete newObject;
         newObject = NULL;
     }
 }
 
-
-/* Public function to return the path and name for Main Window */
+/*
+// Public function to return the path and name for Main Window 
 QString ProjectView::getPathAndName() {
     return pathAndName;
 }
 
-/* Function to return the default node modifiers */
+// Function to return the default node modifiers 
 std::map<std::string, bool> ProjectView::getDefaultNoteModifiers(){
   return defaultNoteModifiers;
 }
 
-/* Function to return the custom node modifiers */
+// Function to return the custom node modifiers 
 std::vector<std::string> ProjectView::getCustomNoteModifiers(){
   return customNoteModifiers;
 }
 
-/* Function called when project modified to change the Main Window title to unsaved version
-which alerts the user to save the project */
+// Function called when project modified to change the Main Window title to unsaved version which alerts the user to save the project
 void ProjectView::modified(){
   if (modifiedButNotSaved){
     mainWindow->setUnsavedTitle(pathAndName);
   }
 }
 
-/* Envelope Library Functions */
+// Envelope Library Functions 
 EnvelopeLibraryEntry* ProjectView::getEnvelopeLibraryEntries(){
 	return envelopeLibraryEntries;
 }
@@ -673,6 +586,7 @@ void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {
         curr = curr->next;
     }
 }
+*/
 //nhi: show attributes
 // void ProjectView::showAttributes(IEvent* event) { // using QString for testing
 void ProjectView::showAttributes(QString eventType, QString eventName) {

@@ -3,6 +3,8 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 
+#include "../utilities.hpp"
+
 MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     : QMainWindow(parent)
 {
@@ -76,8 +78,9 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
     activeProject = project;
     m_listModel->removeRows(0, m_listModel->rowCount());
     if (!activeProject) return;
-    auto& models = activeProject->getMarkovModels();
-    for (int i = 0; i < (int) models.size(); ++i) {
+    ProjectManager *pm = Inst::get_project_manager();
+    auto& models = pm->markovmodels();
+    for (int i = 0; i < models.size(); ++i) {
         auto item = new QStandardItem(QString::number(i));
         m_listModel->appendRow(item);
     }
@@ -85,25 +88,25 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
 
 void MarkovModelLibraryWindow::createNewModel() {
     if (!activeProject) return;
-    int newIdx = activeProject->createNewMarkovModel();
-    activeProject->modified();
+    int newIdx = MarkovUtilities::createNewMarkovModel();
+    MUtilities::modified();
     auto item = new QStandardItem(QString::number(newIdx));
     m_listModel->appendRow(item);
 }
 
 void MarkovModelLibraryWindow::duplicateModel() {
     if (currentSelection < 0 || !activeProject) return;
-    int newIdx = activeProject->duplicateMarkovModel(currentSelection);
+    int newIdx = MarkovUtilities::duplicateMarkovModel(currentSelection);
     if (newIdx < 0) return;
-    activeProject->modified();
+    MUtilities::modified();
     auto item = new QStandardItem(QString::number(newIdx));
     m_listModel->appendRow(item);
 }
 
 void MarkovModelLibraryWindow::removeModel() {
     if (currentSelection < 0 || !activeProject) return;
-    activeProject->removeMarkovModel(currentSelection);
-    activeProject->modified();
+    MarkovUtilities::removeMarkovModel(currentSelection);
+    MUtilities::modified();
     m_listModel->removeRow(currentSelection);
 }
 
@@ -114,13 +117,14 @@ void MarkovModelLibraryWindow::onSelectionChanged(const QModelIndex& index) {
 
 void MarkovModelLibraryWindow::update(int selection) {
     if (!activeProject) return;
-    auto& models = activeProject->getMarkovModels();
+    ProjectManager *pm = Inst::get_project_manager();
+    auto& models = pm->markovmodels();
     if (models.empty()) return;
 
     // Save previous
     if (currentSelection >= 0) {
         models[currentSelection].from_str(toString().toStdString());
-        activeProject->modified();
+        MUtilities::modified();
     }
     currentSelection = selection;
     auto& model = models[selection];
@@ -242,11 +246,11 @@ void MarkovModelLibraryWindow::onRightClick(const QPoint& pos) {
     m_contextMenu->exec(global);
 }
 
-void MarkovModelLibraryWindow::hideEvent(QHideEvent* event) {
-    QMainWindow::hideEvent(event);
-    if (currentSelection >= 0 && activeProject) {
-        auto& models = activeProject->getMarkovModels();
-        models[currentSelection].from_str(toString().toStdString());
-        activeProject->modified();
-    }
-}
+// void MarkovModelLibraryWindow::hideEvent(QHideEvent* event) {
+//     QMainWindow::hideEvent(event);
+//     if (currentSelection >= 0 && activeProject) {
+//         auto& models = activeProject->getMarkovModels();
+//         models[currentSelection].from_str(toString().toStdString());
+//         activeProject->modified();
+//     }
+// }
