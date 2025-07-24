@@ -99,7 +99,6 @@ void MainWindow::newFile()
     statusBar()->showMessage(tr("File created"), 2000);
 
     Project *p = Inst::get_project_manager()->build(currentFile, NULL);
-    // Inst::get_project_manager()->set_curr_project(p);
     projectView = new ProjectView(this, currentFile);
     projects.push_back(projectView);
     projectView->setProperties();
@@ -119,7 +118,6 @@ void MainWindow::openFile()
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
     if (!fileName.isEmpty()) {
         loadFile(fileName);
-        // Project *p = Inst::get_project_manager()->open();
     }
 }
 
@@ -378,6 +376,8 @@ void MainWindow::loadFile(const QString &fileName)
     currentFile = fileName;
     qDebug() << "Looking for:" << fileName;
     if (projectView == NULL) {
+        Project *p = Inst::get_project_manager()->open(currentFile, NULL);
+
         projectView = new ProjectView(this, currentFile);
         projects.push_back(projectView);
     }

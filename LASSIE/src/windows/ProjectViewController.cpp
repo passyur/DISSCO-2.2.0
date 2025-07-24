@@ -102,20 +102,6 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
     ProjectManager *pm = Inst::get_project_manager();
     qDebug() << "In PV Constructor p:" << pm->get_curr_project();
-    // pm->libpath() = _pathAndName;
-    qDebug() << "pm->title: " << pm->title();
-    qDebug() << "pm->libpath: " << pm->libpath();
-    qDebug() << "pm->fileinfo: " << pm->fileinfo();
-
-    QList<HEvent> pHevents = pm->hevents();
-    HEvent defaultTop; // &defaultTop when modifying
-    defaultTop.type = top;
-    defaultTop.name = "0";
-    pHevents.push_back(defaultTop);
-    for (HEvent item : pHevents) {
-        qDebug() << "Hevent type:" << item.type;
-        qDebug() << "Hevent name:" << item.name;
-    }
 
     mainWindow = _mainWindow;
     modifiedButNotSaved = true;
@@ -145,28 +131,23 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     noteWindow = new ObjectWindow(eventNote, this);
     meaWindow = new ObjectWindow(eventMea, this);
 
-    // Create a default top event
-    QStandardItem* defaultObjectType = new QStandardItem("Top");
-    QStandardItem* defaultObjectName = new QStandardItem(Inst::get_project_manager()->topevent());
-    paletteView->folderTop->appendRow({defaultObjectType, defaultObjectName});
-    // HEvent newEvent;
-    // newEvent.name = defaultObjectName;
-    // newEvent.type = top;
-    // project->h_events.append(newEvent);
-
-    // IEvent* newEvent = new IEvent();
-    // newEvent->setEventName("0");
-    // newEvent->setEventType(eventTop);
-    // paletteView->insertEvent(newEvent, "Top");
-
+    updatePaletteView();
 }
 
 // Function to write XML Formatting
-QString ProjectView::inlineXml(QDomDocument& doc) {
-    QString str = doc.toString();
-    str.remove(QRegularExpression("[\\n\\t\\r]+"));
-    str.replace(QRegularExpression(">\\s+<"), "><");
-    return str;
+void ProjectView::writeInlineXml(QXmlStreamWriter& xmlWriter, QString& xmlString) {
+    QDomDocument tempDoc;
+    if (tempDoc.setContent(xmlString.trimmed()) && !tempDoc.documentElement().isNull()) {
+        // Write raw XML 
+        QString str = tempDoc.toString();
+        str.remove(QRegularExpression("[\\n\\t\\r]+"));
+        str.replace(QRegularExpression(">\\s+<"), "><");
+        xmlWriter.writeCharacters("");
+        xmlWriter.device()->write(str.toUtf8());
+    } else {
+        // String/Number 
+        xmlWriter.writeCharacters(xmlString);
+    }
 }
 
 /* Function that creates and saves the xml .dissco file */
@@ -218,17 +199,7 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Duration");	
-                QDomDocument tempDoc;
-                QString duration = pm->duration();
-                if (tempDoc.setContent(duration.trimmed()) && !tempDoc.documentElement().isNull()) {
-                    // Write raw XML inside <Duration>
-                    QString durationXML = inlineXml(tempDoc);
-                    xmlWriter.writeCharacters("");
-                    xmlWriter.device()->write(durationXML.toUtf8());
-                } else {
-                    // String/Number inside <Duration>
-                    xmlWriter.writeCharacters(duration);
-                }
+                writeInlineXml(xmlWriter, pm->duration());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Synthesis");
@@ -287,6 +258,7 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();	
             /* STILL IN PROGRESS  */
             xmlWriter.writeStartElement("CustomModifiers");	
+                xmlWriter.writeCharacters("");
                 if (pm->customnotemodifiers().size() != 0){
                     auto iter2 = pm->customnotemodifiers().begin();
                     while (iter2 != pm->customnotemodifiers().end()){
@@ -353,6 +325,7 @@ void ProjectView::save(){
         xmlWriter.writeStartElement("MarkovModelLibrary");	
             /* STILL IN PROGRESS  */
             //nhi: proper Markov model handling with attributes
+            xmlWriter.writeCharacters("");
             for (int i = 0; i < pm->markovmodels().size(); ++i) {
                 xmlWriter.writeStartElement("MarkovModel");
                 xmlWriter.writeAttribute("id", QString::number(i));
@@ -364,9 +337,423 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("Events");	
             /* STILL IN PROGRESS  */
-            // xmlWriter.writeStartElement("Event");	
-            // xmlWriter.writeAttribute("orderInPalette", "-1");	
-            // xmlWriter.writeEndElement();
+            QList<HEvent>& pHevents = pm->hevents();
+            xmlWriter.writeStartElement("Event");
+            for (HEvent& item : pHevents) {
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(item.type));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("MaxChildDuration");
+                    xmlWriter.writeCharacters(item.max_child_duration);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("EDUPerBeat");
+                    xmlWriter.writeCharacters(item.edu_perbeat);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("TimeSignature");
+                    xmlWriter.writeStartElement("Entry1");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.timesig.bar_value));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry2");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.timesig.note_value));
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Tempo");
+                    xmlWriter.writeStartElement("MethodFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.tempo.method_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Prefix");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.tempo.prefix));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("NoteValue");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.tempo.note_value));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("FractionEntry1");
+                        xmlWriter.writeCharacters(item.tempo.frentry_1);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("FractionEntry2");
+                        xmlWriter.writeCharacters(item.tempo.frentry_2);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("ValueEntry");
+                        xmlWriter.writeCharacters(item.tempo.valentry);
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("NumberOfChildren");
+                    xmlWriter.writeStartElement("MethodFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.numchildren.method_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry1");
+                        xmlWriter.writeCharacters(item.numchildren.entry_1);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry2");
+                        xmlWriter.writeCharacters(item.numchildren.entry_2);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry3");
+                        xmlWriter.writeCharacters(item.numchildren.entry_3);
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("ChildEventDefinition");
+                    xmlWriter.writeStartElement("Entry1");
+                        xmlWriter.writeCharacters(item.child_event_def.entry_1);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry2");
+                        xmlWriter.writeCharacters(item.child_event_def.entry_2);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry3");
+                        xmlWriter.writeCharacters(item.child_event_def.entry_3);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("AttackSieve");
+                        xmlWriter.writeCharacters(item.child_event_def.attack_sieve);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("DurationSieve");
+                        xmlWriter.writeCharacters(item.child_event_def.duration_sieve);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("DefinitionFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.child_event_def.definition_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("StartTypeFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.child_event_def.starttype_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("DurationTypeFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.child_event_def.durationtype_flag));
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Layers");
+                for (Layer itemLayer : item.event_layers) {
+                    xmlWriter.writeStartElement("Layer");
+                        xmlWriter.writeStartElement("ByLayer");
+                            xmlWriter.writeCharacters(itemLayer.by_layer);
+                        xmlWriter.writeEndElement();
+                        xmlWriter.writeStartElement("DiscretePackages");
+                        for (Package layerPkg : itemLayer.discrete_packages) {
+                            xmlWriter.writeStartElement("Package");
+                                xmlWriter.writeStartElement("EventName");
+                                    xmlWriter.writeCharacters(layerPkg.event_name);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("EventType");
+                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("Weight");
+                                    xmlWriter.writeCharacters(layerPkg.weight);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("AttackEnvelope");
+                                    xmlWriter.writeCharacters(layerPkg.attack_envelope);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("AttackEnvelopeScale");
+                                    xmlWriter.writeCharacters(layerPkg.attackenvelope_scale);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DurationEnvelope");
+                                    xmlWriter.writeCharacters(layerPkg.duration_envelope);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DurationEnvelopeScale");
+                                    xmlWriter.writeCharacters(layerPkg.durationenvelope_scale);
+                                xmlWriter.writeEndElement();    
+                            xmlWriter.writeEndElement();
+                        }
+                        xmlWriter.writeEndElement();
+                    xmlWriter.writeEndElement();
+                }
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Spatialization");
+                        xmlWriter.writeCharacters(item.spa);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Reverb");
+                        xmlWriter.writeCharacters(item.reverb);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Filter");
+                        xmlWriter.writeCharacters(item.filter);
+                    xmlWriter.writeEndElement(); 
+                    xmlWriter.writeStartElement("Modifiers");
+                    xmlWriter.writeCharacters("");
+                    for (Modifier itemMod : item.modifiers) {
+                        xmlWriter.writeStartElement("Modifier");
+                            xmlWriter.writeStartElement("Type");
+                                xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("ApplyHow");
+                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Probability");
+                                xmlWriter.writeCharacters(itemMod.probability);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Amplitude");
+                                xmlWriter.writeCharacters(itemMod.amplitude);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Rate");
+                                xmlWriter.writeCharacters(itemMod.rate);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Width");
+                                xmlWriter.writeCharacters(itemMod.width);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("DetuneSpread");
+                                xmlWriter.writeCharacters(itemMod.detune_spread);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("DetuneDirection");
+                                xmlWriter.writeCharacters(itemMod.detune_direction);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("DetuneVelocity");
+                                xmlWriter.writeCharacters(itemMod.detune_velocity);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("GroupName");
+                                xmlWriter.writeCharacters(itemMod.group_name);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("PartialResultString");
+                                xmlWriter.writeCharacters(itemMod.partialresult_string);
+                            xmlWriter.writeEndElement();
+                        xmlWriter.writeEndElement(); 
+                    }   
+                    xmlWriter.writeEndElement(); 
+                
+            }
+            xmlWriter.writeEndElement();
+
+            /*QList<BottomEvent>& pBevents = pm->bottomevents();
+            xmlWriter.writeStartElement("Event");
+            for (BottomEvent& item : pBevents) {
+              xmlWriter.writeAttribute("orderInPalette", item.event.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(item.event.type));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.event.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("MaxChildDuration");
+                    xmlWriter.writeCharacters(item.event.max_child_duration);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("EDUPerBeat");
+                    xmlWriter.writeCharacters(item.event.edu_perbeat);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("TimeSignature");
+                    xmlWriter.writeStartElement("Entry1");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.bar_value));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry2");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.note_value));
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Tempo");
+                    xmlWriter.writeStartElement("MethodFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.tempo.method_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Prefix");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.tempo.prefix));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("NoteValue");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.tempo.note_value));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("FractionEntry1");
+                        xmlWriter.writeCharacters(item.event.tempo.frentry_1);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("FractionEntry2");
+                        xmlWriter.writeCharacters(item.event.tempo.frentry_2);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("ValueEntry");
+                        xmlWriter.writeCharacters(item.event.tempo.valentry);
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("NumberOfChildren");
+                    xmlWriter.writeStartElement("MethodFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.numchildren.method_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry1");
+                        xmlWriter.writeCharacters(item.event.numchildren.entry_1);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry2");
+                        xmlWriter.writeCharacters(item.event.numchildren.entry_2);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry3");
+                        xmlWriter.writeCharacters(item.event.numchildren.entry_3);
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("ChildEventDefinition");
+                    xmlWriter.writeStartElement("Entry1");
+                        xmlWriter.writeCharacters(item.event.child_event_def.entry_1);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry2");
+                        xmlWriter.writeCharacters(item.event.child_event_def.entry_2);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Entry3");
+                        xmlWriter.writeCharacters(item.event.child_event_def.entry_3);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("AttackSieve");
+                        xmlWriter.writeCharacters(item.event.child_event_def.attack_sieve);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("DurationSieve");
+                        xmlWriter.writeCharacters(item.event.child_event_def.duration_sieve);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("DefinitionFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.child_event_def.definition_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("StartTypeFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.child_event_def.starttype_flag));
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("DurationTypeFlag");
+                        xmlWriter.writeCharacters(QString("%1").arg(item.event.child_event_def.durationtype_flag));
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Layers");
+                for (Layer itemLayer : item.event.event_layers) {
+                    xmlWriter.writeStartElement("Layer");
+                        xmlWriter.writeStartElement("ByLayer");
+                            xmlWriter.writeCharacters(itemLayer.by_layer);
+                        xmlWriter.writeEndElement();
+                        xmlWriter.writeStartElement("DiscretePackages");
+                        for (Package layerPkg : itemLayer.discrete_packages) {
+                            xmlWriter.writeStartElement("Package");
+                                xmlWriter.writeStartElement("EventName");
+                                    xmlWriter.writeCharacters(layerPkg.event_name);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("EventType");
+                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("Weight");
+                                    xmlWriter.writeCharacters(layerPkg.weight);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("AttackEnvelope");
+                                    xmlWriter.writeCharacters(layerPkg.attack_envelope);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("AttackEnvelopeScale");
+                                    xmlWriter.writeCharacters(layerPkg.attackenvelope_scale);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DurationEnvelope");
+                                    xmlWriter.writeCharacters(layerPkg.duration_envelope);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DurationEnvelopeScale");
+                                    xmlWriter.writeCharacters(layerPkg.durationenvelope_scale);
+                                xmlWriter.writeEndElement();    
+                            xmlWriter.writeEndElement();
+                        }
+                        xmlWriter.writeEndElement();
+                    xmlWriter.writeEndElement();
+                }
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Spatialization");
+                        xmlWriter.writeCharacters(item.event.spa);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Reverb");
+                        xmlWriter.writeCharacters(item.event.reverb);
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Filter");
+                        xmlWriter.writeCharacters(item.event.filter);
+                    xmlWriter.writeEndElement(); 
+                    xmlWriter.writeStartElement("Modifiers");
+                    xmlWriter.writeCharacters("");
+                    for (Modifier itemMod : item.event.modifiers) {
+                        xmlWriter.writeStartElement("Modifier");
+                            xmlWriter.writeStartElement("Type");
+                                xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("ApplyHow");
+                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Probability");
+                                xmlWriter.writeCharacters(itemMod.probability);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Amplitude");
+                                xmlWriter.writeCharacters(itemMod.amplitude);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Rate");
+                                xmlWriter.writeCharacters(itemMod.rate);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("Width");
+                                xmlWriter.writeCharacters(itemMod.width);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("DetuneSpread");
+                                xmlWriter.writeCharacters(itemMod.detune_spread);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("DetuneDirection");
+                                xmlWriter.writeCharacters(itemMod.detune_direction);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("DetuneVelocity");
+                                xmlWriter.writeCharacters(itemMod.detune_velocity);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("GroupName");
+                                xmlWriter.writeCharacters(itemMod.group_name);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("PartialResultString");
+                                xmlWriter.writeCharacters(itemMod.partialresult_string);
+                            xmlWriter.writeEndElement();
+                        xmlWriter.writeEndElement(); 
+                    }  
+                    xmlWriter.writeEndElement(); 
+                    xmlWriter.writeStartElement("ExtraInfo");
+                        xmlWriter.writeStartElement("FrequencyInfo");
+                            xmlWriter.writeStartElement("FrequencyFlag");
+                                xmlWriter.writeCharacters(QString("%1").arg(item.extra_info.freq_info.freq_flag));
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("FrequencyContinuumFlag");
+                                xmlWriter.writeCharacters(QString("%1").arg(item.extra_info.freq_info.continuum_flag));
+                            xmlWriter.writeEndElement(); 
+                            xmlWriter.writeStartElement("FrequencyEntry1");
+                                xmlWriter.writeCharacters(item.extra_info.freq_info.entry_1);
+                            xmlWriter.writeEndElement(); 
+                            xmlWriter.writeStartElement("FrequencyEntry2");
+                                xmlWriter.writeCharacters(item.extra_info.freq_info.entry_2);
+                            xmlWriter.writeEndElement(); 
+                        xmlWriter.writeEndElement(); 
+                        xmlWriter.writeStartElement("Loudness");
+                            xmlWriter.writeCharacters(item.extra_info.loudness);
+                        xmlWriter.writeEndElement(); 
+                        xmlWriter.writeStartElement("Spatialization");
+                            xmlWriter.writeCharacters(item.extra_info.spa);
+                        xmlWriter.writeEndElement();
+                        xmlWriter.writeStartElement("Reverb");
+                            xmlWriter.writeCharacters(item.extra_info.reverb);
+                        xmlWriter.writeEndElement(); 
+                        xmlWriter.writeStartElement("Filter");
+                            xmlWriter.writeCharacters(item.extra_info.filter);
+                        xmlWriter.writeEndElement(); 
+                        xmlWriter.writeStartElement("ModifierGroup");
+                            xmlWriter.writeCharacters(item.extra_info.modifier_group);
+                        xmlWriter.writeEndElement(); 
+                        xmlWriter.writeStartElement("Modifiers");
+                        xmlWriter.writeCharacters("");
+                        for (Modifier itemMod : item.extra_info.modifiers) {
+                            xmlWriter.writeStartElement("Modifier");
+                                xmlWriter.writeStartElement("Type");
+                                    xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("ApplyHow");
+                                    xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("Probability");
+                                    xmlWriter.writeCharacters(itemMod.probability);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("Amplitude");
+                                    xmlWriter.writeCharacters(itemMod.amplitude);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("Rate");
+                                    xmlWriter.writeCharacters(itemMod.rate);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("Width");
+                                    xmlWriter.writeCharacters(itemMod.width);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DetuneSpread");
+                                    xmlWriter.writeCharacters(itemMod.detune_spread);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DetuneDirection");
+                                    xmlWriter.writeCharacters(itemMod.detune_direction);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("DetuneVelocity");
+                                    xmlWriter.writeCharacters(itemMod.detune_velocity);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("GroupName");
+                                    xmlWriter.writeCharacters(itemMod.group_name);
+                                xmlWriter.writeEndElement();
+                                xmlWriter.writeStartElement("PartialResultString");
+                                    xmlWriter.writeCharacters(itemMod.partialresult_string);
+                                xmlWriter.writeEndElement();
+                            xmlWriter.writeEndElement(); 
+                        }  
+                        xmlWriter.writeEndElement(); 
+                    xmlWriter.writeEndElement(); 
+                
+            }
+            xmlWriter.writeEndElement();*/
+
         xmlWriter.writeEndElement();
     xmlWriter.writeEndElement();
     file.close();
@@ -407,7 +794,7 @@ void ProjectView::setProperties() {
         pm->grandstaff() = projectPropertiesDialog->ui->staffCheckBox->isChecked();
         pm->numstaffs() = projectPropertiesDialog->ui->numStaffEntry->text();
         pm->outputparticel() = projectPropertiesDialog->ui->particelBox->isChecked();
-        pm->topevent() = projectPropertiesDialog->ui->topEventEntry->text();
+        QString new_topevent = projectPropertiesDialog->ui->topEventEntry->text();
         pm->duration() = projectPropertiesDialog->ui->durationEntry->text();
 
         if (new_title != pm->title()) {
@@ -417,6 +804,24 @@ void ProjectView::setProperties() {
                 pm->libpath() = new_pathAndName;
                 pm->title() = new_title;
             }
+        }
+
+        if (new_topevent != pm->topevent()) {
+            QList<HEvent>& pHevents = pm->hevents();
+            for (HEvent &item : pHevents) {
+                if (item.name == pm->topevent() && item.type == top) {
+                    item.name = new_topevent;
+                    break;
+                }
+            }
+            for (int row = 0; row < paletteView->folderTop->rowCount(); row++) {
+                QStandardItem* oldTopName = paletteView->folderTop->child(row, 1);
+                if (oldTopName && oldTopName->text() == pm->topevent()) {
+                    oldTopName->setText(new_topevent);
+                    break;
+                }
+            }
+            pm->topevent() = projectPropertiesDialog->ui->topEventEntry->text();
         }
 
         MUtilities::modified();
@@ -446,76 +851,157 @@ void ProjectView::insertObject() {
     }
 
     if (newObject->exec() == QDialog::Accepted) {
+        ProjectManager *pm = Inst::get_project_manager();
+    
         if (newObject->ui->buttonTop->isChecked()) {
+            QList<HEvent>& eventList = pm->hevents();
+            HEvent newObj = {};
+            newObj.type = top;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Top");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderTop->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonHigh->isChecked()) {
+            QList<HEvent>& eventList = pm->hevents();
+            HEvent newObj = {};
+            newObj.type = high;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("High");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderHigh->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonMid->isChecked()) {
+            QList<HEvent>& eventList = pm->hevents();
+            HEvent newObj = {};
+            newObj.type = mid;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Mid");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderMid->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonLow->isChecked()) {
+            QList<HEvent>& eventList = pm->hevents();
+            HEvent newObj = {};
+            newObj.type = low;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Low");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderLow->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonBottom->isChecked()) {
+            QList<BottomEvent>& eventList = pm->bottomevents();
+            BottomEvent newObj = {};
+            newObj.event.type = bottom;
+            newObj.event.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Bottom");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderBottom->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonSpectrum->isChecked()) {
+            QList<SpectrumEvent>& eventList = pm->spectrumevents();
+            SpectrumEvent newObj;
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Spectrum");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonNote->isChecked()) {
+            QList<NoteEvent>& eventList = pm->noteevents();
+            NoteEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Note");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderNote->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonEnv->isChecked()) {
+            QList<EnvelopeEvent>& eventList = pm->envelopeevents();
+            EnvelopeEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Envelope");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderEnv->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonSiv->isChecked()) {
+            QList<SieveEvent>& eventList = pm->sieveevents();
+            SieveEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Sieve");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderSiv->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonSpa->isChecked()) {
+            QList<SpaEvent>& eventList = pm->spaevents();
+            SpaEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Spatialization");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderSpa->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonPat->isChecked()) {
+            QList<PatternEvent>& eventList = pm->patternevents();
+            PatternEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Pattern");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderPat->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonRev->isChecked()) {
+            QList<ReverbEvent>& eventList = pm->reverbevents();
+            ReverbEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Reverb");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderRev->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonFil->isChecked()) {
+            QList<FilterEvent>& eventList = pm->filterevents();
+            FilterEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = newObject->ui->objNameEntry->text();
+            eventList.push_back(newObj);
+
             QStandardItem* newObjectType = new QStandardItem("Filter");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderFil->appendRow({newObjectType, newObjectName});
         }
-        else if (newObject->ui->buttonMea->isChecked()) {
+        // Commented out because no structs for mea event yet
+        /* else if (newObject->ui->buttonMea->isChecked()) {
             QStandardItem* newObjectType = new QStandardItem("Measurement");
             QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
             paletteView->folderMea->appendRow({newObjectType, newObjectName});
-        }
+        } */
         
         modifiedButNotSaved = true;
         MUtilities::modified();
@@ -524,69 +1010,96 @@ void ProjectView::insertObject() {
     }
 }
 
-/*
-// Public function to return the path and name for Main Window 
-QString ProjectView::getPathAndName() {
-    return pathAndName;
-}
+void ProjectView::updatePaletteView() {
 
-// Function to return the default node modifiers 
-std::map<std::string, bool> ProjectView::getDefaultNoteModifiers(){
-  return defaultNoteModifiers;
-}
-
-// Function to return the custom node modifiers 
-std::vector<std::string> ProjectView::getCustomNoteModifiers(){
-  return customNoteModifiers;
-}
-
-// Function called when project modified to change the Main Window title to unsaved version which alerts the user to save the project
-void ProjectView::modified(){
-  if (modifiedButNotSaved){
-    mainWindow->setUnsavedTitle(pathAndName);
-  }
-}
-
-// Envelope Library Functions 
-EnvelopeLibraryEntry* ProjectView::getEnvelopeLibraryEntries(){
-	return envelopeLibraryEntries;
-}
-EnvelopeLibraryEntry* ProjectView::createNewEnvelope(){
-    if (envelopeLibraryEntries == NULL) {
-        envelopeLibraryEntries = new EnvelopeLibraryEntry(1);
-        return envelopeLibraryEntries;
-    } else {
-        return envelopeLibraryEntries->createNewEnvelope();
-    }
-}
-EnvelopeLibraryEntry* ProjectView::duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope) {
-    if (envelopeLibraryEntries != NULL) {
-        return envelopeLibraryEntries->duplicateEnvelope(_originalEnvelope);
-    } else { return NULL; }
-}
-// nhi: delete envelope
-void ProjectView::deleteEnvelope(EnvelopeLibraryEntry* toDelete) {
-    if (!envelopeLibraryEntries || !toDelete) return;
-    if (envelopeLibraryEntries == toDelete) {
-        EnvelopeLibraryEntry* next = envelopeLibraryEntries->next;
-        if (next) next->prev = nullptr;
-        delete envelopeLibraryEntries;
-        envelopeLibraryEntries = next;
-        return;
-    }
-    EnvelopeLibraryEntry* curr = envelopeLibraryEntries;
-    while (curr && curr->next) {
-        if (curr->next == toDelete) {
-            EnvelopeLibraryEntry* del = curr->next;
-            curr->next = del->next;
-            if (del->next) del->next->prev = curr;
-            delete del;
-            return;
+    ProjectManager *pm = Inst::get_project_manager();
+    
+    QList<HEvent>& pHevents = pm->hevents();
+    for (HEvent &item : pHevents) {
+        QString itemName = item.name;
+        QStandardItem* newObjectName = new QStandardItem(itemName);
+        if (item.type == top) {
+            QStandardItem* newObjectType = new QStandardItem("Top");
+            paletteView->folderTop->appendRow({newObjectType, newObjectName});
         }
-        curr = curr->next;
+        else if (item.type == high) {
+            QStandardItem* newObjectType = new QStandardItem("High");
+            paletteView->folderHigh->appendRow({newObjectType, newObjectName});
+        }
+        else if (item.type == mid) {
+            QStandardItem* newObjectType = new QStandardItem("Mid");
+            paletteView->folderMid->appendRow({newObjectType, newObjectName});
+        }
+        else if (item.type == low) {
+            QStandardItem* newObjectType = new QStandardItem("Low");
+            paletteView->folderLow->appendRow({newObjectType, newObjectName});
+        }
     }
+
+    QList<BottomEvent>& pBevents = pm->bottomevents();
+    for (BottomEvent &item : pBevents) {
+        QStandardItem* newObjectName = new QStandardItem(item.event.name);
+        QStandardItem* newObjectType = new QStandardItem("Bottom");
+        paletteView->folderBottom->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<SpectrumEvent>& pSpeEvents = pm->spectrumevents();
+    for (SpectrumEvent &item : pSpeEvents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Spectrum");
+        paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<NoteEvent>& pNevents = pm->noteevents();
+    for (NoteEvent &item : pNevents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Note");
+        paletteView->folderNote->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
+    for (EnvelopeEvent &item : pEevents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Envelope");
+        paletteView->folderEnv->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<SieveEvent>& pSivEvents = pm->sieveevents();
+    for (SieveEvent &item : pSivEvents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Sieve");
+        paletteView->folderSiv->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<SpaEvent>& pSpaEvents = pm->spaevents();
+    for (SpaEvent &item : pSpaEvents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Spatialization");
+        paletteView->folderSpa->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<PatternEvent>& pPevents = pm->patternevents();
+    for (PatternEvent &item : pPevents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Pattern");
+        paletteView->folderPat->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<ReverbEvent>& pRevents = pm->reverbevents();
+    for (ReverbEvent &item : pRevents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Reverb");
+        paletteView->folderRev->appendRow({newObjectType, newObjectName});
+    }
+
+    QList<FilterEvent>& pFevents = pm->filterevents();
+    for (FilterEvent &item : pFevents) {
+        QStandardItem* newObjectName = new QStandardItem(item.name);
+        QStandardItem* newObjectType = new QStandardItem("Filter");
+        paletteView->folderFil->appendRow({newObjectType, newObjectName});
+    }   
 }
-*/
+
 //nhi: show attributes
 // void ProjectView::showAttributes(IEvent* event) { // using QString for testing
 void ProjectView::showAttributes(QString eventType, QString eventName) {

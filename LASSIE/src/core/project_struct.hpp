@@ -176,7 +176,7 @@ class ProjectManager : public QObject {
         QList<ReverbEvent>& reverbevents() { return curr_project_->reverb_events; }
         QList<FilterEvent>& filterevents() { return curr_project_->filter_events; }
 
-        EnvelopeLibraryEntry* envlibentries() { return curr_project_->elentry; }
+        EnvelopeLibraryEntry*& envlibentries() { return curr_project_->elentry; }
 #ifdef MARKOV
         QList<MarkovModel<float>>& markovmodels() { return curr_project_->markovModels; }
 #endif

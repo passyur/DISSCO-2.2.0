@@ -9,7 +9,7 @@
 #include "../core/EnvelopeLibraryEntry.hpp"
 #include "../../CMOD/src/Markov.h"
 
-#include <QDomDocument>
+#include <QXmlStreamWriter>
 
 class MainWindow;
 class EnvelopeLibraryEntry;
@@ -28,7 +28,7 @@ class ProjectView : public QObject {
 
         /* function to write to the xml .dissco file */
         void save();
-        QString inlineXml(QDomDocument& doc);
+        void writeInlineXml(QXmlStreamWriter& xmlWriter, QString& xmlString);
 
         /* set properties pop up function */
         void setProperties();
@@ -37,32 +37,14 @@ class ProjectView : public QObject {
         void insertObject();   
 
          /* functions for modifying the Envelope list */
-        EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
-        EnvelopeLibraryEntry* createNewEnvelope();
-        EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);
-        void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
-        /*
-        // nhi: Markov model methods
-        std::vector<MarkovModel<float>>& getMarkovModels() { return markovModels; }
-        int createNewMarkovModel() { 
-            markovModels.push_back(MarkovModel<float>()); 
-            return markovModels.size() - 1; 
-        }
-        int duplicateMarkovModel(int idx) { 
-            if (idx >= 0 && idx < (int) markovModels.size()) {
-                markovModels.push_back(markovModels[idx]); 
-                return markovModels.size() - 1;
-            }
-            return -1;
-        }
-        void removeMarkovModel(int idx) { 
-            if (idx >= 0 && idx < (int) markovModels.size()) {
-                markovModels.erase(markovModels.begin() + idx);
-            }
-        }*/
+        // EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
+        // EnvelopeLibraryEntry* createNewEnvelope();
+        // EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);
+        // void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
         // ObjectWindow and Palette methods
         PaletteViewController* getPalette() { return paletteView; }
+        void updatePaletteView();
         void showAttributes(QString eventType, QString eventName);
         //void showAttributes(class IEvent* event);
 
