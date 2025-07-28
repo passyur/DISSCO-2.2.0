@@ -7,12 +7,8 @@
 #include <QHash>
 #include <QObject>
 #include "event_struct.hpp"
-#define ENVELOPE
 #include "EnvelopeLibraryEntry.hpp"
-#define MARKOV
-#ifdef MARKOV
 #include "MarkovModel.h"
-#endif
 
 #include <QFile>
 #include <QFileInfo>
@@ -49,7 +45,7 @@ class Project : public QObject {
          *  \returns 
         **/
         Project(const QString& _title = QString(), const QByteArray& _id = QByteArray());
-        void parseEvents(xercesc::DOMElement *event_start);
+        void parseEvent(xercesc::DOMElement *event_start);
         /* the *.dissco file */
         QFileInfo fileinfo;
         QByteArray id;
@@ -89,11 +85,10 @@ class Project : public QObject {
         QList<PatternEvent> pattern_events;
         QList<ReverbEvent> reverb_events;
         QList<FilterEvent> filter_events;
+
         EnvelopeLibraryEntry *elentry = nullptr;
-#ifdef MARKOV
-        QList<MarkovModel<float>> markovModels;
-#endif
-        // QList<IEvent*> events;
+        QList<MarkovModel<float>> markov_models;
+
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
         /* dict of known default modifiers */
@@ -176,9 +171,8 @@ class ProjectManager : public QObject {
         QList<FilterEvent>& filterevents() { return curr_project_->filter_events; }
 
         EnvelopeLibraryEntry* envlibentries() { return curr_project_->elentry; }
-#ifdef MARKOV
-        QList<MarkovModel<float>>& markovmodels() { return curr_project_->markovModels; }
-#endif
+        QList<MarkovModel<float>>& markovmodels() { return curr_project_->markov_models; }
+        
         QList<QString>& customnotemodifiers() { return curr_project_->custom_note_modifiers; }
 #ifdef TABEDITOR
         QList<Project*> get_projects() { return project_hash_.values(); }

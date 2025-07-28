@@ -95,17 +95,18 @@ namespace XercesParser {
 
     Layer parseForLayer(DOMElement *layer_el){
         Layer layer; 
-        layer_el = layer_el->getFirstElementChild();
-        layer.by_layer = getFunctionString(layer_el);
+        DOMElement *bylayer_el = layer_el->getFirstElementChild();
+        layer.by_layer = getFunctionString(bylayer_el);
 
-        DOMElement *package_el = layer_el->getNextElementSibling()->getFirstElementChild();
-        QList<Package> discrete_packages;
-        while(package_el != nullptr){
-            Package package = parseForPackage(package_el);
-            discrete_packages.append(package);
-            package_el = package_el->getNextElementSibling();
+        DOMElement *package_el = bylayer_el->getNextElementSibling();
+        if(package_el != nullptr){
+            package_el = package_el->getFirstElementChild();
+            while(package_el != nullptr){
+                Package package = parseForPackage(package_el);
+                layer.discrete_packages.append(package);
+                package_el = package_el->getNextElementSibling();
+            }
         }
-        
         return layer;
     }
 
@@ -126,7 +127,7 @@ namespace XercesParser {
         DOMElement *noteval_el = barval_el->getNextElementSibling();
         event.timesig.note_value = getFunctionString(noteval_el).toUInt();
 
-        DOMElement *tempo_el = noteval_el->getNextElementSibling();
+        DOMElement *tempo_el = timesig_el->getNextElementSibling();
         DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
         event.tempo.method_flag = (Numchildrenflag)getFunctionString(tempomethodflag_el).toUInt();
 
@@ -186,7 +187,7 @@ namespace XercesParser {
         DOMElement *layers_el = childdef_el->getNextElementSibling();
         DOMElement *layer_el = layers_el->getFirstElementChild();
         while(layer_el != nullptr){
-            Layer layer = parseForLayer(layers_el);
+            Layer layer = parseForLayer(layer_el);
             event.event_layers.append(layer);
             layer_el = layer_el->getNextElementSibling();
         }
@@ -424,12 +425,12 @@ namespace XercesParser {
     }
 }
 
-void Project::parseEvents(xercesc::DOMElement *event_start){
+void Project::parseEvent(xercesc::DOMElement *event_start){
     using namespace xercesc;
     XMLCh *xmldata = XMLString::transcode("orderInPalette");
     std::string orderinpalette = XMLString::transcode(event_start->getAttribute(xmldata));
     XMLString::release(&xmldata);
-    
+
     DOMElement *eventtype_el = event_start->getFirstElementChild();
     DOMCharacterData* textdata = (DOMCharacterData*)eventtype_el->getFirstChild();
     char* buffer = XMLString::transcode(textdata->getData());
@@ -518,6 +519,7 @@ void Project::parseEvents(xercesc::DOMElement *event_start){
             qDebug() << "ERROR: parsing event gave event type outside defined types";
     }
 }
+
 void ProjectManager::parse(Project *p, const QString& filepath){
     using namespace xercesc;
     XMLPlatformUtils::Initialize();
@@ -538,12 +540,11 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     DOMElement* element = configuration->getFirstElementChild();
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
-    qDebug() << "Fileflag: " << p->file_flag;
 
     //topEvent
     element = element->getNextElementSibling();
     p->top_event = XercesParser::getFunctionString(element);
-    qDebug() << "Top event: " << p->top_event;
+
     // pieceStartTime
     element = element->getNextElementSibling(); //skipped
 
@@ -640,7 +641,6 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     XMLString::release(&buffer);
     file.close();
 
-#ifdef ENVELOPE
     EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
     envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
     std::string deleteCommand = "rm " + fileString;
@@ -666,83 +666,50 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     }
 
     delete envelopeLibrary;
-#endif
     qDebug() << "Passed envelopes";
 
-    DOMElement* currentElement = envlibelement;
+    DOMElement *currentElement = envlibelement;
 
-    DOMElement* markovModelLibraryElement = envlibelement->getNextElementSibling();
-// #ifdef MARKOV
-//     std::string tagName = buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
-//     XMLString::release(&buffer);
-//     if (tagName == "MarkovModelLibrary") {
-//         currentElement = markovModelLibraryElement;
-//         DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
-//         std::string data = buffer = XMLString::transcode(text->getWholeText());
-//         XMLString::release(&buffer);
+    /// \todo remove need for that "MarkovModelLibrary" check
+    DOMElement *markovModelLibraryElement = envlibelement->getNextElementSibling();
+    buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
+    std::string tagName = std::string(buffer);
+    XMLString::release(&buffer);
+    if (tagName == "MarkovModelLibrary") {
+        currentElement = markovModelLibraryElement;
+        DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
+        std::string data = buffer = XMLString::transcode(text->getWholeText());
+        XMLString::release(&buffer);
 
-//         // QTextStream ts(QString::fromStdString(data));
+        std::stringstream ss(data);
+        // read the number of models
+        long long size;
+        ss >> size;
+        p->markov_models.resize(size);
+         // read individual models
+        std::string modelText, line;
+        std::getline(ss, line, '\n');
+        for (int i = 0; i < size; i++) {
+            std::getline(ss, line, '\n');
+            modelText = line + '\n';
+            std::getline(ss, line, '\n');
+            modelText += line + '\n';
+            std::getline(ss, line, '\n');
+            modelText += line + '\n';
+            std::getline(ss, line, '\n');
+            modelText += line;
 
-//         // // read the number of models
-//         // int size;
-//         // ts >> size;
-//         // p->markovModels.resize(size);
+            (p->markov_models[i]).from_str(modelText);
+        }
+    }
 
-//         // // read individual models
-//         // std::string modelText;
-//         // QString line;
-//         // getline(ts, line, '\n');
-//         // for (int i = 0; i < size; i++) {
-//         //     line = ts.readLine();
-//         //     modelText = line + '\n';
-//         //     for (int j = 0; j < 1; j++){
-//         //         line = ts.readLine();
-//         //         modelText += line + '\n';
-//         //     }
-//         //     line = ts.readLine();
-//         //     modelText += line;
-//         std::stringstream ss(data);
-
-//         // read the number of models
-//         long long size;
-//         ss >> size;
-//         p->markovModels.resize(size);
-
-//         // read individual models
-//         std::string modelText, line;
-//         getline(ss, line, '\n');
-//         for (int i = 0; i < size; i++) {
-//             getline(ss, line, '\n');
-//             modelText = line + '\n';
-//             getline(ss, line, '\n');
-//             modelText += line + '\n';
-//             getline(ss, line, '\n');
-//             modelText += line + '\n';
-//             getline(ss, line, '\n');
-//             modelText += line;
-
-//             (p->markovModels[i]).from_str(modelText);
-//         }
-//     }
-// #endif
-    qDebug() << "Skipped markov";
-
-#define EVENTS
-#ifdef EVENTS
     DOMElement *domEvents = currentElement->getNextElementSibling();
     DOMElement *eventElement = domEvents->getFirstElementChild();
 
     while (eventElement != NULL){
-        p->parseEvents(eventElement);
+        p->parseEvent(eventElement);
         eventElement = eventElement->getNextElementSibling();
     }
-
-    // auto eventsIter = p->events.begin();
-    // for (; eventsIter != p->events.end(); ++eventsIter){
-    //     (*eventsIter)->link(p);
-    // }
-#endif
-    qDebug() << "Passed events";
 }
 
 
