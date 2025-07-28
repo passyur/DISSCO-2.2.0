@@ -264,10 +264,10 @@ void ObjectWindow::numOfObjectsChange() {
 
 ObjectWindowObjectPackage::ObjectWindowObjectPackage(ProjectView* _projectView)
     : QPushButton(nullptr),
-      projectView(_projectView),
       prev(nullptr),
       next(nullptr),
-      ievent(nullptr)
+      ievent(nullptr),
+      projectView(_projectView)
 {
     // When pressed, show this event's attributes
     connect(this, &QPushButton::pressed, this, &ObjectWindowObjectPackage::showContent);
