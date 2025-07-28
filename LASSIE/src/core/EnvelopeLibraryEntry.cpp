@@ -1,5 +1,4 @@
 #include "EnvelopeLibraryEntry.hpp"
-#include <cstdio>
 
 /**
  * @brief Default constructor: sets up a linear, flexible segment
