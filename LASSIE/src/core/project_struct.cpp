@@ -45,14 +45,20 @@ namespace XercesParser {
         return QString::fromStdString(returnString);
     }
 
-    /// @brief For use when transcoding a basic `std::string` from a `DOMElement*` and assigning it to a `std::string` variable.
+    /// @brief For use when transcoding a basic `std::string` from a `DOMElement*` and assigning it to a `QString` variable.
     /// @param element the DOMElement to be transcoded from
-    /// @param lhs the string to be assigned to
-    inline void transcodeAndAssign(DOMElement *element, QString& lhs){
+    /// @param lhs the QString to be assigned to
+    /// @note Performs the conversion from `std::string` to `QString` inside the function;
+    /// @note If the `DOMCharacterData*` from `element`'s first child is `null`, sets `lhs` to the empty string
+    inline void transcodeToQString(DOMElement *element, QString& lhs){
         DOMCharacterData *textdata = (DOMCharacterData*)(element->getFirstChild());
-        char *buffer = XMLString::transcode(textdata->getData());;
-        lhs = QString::fromStdString(buffer);
-        XMLString::release(&buffer);
+        if(textdata != nullptr){
+            char *buffer = XMLString::transcode(textdata->getData());;
+            lhs = QString::fromStdString(buffer);
+            XMLString::release(&buffer);     
+        }else{
+            lhs = "";
+        }
     }
 
     /// @brief Parse a `DOMElement` corresponding to a discrete package and return a corresponding `Package`
@@ -61,7 +67,7 @@ namespace XercesParser {
     inline Package parseForPackage(DOMElement *package_el){
         Package package;
         DOMElement *name_el = package_el->getFirstElementChild();
-        transcodeAndAssign(name_el, package.event_name);
+        transcodeToQString(name_el, package.event_name);
 
         DOMElement *type_el = name_el->getNextElementSibling();
         DOMCharacterData *textdata = (DOMCharacterData*)(type_el->getFirstChild());
@@ -70,19 +76,19 @@ namespace XercesParser {
         XMLString::release(&buffer);
 
         DOMElement *weight_el = type_el->getNextElementSibling();
-        transcodeAndAssign(weight_el, package.weight);
+        transcodeToQString(weight_el, package.weight);
 
         DOMElement *attackenv_el = weight_el->getNextElementSibling();
-        transcodeAndAssign(attackenv_el, package.attack_envelope);
+        transcodeToQString(attackenv_el, package.attack_envelope);
 
         DOMElement *attackenvscale_el = attackenv_el->getNextElementSibling();
-        transcodeAndAssign(attackenvscale_el, package.attackenvelope_scale);
+        transcodeToQString(attackenvscale_el, package.attackenvelope_scale);
 
         DOMElement *durationenv_el = attackenvscale_el->getNextElementSibling();
-        transcodeAndAssign(durationenv_el, package.duration_envelope);
+        transcodeToQString(durationenv_el, package.duration_envelope);
 
         DOMElement *durationenvscale_el = durationenv_el->getNextElementSibling();
-        transcodeAndAssign(durationenvscale_el, package.durationenvelope_scale);    
+        transcodeToQString(durationenvscale_el, package.durationenvelope_scale);    
 
         return package;
     }
@@ -105,7 +111,7 @@ namespace XercesParser {
 
     DOMElement* parseHEvent(DOMElement *eventtype_el, HEvent& event){
         DOMElement *name_el = eventtype_el->getNextElementSibling();
-        transcodeAndAssign(name_el, event.name);
+        transcodeToQString(name_el, event.name);
 
         DOMElement *maxchilddur_el = name_el->getNextElementSibling();
         event.max_child_duration = getFunctionString(maxchilddur_el);
