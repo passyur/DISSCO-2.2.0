@@ -75,7 +75,10 @@ class Project : public QObject {
         bool empty_project = false;
 
         /* event details */
-        QList<HEvent> h_events;
+        QList<HEvent> top_events;
+        QList<HEvent> high_events;
+        QList<HEvent> mid_events;
+        QList<HEvent> low_events;
         QList<BottomEvent> bottom_events;
         QList<SpectrumEvent> spectrum_events;
         QList<NoteEvent> note_events;
@@ -159,7 +162,10 @@ class ProjectManager : public QObject {
         bool& outputparticel()      { return curr_project_->output_particel; }
         bool& emptyproject()        { return curr_project_->empty_project; }
 
-        QList<HEvent>& hevents() { return curr_project_->h_events; }
+        QList<HEvent>& topevents() { return curr_project_->top_events; }
+        QList<HEvent>& highevents() { return curr_project_->high_events; }
+        QList<HEvent>& midevents() { return curr_project_->mid_events; }
+        QList<HEvent>& lowevents() { return curr_project_->low_events; }
         QList<BottomEvent>& bottomevents() { return curr_project_->bottom_events; }
         QList<SpectrumEvent>& spectrumevents() { return curr_project_->spectrum_events; }
         QList<NoteEvent>& noteevents() { return curr_project_->note_events; }

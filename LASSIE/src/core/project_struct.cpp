@@ -447,8 +447,20 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             eh.type = type;
             DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eh);
             XercesParser::parseEndOfHEvent(filter_el, eh);
-            h_events.append(eh);
-            break;
+            switch(type){
+                case top: 
+                    top_events.append(eh); 
+                    break;
+                case high:
+                    high_events.append(eh);
+                    break;
+                case mid:
+                    mid_events.append(eh);
+                    break;
+                case low:
+                    low_events.append(eh);
+                    break;
+            }
         }
         case bottom: {
             BottomEvent eb;
