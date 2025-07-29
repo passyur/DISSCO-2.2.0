@@ -45,14 +45,20 @@ namespace XercesParser {
         return QString::fromStdString(returnString);
     }
 
-    /// @brief For use when transcoding a basic `std::string` from a `DOMElement*` and assigning it to a `std::string` variable.
+    /// @brief For use when transcoding a basic `std::string` from a `DOMElement*` and assigning it to a `QString` variable.
     /// @param element the DOMElement to be transcoded from
-    /// @param lhs the string to be assigned to
-    inline void transcodeAndAssign(DOMElement *element, QString& lhs){
+    /// @param lhs the QString to be assigned to
+    /// @note Performs the conversion from `std::string` to `QString` inside the function;
+    /// @note If the `DOMCharacterData*` from `element`'s first child is `null`, sets `lhs` to the empty string
+    inline void transcodeToQString(DOMElement *element, QString& lhs){
         DOMCharacterData *textdata = (DOMCharacterData*)(element->getFirstChild());
-        char *buffer = XMLString::transcode(textdata->getData());;
-        lhs = QString::fromStdString(buffer);
-        XMLString::release(&buffer);
+        if(textdata != nullptr){
+            char *buffer = XMLString::transcode(textdata->getData());;
+            lhs = QString::fromStdString(buffer);
+            XMLString::release(&buffer);     
+        }else{
+            lhs = "";
+        }
     }
 
     /// @brief Parse a `DOMElement` corresponding to a discrete package and return a corresponding `Package`
@@ -61,7 +67,7 @@ namespace XercesParser {
     inline Package parseForPackage(DOMElement *package_el){
         Package package;
         DOMElement *name_el = package_el->getFirstElementChild();
-        transcodeAndAssign(name_el, package.event_name);
+        transcodeToQString(name_el, package.event_name);
 
         DOMElement *type_el = name_el->getNextElementSibling();
         DOMCharacterData *textdata = (DOMCharacterData*)(type_el->getFirstChild());
@@ -70,42 +76,43 @@ namespace XercesParser {
         XMLString::release(&buffer);
 
         DOMElement *weight_el = type_el->getNextElementSibling();
-        transcodeAndAssign(weight_el, package.weight);
+        transcodeToQString(weight_el, package.weight);
 
         DOMElement *attackenv_el = weight_el->getNextElementSibling();
-        transcodeAndAssign(attackenv_el, package.attack_envelope);
+        transcodeToQString(attackenv_el, package.attack_envelope);
 
         DOMElement *attackenvscale_el = attackenv_el->getNextElementSibling();
-        transcodeAndAssign(attackenvscale_el, package.attackenvelope_scale);
+        transcodeToQString(attackenvscale_el, package.attackenvelope_scale);
 
         DOMElement *durationenv_el = attackenvscale_el->getNextElementSibling();
-        transcodeAndAssign(durationenv_el, package.duration_envelope);
+        transcodeToQString(durationenv_el, package.duration_envelope);
 
         DOMElement *durationenvscale_el = durationenv_el->getNextElementSibling();
-        transcodeAndAssign(durationenvscale_el, package.durationenvelope_scale);    
+        transcodeToQString(durationenvscale_el, package.durationenvelope_scale);    
 
         return package;
     }
 
     Layer parseForLayer(DOMElement *layer_el){
         Layer layer; 
-        layer_el = layer_el->getFirstElementChild();
-        layer.by_layer = getFunctionString(layer_el);
+        DOMElement *bylayer_el = layer_el->getFirstElementChild();
+        layer.by_layer = getFunctionString(bylayer_el);
 
-        DOMElement *package_el = layer_el->getNextElementSibling()->getFirstElementChild();
-        QList<Package> discrete_packages;
-        while(package_el != nullptr){
-            Package package = parseForPackage(package_el);
-            discrete_packages.append(package);
-            package_el = package_el->getNextElementSibling();
+        DOMElement *package_el = bylayer_el->getNextElementSibling();
+        if(package_el != nullptr){
+            package_el = package_el->getFirstElementChild();
+            while(package_el != nullptr){
+                Package package = parseForPackage(package_el);
+                layer.discrete_packages.append(package);
+                package_el = package_el->getNextElementSibling();
+            }
         }
-        
         return layer;
     }
 
     DOMElement* parseHEvent(DOMElement *eventtype_el, HEvent& event){
         DOMElement *name_el = eventtype_el->getNextElementSibling();
-        transcodeAndAssign(name_el, event.name);
+        transcodeToQString(name_el, event.name);
 
         DOMElement *maxchilddur_el = name_el->getNextElementSibling();
         event.max_child_duration = getFunctionString(maxchilddur_el);
@@ -180,7 +187,7 @@ namespace XercesParser {
         DOMElement *layers_el = childdef_el->getNextElementSibling();
         DOMElement *layer_el = layers_el->getFirstElementChild();
         while(layer_el != nullptr){
-            Layer layer = parseForLayer(layers_el);
+            Layer layer = parseForLayer(layer_el);
             event.event_layers.append(layer);
             layer_el = layer_el->getNextElementSibling();
         }
@@ -352,10 +359,7 @@ namespace XercesParser {
     }
 
     void parseEnvelopeEvent(DOMElement* event_el, EnvelopeEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -363,10 +367,7 @@ namespace XercesParser {
     }
 
     void parseSieveEvent(DOMElement* event_el, SieveEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -374,10 +375,7 @@ namespace XercesParser {
     }
 
     void parseSpaEvent(DOMElement* event_el, SpaEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -385,10 +383,7 @@ namespace XercesParser {
     }
 
     void parsePatternEvent(DOMElement* event_el, PatternEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -396,10 +391,7 @@ namespace XercesParser {
     }
 
     void parseReverbEvent(DOMElement* event_el, ReverbEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -407,10 +399,7 @@ namespace XercesParser {
     }
 
     void parseFilterEvent(DOMElement* event_el, FilterEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -418,12 +407,12 @@ namespace XercesParser {
     }
 }
 
-void Project::parseEvents(xercesc::DOMElement *event_start){
+void Project::parseEvent(xercesc::DOMElement *event_start){
     using namespace xercesc;
     XMLCh *xmldata = XMLString::transcode("orderInPalette");
     std::string orderinpalette = XMLString::transcode(event_start->getAttribute(xmldata));
     XMLString::release(&xmldata);
-    
+
     DOMElement *eventtype_el = event_start->getFirstElementChild();
     DOMCharacterData* textdata = (DOMCharacterData*)eventtype_el->getFirstChild();
     char* buffer = XMLString::transcode(textdata->getData());
@@ -432,7 +421,6 @@ void Project::parseEvents(xercesc::DOMElement *event_start){
     qDebug() << "eventtype_el: " << eventtype_el;
     qDebug() << "event type: " << type;
 
-    void *event;
     switch(type){
         case top:
         case high:
@@ -516,6 +504,7 @@ void Project::parseEvents(xercesc::DOMElement *event_start){
             qDebug() << "ERROR: parsing event gave event type outside defined types";
     }
 }
+
 void ProjectManager::parse(Project *p, const QString& filepath){
     using namespace xercesc;
     XMLPlatformUtils::Initialize();
@@ -536,12 +525,11 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     DOMElement* element = configuration->getFirstElementChild();
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
-    qDebug() << "Fileflag: " << p->file_flag;
 
     //topEvent
     element = element->getNextElementSibling();
     p->top_event = XercesParser::getFunctionString(element);
-    qDebug() << "Top event: " << p->top_event;
+
     // pieceStartTime
     element = element->getNextElementSibling(); //skipped
 
@@ -638,7 +626,6 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     XMLString::release(&buffer);
     file.close();
 
-#ifdef ENVELOPE
     EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
     envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
     std::string deleteCommand = "rm " + fileString;
@@ -664,85 +651,54 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     }
 
     delete envelopeLibrary;
-#endif
     qDebug() << "Passed envelopes";
 
-    DOMElement* currentElement = envlibelement;
+    DOMElement *currentElement = envlibelement;
 
-    DOMElement* markovModelLibraryElement = envlibelement->getNextElementSibling();
-// #ifdef MARKOV
-//     std::string tagName = buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
-//     XMLString::release(&buffer);
-//     if (tagName == "MarkovModelLibrary") {
-//         currentElement = markovModelLibraryElement;
-//         DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
-//         std::string data = buffer = XMLString::transcode(text->getWholeText());
-//         XMLString::release(&buffer);
+    /// \todo remove need for that "MarkovModelLibrary" check
+    DOMElement *markovModelLibraryElement = envlibelement->getNextElementSibling();
+    buffer = XMLString::transcode(markovModelLibraryElement->getTagName());
+    std::string tagName = std::string(buffer);
+    XMLString::release(&buffer);
+    if (tagName == "MarkovModelLibrary") {
+        currentElement = markovModelLibraryElement;
+        DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
+        if(text != nullptr){
+            std::string data = buffer = XMLString::transcode(text->getWholeText());
+            XMLString::release(&buffer);
 
-//         // QTextStream ts(QString::fromStdString(data));
+            std::stringstream ss(data);
+            // read the number of models
+            long long size;
+            ss >> size;
+            p->markov_models.resize(size);
+            // read individual models
+            std::string modelText, line;
+            std::getline(ss, line, '\n');
+            for (int i = 0; i < size; i++) {
+                std::getline(ss, line, '\n');
+                modelText = line + '\n';
+                std::getline(ss, line, '\n');
+                modelText += line + '\n';
+                std::getline(ss, line, '\n');
+                modelText += line + '\n';
+                std::getline(ss, line, '\n');
+                modelText += line;
 
-//         // // read the number of models
-//         // int size;
-//         // ts >> size;
-//         // p->markovModels.resize(size);
+                (p->markov_models[i]).from_str(modelText);
+            }
+        }
+    }
+    qDebug() << "Passed markov";
 
-//         // // read individual models
-//         // std::string modelText;
-//         // QString line;
-//         // getline(ts, line, '\n');
-//         // for (int i = 0; i < size; i++) {
-//         //     line = ts.readLine();
-//         //     modelText = line + '\n';
-//         //     for (int j = 0; j < 1; j++){
-//         //         line = ts.readLine();
-//         //         modelText += line + '\n';
-//         //     }
-//         //     line = ts.readLine();
-//         //     modelText += line;
-//         std::stringstream ss(data);
-
-//         // read the number of models
-//         long long size;
-//         ss >> size;
-//         p->markovModels.resize(size);
-
-//         // read individual models
-//         std::string modelText, line;
-//         getline(ss, line, '\n');
-//         for (int i = 0; i < size; i++) {
-//             getline(ss, line, '\n');
-//             modelText = line + '\n';
-//             getline(ss, line, '\n');
-//             modelText += line + '\n';
-//             getline(ss, line, '\n');
-//             modelText += line + '\n';
-//             getline(ss, line, '\n');
-//             modelText += line;
-
-//             (p->markovModels[i]).from_str(modelText);
-//         }
-//     }
-// #endif
-    qDebug() << "Skipped markov";
-
-#define EVENTS
-#ifdef EVENTS
-    DOMElement *domEvents = markovModelLibraryElement->getNextElementSibling();
-    qDebug() << "domEvents: " << domEvents;
+    DOMElement *domEvents = currentElement->getNextElementSibling();
     DOMElement *eventElement = domEvents->getFirstElementChild();
     qDebug() << "eventElement: " << eventElement;
 
     while (eventElement != NULL){
-        p->parseEvents(eventElement);
+        p->parseEvent(eventElement);
         eventElement = eventElement->getNextElementSibling();
     }
-
-    // auto eventsIter = p->events.begin();
-    // for (; eventsIter != p->events.end(); ++eventsIter){
-    //     (*eventsIter)->link(p);
-    // }
-#endif
-    qDebug() << "Passed events";
 }
 
 

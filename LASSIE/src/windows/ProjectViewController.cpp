@@ -338,8 +338,8 @@ void ProjectView::save(){
         xmlWriter.writeStartElement("Events");	
             /* STILL IN PROGRESS  */
             QList<HEvent>& pHevents = pm->hevents();
-            xmlWriter.writeStartElement("Event");
             for (HEvent& item : pHevents) {
+              xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
                     xmlWriter.writeCharacters(QString("%1").arg(item.type));	
@@ -506,13 +506,12 @@ void ProjectView::save(){
                         xmlWriter.writeEndElement(); 
                     }   
                     xmlWriter.writeEndElement(); 
-                
+              xmlWriter.writeEndElement();
             }
-            xmlWriter.writeEndElement();
 
-            /*QList<BottomEvent>& pBevents = pm->bottomevents();
-            xmlWriter.writeStartElement("Event");
+            QList<BottomEvent>& pBevents = pm->bottomevents();
             for (BottomEvent& item : pBevents) {
+              xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.event.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
                     xmlWriter.writeCharacters(QString("%1").arg(item.event.type));	
@@ -638,47 +637,7 @@ void ProjectView::save(){
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Filter");
                         xmlWriter.writeCharacters(item.event.filter);
-                    xmlWriter.writeEndElement(); 
-                    xmlWriter.writeStartElement("Modifiers");
-                    xmlWriter.writeCharacters("");
-                    for (Modifier itemMod : item.event.modifiers) {
-                        xmlWriter.writeStartElement("Modifier");
-                            xmlWriter.writeStartElement("Type");
-                                xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("ApplyHow");
-                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("Probability");
-                                xmlWriter.writeCharacters(itemMod.probability);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("Amplitude");
-                                xmlWriter.writeCharacters(itemMod.amplitude);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("Rate");
-                                xmlWriter.writeCharacters(itemMod.rate);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("Width");
-                                xmlWriter.writeCharacters(itemMod.width);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("DetuneSpread");
-                                xmlWriter.writeCharacters(itemMod.detune_spread);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("DetuneDirection");
-                                xmlWriter.writeCharacters(itemMod.detune_direction);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("DetuneVelocity");
-                                xmlWriter.writeCharacters(itemMod.detune_velocity);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("GroupName");
-                                xmlWriter.writeCharacters(itemMod.group_name);
-                            xmlWriter.writeEndElement();
-                            xmlWriter.writeStartElement("PartialResultString");
-                                xmlWriter.writeCharacters(itemMod.partialresult_string);
-                            xmlWriter.writeEndElement();
-                        xmlWriter.writeEndElement(); 
-                    }  
-                    xmlWriter.writeEndElement(); 
+                    xmlWriter.writeEndElement();  
                     xmlWriter.writeStartElement("ExtraInfo");
                         xmlWriter.writeStartElement("FrequencyInfo");
                             xmlWriter.writeStartElement("FrequencyFlag");
@@ -750,9 +709,159 @@ void ProjectView::save(){
                         }  
                         xmlWriter.writeEndElement(); 
                     xmlWriter.writeEndElement(); 
-                
+              xmlWriter.writeEndElement();  
             }
-            xmlWriter.writeEndElement();*/
+
+            QList<SpectrumEvent>& pSevents = pm->spectrumevents();
+            for (SpectrumEvent& item : pSevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(sound));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("NumberOfPartials");
+                    xmlWriter.writeCharacters(item.num_partials);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Deviation");
+                    xmlWriter.writeCharacters(item.deviation);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("GenerateSpectrum");
+                    xmlWriter.writeCharacters(item.generate_spectrum);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Spectrum");
+                    for (QString partial : item.spectrum.partials) {
+                        xmlWriter.writeStartElement("Partial");
+                            writeInlineXml(xmlWriter, partial);	
+                        xmlWriter.writeEndElement();
+                    }
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<NoteEvent>& pNevents = pm->noteevents();
+            for (NoteEvent& item : pNevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(note));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("NoteInfo");
+                    xmlWriter.writeStartElement("Staffs");
+                        xmlWriter.writeCharacters(item.note_info.staffs);	
+                    xmlWriter.writeEndElement();
+                    xmlWriter.writeStartElement("Modifiers");
+                    xmlWriter.writeCharacters("");	
+                    for (QString modifier : item.note_info.modifiers) {
+                        xmlWriter.writeStartElement("Modifier");
+                            writeInlineXml(xmlWriter, modifier);	
+                        xmlWriter.writeEndElement();
+                    }
+                    xmlWriter.writeEndElement();
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
+            for (EnvelopeEvent& item : pEevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(env));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("EnvelopeBuilder");
+                    writeInlineXml(xmlWriter, item.envelope_builder);	
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<SieveEvent>& pSivevents = pm->sieveevents();
+            for (SieveEvent& item : pSivevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(sieve));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("SieveBuilder");
+                    writeInlineXml(xmlWriter, item.sieve_builder);	
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<SpaEvent>& pSpaevents = pm->spaevents();
+            for (SpaEvent& item : pSpaevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(spa));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Spatialization");
+                    writeInlineXml(xmlWriter, item.spatialization);	
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<PatternEvent>& pPevents = pm->patternevents();
+            for (PatternEvent& item : pPevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(pattern));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("PatternBuilder");
+                    writeInlineXml(xmlWriter, item.pattern_builder);	
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<ReverbEvent>& pRevents = pm->reverbevents();
+            for (ReverbEvent& item : pRevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(reverb));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Reverberation");
+                    writeInlineXml(xmlWriter, item.reverberation);	
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
+
+            QList<FilterEvent>& pFevents = pm->filterevents();
+            for (FilterEvent& item : pFevents) {
+              xmlWriter.writeStartElement("Event");
+              xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
+                xmlWriter.writeStartElement("EventType");
+                    xmlWriter.writeCharacters(QString("%1").arg(filter));	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("Name");
+                    xmlWriter.writeCharacters(item.name);	
+                xmlWriter.writeEndElement();
+                xmlWriter.writeStartElement("FilterBuilder");
+                    writeInlineXml(xmlWriter, item.filter_builder);	
+                xmlWriter.writeEndElement();
+              xmlWriter.writeEndElement();
+            }
 
         xmlWriter.writeEndElement();
     xmlWriter.writeEndElement();

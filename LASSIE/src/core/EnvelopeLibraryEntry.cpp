@@ -1,5 +1,4 @@
 #include "EnvelopeLibraryEntry.hpp"
-#include <cstdio>
 
 /**
  * @brief Default constructor: sets up a linear, flexible segment
@@ -40,8 +39,8 @@ int EnvLibEntryNode::countNumOfNodes() {
  */
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(int _number)
   : number(_number),
-    prev(nullptr),
-    next(nullptr)
+    next(nullptr),
+    prev(nullptr)
 {
   // initialize a simple two-node envelope: (0,0) → (1,0)
   head = new EnvLibEntryNode(0.0, 0.0);
@@ -60,8 +59,8 @@ EnvelopeLibraryEntry::EnvelopeLibraryEntry(int _number)
  */
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelope, int _number)
   : number(_number),
-    prev(nullptr),
-    next(nullptr)
+    next(nullptr),
+    prev(nullptr)
 {
   // duplicate linked nodes/segments from original
   EnvLibEntryNode* origNode = _originalEnvelope->head;
@@ -95,11 +94,10 @@ EnvelopeLibraryEntry::EnvelopeLibraryEntry(EnvelopeLibraryEntry* _originalEnvelo
  */
 EnvelopeLibraryEntry::EnvelopeLibraryEntry(Envelope* _envelope, int _number)
   : number(_number),
-    prev(nullptr),
-    next(nullptr)
+    next(nullptr),
+    prev(nullptr)
 {
   auto segments = _envelope->getSegments();
-  EnvLibEntryNode* prevNode = nullptr;
   EnvLibEntrySeg*  prevSeg  = nullptr;
 
   // build all but last segment
@@ -131,7 +129,6 @@ EnvelopeLibraryEntry::EnvelopeLibraryEntry(Envelope* _envelope, int _number)
       default:            seg->segmentType = envSegmentTypeLinear;      break;
     }
 
-    prevNode = node;
     prevSeg  = seg;
   }
 

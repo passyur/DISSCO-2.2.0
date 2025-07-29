@@ -26,7 +26,6 @@ qt_add_executable(LASSIE
     src/windows/ProjectPropertiesDialog.cpp src/windows/ProjectPropertiesDialog.hpp src/UI/ProjectPropertiesDialog.ui
     src/inst.hpp
     src/windows/ProjectViewController.cpp src/windows/ProjectViewController.hpp
-    # src/core/envelope_struct.cpp src/core/envelope_struct.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
     src/windows/ObjectWindow.cpp src/windows/ObjectWindow.hpp
     src/windows/PaletteViewController.cpp src/windows/PaletteViewController.hpp
