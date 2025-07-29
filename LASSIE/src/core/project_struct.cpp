@@ -678,30 +678,33 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     if (tagName == "MarkovModelLibrary") {
         currentElement = markovModelLibraryElement;
         DOMText* text = dynamic_cast<DOMText*>(markovModelLibraryElement->getFirstChild());
-        std::string data = buffer = XMLString::transcode(text->getWholeText());
-        XMLString::release(&buffer);
+        if(text != nullptr){
+            std::string data = buffer = XMLString::transcode(text->getWholeText());
+            XMLString::release(&buffer);
 
-        std::stringstream ss(data);
-        // read the number of models
-        long long size;
-        ss >> size;
-        p->markov_models.resize(size);
-         // read individual models
-        std::string modelText, line;
-        std::getline(ss, line, '\n');
-        for (int i = 0; i < size; i++) {
+            std::stringstream ss(data);
+            // read the number of models
+            long long size;
+            ss >> size;
+            p->markov_models.resize(size);
+            // read individual models
+            std::string modelText, line;
             std::getline(ss, line, '\n');
-            modelText = line + '\n';
-            std::getline(ss, line, '\n');
-            modelText += line + '\n';
-            std::getline(ss, line, '\n');
-            modelText += line + '\n';
-            std::getline(ss, line, '\n');
-            modelText += line;
+            for (int i = 0; i < size; i++) {
+                std::getline(ss, line, '\n');
+                modelText = line + '\n';
+                std::getline(ss, line, '\n');
+                modelText += line + '\n';
+                std::getline(ss, line, '\n');
+                modelText += line + '\n';
+                std::getline(ss, line, '\n');
+                modelText += line;
 
-            (p->markov_models[i]).from_str(modelText);
+                (p->markov_models[i]).from_str(modelText);
+            }
         }
     }
+    qDebug() << "Passed markov";
 
     DOMElement *domEvents = currentElement->getNextElementSibling();
     DOMElement *eventElement = domEvents->getFirstElementChild();
