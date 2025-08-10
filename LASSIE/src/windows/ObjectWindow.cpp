@@ -1,4 +1,3 @@
-// ObjectWindow.cpp
 #include "ObjectWindow.hpp"
 #include "PaletteViewController.hpp"
 #include "../../CMOD/src/Libraries.h"

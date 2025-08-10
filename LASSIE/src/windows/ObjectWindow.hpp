@@ -1,4 +1,3 @@
-// ObjectWindow.hpp
 #ifndef OBJECTWINDOW_HPP
 #define OBJECTWINDOW_HPP
 
