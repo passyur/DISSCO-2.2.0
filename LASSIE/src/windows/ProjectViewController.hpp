@@ -9,7 +9,7 @@
 #include "../core/EnvelopeLibraryEntry.hpp"
 #include "../../CMOD/src/Markov.h"
 
-#include <QDomDocument>
+#include <QXmlStreamWriter>
 
 class MainWindow;
 class EnvelopeLibraryEntry;
@@ -28,7 +28,7 @@ class ProjectView : public QObject {
 
         /* function to write to the xml .dissco file */
         void save();
-        QString inlineXml(QDomDocument& doc);
+        void writeInlineXml(QXmlStreamWriter& xmlWriter, QString& xmlString);
 
         /* set properties pop up function */
         void setProperties();
@@ -37,13 +37,14 @@ class ProjectView : public QObject {
         void insertObject();   
 
          /* functions for modifying the Envelope list */
-        EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
-        EnvelopeLibraryEntry* createNewEnvelope();
-        EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);
-        void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
+        // EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
+        // EnvelopeLibraryEntry* createNewEnvelope();
+        // EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);
+        // void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
         // ObjectWindow and Palette methods
         PaletteViewController* getPalette() { return paletteView; }
+        void updatePaletteView();
         void showAttributes(QString eventType, QString eventName);
         //void showAttributes(class IEvent* event);
 

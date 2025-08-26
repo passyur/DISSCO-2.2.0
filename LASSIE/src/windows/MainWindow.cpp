@@ -98,10 +98,7 @@ void MainWindow::newFile()
     setUnsavedTitle(currentFile);
     statusBar()->showMessage(tr("File created"), 2000);
 
-    ProjectManager *pm = Inst::get_project_manager(); 
-    Project* p = pm->create(fileName);
-    pm->set_curr_project(p);
-
+    Project *p = Inst::get_project_manager()->build(currentFile, NULL);
     projectView = new ProjectView(this, currentFile);
     projects.push_back(projectView);
     projectView->setProperties();
@@ -380,9 +377,7 @@ void MainWindow::loadFile(const QString &fileName)
     currentFile = fileName;
     qDebug() << "Looking for:" << fileName;
     if (projectView == NULL) {
-        ProjectManager *pm = Inst::get_project_manager(); 
-        Project* p = pm->open(fileName);
-        pm->set_curr_project(p);
+        Project *p = Inst::get_project_manager()->open(currentFile, NULL);
 
         projectView = new ProjectView(this, currentFile);
         projects.push_back(projectView);

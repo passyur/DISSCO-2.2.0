@@ -130,6 +130,7 @@ class ProjectManager : public QObject {
         Project* create(const QString& title = QString(), const QByteArray& id = QByteArray());
         /* validates and, if successful, opens the file and creates a Project from that file */
         Project* open(const QString& filepath, const QByteArray& id = QByteArray());
+        Project* build(const QString& filepath, const QByteArray& id = QByteArray());
         void parse(Project *p, const QString& filepath);
         void close(Project*);
         int save(Project*);
@@ -176,7 +177,7 @@ class ProjectManager : public QObject {
         QList<ReverbEvent>& reverbevents() { return curr_project_->reverb_events; }
         QList<FilterEvent>& filterevents() { return curr_project_->filter_events; }
 
-        EnvelopeLibraryEntry* envlibentries() { return curr_project_->elentry; }
+        EnvelopeLibraryEntry*& envlibentries() { return curr_project_->elentry; }
         QList<MarkovModel<float>>& markovmodels() { return curr_project_->markov_models; }
         
         QList<QString>& customnotemodifiers() { return curr_project_->custom_note_modifiers; }

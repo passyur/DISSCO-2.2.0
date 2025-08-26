@@ -359,10 +359,7 @@ namespace XercesParser {
     }
 
     void parseEnvelopeEvent(DOMElement* event_el, EnvelopeEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -370,10 +367,7 @@ namespace XercesParser {
     }
 
     void parseSieveEvent(DOMElement* event_el, SieveEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -381,10 +375,7 @@ namespace XercesParser {
     }
 
     void parseSpaEvent(DOMElement* event_el, SpaEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -392,10 +383,7 @@ namespace XercesParser {
     }
 
     void parsePatternEvent(DOMElement* event_el, PatternEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -403,10 +391,7 @@ namespace XercesParser {
     }
 
     void parseReverbEvent(DOMElement* event_el, ReverbEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -414,10 +399,7 @@ namespace XercesParser {
     }
 
     void parseFilterEvent(DOMElement* event_el, FilterEvent& ev) {
-        DOMElement *child = event_el->getFirstElementChild();
-        ev.orderinpalette = getFunctionString(child);
-
-        child = child->getNextElementSibling();
+        DOMElement *child = event_el->getNextElementSibling();
         ev.name = getFunctionString(child);
 
         child = child->getNextElementSibling();
@@ -436,6 +418,8 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
     char* buffer = XMLString::transcode(textdata->getData());
     Eventtype type = (Eventtype)std::stoi(buffer);
     XMLString::release(&buffer);
+    qDebug() << "eventtype_el: " << eventtype_el;
+    qDebug() << "event type: " << type;
 
     switch(type){
         case top:
@@ -447,6 +431,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             eh.type = type;
             DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eh);
             XercesParser::parseEndOfHEvent(filter_el, eh);
+            qDebug() << "event name " << eh.name << " of type " << eh.type;
             switch(type){
                 case top: 
                     top_events.append(eh); 
@@ -720,6 +705,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     DOMElement *domEvents = currentElement->getNextElementSibling();
     DOMElement *eventElement = domEvents->getFirstElementChild();
+    qDebug() << "eventElement: " << eventElement;
 
     while (eventElement != NULL){
         p->parseEvent(eventElement);
@@ -802,7 +788,7 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
     }
     file.close();
 
-    Project *project = create(info.fileName(), id);
+    Project *project = create(info.baseName(), id);
     QFileInfo fileinfo(filepath);
     project->fileinfo = fileinfo;
     project->dat_path = fileinfo.absolutePath();
@@ -813,6 +799,28 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
     qDebug() << "Now parsing " << filepath;
     parse(project, filepath);
     
+    return project;
+}
+
+Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
+    QFileInfo info(filepath);
+
+    Project *project = create(info.baseName(), id);
+    QFileInfo fileinfo(filepath);
+    project->fileinfo = fileinfo;
+    project->dat_path = fileinfo.absolutePath();
+    project->lib_path = fileinfo.absoluteFilePath();
+
+    curr_project_ = project;  
+
+    // Create a default top event
+    QList<HEvent>& pHevents = this->hevents();
+    HEvent defaultTop;
+    defaultTop.type = top;
+    defaultTop.name = this->topevent();
+    defaultTop.orderinpalette = "-1";
+    pHevents.push_back(defaultTop);
+
     return project;
 }
 

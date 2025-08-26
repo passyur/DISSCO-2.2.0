@@ -16,6 +16,7 @@
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QSizePolicy>
+#include <QDebug>
 
 #include "../utilities.hpp"
 
@@ -159,7 +160,13 @@ void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
 void EnvelopeLibraryWindow::createNewEnvelope()
 {
     if (!activeProject) return;
-    EnvelopeLibraryEntry *newEnv = EnvelopeUtilities::createNewEnvelopeHelper(Inst::get_project_manager()->envlibentries());
+
+    ProjectManager *pm = Inst::get_project_manager();
+    EnvelopeLibraryEntry *newEnv = EnvelopeUtilities::createNewEnvelopeHelper(pm->envlibentries());
+    if (pm->envlibentries() == nullptr) {
+        pm->envlibentries() = newEnv;
+    }
+
     MUtilities::modified();
 
     QStandardItem* item = new QStandardItem(newEnv->getNumberString());
