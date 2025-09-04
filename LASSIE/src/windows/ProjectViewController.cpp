@@ -191,7 +191,7 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("TopEvent");	
-                xmlWriter.writeCharacters(pm->topevent());
+                xmlWriter.writeCharacters(pm->topevent().name);
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("PieceStartTime");	
@@ -337,7 +337,13 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("Events");	
             /* STILL IN PROGRESS  */
-            QList<HEvent>& pHevents = pm->hevents();
+            QList<HEvent>& pHevents;
+            // populate vector with all HEvent subcategories
+            pHevents.append(pm->topevent());
+            pHevents.append(pm->highevents());
+            pHevents.append(pm->midevents());
+            pHevents.append(pm->lowevents());
+
             for (HEvent& item : pHevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
@@ -887,7 +893,7 @@ void ProjectView::setProperties() {
     projectPropertiesDialog->ui->staffCheckBox->setCheckState(pm->grandstaff() ? Qt::Checked : Qt::Unchecked);
     projectPropertiesDialog->ui->numStaffEntry->setText(pm->numstaffs());
     projectPropertiesDialog->ui->particelBox->setCheckState(pm->outputparticel() ? Qt::Checked : Qt::Unchecked);
-    projectPropertiesDialog->ui->topEventEntry->setText(pm->topevent());
+    projectPropertiesDialog->ui->topEventEntry->setText(pm->topevent().name);
     projectPropertiesDialog->ui->durationEntry->setText(pm->duration());
 
  
@@ -915,22 +921,17 @@ void ProjectView::setProperties() {
             }
         }
 
-        if (new_topevent != pm->topevent()) {
-            QList<HEvent>& pHevents = pm->hevents();
-            for (HEvent &item : pHevents) {
-                if (item.name == pm->topevent() && item.type == top) {
-                    item.name = new_topevent;
-                    break;
-                }
-            }
+        if (new_topevent != pm->topevent().name) {            
+            /// \todo connect topevent names to folder names (in paletteviewcontroller most likely)? -jacob
             for (int row = 0; row < paletteView->folderTop->rowCount(); row++) {
                 QStandardItem* oldTopName = paletteView->folderTop->child(row, 1);
-                if (oldTopName && oldTopName->text() == pm->topevent()) {
+                if (oldTopName && oldTopName->text() == pm->topevent().name) {
                     oldTopName->setText(new_topevent);
                     break;
                 }
             }
-            pm->topevent() = projectPropertiesDialog->ui->topEventEntry->text();
+
+            pm->topevent().name = projectPropertiesDialog->ui->topEventEntry->text();
         }
 
         MUtilities::modified();
@@ -962,19 +963,20 @@ void ProjectView::insertObject() {
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
     
-        if (newObject->ui->buttonTop->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
-            HEvent newObj = {};
-            newObj.type = top;
-            newObj.name = newObject->ui->objNameEntry->text();
-            eventList.push_back(newObj);
+        // if (newObject->ui->buttonTop->isChecked()) {
+        //     QList<HEvent>& eventList = pm->hevents();
+        //     HEvent newObj = {};
+        //     newObj.type = top;
+        //     newObj.name = newObject->ui->objNameEntry->text();
+        //     eventList.push_back(newObj);
 
-            QStandardItem* newObjectType = new QStandardItem("Top");
-            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
-            paletteView->folderTop->appendRow({newObjectType, newObjectName});
-        }
-        else if (newObject->ui->buttonHigh->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
+        //     QStandardItem* newObjectType = new QStandardItem("Top");
+        //     QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
+        //     paletteView->folderTop->appendRow({newObjectType, newObjectName});
+        // }
+        // else 
+        if (newObject->ui->buttonHigh->isChecked()) {
+            QList<HEvent>& eventList = pm->highevents();
             HEvent newObj = {};
             newObj.type = high;
             newObj.name = newObject->ui->objNameEntry->text();
@@ -985,7 +987,7 @@ void ProjectView::insertObject() {
             paletteView->folderHigh->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonMid->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
+            QList<HEvent>& eventList = pm->midevents();
             HEvent newObj = {};
             newObj.type = mid;
             newObj.name = newObject->ui->objNameEntry->text();
@@ -996,7 +998,7 @@ void ProjectView::insertObject() {
             paletteView->folderMid->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonLow->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
+            QList<HEvent>& eventList = pm->lowevents();
             HEvent newObj = {};
             newObj.type = low;
             newObj.name = newObject->ui->objNameEntry->text();
@@ -1123,7 +1125,12 @@ void ProjectView::updatePaletteView() {
 
     ProjectManager *pm = Inst::get_project_manager();
     
-    QList<HEvent>& pHevents = pm->hevents();
+     QList<HEvent>& pHevents;
+    // populate vector with all HEvent subcategories
+    pHevents.append(pm->topevent());
+    pHevents.append(pm->highevents());
+    pHevents.append(pm->midevents());
+    pHevents.append(pm->lowevents());
     for (HEvent &item : pHevents) {
         QString itemName = item.name;
         QStandardItem* newObjectName = new QStandardItem(itemName);

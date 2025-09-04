@@ -51,7 +51,6 @@ class Project : public QObject {
         QByteArray id;
 
         /* properties */
-        QString top_event = "0";
         QString title; /* file name */
         QString file_flag = "THMLBsnv";
         QString duration = "";
@@ -75,7 +74,7 @@ class Project : public QObject {
         bool empty_project = false;
 
         /* event details */
-        QList<HEvent> top_events;
+        HEvent top_event;
         QList<HEvent> high_events;
         QList<HEvent> mid_events;
         QList<HEvent> low_events;
@@ -141,7 +140,6 @@ class ProjectManager : public QObject {
 
         QFileInfo fileinfo()        { return curr_project_->fileinfo; }
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
-        QString& topevent()         { return curr_project_->top_event; }
         QString& title()            { return curr_project_->title; }
         QString& fileflag()         { return curr_project_->file_flag; }
         QString& duration()         { return curr_project_->duration; }
@@ -163,7 +161,7 @@ class ProjectManager : public QObject {
         bool& outputparticel()      { return curr_project_->output_particel; }
         bool& emptyproject()        { return curr_project_->empty_project; }
 
-        QList<HEvent>& topevents() { return curr_project_->top_events; }
+        HEvent& topevent() { return curr_project_->top_event; }
         QList<HEvent>& highevents() { return curr_project_->high_events; }
         QList<HEvent>& midevents() { return curr_project_->mid_events; }
         QList<HEvent>& lowevents() { return curr_project_->low_events; }

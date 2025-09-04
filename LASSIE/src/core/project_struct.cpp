@@ -434,7 +434,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             qDebug() << "event name " << eh.name << " of type " << eh.type;
             switch(type){
                 case top: 
-                    top_events.append(eh); 
+                    top_event = eh; 
                     break;
                 case high:
                     high_events.append(eh);
@@ -537,10 +537,6 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     DOMElement* element = configuration->getFirstElementChild();
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
-
-    //topEvent
-    element = element->getNextElementSibling();
-    p->top_event = XercesParser::getFunctionString(element);
 
     // pieceStartTime
     element = element->getNextElementSibling(); //skipped
@@ -814,12 +810,12 @@ Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
     curr_project_ = project;  
 
     // Create a default top event
-    QList<HEvent>& pHevents = this->hevents();
+    HEvent& topevent = this->topevent();
     HEvent defaultTop;
     defaultTop.type = top;
-    defaultTop.name = this->topevent();
+    defaultTop.name = "0";
     defaultTop.orderinpalette = "-1";
-    pHevents.push_back(defaultTop);
+    topevent = defaultTop;
 
     return project;
 }
