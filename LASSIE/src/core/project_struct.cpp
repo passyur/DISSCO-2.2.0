@@ -446,6 +446,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
                     low_events.append(eh);
                     break;
             }
+            break;
         }
         case bottom: {
             BottomEvent eb;
