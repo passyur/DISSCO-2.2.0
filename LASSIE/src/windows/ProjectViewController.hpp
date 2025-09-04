@@ -28,7 +28,7 @@ class ProjectView : public QObject {
 
         /* function to write to the xml .dissco file */
         void save();
-        void writeInlineXml(QXmlStreamWriter& xmlWriter, QString& xmlString);
+        void writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xmlString);
 
         /* set properties pop up function */
         void setProperties();
