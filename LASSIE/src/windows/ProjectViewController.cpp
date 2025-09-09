@@ -337,6 +337,7 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("Events");	
             /* STILL IN PROGRESS  */
+            /* really ugly to have this be copied when it should be a const reference & implicitly shared, but I'm still mulling how to const-initialize this with the contents of 4 QLists.. -jacob */
             QList<HEvent> pHevents;
             // populate vector with all HEvent subcategories
             pHevents.append(pm->topevent());
@@ -956,25 +957,11 @@ void ProjectView::propertiesInsertFunction() {
 }
 
 void ProjectView::insertObject() {
-    if (!newObject) {
+    if (!newObject)
         newObject = new FileNewObject(mainWindow);
-    }
 
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
-    
-        // if (newObject->ui->buttonTop->isChecked()) {
-        //     QList<HEvent>& eventList = pm->hevents();
-        //     HEvent newObj = {};
-        //     newObj.type = top;
-        //     newObj.name = newObject->ui->objNameEntry->text();
-        //     eventList.push_back(newObj);
-
-        //     QStandardItem* newObjectType = new QStandardItem("Top");
-        //     QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
-        //     paletteView->folderTop->appendRow({newObjectType, newObjectName});
-        // }
-        // else 
         if (newObject->ui->buttonHigh->isChecked()) {
             QList<HEvent>& eventList = pm->highevents();
             HEvent newObj = {};
@@ -1122,11 +1109,9 @@ void ProjectView::insertObject() {
 }
 
 void ProjectView::updatePaletteView() {
-
-    ProjectManager *pm = Inst::get_project_manager();
-    
     QList<HEvent> pHevents;
     // populate vector with all HEvent subcategories
+    ProjectManager *pm = Inst::get_project_manager();
     pHevents.append(pm->topevent());
     pHevents.append(pm->highevents());
     pHevents.append(pm->midevents());
