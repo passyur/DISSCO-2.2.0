@@ -51,8 +51,8 @@ typedef enum {
 
 typedef struct TimeSignature TimeSignature;
 struct TimeSignature {
-    unsigned bar_value;
-    unsigned note_value;
+    QString bar_value;
+    QString note_value;
 };
 
 typedef struct Tempo Tempo;

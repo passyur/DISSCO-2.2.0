@@ -534,10 +534,10 @@ void ProjectView::save(){
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("TimeSignature");
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.bar_value));
+                        xmlWriter.writeCharacters(item.event.timesig.bar_value);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.note_value));
+                        xmlWriter.writeCharacters(item.event.timesig.note_value);
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Tempo");

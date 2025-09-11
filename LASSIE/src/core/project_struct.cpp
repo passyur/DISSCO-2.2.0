@@ -122,10 +122,10 @@ namespace XercesParser {
 
         DOMElement *timesig_el = eduperbeat_el->getNextElementSibling();
         DOMElement *barval_el = timesig_el->getFirstElementChild();
-        event.timesig.bar_value = getFunctionString(barval_el).toUInt();
+        event.timesig.bar_value = getFunctionString(barval_el);
 
         DOMElement *noteval_el = barval_el->getNextElementSibling();
-        event.timesig.note_value = getFunctionString(noteval_el).toUInt();
+        event.timesig.note_value = getFunctionString(noteval_el);
 
         DOMElement *tempo_el = timesig_el->getNextElementSibling();
         DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
