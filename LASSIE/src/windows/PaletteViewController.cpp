@@ -192,3 +192,11 @@ int PaletteViewController::getEventTypeFromString(const QString& type)
     if (type == "Measurement") return 14;
     return -1;
 } 
+
+// void PaletteViewController::keyPressEvent(QKeyEvent *event)
+// {
+//     if(event->key() == Qt::Key_Delete) {
+//         QModelIndex selectedIndex = treeView->selectionModel()->currentIndex();
+//         qDebug() << "Delete key pressed for " << selectedIndex;
+//     }
+// }

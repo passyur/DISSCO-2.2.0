@@ -434,7 +434,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             qDebug() << "event name " << eh.name << " of type " << eh.type;
             switch(type){
                 case top: 
-                    top_event = eh; 
+                    top_event = eh;
                     break;
                 case high:
                     high_events.append(eh);
@@ -446,6 +446,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
                     low_events.append(eh);
                     break;
             }
+            break;
         }
         case bottom: {
             BottomEvent eb;
@@ -538,6 +539,9 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
 
+    // top event
+    element = element->getNextElementSibling(); //skipped
+
     // pieceStartTime
     element = element->getNextElementSibling(); //skipped
 
@@ -566,7 +570,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     else
         p->grand_staff = false;
 
-        //numOfStaff
+    //numOfStaff
     element = element->getNextElementSibling();
     p->num_staffs = XercesParser::getFunctionString(element);
 
@@ -818,5 +822,111 @@ Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
     topevent = defaultTop;
 
     return project;
+}
+
+void ProjectManager::addEvent(Eventtype newEvent, QString eventName) {
+    switch(newEvent) {
+        case high: {
+            QList<HEvent>& eventList = highevents();
+            HEvent newObj = {};
+            newObj.type = high;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case mid: {
+            QList<HEvent>& eventList = midevents();
+            HEvent newObj = {};
+            newObj.type = mid;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case low: {
+            QList<HEvent>& eventList = lowevents();
+            HEvent newObj = {};
+            newObj.type = low;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case bottom: {
+            QList<BottomEvent>& eventList = bottomevents();
+            BottomEvent newObj = {};
+            newObj.event.type = bottom;
+            newObj.event.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case sound: {
+            QList<SpectrumEvent>& eventList = spectrumevents();
+            SpectrumEvent newObj;
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case env: {
+            QList<EnvelopeEvent>& eventList = envelopeevents();
+            EnvelopeEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case sieve: {
+            QList<SieveEvent>& eventList = sieveevents();
+            SieveEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case spa: {
+            QList<SpaEvent>& eventList = spaevents();
+            SpaEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case pattern: {
+            QList<PatternEvent>& eventList = patternevents();
+            PatternEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case reverb: {
+            QList<ReverbEvent>& eventList = reverbevents();
+            ReverbEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case note: {
+            QList<NoteEvent>& eventList = noteevents();
+            NoteEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case filter: {
+            QList<FilterEvent>& eventList = filterevents();
+            FilterEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size()+1);;
+            newObj.name = eventName;
+            eventList.push_back(newObj);
+            break;
+        }
+        case folder: case mea: case spec:
+            break;
+        default:
+            break;
+    }
+
 }
 

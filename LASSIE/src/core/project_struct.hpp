@@ -179,6 +179,9 @@ class ProjectManager : public QObject {
         QList<MarkovModel<float>>& markovmodels() { return curr_project_->markov_models; }
         
         QList<QString>& customnotemodifiers() { return curr_project_->custom_note_modifiers; }
+
+        // Adds default event of eventtype to its corresponding QList
+        void addEvent(Eventtype newEvent, QString eventName);
 #ifdef TABEDITOR
         QList<Project*> get_projects() { return project_hash_.values(); }
         QList<QByteArray> get_project_IDs() { return project_hash_.keys(); }
