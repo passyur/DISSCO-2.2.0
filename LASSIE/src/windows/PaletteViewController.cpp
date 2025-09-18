@@ -173,22 +173,3 @@ void PaletteViewController::removeEvent(IEvent* event, const QString& type)
         events.erase(std::remove(events.begin(), events.end(), event), events.end());
     }
 }
-
-int PaletteViewController::getEventTypeFromString(const QString& type)
-{
-    if (type == "Top") return 0;
-    if (type == "High") return 1;
-    if (type == "Mid") return 2;
-    if (type == "Low") return 3;
-    if (type == "Bottom") return 4;
-    if (type == "Spectrum") return 5;
-    if (type == "Envelope") return 6;
-    if (type == "Sieve") return 7;
-    if (type == "Spatialization") return 8;
-    if (type == "Pattern") return 9;
-    if (type == "Reverb") return 10;
-    if (type == "Note") return 12;
-    if (type == "Filter") return 13;
-    if (type == "Measurement") return 14;
-    return -1;
-} 
