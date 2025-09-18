@@ -70,10 +70,7 @@ namespace XercesParser {
         transcodeToQString(name_el, package.event_name);
 
         DOMElement *type_el = name_el->getNextElementSibling();
-        DOMCharacterData *textdata = (DOMCharacterData*)(type_el->getFirstChild());
-        char *buffer = XMLString::transcode(textdata->getData());
-        package.event_type = (Eventtype)std::atoi(buffer);
-        XMLString::release(&buffer);
+        transcodeToQString(type_el, package.event_type);
 
         DOMElement *weight_el = type_el->getNextElementSibling();
         transcodeToQString(weight_el, package.weight);

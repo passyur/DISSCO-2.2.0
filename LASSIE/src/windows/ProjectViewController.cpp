@@ -441,7 +441,7 @@ void ProjectView::save(){
                                     xmlWriter.writeCharacters(layerPkg.event_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("EventType");
-                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                    xmlWriter.writeCharacters(layerPkg.event_type);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Weight");
                                     xmlWriter.writeCharacters(layerPkg.weight);
@@ -613,7 +613,7 @@ void ProjectView::save(){
                                     xmlWriter.writeCharacters(layerPkg.event_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("EventType");
-                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                    xmlWriter.writeCharacters(layerPkg.event_type);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Weight");
                                     xmlWriter.writeCharacters(layerPkg.weight);

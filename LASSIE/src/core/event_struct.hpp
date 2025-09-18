@@ -106,7 +106,7 @@ struct ChildDef {
 typedef struct Package Package;
 struct Package {
     QString event_name;
-    Eventtype event_type;
+    QString event_type;
     QString weight;
     QString attack_envelope;
     QString attackenvelope_scale;
