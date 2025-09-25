@@ -517,21 +517,35 @@ void EventAttributesViewController::showCurrentEventData() {
 
         // tempo
         Tempo tempo = event.tempo;
-        bool asNote = (tempo.method_flag == 0);
-        ui->tempoAsNoteValueRadio->setChecked(asNote);
-        ui->tempoAsFractionRadio->setChecked(!asNote);
         /// \todo sort this out
         // ui->tempoNotePrefixCombo->setCurrentIndex(static_cast<int>(tempo.prefix));
         // ui->tempoNoteValueCombo->setCurrentIndex(static_cast<int>(tempo.note_value));
-        ui->tempoFractionEntry1->setText(tempo.frentry_1);
-        ui->tempoFractionEntry2->setText(tempo.frentry_2);
-        ui->tempoValueEntry->setText(tempo.valentry);
+        
+        if(tempo.method_flag == 0){  /* as note */
+            ui->tempoAsNoteValueRadio->click();
+            ui->tempoNotePrefixCombo1->setCurrentIndex(tempo.prefix.toUInt());
+            ui->tempoNoteCombo1->setCurrentIndex(tempo.note_value.toUInt());
+            ui->tempoValueEntry->setText(tempo.valentry);
+        }else{ /* as fraction */
+            ui->tempoAsFractionRadio->click();
+            ui->tempoFractionEntry1->setText(tempo.frentry_1);
+            ui->tempoFractionEntry2->setText(tempo.frentry_2);
+            ui->tempoNotePrefixCombo2->setCurrentIndex(tempo.prefix.toUInt());
+            ui->tempoNoteCombo2->setCurrentIndex(tempo.note_value.toUInt());
+        }
 
         // num children
         NumChildren num_children = event.numchildren;
-        ui->fixedButton->setChecked(num_children.method_flag == 2);
-        ui->densityButton->setChecked(num_children.method_flag == density);
-        ui->byLayerButton->setChecked(num_children.method_flag == bylayer);
+        switch(num_children.method_flag){
+            case Numchildrenflag::fixed:
+                ui->fixedButton->click();
+                break;
+            case density:
+                ui->densityButton->click();
+                break;
+            case bylayer:
+                ui->byLayerButton->click();
+        }
         ui->childCountEntry1->setText(num_children.entry_1);
         ui->childCountEntry2->setText(num_children.entry_2);
         ui->childCountEntry3->setText(num_children.entry_3);
@@ -547,11 +561,18 @@ void EventAttributesViewController::showCurrentEventData() {
 
         // child‐event‐def
         ChildDef childeventdef = event.child_event_def;
-        Childdefnflag def_flag = childeventdef.definition_flag;
-        ui->continuumButton->setChecked(def_flag == continuumdef);
-        ui->sweepButton->setChecked(def_flag == sweep);
-        ui->discreteButton->setChecked(def_flag == discrete);
+        switch(childeventdef.definition_flag){
+            case discrete:
+                ui->discreteButton->click();
+                break;
+            case continuumdef:
+                ui->continuumButton->click();
+                break;
+            case sweep:
+                ui->sweepButton->click();
+                break;
 
+        }
         ui->childDefEntry1->setText(childeventdef.entry_1);
         ui->childDefEntry2->setText(childeventdef.entry_2);
         ui->childDefEntry3->setText(childeventdef.entry_3);

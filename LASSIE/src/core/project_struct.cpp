@@ -129,10 +129,10 @@ namespace XercesParser {
         event.tempo.method_flag = (Numchildrenflag)getFunctionString(tempomethodflag_el).toUInt();
 
         DOMElement *tempoprefix_el = tempomethodflag_el->getNextElementSibling();
-        event.tempo.prefix = (Tempoprefix)getFunctionString(tempoprefix_el).toUInt();
+        event.tempo.prefix = getFunctionString(tempoprefix_el);
 
         DOMElement *temponoteval_el = tempoprefix_el->getNextElementSibling();
-        event.tempo.note_value = (Temponotevalue)getFunctionString(temponoteval_el).toUInt();
+        event.tempo.note_value = getFunctionString(temponoteval_el);
 
         DOMElement *tempofrentry1_el = temponoteval_el->getNextElementSibling();
         event.tempo.frentry_1 = getFunctionString(tempofrentry1_el);
@@ -159,7 +159,8 @@ namespace XercesParser {
         DOMElement *childdef_el = numchildren_el->getNextElementSibling();
         curr = childdef_el->getFirstElementChild();
         event.child_event_def.entry_1 = getFunctionString(curr);
-
+        qDebug() << event.child_event_def.entry_1;
+         
         curr = curr->getNextElementSibling();
         event.child_event_def.entry_2 = getFunctionString(curr);
 
