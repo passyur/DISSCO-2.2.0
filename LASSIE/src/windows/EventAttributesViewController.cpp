@@ -6,8 +6,12 @@
 //#include "PaletteViewController.h"
 //#include "PartialWindow.h"
 
+#include "Modifiers.hpp"
+#include "../ui/ui_Modifiers.h"
+
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QScrollBar>
 
 // EventAttributesViewController::EventAttributesViewController(SharedPointers* sharedPointers,
 //                                                              QWidget* parent)
@@ -110,10 +114,10 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
 /*
     // --- additional controls ---
     connect(ui->addNewLayerButton, &QPushButton::clicked,
-            this, &EventAttributesViewController::addNewLayerButtonClicked);
+            this, &EventAttributesViewController::addNewLayerButtonClicked);*/
     connect(ui->addModifierButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addModifierButtonClicked);
-    connect(ui->addPartialButton, &QPushButton::clicked,
+/*    connect(ui->addPartialButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addPartialButtonClicked);
 
  */   // --- tempo controls ---
@@ -933,24 +937,28 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
     ui->layersLayout->addWidget(box);
     m_layerBoxesStorage.push_back(box);
 }
-
+*/
 void EventAttributesViewController::addModifierButtonClicked() {
-    if (!m_currentlyShownEvent) return;
-    EventBottomModifier* mod = (m_currentlyShownEvent->getEventType()==eventBottom)
-        ? m_currentlyShownEvent->getEventExtraInfo()->addModifier()
-        : m_currentlyShownEvent->addModifier();
+    // if (!m_currentlyShownEvent) return;
+    // EventBottomModifier* mod = (m_currentlyShownEvent->getEventType()==eventBottom)
+    //     ? m_currentlyShownEvent->getEventExtraInfo()->addModifier()
+    //     : m_currentlyShownEvent->addModifier();
 
-    auto* align = new EventBottomModifierAlignment(mod, this);
-    if (!m_modifiers) m_modifiers = align;
-    else {
-        auto* tail = m_modifiers;
-        while (tail->next) tail = tail->next;
-        tail->next = align;
-        align->prev = tail;
-    }
-    ui->modifiersLayout->addWidget(align);
+    // auto* align = new EventBottomModifierAlignment(mod, this);
+    // if (!m_modifiers) m_modifiers = align;
+    // else {
+    //     auto* tail = m_modifiers;
+    //     while (tail->next) tail = tail->next;
+    //     tail->next = align;
+    //     align->prev = tail;
+    // }
+    ui->modScrollWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->modScrollWindowContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    Modifiers* newMod = new Modifiers(ui->modScrollWindow);
+    ui->modScrollWindowContent->layout()->addWidget(newMod);
 }
-
+/*
 void EventAttributesViewController::addPartialButtonClicked() {
     if (!m_currentlyShownEvent) return;
     auto* partial = m_currentlyShownEvent->getEventExtraInfo()->addPartial();

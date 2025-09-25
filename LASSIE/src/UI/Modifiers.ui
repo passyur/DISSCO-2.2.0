@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Modifiers</class>
+ <widget class="QWidget" name="Modifier">
+    <layout class="QVBoxLayout" name="modifierGroupLayout">
+    <item>
+    <widget class="QGroupBox" name="modifierGroup">
+    <layout class="QVBoxLayout" name="modifierLayout">
+        <item>
+        <layout class="QHBoxLayout" name="modifierRemoveLayout">
+            <item>
+                <widget class="QComboBox" name="modifierType">
+                    <item><property name="text"><string>TREMOLO</string></property></item>
+                    <item><property name="text"><string>VIBRATO</string></property></item>
+                    <item><property name="text"><string>GLISSANDO</string></property></item>
+                    <item><property name="text"><string>DETUNE</string></property></item>
+                    <item><property name="text"><string>AMPTRANS</string></property></item>
+                    <item><property name="text"><string>FREQTRANS</string></property></item>
+                    <item><property name="text"><string>WAVE_TYPE</string></property></item>
+                </widget>
+            </item>
+            <item>
+            <widget class="QPushButton" name="modifierRemoveButton">
+                <property name="text">
+                    <string>Remove This Modifier</string>
+                </property>
+            </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierNameLayout">
+            <item>
+                <widget class="QComboBox" name="modifierApply">
+                    <item><property name="text"><string>SOUND</string></property></item>
+                    <item><property name="text"><string>PARTIAL</string></property></item>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLabel" name="modifierNameLabel">
+                    <property name="text">
+                    <string>Group Name:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierNameEdit"/>
+            </item>
+            <!-- <item>
+                <widget class="QPushButton" name="modifierNameFunButton">
+                    <property name="text">
+                    <string>Fn</string>
+                    </property>
+                </widget>
+            </item> -->
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierProbLayout">
+            <item>
+                <widget class="QLabel" name="modifierProbLabel">
+                    <property name="text">
+                    <string>Probability Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierProbEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierProbFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierDetuneLayout">
+            <item>
+                <widget class="QLabel" name="modifierSpreadLabel">
+                    <property name="text">
+                    <string>Detune Spread:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierSpreadEdit"/>
+            </item>
+            <item>
+                <widget class="QLabel" name="modifierDirLabel">
+                    <property name="text">
+                    <string>Detune Direction:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierDirEdit"/>
+            </item>
+            <item>
+                <widget class="QLabel" name="modifierVelLabel">
+                    <property name="text">
+                    <string>Detune Velocity:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierVelEdit"/>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierMagLayout">
+            <item>
+                <widget class="QLabel" name="modifierMagLabel">
+                    <property name="text">
+                    <string>Magnitude Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierMagEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierMagFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierWidthLayout">
+            <item>
+                <widget class="QLabel" name="modifierWidthLabel">
+                    <property name="text">
+                    <string>Width Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierWidthEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierWidthFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierResLayout">
+            <item>
+                <widget class="QLabel" name="modifierResLabel">
+                    <property name="text">
+                    <string>Partial Result String:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierResEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierResFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierRateLayout">
+            <item>
+                <widget class="QLabel" name="modifierRateLabel">
+                    <property name="text">
+                    <string>Rate Value Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierRateEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierRateFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+    </layout>
+    </widget>
+    </item>
+    </layout>
+ </widget>
+</ui>
+
+

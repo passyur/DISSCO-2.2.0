@@ -22,6 +22,7 @@ class EventBottomModifier;
 class SpectrumPartial;
 class EventLayer;
 class QKeyEvent;
+class Modifiers;
 
 namespace Ui {
 class EventAttributesViewController;
@@ -129,7 +130,7 @@ private slots:
 
     // // main actions
     // void addNewLayerButtonClicked();
-    // void addModifierButtonClicked();
+    void addModifierButtonClicked();
     // void addPartialButtonClicked();
 
     // // tempo controls

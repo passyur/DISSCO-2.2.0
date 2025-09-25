@@ -84,6 +84,14 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     // Calls objectActivated
     connect(treeView, &QTreeView::doubleClicked, this, &PaletteViewController::objectActivated);
 
+    // // Delete right click Menu
+    // this->setContextMenuPolicy(Qt::CustomContextMenu);
+    // connect(this,&QWidget::customContextMenuRequested,this,&PaletteViewController::slotCustomMenuRequested);
+
+    // // Delete Action
+    // delAct = new QAction("Delete Object", this);
+    // connect(delAct, &QAction::triggered, this, &PaletteViewController::deleteObject);
+
     treeView->expandAll();
 
 
@@ -193,10 +201,13 @@ int PaletteViewController::getEventTypeFromString(const QString& type)
     return -1;
 } 
 
-// void PaletteViewController::keyPressEvent(QKeyEvent *event)
+// void PaletteViewController::slotCustomMenuRequested(QPoint pos)
 // {
-//     if(event->key() == Qt::Key_Delete) {
-//         QModelIndex selectedIndex = treeView->selectionModel()->currentIndex();
-//         qDebug() << "Delete key pressed for " << selectedIndex;
-//     }
+//     QMenu *menu = new QMenu(this);
+//     menu->addAction(delAct);
+//     menu->popup(this->mapToGlobal(pos));
+// }
+
+// void PaletteViewController::deleteObject() {
+//      qDebug() << "pressed delete object menu";
 // }

@@ -911,6 +911,18 @@
                                 </widget>
                             </item>
                             <item>
+                            <widget class="QScrollArea" name="modScrollWindow">
+                                <property name="minimumHeight"><number>450</number></property>
+                                <property name="maximumHeight"><number>450</number></property>
+                                <property name="widgetResizable"><bool>true</bool></property>
+                                <widget class="QWidget" name="modScrollWindowContent">     
+                                    <layout class="QVBoxLayout" name="modScrollWindowLayout">    
+                                        <!-- Modifiers.ui -->
+                                    </layout>    
+                                </widget>
+                            </widget>
+                            </item>      
+                            <item>
                                 <widget class="QPushButton" name="addModifierButton">
                                 <property name="text">
                                     <string>Add Modifier</string>

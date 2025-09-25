@@ -59,6 +59,9 @@ private:
     // Tree View
     QTreeView* treeView;
     QStandardItemModel* model;
+    // void slotCustomMenuRequested(QPoint pos);
+    // QAction *delAct;
+    // void deleteObject();
 
 };
 
