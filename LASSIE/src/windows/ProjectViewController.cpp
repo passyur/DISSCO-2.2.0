@@ -1203,67 +1203,53 @@ void ProjectView::updatePaletteView() {
 
 //nhi: show attributes
 // void ProjectView::showAttributes(IEvent* event) { // using QString for testing
-void ProjectView::showAttributes(QString eventType, QString eventName) {
+void ProjectView::showAttributes(QString eventType, int index) {
     // TODO: Implement event attributes display
     // This would typically show the event in an EventAttributesViewController
-    //qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
+    qDebug() << "Showing attributes for event:" << eventType << " at index " << index;
 
     // Show the ObjectWindows
     if (eventType == "Top" ){ 
-        if (eventName == "") { topWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(top); }
+        eventAttributesView->showAttributesOfEvent(top, 0);
     }
     else if (eventType == "High" ){
-        if (eventName == "") { highWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(high); }
+        eventAttributesView->showAttributesOfEvent(high, index);
     }
     else if (eventType == "Mid" ){
-        if (eventName == "") { midWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(mid); }
+        eventAttributesView->showAttributesOfEvent(mid, index);
     }
     else if (eventType == "Low" ){ 
-        if (eventName == "") { lowWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(low); }
+        eventAttributesView->showAttributesOfEvent(low, index);
     }
     else if (eventType == "Bottom" ){ 
-        if (eventName == "") { bottomWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(bottom); }
+        eventAttributesView->showAttributesOfEvent(bottom, index);
     }
     else if (eventType == "Spectrum" ){
-        if (eventName == "") { spectrumWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(sound); }
+        eventAttributesView->showAttributesOfEvent(sound, index);
     }
     else if (eventType == "Note" ){
-        if (eventName == "") { noteWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(note); }
+        eventAttributesView->showAttributesOfEvent(note, index);
     }
     else if (eventType == "Envelope" ){
-        if (eventName == "") { envWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(env); }
+        eventAttributesView->showAttributesOfEvent(env, index);
     }
     else if (eventType == "Sieve" ){
-        if (eventName == "") { sivWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(sieve); }
+        eventAttributesView->showAttributesOfEvent(sieve, index);
     }
     else if (eventType == "Spatialization" ){
-       if (eventName == "") { spaWindow->show(); }
-       else { eventAttributesView->showAttributesOfEvent(spa); }
+       eventAttributesView->showAttributesOfEvent(spa, index);
     }
     else if (eventType == "Pattern" ){
-        if (eventName == "") { patWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(pattern); }
+        eventAttributesView->showAttributesOfEvent(pattern, index);
     }
     else if (eventType == "Reverb" ){
-        if (eventName == "") { revWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(reverb); }
+        eventAttributesView->showAttributesOfEvent(reverb, index);
     }
     else if (eventType == "Filter" ){
-        if (eventName == "") { filWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(filter); }
+        eventAttributesView->showAttributesOfEvent(filter, index);
     }
     else if (eventType == "Measurement" ){
-        if (eventName == "") { meaWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(mea); }
+        eventAttributesView->showAttributesOfEvent(mea, index);
     } 
 
     mainWindow->ui->eventsScrollArea->widget()->adjustSize();

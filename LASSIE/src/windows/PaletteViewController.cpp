@@ -116,15 +116,15 @@ void PaletteViewController::objectActivated(const QModelIndex &index){
     QString eventType;
     QString eventName;
 
+    /* if it is a Folder, it will have no parent */
     if (!parent) {
         eventType = model->itemFromIndex(index.sibling(index.row(), 1))->text();
         eventName = NULL;
     } else {
-        eventType = model->itemFromIndex(index.sibling(index.row(), 0))->text();;
+        eventType = model->itemFromIndex(index.sibling(index.row(), 0))->text();
         eventName = model->itemFromIndex(index.sibling(index.row(), 1))->text();
+        projectView->showAttributes(eventType, index.row());
     }
-    
-    projectView->showAttributes(eventType, eventName);
 }
 
 ObjectWindowObjectPackage* PaletteViewController::getObjectsLinkedList(const QString& type)

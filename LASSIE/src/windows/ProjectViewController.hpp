@@ -45,7 +45,7 @@ class ProjectView : public QObject {
         // ObjectWindow and Palette methods
         PaletteViewController* getPalette() { return paletteView; }
         void updatePaletteView();
-        void showAttributes(QString eventType, QString eventName);
+        void showAttributes(QString eventType, int index);
         //void showAttributes(class IEvent* event);
 
     private:
@@ -63,6 +63,7 @@ class ProjectView : public QObject {
         void propertiesInsertFunction();
 
         // ObjectWindow instances
+        /* these hold pointers to linked lists for their respective event type  */
         ObjectWindow* topWindow;
         ObjectWindow* highWindow;
         ObjectWindow* midWindow;
