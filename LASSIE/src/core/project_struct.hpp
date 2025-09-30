@@ -6,13 +6,16 @@
 #include <QMap>
 #include <QHash>
 #include <QObject>
-#include "event_struct.hpp"
-#include "EnvelopeLibraryEntry.hpp"
-#include "MarkovModel.h"
-
 #include <QFile>
 #include <QFileInfo>
+
 #include <xercesc/dom/DOMElement.hpp>
+
+#include "event_struct.hpp"
+#include "EnvelopeLibraryEntry.hpp"
+
+// cmod
+#include "MarkovModel.h"
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -20,12 +23,7 @@ the model: all transactions dealing with Projects must go through the ProjectMan
               unnecessary to the caller. 
 */
 
-// QMap<QString, bool> default_note_modifiers;
-
 class ProjectManager;
-
-// class IEvent;
-
 class EnvelopeLibraryEntry;
 
 class Project : public QObject {
@@ -154,7 +152,6 @@ class ProjectManager : public QObject {
         QString& measure()          { return curr_project_->measure; }
 
         bool& modified()            { return curr_project_->modifiedButNotSaved; }
-        // bool& getters
         bool& grandstaff()          { return curr_project_->grand_staff; }
         bool& score()               { return curr_project_->score; }
         bool& synthesis()           { return curr_project_->synthesis; }
