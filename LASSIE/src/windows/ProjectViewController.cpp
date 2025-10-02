@@ -135,7 +135,7 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 }
 
 // Function to write XML Formatting
-void ProjectView::writeInlineXml(QXmlStreamWriter& xmlWriter, QString& xmlString) {
+void ProjectView::writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xmlString) {
     QDomDocument tempDoc;
     if (tempDoc.setContent(xmlString.trimmed()) && !tempDoc.documentElement().isNull()) {
         // Write raw XML 
@@ -191,11 +191,11 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("TopEvent");	
-                xmlWriter.writeCharacters(pm->topevent());
+                xmlWriter.writeCharacters(pm->topevent().name);
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("PieceStartTime");	
-                xmlWriter.writeCharacters("0");
+                xmlWriter.writeCharacters(pm->starttime());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Duration");	
@@ -337,8 +337,15 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("Events");	
             /* STILL IN PROGRESS  */
-            QList<HEvent>& pHevents = pm->hevents();
-            for (HEvent& item : pHevents) {
+            /* really ugly to have this be copied when it should be a const reference & implicitly shared, but I'm still mulling how to const-initialize this with the contents of 4 QLists.. -jacob */
+            QList<HEvent> pHevents;
+            // populate vector with all HEvent subcategories
+            pHevents.append(pm->topevent());
+            pHevents.append(pm->highevents());
+            pHevents.append(pm->midevents());
+            pHevents.append(pm->lowevents());
+
+            for (const HEvent& item : pHevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -422,7 +429,7 @@ void ProjectView::save(){
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Layers");
-                for (Layer itemLayer : item.event_layers) {
+                for (const Layer& itemLayer : item.event_layers) {
                     xmlWriter.writeStartElement("Layer");
                         xmlWriter.writeStartElement("ByLayer");
                             xmlWriter.writeCharacters(itemLayer.by_layer);
@@ -434,7 +441,7 @@ void ProjectView::save(){
                                     xmlWriter.writeCharacters(layerPkg.event_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("EventType");
-                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                    xmlWriter.writeCharacters(layerPkg.event_type);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Weight");
                                     xmlWriter.writeCharacters(layerPkg.weight);
@@ -468,7 +475,7 @@ void ProjectView::save(){
                     xmlWriter.writeEndElement(); 
                     xmlWriter.writeStartElement("Modifiers");
                     xmlWriter.writeCharacters("");
-                    for (Modifier itemMod : item.modifiers) {
+                    for (const Modifier& itemMod : item.modifiers) {
                         xmlWriter.writeStartElement("Modifier");
                             xmlWriter.writeStartElement("Type");
                                 xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
@@ -509,8 +516,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<BottomEvent>& pBevents = pm->bottomevents();
-            for (BottomEvent& item : pBevents) {
+            const QList<BottomEvent>& pBevents = pm->bottomevents();
+            for (const BottomEvent& item : pBevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.event.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -527,10 +534,10 @@ void ProjectView::save(){
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("TimeSignature");
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.bar_value));
+                        xmlWriter.writeCharacters(item.event.timesig.bar_value);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.note_value));
+                        xmlWriter.writeCharacters(item.event.timesig.note_value);
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Tempo");
@@ -594,19 +601,19 @@ void ProjectView::save(){
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Layers");
-                for (Layer itemLayer : item.event.event_layers) {
+                for (const Layer& itemLayer : item.event.event_layers) {
                     xmlWriter.writeStartElement("Layer");
                         xmlWriter.writeStartElement("ByLayer");
                             xmlWriter.writeCharacters(itemLayer.by_layer);
                         xmlWriter.writeEndElement();
                         xmlWriter.writeStartElement("DiscretePackages");
-                        for (Package layerPkg : itemLayer.discrete_packages) {
+                        for (const Package& layerPkg : itemLayer.discrete_packages) {
                             xmlWriter.writeStartElement("Package");
                                 xmlWriter.writeStartElement("EventName");
                                     xmlWriter.writeCharacters(layerPkg.event_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("EventType");
-                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                    xmlWriter.writeCharacters(layerPkg.event_type);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Weight");
                                     xmlWriter.writeCharacters(layerPkg.weight);
@@ -670,7 +677,7 @@ void ProjectView::save(){
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("Modifiers");
                         xmlWriter.writeCharacters("");
-                        for (Modifier itemMod : item.extra_info.modifiers) {
+                        for (const Modifier& itemMod : item.extra_info.modifiers) {
                             xmlWriter.writeStartElement("Modifier");
                                 xmlWriter.writeStartElement("Type");
                                     xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
@@ -712,8 +719,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();  
             }
 
-            QList<SpectrumEvent>& pSevents = pm->spectrumevents();
-            for (SpectrumEvent& item : pSevents) {
+            const QList<SpectrumEvent>& pSevents = pm->spectrumevents();
+            for (const SpectrumEvent& item : pSevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -741,8 +748,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<NoteEvent>& pNevents = pm->noteevents();
-            for (NoteEvent& item : pNevents) {
+            const QList<NoteEvent>& pNevents = pm->noteevents();
+            for (const NoteEvent& item : pNevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -767,8 +774,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
-            for (EnvelopeEvent& item : pEevents) {
+            const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
+            for (const EnvelopeEvent& item : pEevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -783,8 +790,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<SieveEvent>& pSivevents = pm->sieveevents();
-            for (SieveEvent& item : pSivevents) {
+            const QList<SieveEvent>& pSivevents = pm->sieveevents();
+            for (const SieveEvent& item : pSivevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -799,8 +806,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<SpaEvent>& pSpaevents = pm->spaevents();
-            for (SpaEvent& item : pSpaevents) {
+            const QList<SpaEvent>& pSpaevents = pm->spaevents();
+            for (const SpaEvent& item : pSpaevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -815,8 +822,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<PatternEvent>& pPevents = pm->patternevents();
-            for (PatternEvent& item : pPevents) {
+            const QList<PatternEvent>& pPevents = pm->patternevents();
+            for (const PatternEvent& item : pPevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -831,8 +838,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<ReverbEvent>& pRevents = pm->reverbevents();
-            for (ReverbEvent& item : pRevents) {
+            const QList<ReverbEvent>& pRevents = pm->reverbevents();
+            for (const ReverbEvent& item : pRevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -847,8 +854,8 @@ void ProjectView::save(){
               xmlWriter.writeEndElement();
             }
 
-            QList<FilterEvent>& pFevents = pm->filterevents();
-            for (FilterEvent& item : pFevents) {
+            const QList<FilterEvent>& pFevents = pm->filterevents();
+            for (const FilterEvent& item : pFevents) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);	
                 xmlWriter.writeStartElement("EventType");
@@ -887,7 +894,7 @@ void ProjectView::setProperties() {
     projectPropertiesDialog->ui->staffCheckBox->setCheckState(pm->grandstaff() ? Qt::Checked : Qt::Unchecked);
     projectPropertiesDialog->ui->numStaffEntry->setText(pm->numstaffs());
     projectPropertiesDialog->ui->particelBox->setCheckState(pm->outputparticel() ? Qt::Checked : Qt::Unchecked);
-    projectPropertiesDialog->ui->topEventEntry->setText(pm->topevent());
+    projectPropertiesDialog->ui->topEventEntry->setText(pm->topevent().name);
     projectPropertiesDialog->ui->durationEntry->setText(pm->duration());
 
  
@@ -915,22 +922,17 @@ void ProjectView::setProperties() {
             }
         }
 
-        if (new_topevent != pm->topevent()) {
-            QList<HEvent>& pHevents = pm->hevents();
-            for (HEvent &item : pHevents) {
-                if (item.name == pm->topevent() && item.type == top) {
-                    item.name = new_topevent;
-                    break;
-                }
-            }
+        if (new_topevent != pm->topevent().name) {            
+            /// \todo connect topevent names to folder names (in paletteviewcontroller most likely)? -jacob
             for (int row = 0; row < paletteView->folderTop->rowCount(); row++) {
                 QStandardItem* oldTopName = paletteView->folderTop->child(row, 1);
-                if (oldTopName && oldTopName->text() == pm->topevent()) {
+                if (oldTopName && oldTopName->text() == pm->topevent().name) {
                     oldTopName->setText(new_topevent);
                     break;
                 }
             }
-            pm->topevent() = projectPropertiesDialog->ui->topEventEntry->text();
+
+            pm->topevent().name = projectPropertiesDialog->ui->topEventEntry->text();
         }
 
         MUtilities::modified();
@@ -955,26 +957,13 @@ void ProjectView::propertiesInsertFunction() {
 }
 
 void ProjectView::insertObject() {
-    if (!newObject) {
+    if (!newObject)
         newObject = new FileNewObject(mainWindow);
-    }
 
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
-    
-        if (newObject->ui->buttonTop->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
-            HEvent newObj = {};
-            newObj.type = top;
-            newObj.name = newObject->ui->objNameEntry->text();
-            eventList.push_back(newObj);
-
-            QStandardItem* newObjectType = new QStandardItem("Top");
-            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
-            paletteView->folderTop->appendRow({newObjectType, newObjectName});
-        }
-        else if (newObject->ui->buttonHigh->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
+        if (newObject->ui->buttonHigh->isChecked()) {
+            QList<HEvent>& eventList = pm->highevents();
             HEvent newObj = {};
             newObj.type = high;
             newObj.name = newObject->ui->objNameEntry->text();
@@ -985,7 +974,7 @@ void ProjectView::insertObject() {
             paletteView->folderHigh->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonMid->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
+            QList<HEvent>& eventList = pm->midevents();
             HEvent newObj = {};
             newObj.type = mid;
             newObj.name = newObject->ui->objNameEntry->text();
@@ -996,7 +985,7 @@ void ProjectView::insertObject() {
             paletteView->folderMid->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonLow->isChecked()) {
-            QList<HEvent>& eventList = pm->hevents();
+            QList<HEvent>& eventList = pm->lowevents();
             HEvent newObj = {};
             newObj.type = low;
             newObj.name = newObject->ui->objNameEntry->text();
@@ -1120,11 +1109,14 @@ void ProjectView::insertObject() {
 }
 
 void ProjectView::updatePaletteView() {
-
+    QList<HEvent> pHevents;
+    // populate vector with all HEvent subcategories
     ProjectManager *pm = Inst::get_project_manager();
-    
-    QList<HEvent>& pHevents = pm->hevents();
-    for (HEvent &item : pHevents) {
+    pHevents.append(pm->topevent());
+    pHevents.append(pm->highevents());
+    pHevents.append(pm->midevents());
+    pHevents.append(pm->lowevents());
+    for (const HEvent& item : pHevents) {
         QString itemName = item.name;
         QStandardItem* newObjectName = new QStandardItem(itemName);
         if (item.type == top) {
@@ -1145,64 +1137,64 @@ void ProjectView::updatePaletteView() {
         }
     }
 
-    QList<BottomEvent>& pBevents = pm->bottomevents();
-    for (BottomEvent &item : pBevents) {
+    const QList<BottomEvent>& pBevents = pm->bottomevents();
+    for (const BottomEvent& item : pBevents) {
         QStandardItem* newObjectName = new QStandardItem(item.event.name);
         QStandardItem* newObjectType = new QStandardItem("Bottom");
         paletteView->folderBottom->appendRow({newObjectType, newObjectName});
     }
 
-    QList<SpectrumEvent>& pSpeEvents = pm->spectrumevents();
-    for (SpectrumEvent &item : pSpeEvents) {
+    const QList<SpectrumEvent>& pSpeEvents = pm->spectrumevents();
+    for (const SpectrumEvent& item : pSpeEvents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Spectrum");
         paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
     }
 
-    QList<NoteEvent>& pNevents = pm->noteevents();
-    for (NoteEvent &item : pNevents) {
+    const QList<NoteEvent>& pNevents = pm->noteevents();
+    for (const NoteEvent& item : pNevents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Note");
         paletteView->folderNote->appendRow({newObjectType, newObjectName});
     }
 
-    QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
-    for (EnvelopeEvent &item : pEevents) {
+   const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
+    for (const EnvelopeEvent& item : pEevents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Envelope");
         paletteView->folderEnv->appendRow({newObjectType, newObjectName});
     }
 
-    QList<SieveEvent>& pSivEvents = pm->sieveevents();
-    for (SieveEvent &item : pSivEvents) {
+    const QList<SieveEvent>& pSivEvents = pm->sieveevents();
+    for (const SieveEvent& item : pSivEvents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Sieve");
         paletteView->folderSiv->appendRow({newObjectType, newObjectName});
     }
 
-    QList<SpaEvent>& pSpaEvents = pm->spaevents();
-    for (SpaEvent &item : pSpaEvents) {
+    const QList<SpaEvent>& pSpaEvents = pm->spaevents();
+    for (const SpaEvent& item : pSpaEvents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Spatialization");
         paletteView->folderSpa->appendRow({newObjectType, newObjectName});
     }
 
-    QList<PatternEvent>& pPevents = pm->patternevents();
-    for (PatternEvent &item : pPevents) {
+    const QList<PatternEvent>& pPevents = pm->patternevents();
+    for (const PatternEvent& item : pPevents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Pattern");
         paletteView->folderPat->appendRow({newObjectType, newObjectName});
     }
 
-    QList<ReverbEvent>& pRevents = pm->reverbevents();
-    for (ReverbEvent &item : pRevents) {
+    const QList<ReverbEvent>& pRevents = pm->reverbevents();
+    for (const ReverbEvent& item : pRevents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Reverb");
         paletteView->folderRev->appendRow({newObjectType, newObjectName});
     }
 
-    QList<FilterEvent>& pFevents = pm->filterevents();
-    for (FilterEvent &item : pFevents) {
+    const QList<FilterEvent>& pFevents = pm->filterevents();
+    for (const FilterEvent& item : pFevents) {
         QStandardItem* newObjectName = new QStandardItem(item.name);
         QStandardItem* newObjectType = new QStandardItem("Filter");
         paletteView->folderFil->appendRow({newObjectType, newObjectName});
@@ -1211,67 +1203,53 @@ void ProjectView::updatePaletteView() {
 
 //nhi: show attributes
 // void ProjectView::showAttributes(IEvent* event) { // using QString for testing
-void ProjectView::showAttributes(QString eventType, QString eventName) {
+void ProjectView::showAttributes(QString eventType, int index) {
     // TODO: Implement event attributes display
     // This would typically show the event in an EventAttributesViewController
-    //qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
+    qDebug() << "Showing attributes for event:" << eventType << " at index " << index;
 
     // Show the ObjectWindows
     if (eventType == "Top" ){ 
-        if (eventName == "") { topWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(top); }
+        eventAttributesView->showAttributesOfEvent(top, 0);
     }
     else if (eventType == "High" ){
-        if (eventName == "") { highWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(high); }
+        eventAttributesView->showAttributesOfEvent(high, index);
     }
     else if (eventType == "Mid" ){
-        if (eventName == "") { midWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(mid); }
+        eventAttributesView->showAttributesOfEvent(mid, index);
     }
     else if (eventType == "Low" ){ 
-        if (eventName == "") { lowWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(low); }
+        eventAttributesView->showAttributesOfEvent(low, index);
     }
     else if (eventType == "Bottom" ){ 
-        if (eventName == "") { bottomWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(bottom); }
+        eventAttributesView->showAttributesOfEvent(bottom, index);
     }
     else if (eventType == "Spectrum" ){
-        if (eventName == "") { spectrumWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(sound); }
+        eventAttributesView->showAttributesOfEvent(sound, index);
     }
     else if (eventType == "Note" ){
-        if (eventName == "") { noteWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(note); }
+        eventAttributesView->showAttributesOfEvent(note, index);
     }
     else if (eventType == "Envelope" ){
-        if (eventName == "") { envWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(env); }
+        eventAttributesView->showAttributesOfEvent(env, index);
     }
     else if (eventType == "Sieve" ){
-        if (eventName == "") { sivWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(sieve); }
+        eventAttributesView->showAttributesOfEvent(sieve, index);
     }
     else if (eventType == "Spatialization" ){
-       if (eventName == "") { spaWindow->show(); }
-       else { eventAttributesView->showAttributesOfEvent(spa); }
+       eventAttributesView->showAttributesOfEvent(spa, index);
     }
     else if (eventType == "Pattern" ){
-        if (eventName == "") { patWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(pattern); }
+        eventAttributesView->showAttributesOfEvent(pattern, index);
     }
     else if (eventType == "Reverb" ){
-        if (eventName == "") { revWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(reverb); }
+        eventAttributesView->showAttributesOfEvent(reverb, index);
     }
     else if (eventType == "Filter" ){
-        if (eventName == "") { filWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(filter); }
+        eventAttributesView->showAttributesOfEvent(filter, index);
     }
     else if (eventType == "Measurement" ){
-        if (eventName == "") { meaWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(mea); }
+        eventAttributesView->showAttributesOfEvent(mea, index);
     } 
 
     mainWindow->ui->eventsScrollArea->widget()->adjustSize();

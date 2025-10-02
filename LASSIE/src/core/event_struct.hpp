@@ -51,18 +51,18 @@ typedef enum {
 
 typedef struct TimeSignature TimeSignature;
 struct TimeSignature {
-    unsigned bar_value;
-    unsigned note_value;
+    QString bar_value;
+    QString note_value;
 };
 
 typedef struct Tempo Tempo;
 struct Tempo {
     unsigned method_flag; // true = as fraction, false = as note value
-    Tempoprefix prefix;
-    Temponotevalue note_value;
-    QString frentry_1;
-    QString frentry_2;
-    QString valentry;
+    QString prefix; /* both */
+    QString note_value; /* both */
+    QString frentry_1; /* as fraction */
+    QString frentry_2; /* as fraction */
+    QString valentry; /* as note */
 };
 
 typedef enum {
@@ -93,9 +93,9 @@ typedef enum {
 
 typedef struct ChildDef ChildDef;
 struct ChildDef {
-    QString entry_1;
-    QString entry_2;
-    QString entry_3;
+    QString entry_1; /* start time */
+    QString entry_2; /* type */
+    QString entry_3; /* duration */
     QString attack_sieve;
     QString duration_sieve;
     Childdefnflag definition_flag;
@@ -106,7 +106,7 @@ struct ChildDef {
 typedef struct Package Package;
 struct Package {
     QString event_name;
-    Eventtype event_type;
+    QString event_type;
     QString weight;
     QString attack_envelope;
     QString attackenvelope_scale;

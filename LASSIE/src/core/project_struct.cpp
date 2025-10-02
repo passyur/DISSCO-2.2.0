@@ -70,10 +70,7 @@ namespace XercesParser {
         transcodeToQString(name_el, package.event_name);
 
         DOMElement *type_el = name_el->getNextElementSibling();
-        DOMCharacterData *textdata = (DOMCharacterData*)(type_el->getFirstChild());
-        char *buffer = XMLString::transcode(textdata->getData());
-        package.event_type = (Eventtype)std::atoi(buffer);
-        XMLString::release(&buffer);
+        transcodeToQString(type_el, package.event_type);
 
         DOMElement *weight_el = type_el->getNextElementSibling();
         transcodeToQString(weight_el, package.weight);
@@ -122,20 +119,20 @@ namespace XercesParser {
 
         DOMElement *timesig_el = eduperbeat_el->getNextElementSibling();
         DOMElement *barval_el = timesig_el->getFirstElementChild();
-        event.timesig.bar_value = getFunctionString(barval_el).toUInt();
+        event.timesig.bar_value = getFunctionString(barval_el);
 
         DOMElement *noteval_el = barval_el->getNextElementSibling();
-        event.timesig.note_value = getFunctionString(noteval_el).toUInt();
+        event.timesig.note_value = getFunctionString(noteval_el);
 
         DOMElement *tempo_el = timesig_el->getNextElementSibling();
         DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
         event.tempo.method_flag = (Numchildrenflag)getFunctionString(tempomethodflag_el).toUInt();
 
         DOMElement *tempoprefix_el = tempomethodflag_el->getNextElementSibling();
-        event.tempo.prefix = (Tempoprefix)getFunctionString(tempoprefix_el).toUInt();
+        event.tempo.prefix = getFunctionString(tempoprefix_el);
 
         DOMElement *temponoteval_el = tempoprefix_el->getNextElementSibling();
-        event.tempo.note_value = (Temponotevalue)getFunctionString(temponoteval_el).toUInt();
+        event.tempo.note_value = getFunctionString(temponoteval_el);
 
         DOMElement *tempofrentry1_el = temponoteval_el->getNextElementSibling();
         event.tempo.frentry_1 = getFunctionString(tempofrentry1_el);
@@ -162,7 +159,8 @@ namespace XercesParser {
         DOMElement *childdef_el = numchildren_el->getNextElementSibling();
         curr = childdef_el->getFirstElementChild();
         event.child_event_def.entry_1 = getFunctionString(curr);
-
+        qDebug() << event.child_event_def.entry_1;
+         
         curr = curr->getNextElementSibling();
         event.child_event_def.entry_2 = getFunctionString(curr);
 
@@ -432,7 +430,20 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eh);
             XercesParser::parseEndOfHEvent(filter_el, eh);
             qDebug() << "event name " << eh.name << " of type " << eh.type;
-            h_events.append(eh);
+            switch(type){
+                case top: 
+                    top_event = eh; 
+                    break;
+                case high:
+                    high_events.append(eh);
+                    break;
+                case mid:
+                    mid_events.append(eh);
+                    break;
+                case low:
+                    low_events.append(eh);
+                    break;
+            }
             break;
         }
         case bottom: {
@@ -526,12 +537,12 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
 
-    //topEvent
-    element = element->getNextElementSibling();
-    p->top_event = XercesParser::getFunctionString(element);
+    // topEvent
+    element = element->getNextElementSibling(); //skipped, always = "0"
 
     // pieceStartTime
-    element = element->getNextElementSibling(); //skipped
+    element = element->getNextElementSibling();
+    p->start_time = XercesParser::getFunctionString(element);
 
     //duration
     element = element->getNextElementSibling();
@@ -539,6 +550,8 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     //synthesis
     element = element->getNextElementSibling();
+    qDebug() << "Synthesis: " << element->getTagName();
+
     if(XercesParser::getFunctionString(element) == "True")
         p->synthesis = true;
     else
@@ -553,12 +566,13 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     //grandstaff
     element = element->getNextElementSibling();
+    qDebug() << "Grandstaff: " << element->getTagName();
     if(XercesParser::getFunctionString(element) == "True")
         p->grand_staff = true;
     else
         p->grand_staff = false;
 
-        //numOfStaff
+    //numOfStaff
     element = element->getNextElementSibling();
     p->num_staffs = XercesParser::getFunctionString(element);
 
@@ -802,12 +816,12 @@ Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
     curr_project_ = project;  
 
     // Create a default top event
-    QList<HEvent>& pHevents = this->hevents();
+    HEvent& topevent = this->topevent();
     HEvent defaultTop;
     defaultTop.type = top;
-    defaultTop.name = this->topevent();
+    defaultTop.name = "0";
     defaultTop.orderinpalette = "-1";
-    pHevents.push_back(defaultTop);
+    topevent = defaultTop;
 
     return project;
 }

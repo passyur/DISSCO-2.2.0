@@ -6,13 +6,16 @@
 #include <QMap>
 #include <QHash>
 #include <QObject>
-#include "event_struct.hpp"
-#include "EnvelopeLibraryEntry.hpp"
-#include "MarkovModel.h"
-
 #include <QFile>
 #include <QFileInfo>
+
 #include <xercesc/dom/DOMElement.hpp>
+
+#include "event_struct.hpp"
+#include "EnvelopeLibraryEntry.hpp"
+
+// cmod
+#include "MarkovModel.h"
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -20,12 +23,7 @@ the model: all transactions dealing with Projects must go through the ProjectMan
               unnecessary to the caller. 
 */
 
-// QMap<QString, bool> default_note_modifiers;
-
 class ProjectManager;
-
-// class IEvent;
-
 class EnvelopeLibraryEntry;
 
 class Project : public QObject {
@@ -51,9 +49,9 @@ class Project : public QObject {
         QByteArray id;
 
         /* properties */
-        QString top_event = "0";
         QString title; /* file name */
         QString file_flag = "THMLBsnv";
+        QString start_time = "0";
         QString duration = "";
         QString num_channels = "2";
         QString sample_rate = "44100";
@@ -75,7 +73,10 @@ class Project : public QObject {
         bool empty_project = false;
 
         /* event details */
-        QList<HEvent> h_events;
+        HEvent top_event;
+        QList<HEvent> high_events;
+        QList<HEvent> mid_events;
+        QList<HEvent> low_events;
         QList<BottomEvent> bottom_events;
         QList<SpectrumEvent> spectrum_events;
         QList<NoteEvent> note_events;
@@ -138,9 +139,9 @@ class ProjectManager : public QObject {
 
         QFileInfo fileinfo()        { return curr_project_->fileinfo; }
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
-        QString& topevent()         { return curr_project_->top_event; }
         QString& title()            { return curr_project_->title; }
         QString& fileflag()         { return curr_project_->file_flag; }
+        QString& starttime()        { return curr_project_->start_time; }
         QString& duration()         { return curr_project_->duration; }
         QString& numchannels()      { return curr_project_->num_channels; }
         QString& samplerate()       { return curr_project_->sample_rate; }
@@ -153,14 +154,16 @@ class ProjectManager : public QObject {
         QString& measure()          { return curr_project_->measure; }
 
         bool& modified()            { return curr_project_->modifiedButNotSaved; }
-        // bool& getters
         bool& grandstaff()          { return curr_project_->grand_staff; }
         bool& score()               { return curr_project_->score; }
         bool& synthesis()           { return curr_project_->synthesis; }
         bool& outputparticel()      { return curr_project_->output_particel; }
         bool& emptyproject()        { return curr_project_->empty_project; }
 
-        QList<HEvent>& hevents() { return curr_project_->h_events; }
+        HEvent& topevent() { return curr_project_->top_event; }
+        QList<HEvent>& highevents() { return curr_project_->high_events; }
+        QList<HEvent>& midevents() { return curr_project_->mid_events; }
+        QList<HEvent>& lowevents() { return curr_project_->low_events; }
         QList<BottomEvent>& bottomevents() { return curr_project_->bottom_events; }
         QList<SpectrumEvent>& spectrumevents() { return curr_project_->spectrum_events; }
         QList<NoteEvent>& noteevents() { return curr_project_->note_events; }

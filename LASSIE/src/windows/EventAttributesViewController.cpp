@@ -210,7 +210,7 @@ LayerBox::LayerBox(EventAttributesViewController* parentController,
 
 LayerBox::~LayerBox() {}
 
-void EventAttributesViewController::showAttributesOfEvent(Eventtype event) { // (IEvent* event)
+void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsigned index) { // (IEvent* event)
     // if (!event) {
     //     m_currentlyShownEvent = nullptr;
     //     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
@@ -223,7 +223,9 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype event) { // 
 
     // saveCurrentShownEventData();
     // m_currentlyShownEvent = event;
-    m_currentlyShownEvent = event;
+    m_curreventtype = type;
+    m_curreventindex = index;
+    
     showCurrentEventData();
 }
 /*
@@ -376,6 +378,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
     }
 }
 */
+
 void EventAttributesViewController::showCurrentEventData() {
     // clear dynamic widgets
     // qDeleteAll(m_layerBoxesStorage);
@@ -389,224 +392,307 @@ void EventAttributesViewController::showCurrentEventData() {
     //     m_soundPartialHboxes = nullptr;
     // }
 
-    // choose page
-    // int type = m_currentlyShownEvent->getEventType();
-    int type = m_currentlyShownEvent;
-    switch (type) {
-    case top: case high: case mid: case low: case bottom: {
-        ui->stackedWidget->setCurrentWidget(ui->standardPage);
-        if (type == bottom) {  
-            ui->frequencyContainer->setVisible(true);
-            ui->loudnessContainer->setVisible(true);
-            ui->modGroupContainer->setVisible(true);
-        }
-        else {
-            ui->frequencyContainer->setVisible(false);
-            ui->loudnessContainer->setVisible(false);
-            ui->modGroupContainer->setVisible(false);
-        }
-        fixStackedWidgetLayout(ui->standardPage);
-        break;
-    }
-    case sound:
-        ui->stackedWidget->setCurrentWidget(ui->soundPage);
-        fixStackedWidgetLayout(ui->soundPage);
-        break;
-    case env:
-        ui->stackedWidget->setCurrentWidget(ui->envPage);
-        fixStackedWidgetLayout(ui->envPage);
-        break;
-    case sieve:
-        ui->stackedWidget->setCurrentWidget(ui->sievePage);
-        fixStackedWidgetLayout(ui->sievePage);
-        break;
-    case spa:
-        ui->stackedWidget->setCurrentWidget(ui->spaPage);
-        fixStackedWidgetLayout(ui->spaPage);
-        break;
-    case pattern:
-        ui->stackedWidget->setCurrentWidget(ui->patPage);
-        fixStackedWidgetLayout(ui->patPage);
-        break;
-    case reverb:
-        ui->stackedWidget->setCurrentWidget(ui->revPage);     
-        fixStackedWidgetLayout(ui->revPage);  
-        break;
-    case filter:
-        ui->stackedWidget->setCurrentWidget(ui->filPage);
-        fixStackedWidgetLayout(ui->filPage);
-        break;
-    case mea:
-        ui->stackedWidget->setCurrentWidget(ui->meaPage);
-        fixStackedWidgetLayout(ui->meaPage);
-        break;
-    case note:
-        ui->stackedWidget->setCurrentWidget(ui->notePage);
-        fixStackedWidgetLayout(ui->notePage);
-        break;
-    default:
-        ui->stackedWidget->setCurrentWidget(ui->emptyPage);
-        fixStackedWidgetLayout(ui->emptyPage);
+    // Choose page based on type of currently shown event
+    Eventtype type = m_curreventtype;
+    switch(type) {
+        case top: 
+        case high: 
+        case mid: 
+        case low: 
+        case bottom:
+            ui->stackedWidget->setCurrentWidget(ui->standardPage);
+            if (type == bottom) {  
+                ui->frequencyContainer->setVisible(true);
+                ui->loudnessContainer->setVisible(true);
+                ui->modGroupContainer->setVisible(true);
+            } else {
+                ui->frequencyContainer->setVisible(false);
+                ui->loudnessContainer->setVisible(false);
+                ui->modGroupContainer->setVisible(false);
+            }
+            fixStackedWidgetLayout(ui->standardPage);
+            break;
+        case sound:
+            ui->stackedWidget->setCurrentWidget(ui->soundPage);
+            fixStackedWidgetLayout(ui->soundPage);
+            break;
+        case env:
+            ui->stackedWidget->setCurrentWidget(ui->envPage);
+            fixStackedWidgetLayout(ui->envPage);
+            break;
+        case sieve:
+            ui->stackedWidget->setCurrentWidget(ui->sievePage);
+            fixStackedWidgetLayout(ui->sievePage);
+            break;
+        case spa:
+            ui->stackedWidget->setCurrentWidget(ui->spaPage);
+            fixStackedWidgetLayout(ui->spaPage);
+            break;
+        case pattern:
+            ui->stackedWidget->setCurrentWidget(ui->patPage);
+            fixStackedWidgetLayout(ui->patPage);
+            break;
+        case reverb:
+            ui->stackedWidget->setCurrentWidget(ui->revPage);     
+            fixStackedWidgetLayout(ui->revPage);  
+            break;
+        case filter:
+            ui->stackedWidget->setCurrentWidget(ui->filPage);
+            fixStackedWidgetLayout(ui->filPage);
+            break;
+        case mea:
+            ui->stackedWidget->setCurrentWidget(ui->meaPage);
+            fixStackedWidgetLayout(ui->meaPage);
+            break;
+        case note:
+            ui->stackedWidget->setCurrentWidget(ui->notePage);
+            fixStackedWidgetLayout(ui->notePage);
+            break;
+        default:
+            ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+            fixStackedWidgetLayout(ui->emptyPage);
     }
 
-    /*
     // populate fields
-    ui->nameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+    ProjectManager *pm = Inst::get_project_manager();
+    // ui->nameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+    HEvent event;
+    if(type <= bottom){
+        if(type == bottom){
+            const BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
+            ExtraInfo extra_info = bottom_event.extra_info;
 
-    if (type <= eventBottom) {
-        ui->maxChildDurEntry->setText(QString::fromStdString(m_currentlyShownEvent->getMaxChildDur()));
-        ui->timeSig1Entry->setText(QString::fromStdString(m_currentlyShownEvent->getTimeSignatureEntry1()));
-        ui->timeSig2Entry->setText(QString::fromStdString(m_currentlyShownEvent->getTimeSignatureEntry2()));
-        ui->unitsPerSecondEntry->setText(QString::fromStdString(m_currentlyShownEvent->getUnitsPerSecond()));
+            FreqInfo freq_info = extra_info.freq_info;
+            ui->wellTemperedRadio->setChecked(freq_info.freq_flag == welltempered);
+            ui->fundamentalRadio->setChecked(freq_info.freq_flag == fundamental);
+            ui->continuumRadio->setChecked(freq_info.freq_flag == continuum);
+            ui->wellTemperedEntry->setText(freq_info.entry_1);
+            ui->funFreqEntry1->setText(freq_info.entry_1);
+            ui->funFreqEntry2->setText(freq_info.entry_2);
+            // ui->contFreqEntry->setText(freq_info.entry_1);
+            ui->hertzRadio->setChecked(freq_info.continuum_flag == hertz);
+            ui->powerOfTwoRadio->setChecked(freq_info.continuum_flag == power_of_two);
+
+            ui->loudnessEntry->setText(extra_info.loudness);
+            ui->spaEntry->setText(extra_info.spa);
+            ui->revEntry->setText(extra_info.reverb);
+            ui->filEntry->setText(extra_info.filter);
+            ui->modifierGroupEntry->setText(extra_info.modifier_group);
+
+            /// \todo modifiers
+            // if (ui->childTypeSoundRadio->isChecked()) {
+            //     auto* em = extra->getModifiers();
+            //     while (em) {
+            //         auto* align = new EventBottomModifierAlignment(em, this);
+            //         if (!m_modifiers) m_modifiers = align;
+            //         else {
+            //             auto* tail = m_modifiers;
+            //             while (tail->next) tail = tail->next;
+            //             tail->next = align;
+            //             align->prev = tail;
+            //         }
+            //         ui.modifiersLayout->addWidget(align);
+            //         em = em->next;
+            //     }
+            //     for(auto iter : )
+            // }
+
+            event = bottom_event.event;
+        }else if(type == top){
+            event = pm->topevent();
+        }else if(type == high){
+            event = pm->highevents()[m_curreventindex];
+            qDebug() << "got high";
+        }else if(type == mid){
+            event = pm->midevents()[m_curreventindex];
+        }else{
+            event = pm->lowevents()[m_curreventindex];
+        }
+        ui->nameEntry->setText(event.name);
+
+        ui->maxChildDurEntry->setText(event.max_child_duration);
+        ui->timeSig1Entry->setText(event.timesig.bar_value);
+        ui->timeSig2Entry->setText(event.timesig.note_value);
+        ui->unitsPerSecondEntry->setText(event.edu_perbeat);
 
         // tempo
-        bool asNote = (m_currentlyShownEvent->getTempoMethodFlag() == 0);
-        ui->tempoAsNoteValueRadio->setChecked(asNote);
-        ui->tempoAsFractionRadio->setChecked(!asNote);
-        ui->tempoNotePrefixCombo->setCurrentIndex(static_cast<int>(m_currentlyShownEvent->getTempoPrefix()));
-        ui->tempoNoteValueCombo->setCurrentIndex(static_cast<int>(m_currentlyShownEvent->getTempoNoteValue()));
-        ui->tempoFractionEntry1->setText(QString::fromStdString(m_currentlyShownEvent->getTempoFractionEntry1()));
-        ui->tempoValueEntry->setText(QString::fromStdString(m_currentlyShownEvent->getTempoValueEntry()));
+        Tempo tempo = event.tempo;
+        /// \todo sort this out
+        // ui->tempoNotePrefixCombo->setCurrentIndex(static_cast<int>(tempo.prefix));
+        // ui->tempoNoteValueCombo->setCurrentIndex(static_cast<int>(tempo.note_value));
+        
+        if(tempo.method_flag == 0){  /* as note */
+            ui->tempoAsNoteValueRadio->click();
+            ui->tempoNotePrefixCombo1->setCurrentIndex(tempo.prefix.toUInt());
+            ui->tempoNoteCombo1->setCurrentIndex(tempo.note_value.toUInt());
+            ui->tempoValueEntry->setText(tempo.valentry);
+        }else{ /* as fraction */
+            ui->tempoAsFractionRadio->click();
+            ui->tempoFractionEntry1->setText(tempo.frentry_1);
+            ui->tempoFractionEntry2->setText(tempo.frentry_2);
+            ui->tempoNotePrefixCombo2->setCurrentIndex(tempo.prefix.toUInt());
+            ui->tempoNoteCombo2->setCurrentIndex(tempo.note_value.toUInt());
+        }
 
         // num children
-        int flag = m_currentlyShownEvent->getFlagNumChildren();
-        ui->fixedButton->setChecked(flag == 0);
-        ui->densityButton->setChecked(flag == 1);
-        ui->byLayerButton->setChecked(flag == 2);
-        ui->childCountEntry1->setText(QString::fromStdString(m_currentlyShownEvent->getNumChildrenEntry1()));
-        ui->childCountEntry2->setText(QString::fromStdString(m_currentlyShownEvent->getNumChildrenEntry2()));
-        ui->childCountEntry3->setText(QString::fromStdString(m_currentlyShownEvent->getNumChildrenEntry3()));
+        NumChildren num_children = event.numchildren;
+        switch(num_children.method_flag){
+            case Numchildrenflag::fixed:
+                ui->fixedButton->click();
+                break;
+            case density:
+                ui->densityButton->click();
+                break;
+            case bylayer:
+                ui->byLayerButton->click();
+        }
+        ui->childCountEntry1->setText(num_children.entry_1);
+        ui->childCountEntry2->setText(num_children.entry_2);
+        ui->childCountEntry3->setText(num_children.entry_3);
 
         // build layers
-        for (auto* layer : m_currentlyShownEvent->layers) {
-            LayerBox* box = new LayerBox(this, m_sharedPointers->projectView, layer,
-                                         (flag==2));
-            ui->layersLayout->addWidget(box);
-            m_layerBoxesStorage.push_back(box);
-        }
-        refreshChildTypeInLayer();
+        // for (auto* layer : m_currentlyShownEvent->layers) {
+        //     LayerBox* box = new LayerBox(this, m_sharedPointers->projectView, layer,
+        //                                 (event.numchildren.method_flag == bylayer));
+        //     ui->layersLayout->addWidget(box);
+        //     m_layerBoxesStorage.push_back(box);
+        // }
+        // refreshChildTypeInLayer();
 
         // child‐event‐def
-        int ced = m_currentlyShownEvent->getFlagChildEventDef();
-        ui->continuumButton->setChecked(ced == 0);
-        ui->sweepButton->setChecked(ced == 1);
-        ui->discreteButton->setChecked(ced == 2);
-        ui->childDefEntry1->setText(QString::fromStdString(m_currentlyShownEvent->getChildEventDefEntry1()));
-        ui->childDefEntry2->setText(QString::fromStdString(m_currentlyShownEvent->getChildEventDefEntry2()));
-        ui->childDefEntry3->setText(QString::fromStdString(m_currentlyShownEvent->getChildEventDefEntry3()));
-        ui->attackSieveEntry->setText(QString::fromStdString(m_currentlyShownEvent->getChildEventDefAttackSieve()));
-        ui->durationSieveEntry->setText(QString::fromStdString(m_currentlyShownEvent->getChildEventDefDurationSieve()));
-        int st = m_currentlyShownEvent->getFlagChildEventDefStartType();
-        ui->startTypePercentRadio->setChecked(st==0);
-        ui->startTypeUnitsRadio->setChecked(st==1);
-        ui->startTypeSecondsRadio->setChecked(st==2);
-        int dt = m_currentlyShownEvent->getFlagChildEventDefDurationType();
-        ui->durationTypePercentRadio->setChecked(dt==0);
-        ui->durationTypeUnitsRadio->setChecked(dt==1);
-        ui->durationTypeSecondsRadio->setChecked(dt==2);
+        ChildDef childeventdef = event.child_event_def;
+        switch(childeventdef.definition_flag){
+            case discrete:
+                ui->discreteButton->click();
+                break;
+            case continuumdef:
+                ui->continuumButton->click();
+                break;
+            case sweep:
+                ui->sweepButton->click();
+                break;
+
+        }
+        ui->childDefEntry1->setText(childeventdef.entry_1);
+        ui->childDefEntry2->setText(childeventdef.entry_2);
+        ui->childDefEntry3->setText(childeventdef.entry_3);
+        ui->attackSieveEntry->setText(childeventdef.attack_sieve);
+        ui->durationSieveEntry->setText(childeventdef.duration_sieve);
+
+        Childdeftimeflag st_flag = childeventdef.starttype_flag;
+        ui->startTypePercentRadio->setChecked(st_flag == percentage);
+        ui->startTypeUnitsRadio->setChecked(st_flag == units);
+        ui->startTypeSecondsRadio->setChecked(st_flag == seconds);
+
+        Childdeftimeflag dt_flag = childeventdef.durationtype_flag;
+        ui->durationTypePercentRadio->setChecked(dt_flag == percentage);
+        ui->durationTypeUnitsRadio->setChecked(dt_flag == units);
+        ui->durationTypeSecondsRadio->setChecked(dt_flag == seconds);
 
         // environment
-        if (type != eventBottom) {
-            ui->spaEntry->setText(QString::fromStdString(m_currentlyShownEvent->getSpa()));
-            ui->revEntry->setText(QString::fromStdString(m_currentlyShownEvent->getRev()));
-            ui->filEntry->setText(QString::fromStdString(m_currentlyShownEvent->getFil()));
+        if (type != bottom) {
+            ui->spaEntry->setText(event.spa);
+            ui->revEntry->setText(event.reverb);
+            ui->filEntry->setText(event.filter);
         }
+    }else{
+        // if(type == sound){
+            /// \todo implement partials info display
+            // auto* extra = m_currentlyShownEvent->getEventExtraInfo();
+            // ui->spectrumNumPartialEntry->setText(QString::fromStdString(extra->getNumPartials()));
+            // ui->spectrumDeviationEntry->setText(QString::fromStdString(extra->getDeviation()));
+            // ui->spectrumGenEntry->setText(QString::fromStdString(extra->getSpectrumGenBuilder()));
+            /// \todo implement partials display
+            // auto* sp = extra->getSpectrumPartials();
+            // if (sp) {
+            //     m_soundPartialHboxes = new SoundPartialHBox(sp, this);
+            //     ui.partialsLayout->addWidget(m_soundPartialHboxes);
+            //     sp = sp->next;
+            //     while (sp) {
+            //         auto* nextBox = new SoundPartialHBox(sp, this);
+            //         m_soundPartialHboxes->next = nextBox;
+            //         nextBox->prev = m_soundPartialHboxes;
+            //         ui->partialsLayout->addWidget(nextBox);
+            //         sp = sp->next;
+            //     }
+            //     m_soundPartialHboxes->setPartialNumber(1);
+            // }
 
-        // bottom‐extra
-        if (type == eventBottom) {
-            auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-            ui->wellTemperedRadio->setChecked(extra->getFrequencyFlag()==0);
-            ui->fundamentalRadio->setChecked(extra->getFrequencyFlag()==1);
-            ui->contFreqRadio->setChecked(extra->getFrequencyFlag()==2);
-            ui->wellTemperedEntry->setText(QString::fromStdString(extra->getFrequencyEntry1()));
-            ui->funFreqEntry1->setText(QString::fromStdString(extra->getFrequencyEntry1()));
-            ui->funFreqEntry2->setText(QString::fromStdString(extra->getFrequencyEntry2()));
-            ui->contFreqEntry->setText(QString::fromStdString(extra->getFrequencyEntry1()));
-            ui->hertzRadio->setChecked(extra->getFrequencyContinuumFlag()==0);
-            ui->powerOfTwoRadio->setChecked(extra->getFrequencyContinuumFlag()==1);
-            ui->loudnessEntry->setText(QString::fromStdString(extra->getLoudness()));
-            ui->spatializationEntry->setText(QString::fromStdString(extra->getSpatialization()));
-            ui->reverbEntry->setText(QString::fromStdString(extra->getReverb()));
-            ui->filterEntry->setText(QString::fromStdString(extra->getFilter()));
-            ui->modifierGroupEntry->setText(QString::fromStdString(extra->getModifierGroup()));
+        // }else
+        if(type == env){
+            const EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
+            ui->envNameEntry->setText(event.name);
+            ui->envBuilderEntry->setText(event.envelope_builder);
+        }else if(type == sieve){
+            const SieveEvent& event = pm->sieveevents()[m_curreventindex];
+            ui->sieveNameEntry->setText(event.name);
+            ui->sieveBuilderEntry->setText(event.sieve_builder);
+        }else if(type == spa){
+            const SpaEvent& event = pm->spaevents()[m_curreventindex];
+            ui->spaNameEntry->setText(event.name);
+            ui->spaBuilderEntry->setText(event.spatialization);
+        }else if(type == pattern){
+            const PatternEvent& event = pm->patternevents()[m_curreventindex];
+            ui->patNameEntry->setText(event.name);
+            ui->patBuilderEntry->setText(event.pattern_builder);
+        }else if(type == reverb){
+            const ReverbEvent& event = pm->reverbevents()[m_curreventindex];
+            ui->revNameEntry->setText(event.name);
+            ui->revBuilderEntry->setText(event.reverberation);
+        }else if(type == note){
+            const NoteEvent& event = pm->noteevents()[m_curreventindex];
+            ui->noteNameEntry->setText(event.name);
+            ui->staffNumberEntry->setText(event.note_info.staffs);
+        }else if(type == filter){
+            const FilterEvent& event = pm->filterevents()[m_curreventindex];
+            ui->filNameEntry->setText(event.name);
+            ui->filBuilderEntry->setText(event.filter_builder);
+        }else{
+            qDebug() << "Cannot show event data: type of event not valid";
+        }
+        // Sound event
+        // if (type == eventSound) {
+            
+        // }
 
-            // modifiers
-            if (ui->childTypeSoundRadio->isChecked()) {
-                auto* em = extra->getModifiers();
-                while (em) {
-                    auto* align = new EventBottomModifierAlignment(em, this);
-                    if (!m_modifiers) m_modifiers = align;
-                    else {
-                        auto* tail = m_modifiers;
-                        while (tail->next) tail = tail->next;
-                        tail->next = align;
-                        align->prev = tail;
-                    }
-                    ui.modifiersLayout->addWidget(align);
-                    em = em->next;
-                }
-            }
-        }
-    }
-    // Sound event
-    else if (type == eventSound) {
-        auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-        ui->spectrumNumPartialEntry->setText(QString::fromStdString(extra->getNumPartials()));
-        ui->spectrumDeviationEntry->setText(QString::fromStdString(extra->getDeviation()));
-        ui->spectrumGenEntry->setText(QString::fromStdString(extra->getSpectrumGenBuilder()));
-        auto* sp = extra->getSpectrumPartials();
-        if (sp) {
-            m_soundPartialHboxes = new SoundPartialHBox(sp, this);
-            ui.partialsLayout->addWidget(m_soundPartialHboxes);
-            sp = sp->next;
-            while (sp) {
-                auto* nextBox = new SoundPartialHBox(sp, this);
-                m_soundPartialHboxes->next = nextBox;
-                nextBox->prev = m_soundPartialHboxes;
-                ui->partialsLayout->addWidget(nextBox);
-                sp = sp->next;
-            }
-            m_soundPartialHboxes->setPartialNumber(1);
-        }
-    }
-
-    // envelope, sieve, spa, pat, rev, fil, mea, note
-    else {
-        auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-        if (type == eventEnv) {
-            ui->envNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->envBuilderEntry->setText(QString::fromStdString(extra->getEnvelopeBuilder()));
-        }
-        else if (type == eventSiv) {
-            ui->sieveNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->sieveBuilderEntry->setText(QString::fromStdString(extra->getSieveBuilder()));
-        }
-        else if (type == eventSpa) {
-            ui->spaNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->spaBuilderEntry->setText(QString::fromStdString(extra->getSpatializationBuilder()));
-        }
-        else if (type == eventPat) {
-            ui->patNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->patBuilderEntry->setText(QString::fromStdString(extra->getPatternBuilder()));
-        }
-        else if (type == eventRev) {
-            ui->revNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->revBuilderEntry->setText(QString::fromStdString(extra->getReverbBuilder()));
-        }
-        else if (type == eventFil) {
-            ui->filNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->filBuilderEntry->setText(QString::fromStdString(extra->getFilterBuilder()));
-        }
-        else if (type == eventMea) {
-            ui->meaNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->meaBuilderEntry->setText(QString::fromStdString(extra->getMeasureBuilder()));
-        }
-        else if (type == eventNote) {
-            ui->noteNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-            ui->staffNumberEntry->setText(QString::fromStdString(extra->getStaffNum()));
-            buildNoteModifiersList();
-        }
-    }*/
+        // // envelope, sieve, spa, pat, rev, fil, mea, note
+        // else {
+        //     auto* extra = m_currentlyShownEvent->getEventExtraInfo();
+        //     if (type == eventEnv) {
+        //         ui->envNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->envBuilderEntry->setText(QString::fromStdString(extra->getEnvelopeBuilder()));
+        //     }
+        //     else if (type == eventSiv) {
+        //         ui->sieveNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->sieveBuilderEntry->setText(QString::fromStdString(extra->getSieveBuilder()));
+        //     }
+        //     else if (type == eventSpa) {
+        //         ui->spaNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->spaBuilderEntry->setText(QString::fromStdString(extra->getSpatializationBuilder()));
+        //     }
+        //     else if (type == eventPat) {
+        //         ui->patNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->patBuilderEntry->setText(QString::fromStdString(extra->getPatternBuilder()));
+        //     }
+        //     else if (type == eventRev) {
+        //         ui->revNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->revBuilderEntry->setText(QString::fromStdString(extra->getReverbBuilder()));
+        //     }
+        //     else if (type == eventFil) {
+        //         ui->filNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->filBuilderEntry->setText(QString::fromStdString(extra->getFilterBuilder()));
+        //     }
+        //     else if (type == eventMea) {
+        //         ui->meaNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->meaBuilderEntry->setText(QString::fromStdString(extra->getMeasureBuilder()));
+        //     }
+        //     else if (type == eventNote) {
+        //         ui->noteNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
+        //         ui->staffNumberEntry->setText(QString::fromStdString(extra->getStaffNum()));
+        //         buildNoteModifiersList();
+        //     }
+        // }
+    } /* not hevent nor bottom event */
 }
 
 void EventAttributesViewController::fixedButtonClicked() {

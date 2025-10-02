@@ -53,9 +53,6 @@ private:
     // Store events by type
     QMap<QString, std::vector<IEvent*>> eventsByType;
     
-    // Convert event type string to EventType enum
-    int getEventTypeFromString(const QString& type);
-
     // Tree View
     QTreeView* treeView;
     QStandardItemModel* model;

@@ -118,6 +118,7 @@ void MainWindow::openFile()
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
     if (!fileName.isEmpty()) {
         loadFile(fileName);
+        // Project *p = Inst::get_project_manager()->open();
     }
 }
 
