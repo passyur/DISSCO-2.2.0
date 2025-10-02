@@ -537,8 +537,12 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     element = element->getNextElementSibling(); // skip Title attribute
     p->file_flag = XercesParser::getFunctionString(element);
 
+    // topEvent
+    element = element->getNextElementSibling(); //skipped, always = "0"
+
     // pieceStartTime
-    element = element->getNextElementSibling(); //skipped
+    element = element->getNextElementSibling();
+    p->start_time = XercesParser::getFunctionString(element);
 
     //duration
     element = element->getNextElementSibling();
@@ -546,6 +550,8 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     //synthesis
     element = element->getNextElementSibling();
+    qDebug() << "Synthesis: " << element->getTagName();
+
     if(XercesParser::getFunctionString(element) == "True")
         p->synthesis = true;
     else
@@ -560,12 +566,13 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     //grandstaff
     element = element->getNextElementSibling();
+    qDebug() << "Grandstaff: " << element->getTagName();
     if(XercesParser::getFunctionString(element) == "True")
         p->grand_staff = true;
     else
         p->grand_staff = false;
 
-        //numOfStaff
+    //numOfStaff
     element = element->getNextElementSibling();
     p->num_staffs = XercesParser::getFunctionString(element);
 

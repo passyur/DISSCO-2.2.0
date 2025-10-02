@@ -51,6 +51,7 @@ class Project : public QObject {
         /* properties */
         QString title; /* file name */
         QString file_flag = "THMLBsnv";
+        QString start_time = "0";
         QString duration = "";
         QString num_channels = "2";
         QString sample_rate = "44100";
@@ -140,6 +141,7 @@ class ProjectManager : public QObject {
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
         QString& title()            { return curr_project_->title; }
         QString& fileflag()         { return curr_project_->file_flag; }
+        QString& starttime()        { return curr_project_->start_time; }
         QString& duration()         { return curr_project_->duration; }
         QString& numchannels()      { return curr_project_->num_channels; }
         QString& samplerate()       { return curr_project_->sample_rate; }

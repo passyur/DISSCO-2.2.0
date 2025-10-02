@@ -195,7 +195,7 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("PieceStartTime");	
-                xmlWriter.writeCharacters("0");
+                xmlWriter.writeCharacters(pm->starttime());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Duration");	
