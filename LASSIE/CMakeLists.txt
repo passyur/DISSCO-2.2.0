@@ -31,6 +31,7 @@ qt_add_executable(LASSIE
     src/widgets/PaletteViewController.cpp src/widgets/PaletteViewController.hpp
     src/widgets/EventAttributesViewController.cpp src/widgets/EventAttributesViewController.hpp src/ui/Attributes.ui
     src/dialogs/FileNewObject.cpp src/dialogs/FileNewObject.hpp src/ui/FileNewObject.ui
+    src/widgets/LayerBox.cpp src/widgets/LayerBox.hpp
     src/widgets/Modifiers.cpp src/widgets/Modifiers.hpp src/ui/Modifiers.ui
     # src/core/IEvent.cpp src/core/IEvent.h
 )

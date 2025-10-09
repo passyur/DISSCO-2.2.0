@@ -1,6 +1,5 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "../widgets/EnvLibDrawingArea.hpp"
-#include "../widgets/ProjectViewController.hpp"
 #include "../core/EnvelopeLibraryEntry.hpp"
 
 #include <QTreeView>
