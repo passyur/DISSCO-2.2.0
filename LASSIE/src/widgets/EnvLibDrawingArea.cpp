@@ -1,5 +1,5 @@
 #include "EnvLibDrawingArea.hpp"
-#include "EnvelopeLibraryWindow.hpp"
+#include "../windows/EnvelopeLibraryWindow.hpp"
 #include "../core/EnvelopeLibraryEntry.hpp"
 
 #include <QPainter>

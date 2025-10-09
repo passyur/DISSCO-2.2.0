@@ -25,7 +25,7 @@ class QKeyEvent;
 class Modifiers;
 
 namespace Ui {
-class EventAttributesViewController;
+    class EventAttributesViewController;
 }
 
 typedef enum {
@@ -71,7 +71,7 @@ public:
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
     //  */
-    void showAttributesOfEvent(Eventtype event); //IEvent* event
+    void showAttributesOfEvent(Eventtype type, unsigned index); //IEvent* event
 
     // /*! \brief get the currently shown event */
     // IEvent* getCurrentEvent() const;
@@ -145,7 +145,11 @@ private:
     // // data/model
     // SharedPointers*              m_sharedPointers;
     // IEvent*                      m_currentlyShownEvent;
-    Eventtype                       m_currentlyShownEvent;
+    // Eventtype                       m_currentlyShownEvent;
+    
+    Eventtype m_curreventtype;
+    // index of event in QList in ProjectManager
+    unsigned m_curreventindex;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 

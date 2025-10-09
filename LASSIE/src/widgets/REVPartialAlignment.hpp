@@ -2,7 +2,7 @@
 #define REVPARTIALALIGNMENT_HPP
 
 
-#include "FunctionGenerator.hpp"
+#include "../dialogs/FunctionGenerator.hpp"
 
 #include <QDialog>
 #include <QWidget>

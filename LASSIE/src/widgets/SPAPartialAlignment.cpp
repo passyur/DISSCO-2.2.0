@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "FunctionGenerator.hpp"
+#include "../dialogs/FunctionGenerator.hpp"
 #include "../ui/ui_FunctionGenerator.h"
 
 SPAPartialAlignment::SPAPartialAlignment(QWidget *parent)

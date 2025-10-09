@@ -1,7 +1,7 @@
 #include "ObjectWindow.hpp"
-#include "PaletteViewController.hpp"
+#include "../widgets/PaletteViewController.hpp"
 #include "../../CMOD/src/Libraries.h"
-#include "ProjectViewController.hpp"
+#include "../widgets/ProjectViewController.hpp"
 #include "MainWindow.hpp"
 #include <QResizeEvent>
 #include <QDebug>

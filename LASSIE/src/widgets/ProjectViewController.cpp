@@ -25,19 +25,19 @@
 #include <QStandardItem>
 
 #include "ProjectViewController.hpp"
-#include "MainWindow.hpp"
+#include "../windows/MainWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "../inst.hpp"
 #include "../core/EnvelopeLibraryEntry.hpp"
-#include "ProjectPropertiesDialog.hpp"
+#include "../dialogs/ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
-#include "FunctionGenerator.hpp"
+#include "../dialogs/FunctionGenerator.hpp"
 #include "../ui/ui_FunctionGenerator.h"
-#include "ObjectWindow.hpp"
+#include "../windows/ObjectWindow.hpp"
 #include "PaletteViewController.hpp"
 #include "../core/event_struct.hpp"
 #include "EventAttributesViewController.hpp"
-#include "FileNewObject.hpp"
+#include "../dialogs/FileNewObject.hpp"
 #include "../ui/ui_FileNewObject.h"
 // #include "../core/IEvent.h"
 // #include "muParser.h"
@@ -195,7 +195,7 @@ void ProjectView::save(){
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("PieceStartTime");	
-                xmlWriter.writeCharacters("0");
+                xmlWriter.writeCharacters(pm->starttime());
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("Duration");	
@@ -337,6 +337,7 @@ void ProjectView::save(){
 
         xmlWriter.writeStartElement("Events");	
             /* STILL IN PROGRESS  */
+            /* really ugly to have this be copied when it should be a const reference & implicitly shared, but I'm still mulling how to const-initialize this with the contents of 4 QLists.. -jacob */
             QList<HEvent> pHevents;
             // populate vector with all HEvent subcategories
             pHevents.append(pm->topevent());
@@ -440,7 +441,7 @@ void ProjectView::save(){
                                     xmlWriter.writeCharacters(layerPkg.event_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("EventType");
-                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                    xmlWriter.writeCharacters(layerPkg.event_type);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Weight");
                                     xmlWriter.writeCharacters(layerPkg.weight);
@@ -533,10 +534,10 @@ void ProjectView::save(){
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("TimeSignature");
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.bar_value));
+                        xmlWriter.writeCharacters(item.event.timesig.bar_value);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(QString("%1").arg(item.event.timesig.note_value));
+                        xmlWriter.writeCharacters(item.event.timesig.note_value);
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Tempo");
@@ -612,7 +613,7 @@ void ProjectView::save(){
                                     xmlWriter.writeCharacters(layerPkg.event_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("EventType");
-                                    xmlWriter.writeCharacters(QString("%1").arg(layerPkg.event_type));
+                                    xmlWriter.writeCharacters(layerPkg.event_type);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Weight");
                                     xmlWriter.writeCharacters(layerPkg.weight);
@@ -956,26 +957,12 @@ void ProjectView::propertiesInsertFunction() {
 }
 
 void ProjectView::insertObject() {
-    if (!newObject) {
+    if (!newObject)
         newObject = new FileNewObject(mainWindow);
-    }
 
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
         QString objName = newObject->ui->objNameEntry->text();
-    
-        // if (newObject->ui->buttonTop->isChecked()) {
-        //     QList<HEvent>& eventList = pm->hevents();
-        //     HEvent newObj = {};
-        //     newObj.type = top;
-        //     newObj.name = newObject->ui->objNameEntry->text();
-        //     eventList.push_back(newObj);
-
-        //     QStandardItem* newObjectType = new QStandardItem("Top");
-        //     QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
-        //     paletteView->folderTop->appendRow({newObjectType, newObjectName});
-        // }
-        // else 
         if (newObject->ui->buttonHigh->isChecked()) {
             pm->addEvent(high, objName);
             QStandardItem* newObjectType = new QStandardItem("High");
@@ -1063,11 +1050,9 @@ void ProjectView::insertObject() {
 }
 
 void ProjectView::updatePaletteView() {
-
-    ProjectManager *pm = Inst::get_project_manager();
-    
     QList<HEvent> pHevents;
     // populate vector with all HEvent subcategories
+    ProjectManager *pm = Inst::get_project_manager();
     pHevents.append(pm->topevent());
     pHevents.append(pm->highevents());
     pHevents.append(pm->midevents());
@@ -1159,67 +1144,53 @@ void ProjectView::updatePaletteView() {
 
 //nhi: show attributes
 // void ProjectView::showAttributes(IEvent* event) { // using QString for testing
-void ProjectView::showAttributes(QString eventType, QString eventName) {
+void ProjectView::showAttributes(QString eventType, int index) {
     // TODO: Implement event attributes display
     // This would typically show the event in an EventAttributesViewController
-    //qDebug() << "Showing attributes for event:" << QString::fromStdString(event->getEventName());
+    qDebug() << "Showing attributes for event:" << eventType << " at index " << index;
 
     // Show the ObjectWindows
     if (eventType == "Top" ){ 
-        if (eventName == "") { topWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(top); }
+        eventAttributesView->showAttributesOfEvent(top, 0);
     }
     else if (eventType == "High" ){
-        if (eventName == "") { highWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(high); }
+        eventAttributesView->showAttributesOfEvent(high, index);
     }
     else if (eventType == "Mid" ){
-        if (eventName == "") { midWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(mid); }
+        eventAttributesView->showAttributesOfEvent(mid, index);
     }
     else if (eventType == "Low" ){ 
-        if (eventName == "") { lowWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(low); }
+        eventAttributesView->showAttributesOfEvent(low, index);
     }
     else if (eventType == "Bottom" ){ 
-        if (eventName == "") { bottomWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(bottom); }
+        eventAttributesView->showAttributesOfEvent(bottom, index);
     }
     else if (eventType == "Spectrum" ){
-        if (eventName == "") { spectrumWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(sound); }
+        eventAttributesView->showAttributesOfEvent(sound, index);
     }
     else if (eventType == "Note" ){
-        if (eventName == "") { noteWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(note); }
+        eventAttributesView->showAttributesOfEvent(note, index);
     }
     else if (eventType == "Envelope" ){
-        if (eventName == "") { envWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(env); }
+        eventAttributesView->showAttributesOfEvent(env, index);
     }
     else if (eventType == "Sieve" ){
-        if (eventName == "") { sivWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(sieve); }
+        eventAttributesView->showAttributesOfEvent(sieve, index);
     }
     else if (eventType == "Spatialization" ){
-       if (eventName == "") { spaWindow->show(); }
-       else { eventAttributesView->showAttributesOfEvent(spa); }
+       eventAttributesView->showAttributesOfEvent(spa, index);
     }
     else if (eventType == "Pattern" ){
-        if (eventName == "") { patWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(pattern); }
+        eventAttributesView->showAttributesOfEvent(pattern, index);
     }
     else if (eventType == "Reverb" ){
-        if (eventName == "") { revWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(reverb); }
+        eventAttributesView->showAttributesOfEvent(reverb, index);
     }
     else if (eventType == "Filter" ){
-        if (eventName == "") { filWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(filter); }
+        eventAttributesView->showAttributesOfEvent(filter, index);
     }
     else if (eventType == "Measurement" ){
-        if (eventName == "") { meaWindow->show(); }
-        else { eventAttributesView->showAttributesOfEvent(mea); }
+        eventAttributesView->showAttributesOfEvent(mea, index);
     } 
 
     mainWindow->ui->eventsScrollArea->widget()->adjustSize();

@@ -2,7 +2,7 @@
 #define ENVELOPE_LIBRARY_WINDOW_HPP
 
 #include <QMainWindow>
-#include "ProjectViewController.hpp"
+#include "../widgets/ProjectViewController.hpp"
 
 class EnvelopeLibraryEntry;
 class ProjectView;

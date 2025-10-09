@@ -6,13 +6,16 @@
 #include <QMap>
 #include <QHash>
 #include <QObject>
-#include "event_struct.hpp"
-#include "EnvelopeLibraryEntry.hpp"
-#include "MarkovModel.h"
-
 #include <QFile>
 #include <QFileInfo>
+
 #include <xercesc/dom/DOMElement.hpp>
+
+#include "event_struct.hpp"
+#include "EnvelopeLibraryEntry.hpp"
+
+// cmod
+#include "MarkovModel.h"
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -20,12 +23,7 @@ the model: all transactions dealing with Projects must go through the ProjectMan
               unnecessary to the caller. 
 */
 
-// QMap<QString, bool> default_note_modifiers;
-
 class ProjectManager;
-
-// class IEvent;
-
 class EnvelopeLibraryEntry;
 
 class Project : public QObject {
@@ -53,6 +51,7 @@ class Project : public QObject {
         /* properties */
         QString title; /* file name */
         QString file_flag = "THMLBsnv";
+        QString start_time = "0";
         QString duration = "";
         QString num_channels = "2";
         QString sample_rate = "44100";
@@ -142,6 +141,7 @@ class ProjectManager : public QObject {
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
         QString& title()            { return curr_project_->title; }
         QString& fileflag()         { return curr_project_->file_flag; }
+        QString& starttime()        { return curr_project_->start_time; }
         QString& duration()         { return curr_project_->duration; }
         QString& numchannels()      { return curr_project_->num_channels; }
         QString& samplerate()       { return curr_project_->sample_rate; }
@@ -154,7 +154,6 @@ class ProjectManager : public QObject {
         QString& measure()          { return curr_project_->measure; }
 
         bool& modified()            { return curr_project_->modifiedButNotSaved; }
-        // bool& getters
         bool& grandstaff()          { return curr_project_->grand_staff; }
         bool& score()               { return curr_project_->score; }
         bool& synthesis()           { return curr_project_->synthesis; }
