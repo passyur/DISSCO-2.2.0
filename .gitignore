@@ -1,5 +1,6 @@
 # editor related
 *.swp
+.idea
 
 # VSCode related
 /.vscode
