@@ -14,9 +14,9 @@
 
 #include <string>
 
-#include "SPAPartialAlignment.hpp"
+#include "../widgets/SPAPartialAlignment.hpp"
 #include "../ui/ui_FunGenSPAPartialAlignment.h"
-#include "REVPartialAlignment.hpp"
+#include "../widgets/REVPartialAlignment.hpp"
 #include "../ui/ui_FunGenREVPartialAlignment.h"
 
 

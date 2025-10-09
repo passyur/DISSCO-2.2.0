@@ -18,19 +18,19 @@ qt_add_executable(LASSIE
     # src/windows/markovwindow.cpp src/windows/markovwindow.hpp
     src/windows/MarkovModelLibraryWindow.cpp src/windows/MarkovModelLibraryWindow.hpp
     src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp 
-    src/windows/EnvLibDrawingArea.cpp src/windows/EnvLibDrawingArea.hpp 
+    src/widgets/EnvLibDrawingArea.cpp src/widgets/EnvLibDrawingArea.hpp 
     src/core/EnvelopeLibraryEntry.cpp src/core/EnvelopeLibraryEntry.hpp
-    src/windows/FunctionGenerator.cpp src/windows/FunctionGenerator.hpp src/UI/FunctionGenerator.ui
-    src/windows/REVPartialAlignment.cpp src/windows/REVPartialAlignment.hpp src/UI/FunGenREVPartialAlignment.ui
-    src/windows/SPAPartialAlignment.cpp src/windows/SPAPartialAlignment.hpp src/UI/FunGenSPAPartialAlignment.ui
-    src/windows/ProjectPropertiesDialog.cpp src/windows/ProjectPropertiesDialog.hpp src/UI/ProjectPropertiesDialog.ui
+    src/dialogs/FunctionGenerator.cpp src/dialogs/FunctionGenerator.hpp src/UI/FunctionGenerator.ui
+    src/widgets/REVPartialAlignment.cpp src/widgets/REVPartialAlignment.hpp src/UI/FunGenREVPartialAlignment.ui
+    src/widgets/SPAPartialAlignment.cpp src/widgets/SPAPartialAlignment.hpp src/UI/FunGenSPAPartialAlignment.ui
+    src/dialogs/ProjectPropertiesDialog.cpp src/dialogs/ProjectPropertiesDialog.hpp src/UI/ProjectPropertiesDialog.ui
     src/inst.hpp
-    src/windows/ProjectViewController.cpp src/windows/ProjectViewController.hpp
+    src/widgets/ProjectViewController.cpp src/widgets/ProjectViewController.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
     src/windows/ObjectWindow.cpp src/windows/ObjectWindow.hpp
-    src/windows/PaletteViewController.cpp src/windows/PaletteViewController.hpp
-    src/windows/EventAttributesViewController.cpp src/windows/EventAttributesViewController.hpp src/ui/Attributes.ui
-    src/windows/FileNewObject.cpp src/windows/FileNewObject.hpp src/ui/FileNewObject.ui
+    src/widgets/PaletteViewController.cpp src/widgets/PaletteViewController.hpp
+    src/widgets/EventAttributesViewController.cpp src/widgets/EventAttributesViewController.hpp src/ui/Attributes.ui
+    src/dialogs/FileNewObject.cpp src/dialogs/FileNewObject.hpp src/ui/FileNewObject.ui
     src/widgets/LayerBox.cpp src/widgets/LayerBox.hpp
     # src/core/IEvent.cpp src/core/IEvent.h
 )

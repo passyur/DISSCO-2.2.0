@@ -1,5 +1,5 @@
 #include "MarkovModelLibraryWindow.hpp"
-#include "ProjectViewController.hpp"
+
 #include <QHBoxLayout>
 #include <QHeaderView>
 

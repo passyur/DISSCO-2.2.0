@@ -1,6 +1,6 @@
 #include "PaletteViewController.hpp"
 #include "ProjectViewController.hpp"
-#include "ObjectWindow.hpp"
+#include "../windows/ObjectWindow.hpp"
 #include "../core/event_struct.hpp"
 
 #include <QVBoxLayout>

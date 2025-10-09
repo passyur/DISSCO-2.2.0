@@ -13,7 +13,7 @@
 #include <QMenu>
 #include <QVector>
 #include <QString>
-#include "ProjectViewController.hpp"
+#include "../widgets/ProjectViewController.hpp"
 #include "../../CMOD/src/Markov.h"
 
 // Define missing constant for minimal build

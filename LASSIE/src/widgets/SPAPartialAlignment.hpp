@@ -1,7 +1,7 @@
 #ifndef SPAPARTIALALIGNMENT_HPP
 #define SPAPARTIALALIGNMENT_HPP
 
-#include "FunctionGenerator.hpp"
+#include "../dialogs/FunctionGenerator.hpp"
 
 #include <QDialog>
 #include <QWidget>

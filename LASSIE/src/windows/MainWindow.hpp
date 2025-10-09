@@ -14,7 +14,7 @@
 #include <QStatusBar>
 
 #include "../inst.hpp"
-#include "ProjectViewController.hpp" //nhi:  use ProjectViewController.hpp instead of projectview.hpp
+#include "../widgets/ProjectViewController.hpp" //nhi:  use ProjectViewController.hpp instead of projectview.hpp
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

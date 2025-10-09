@@ -1,7 +1,9 @@
 #include "EventAttributesViewController.hpp"
 #include "../ui/ui_Attributes.h"
 
-#include "FunctionGenerator.hpp"
+#include "../inst.hpp"
+
+#include "../dialogs/FunctionGenerator.hpp"
 #include "ProjectViewController.hpp"
 //#include "PaletteViewController.h"
 //#include "PartialWindow.h"

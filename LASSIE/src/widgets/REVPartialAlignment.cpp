@@ -11,9 +11,6 @@
 // #include <QOverload>
 #include <QDateTime>
 
-#include <string>
-
-#include "FunctionGenerator.hpp"
 #include "../ui/ui_FunctionGenerator.h"
 
 REVPartialAlignment::REVPartialAlignment(QWidget *parent)

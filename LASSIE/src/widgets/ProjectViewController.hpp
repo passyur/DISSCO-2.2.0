@@ -1,9 +1,7 @@
 #ifndef PROJECTVIEW_HPP
 #define PROJECTVIEW_HPP
 
-#include "MainWindow.hpp"
-#include "ProjectPropertiesDialog.hpp"
-#include "FileNewObject.hpp"
+#include "../dialogs/ProjectPropertiesDialog.hpp"
 #include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
 #include "../core/EnvelopeLibraryEntry.hpp"
@@ -16,6 +14,7 @@ class EnvelopeLibraryEntry;
 class EventAttributesViewController;
 class ObjectWindow;
 class PaletteViewController;
+class FileNewObject;
 
 class ProjectView : public QObject {
     Q_OBJECT

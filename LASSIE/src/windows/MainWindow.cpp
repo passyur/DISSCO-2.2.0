@@ -4,7 +4,6 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "MarkovModelLibraryWindow.hpp"
-#include "ProjectViewController.hpp"
 #include "../core/project_struct.hpp"
 
 #include <QApplication>
