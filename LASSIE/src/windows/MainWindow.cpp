@@ -83,6 +83,10 @@ void MainWindow::newFile()
         return;
     }
 
+    // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
+    newAct->setDisabled(true);
+    openAct->setDisabled(true);
+
     QFileInfo fileInfo(fileName);
     QString baseDir = fileInfo.absolutePath();
     QString projectName = fileInfo.completeBaseName();
@@ -115,10 +119,8 @@ void MainWindow::openFile()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                   QString(),
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty())
         loadFile(fileName);
-        // Project *p = Inst::get_project_manager()->open();
-    }
 }
 
 void MainWindow::saveFile()
@@ -369,18 +371,21 @@ void MainWindow::loadFile(const QString &fileName)
                            tr("Cannot read file %1:\n%2.")
                            .arg(QDir::toNativeSeparators(fileName),
                                file.errorString()));
+
         return;
     }
 
     // TODO: Implement file loading
     currentFile = fileName;
-    qDebug() << "Looking for:" << fileName;
-    if (projectView == NULL) {
-        Project *p = Inst::get_project_manager()->open(currentFile, NULL);
+    // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
+    openAct->setDisabled(true);
+    newAct->setDisabled(true);
 
-        projectView = new ProjectView(this, currentFile);
-        projects.push_back(projectView);
-    }
+    Project *p = Inst::get_project_manager()->open(currentFile, NULL);
+
+    projectView = new ProjectView(this, currentFile);
+    projects.push_back(projectView);
+
     setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
     statusBar()->showMessage(tr("File loaded"), 2000);
     projectView->setProperties();
