@@ -75,39 +75,22 @@ void MainWindow::newFile()
     QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
                                                   QString(),
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (fileName.isEmpty()) {
+    if (fileName.isEmpty())
         return;
-    }
-
-    // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
-    newAct->setDisabled(true);
-    openAct->setDisabled(true);
 
     QFileInfo fileInfo(fileName);
-    QString baseDir = fileInfo.absolutePath();
     QString projectName = fileInfo.completeBaseName();
-    QString projectFolder = baseDir + "/" + projectName;
+    QString projectFolder = fileInfo.absolutePath() + "/" + projectName;
     QDir dir;
-    if (!dir.exists(projectFolder)) {
+    if (!dir.exists(projectFolder))
         dir.mkdir(projectFolder);
-    }
+
     QString fullFilePath = projectFolder + "/" + projectName + ".dissco";
     currentFile = fullFilePath;
 
     setUnsavedTitle(currentFile);
-    statusBar()->showMessage(tr("File created"), 2000);
-
-    Project *p = Inst::get_project_manager()->build(currentFile, NULL);
-    projectView = new ProjectView(this, currentFile);
-    projects.push_back(projectView);
-    projectView->setProperties();
-    
-    //nhi: connect envelope library to new project
-    envelopeLibraryWindow->setActiveProject(projectView);
-
-    ui->tabWidget->show();
-    ui->paletteWidget->show();
-    enableProjectActions(true);
+    Project *p = Inst::get_project_manager()->build(currentFile, nullptr);
+    showFile();
 }
 
 void MainWindow::openFile()
@@ -115,8 +98,21 @@ void MainWindow::openFile()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                   QString(),
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (!fileName.isEmpty())
-        loadFile(fileName);
+    if (!fileName.isEmpty()){
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly | QFile::Text)) {
+            QMessageBox::warning(this, tr("LASSIE"),
+                            tr("Cannot read file %1:\n%2.")
+                            .arg(QDir::toNativeSeparators(fileName),
+                                file.errorString()));
+
+            return;
+        }
+        currentFile = fileName;
+
+        Project *p = Inst::get_project_manager()->open(currentFile, NULL);
+        showFile();
+    }
 }
 
 void MainWindow::saveFile()
@@ -359,39 +355,32 @@ void MainWindow::createStatusBar()
     statusBar()->showMessage(tr("Ready"));
 }
 
-void MainWindow::loadFile(const QString &fileName)
+void MainWindow::showFile()
 {
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("LASSIE"),
-                           tr("Cannot read file %1:\n%2.")
-                           .arg(QDir::toNativeSeparators(fileName),
-                               file.errorString()));
+    if(currentFile != nullptr){
+        if(projectView == nullptr){
+            // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
+            openAct->setDisabled(true);
+            newAct->setDisabled(true);
 
-        return;
+            projectView = new ProjectView(this, currentFile);
+
+            setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
+            statusBar()->showMessage(tr("Project loaded"), 2000);
+            projectView->setProperties();
+            
+            //nhi: connect envelope library to loaded project
+            envelopeLibraryWindow->setActiveProject(projectView);
+
+            ui->tabWidget->show();
+            ui->paletteWidget->show();
+            enableProjectActions(true);
+        }else{
+            qDebug() << "WARNING: file attempted to display while ProjectView is already allocated for an existing project.";
+        }
+    }else{
+        qDebug() << "WARNING: file attempted to display when there is no file to display!";
     }
-
-    // TODO: Implement file loading
-    currentFile = fileName;
-    // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
-    openAct->setDisabled(true);
-    newAct->setDisabled(true);
-
-    Project *p = Inst::get_project_manager()->open(currentFile, NULL);
-
-    projectView = new ProjectView(this, currentFile);
-    projects.push_back(projectView);
-
-    setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
-    statusBar()->showMessage(tr("File loaded"), 2000);
-    projectView->setProperties();
-    
-    //nhi: connect envelope library to loaded project
-    envelopeLibraryWindow->setActiveProject(projectView);
-
-    ui->tabWidget->show();
-    ui->paletteWidget->show();
-    enableProjectActions(true);
 }
 
 void MainWindow::saveFile(const QString &fileName)

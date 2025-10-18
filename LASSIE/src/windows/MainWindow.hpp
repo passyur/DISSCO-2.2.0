@@ -69,8 +69,9 @@ class MainWindow : public QMainWindow
         void createMenus();
         void createToolBars();
         void createStatusBar();
-        void loadFile(const QString &fileName);
-        void saveFile(const QString &fileName);
+
+        void showFile();
+        void saveFile(const QString&);
 
 
         QString currentFile;
