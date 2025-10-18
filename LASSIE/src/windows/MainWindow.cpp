@@ -60,12 +60,8 @@ MainWindow::MainWindow(Inst* m)
 
 //MainWindow::~MainWindow() = default;
 MainWindow::~MainWindow() {
-    for(std::vector<ProjectView*>::
-        iterator it = projects.begin();
-      it!=projects.end();
-      it++){
-    delete *it;
-  }
+    if(projectView != nullptr)
+        delete projectView;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -113,7 +113,6 @@ class MainWindow : public QMainWindow
         QStatusBar *statusbar_;
         
         // projectView pointer for testing
-        std::vector<ProjectView*> projects;
         ProjectView* projectView;
         
         Inst *main_;
