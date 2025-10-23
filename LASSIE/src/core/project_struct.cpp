@@ -793,8 +793,6 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
     Project *project = create(info.baseName(), id);
     QFileInfo fileinfo(filepath);
     project->fileinfo = fileinfo;
-    project->dat_path = fileinfo.absolutePath();
-    project->lib_path = fileinfo.absoluteFilePath();
 
     curr_project_ = project;
 

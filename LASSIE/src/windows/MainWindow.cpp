@@ -1,9 +1,10 @@
-#include <QtWidgets>
-
 #include "MainWindow.hpp"
-#include "EnvelopeLibraryWindow.hpp"
 #include "../ui/ui_mainwindow.h"
+
+#include "EnvelopeLibraryWindow.hpp"
 #include "MarkovModelLibraryWindow.hpp"
+#include "../widgets/ProjectViewController.hpp"
+
 #include "../core/project_struct.hpp"
 
 #include <QApplication>
@@ -20,12 +21,7 @@
 #include <QDir>
 #include<QDebug>
 
-
-MainWindow* MainWindow::instance_ = 0;
-
-void MainWindow::showStatusMessage(const QString& message){
-    statusbar_->showMessage(message, 5000);
-}
+MainWindow *MainWindow::instance_ = 0;
 
 MainWindow::MainWindow(Inst* m)
     : QMainWindow()
@@ -55,7 +51,6 @@ MainWindow::MainWindow(Inst* m)
 
     connect(ui->envButton, &QPushButton::clicked, this, &MainWindow::showEnvelopeLibraryWindow);
     connect(ui->markovButton, &QPushButton::clicked, this, &MainWindow::showMarkovWindow);
-
 }
 
 //MainWindow::~MainWindow() = default;
@@ -116,12 +111,24 @@ void MainWindow::openFile()
 }
 
 void MainWindow::saveFile()
-{
-    if (currentFile.isEmpty()) {
-        saveFileAs();
-    } else {
-        saveFile(currentFile);
+{    
+    //nhi: ensure directory exists before saving
+    QFileInfo fileInfo(currentFile);
+    QDir dir = fileInfo.absoluteDir();
+    if (!dir.exists()) {
+        if (!dir.mkpath(".")) {
+            QMessageBox::critical(this, tr("Error"),
+                                tr("Failed to create directory:\n%1")
+                                .arg(dir.absolutePath()));
+            return;
+        }
     }
+    
+    projectView->save();
+    
+    //nhi: update window title and status after successful save
+    setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
+    statusBar()->showMessage(tr("File saved"), 2000);
 }
 
 void MainWindow::saveFileAs()
@@ -129,21 +136,12 @@ void MainWindow::saveFileAs()
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
                                                   currentFile,
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (!fileName.isEmpty()) {
-        saveFile(fileName);
+    if (!fileName.isEmpty()){
+        currentFile = fileName;
+        ProjectManager *pm = Inst::get_project_manager();
+        pm->fileinfo() = QFileInfo(currentFile);
+        saveFile();
     }
-}
-
-void MainWindow::undo()
-{
-    // TODO: Implement undo functionality
-    statusBar()->showMessage(tr("Undo"), 2000);
-}
-
-void MainWindow::redo()
-{
-    // TODO: Implement redo functionality
-    statusBar()->showMessage(tr("Redo"), 2000);
 }
 
 void MainWindow::showEnvelopeLibraryWindow()
@@ -340,6 +338,7 @@ void MainWindow::createToolBars()
     //nhi: envelope library action moved to view menu instead of project toolbar
     projectToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 
+    /* TODO: implement edit, undo/redo functionality */
     // editToolBar = addToolBar(tr("Edit"));
     // editToolBar->addAction(undoAct);
     // editToolBar->addAction(redoAct);
@@ -348,11 +347,6 @@ void MainWindow::createToolBars()
     // editToolBar->addAction(copyAct);
     // editToolBar->addAction(pasteAct);
     // fileToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-}
-
-void MainWindow::createStatusBar()
-{
-    statusBar()->showMessage(tr("Ready"));
 }
 
 void MainWindow::showFile()
@@ -381,31 +375,6 @@ void MainWindow::showFile()
     }else{
         qDebug() << "WARNING: file attempted to display when there is no file to display!";
     }
-}
-
-void MainWindow::saveFile(const QString &fileName)
-{
-    currentFile = fileName;
-    qDebug() << "Current File:" << currentFile;
-    
-    //nhi: ensure directory exists before saving
-    QFileInfo fileInfo(fileName);
-    QDir dir = fileInfo.absoluteDir();
-    if (!dir.exists()) {
-        if (!dir.mkpath(".")) {
-            QMessageBox::critical(this, tr("Error"),
-                                tr("Failed to create directory:\n%1")
-                                .arg(dir.absolutePath()));
-            return;
-        }
-    }
-    
-    qDebug() << "In Main Window Save Function";
-    projectView->save();
-    
-    //nhi: update window title and status after successful save
-    setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
-    statusBar()->showMessage(tr("File saved"), 2000);
 }
 
 void MainWindow::setUnsavedTitle(QString unsavedFile){

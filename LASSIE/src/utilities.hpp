@@ -11,7 +11,7 @@ namespace MUtilities {
     which alerts the user to save the project */
     inline void modified(){
         ProjectManager *pm = Inst::get_project_manager();
-        MainWindow::instance()->setUnsavedTitle(pm->libpath());
+        MainWindow::instance()->setUnsavedTitle(pm->fileinfo().absoluteFilePath());
     }
 
 }

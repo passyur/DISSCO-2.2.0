@@ -137,7 +137,7 @@ class ProjectManager : public QObject {
         void set_curr_project(class Project* p) { curr_project_ = p; }
         Project *get_curr_project() { return curr_project_; }
 
-        QFileInfo fileinfo()        { return curr_project_->fileinfo; }
+        QFileInfo& fileinfo()        { return curr_project_->fileinfo; }
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
         QString& title()            { return curr_project_->title; }
         QString& fileflag()         { return curr_project_->file_flag; }
@@ -148,8 +148,6 @@ class ProjectManager : public QObject {
         QString& samplesize()       { return curr_project_->sample_size; }
         QString& numthreads()       { return curr_project_->num_threads; }
         QString& numstaffs()        { return curr_project_->num_staffs; }
-        QString& datpath()          { return curr_project_->dat_path; }
-        QString& libpath()          { return curr_project_->lib_path; }
         QString& seed()             { return curr_project_->seed; }
         QString& measure()          { return curr_project_->measure; }
 
