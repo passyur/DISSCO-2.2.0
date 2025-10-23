@@ -12,10 +12,6 @@
 #include <xercesc/dom/DOMElement.hpp>
 
 #include "event_struct.hpp"
-#include "EnvelopeLibraryEntry.hpp"
-
-// cmod
-#include "MarkovModel.h"
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -23,8 +19,11 @@ the model: all transactions dealing with Projects must go through the ProjectMan
               unnecessary to the caller. 
 */
 
+
 class ProjectManager;
 class EnvelopeLibraryEntry;
+template<typename T> 
+class MarkovModel; 
 
 class Project : public QObject {
     friend class ProjectManager;
@@ -129,7 +128,7 @@ class ProjectManager : public QObject {
         /* validates and, if successful, opens the file and creates a Project from that file */
         Project* open(const QString& filepath, const QByteArray& id = QByteArray());
         Project* build(const QString& filepath, const QByteArray& id = QByteArray());
-        void parse(Project *p, const QString& filepath);
+        void parse(Project*, const QString&);
         void close(Project*);
         int save(Project*);
         int saveAs(Project*);

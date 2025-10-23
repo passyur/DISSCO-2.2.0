@@ -4,9 +4,12 @@ in the associated window (currently, the project view).
 */
 #include "project_struct.hpp"
 #include "event_struct.hpp"
-// #include "IEvent.h"
 
-#include "../windows/MainWindow.hpp"
+#include "../../LASS/src/LASS.h"
+#include "EnvelopeLibraryEntry.hpp"
+
+// cmod
+#include "MarkovModel.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -777,18 +780,6 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
     QFileInfo info(filepath);
     QString cpath = info.canonicalFilePath();
     info.setFile(cpath);
-
-    if(cpath.isEmpty() == true){
-        MainWindow::instance()->showStatusMessage(QStringLiteral("Cannot open file: file does not exist at %s\n").arg(filepath));
-        return 0;
-    }
-
-    QFile file(cpath);
-    if(file.open(QIODevice::ReadWrite) == false){
-        MainWindow::instance()->showStatusMessage("Cannot open file: cannot read and write\n");
-        return 0;
-    }
-    file.close();
 
     Project *project = create(info.baseName(), id);
     QFileInfo fileinfo(filepath);
