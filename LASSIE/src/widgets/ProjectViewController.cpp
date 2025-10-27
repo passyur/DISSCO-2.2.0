@@ -269,7 +269,7 @@ void ProjectView::save(){
         xmlWriter.writeEndElement(); 
 
         xmlWriter.writeStartElement("EnvelopeLibrary");
-            QString stringBuffer = "";
+            QString stringBuffer;
             if (pm->envlibentries() != NULL){
                 EnvelopeLibraryEntry* envLib = pm->envlibentries();
                 int count = envLib->count();
@@ -314,8 +314,8 @@ void ProjectView::save(){
                     count++;
                     envLib = envLib->next;
                 }
+                stringBuffer = stringBuffer + "    "; 
             }
-            stringBuffer = stringBuffer + "    ";
             xmlWriter.writeCharacters(stringBuffer);
         xmlWriter.writeEndElement();
 

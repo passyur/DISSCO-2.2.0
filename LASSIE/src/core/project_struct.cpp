@@ -14,6 +14,7 @@ in the associated window (currently, the project view).
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
+#include <QProcess>
 // #include <QtLogging>
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
@@ -631,24 +632,26 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     DOMElement *envlibelement = noteModifiers->getNextElementSibling();
     char_data = (DOMCharacterData*) envlibelement->getFirstChild();
 
-    buffer = XMLString::transcode(char_data->getData());
-    std::string fileString = file_name + ".lib.temp";
-    QFile file(QString::fromStdString(fileString));
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)){
-        return;
+    EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
+    if(char_data != nullptr){
+        buffer = XMLString::transcode(char_data->getData());
+        std::string fileString = file_name + ".lib.temp"; /* the conversion from char* to QString is MUCH better than the other way around */
+        QFile file(QString::fromStdString(fileString));
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+            return;
+            
+        QTextStream out(&file);
+        out << buffer;
+        XMLString::release(&buffer);
+        file.close();
+
+        envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
+        QString deleteCommand = "rm " + QString::fromStdString(fileString);
+        QProcess::execute(deleteCommand);
     }
 
-    QTextStream out(&file);
-    out << buffer;
-    XMLString::release(&buffer);
-    file.close();
-
-    EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
-    envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
-    std::string deleteCommand = "rm " + fileString;
-    system(deleteCommand.c_str());
-
-    EnvelopeLibraryEntry* previousEntry = NULL;
+    /// \todo refactor this (from old lassie)
+    EnvelopeLibraryEntry* previousEntry = nullptr;
     Envelope* thisEnvelope;
 
     for (int i = 1; i <= envelopeLibrary->size(); i ++){
@@ -656,10 +659,10 @@ void ProjectManager::parse(Project *p, const QString& filepath){
         EnvelopeLibraryEntry* thisEntry = new EnvelopeLibraryEntry(thisEnvelope, i);
         delete thisEnvelope;
 
-        if (previousEntry ==NULL){
+        if (previousEntry == nullptr){
             p->elentry = thisEntry;
             previousEntry = thisEntry;
-            thisEntry->prev = NULL;
+            thisEntry->prev = nullptr;
         }else{
             previousEntry->next = thisEntry;
             thisEntry->prev = previousEntry;
