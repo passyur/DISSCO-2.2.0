@@ -900,7 +900,7 @@ void ProjectView::setProperties() {
         pm->fileflag() = projectPropertiesDialog->ui->flagEntry->text();
         pm->numchannels() = projectPropertiesDialog->ui->numChannelsEntry->text();
         pm->samplerate() = projectPropertiesDialog->ui->rateEntry->text();
-        pm->samplerate() = projectPropertiesDialog->ui->sizeEntry->text();
+        pm->samplesize() = projectPropertiesDialog->ui->sizeEntry->text();
         pm->numthreads() = projectPropertiesDialog->ui->numThreadsEntry->text();
         pm->synthesis() = projectPropertiesDialog->ui->synthesisCheckBox->isChecked();
         pm->score() = projectPropertiesDialog->ui->scoreCheckBox->isChecked();
