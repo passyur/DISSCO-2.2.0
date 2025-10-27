@@ -411,15 +411,15 @@ void EventAttributesViewController::showCurrentEventData() {
             ExtraInfo extra_info = bottom_event.extra_info;
 
             FreqInfo freq_info = extra_info.freq_info;
-            ui->wellTemperedRadio->setChecked(freq_info.freq_flag == welltempered);
-            ui->fundamentalRadio->setChecked(freq_info.freq_flag == fundamental);
-            ui->continuumRadio->setChecked(freq_info.freq_flag == continuum);
+            ui->wellTemperedRadio->setChecked(freq_info.freq_flag == 0);
+            ui->fundamentalRadio->setChecked(freq_info.freq_flag == 1);
+            ui->continuumRadio->setChecked(freq_info.freq_flag == 2);
             ui->wellTemperedEntry->setText(freq_info.entry_1);
             ui->funFreqEntry1->setText(freq_info.entry_1);
             ui->funFreqEntry2->setText(freq_info.entry_2);
             // ui->contFreqEntry->setText(freq_info.entry_1);
-            ui->hertzRadio->setChecked(freq_info.continuum_flag == hertz);
-            ui->powerOfTwoRadio->setChecked(freq_info.continuum_flag == power_of_two);
+            ui->hertzRadio->setChecked(freq_info.continuum_flag == 0);
+            ui->powerOfTwoRadio->setChecked(freq_info.continuum_flag == 1);
 
             ui->loudnessEntry->setText(extra_info.loudness);
             ui->spaEntry->setText(extra_info.spa);
@@ -485,13 +485,13 @@ void EventAttributesViewController::showCurrentEventData() {
         // num children
         NumChildren num_children = event.numchildren;
         switch(num_children.method_flag){
-            case Numchildrenflag::fixed:
+            case 0:
                 ui->fixedButton->click();
                 break;
-            case density:
+            case 1:
                 ui->densityButton->click();
                 break;
-            case bylayer:
+            case 2:
                 ui->byLayerButton->click();
         }
         ui->childCountEntry1->setText(num_children.entry_1);
@@ -510,13 +510,13 @@ void EventAttributesViewController::showCurrentEventData() {
         // child‐event‐def
         ChildDef childeventdef = event.child_event_def;
         switch(childeventdef.definition_flag){
-            case discrete:
+            case 2:
                 ui->discreteButton->click();
                 break;
-            case continuumdef:
+            case 0:
                 ui->continuumButton->click();
                 break;
-            case sweep:
+            case 1:
                 ui->sweepButton->click();
                 break;
 
@@ -527,15 +527,15 @@ void EventAttributesViewController::showCurrentEventData() {
         ui->attackSieveEntry->setText(childeventdef.attack_sieve);
         ui->durationSieveEntry->setText(childeventdef.duration_sieve);
 
-        Childdeftimeflag st_flag = childeventdef.starttype_flag;
-        ui->startTypePercentRadio->setChecked(st_flag == percentage);
-        ui->startTypeUnitsRadio->setChecked(st_flag == units);
-        ui->startTypeSecondsRadio->setChecked(st_flag == seconds);
+        unsigned st_flag = childeventdef.starttype_flag;
+        ui->startTypePercentRadio->setChecked(st_flag == 0);
+        ui->startTypeUnitsRadio->setChecked(st_flag == 1);
+        ui->startTypeSecondsRadio->setChecked(st_flag == 2);
 
-        Childdeftimeflag dt_flag = childeventdef.durationtype_flag;
-        ui->durationTypePercentRadio->setChecked(dt_flag == percentage);
-        ui->durationTypeUnitsRadio->setChecked(dt_flag == units);
-        ui->durationTypeSecondsRadio->setChecked(dt_flag == seconds);
+        unsigned dt_flag = childeventdef.durationtype_flag;
+        ui->durationTypePercentRadio->setChecked(dt_flag == 0);
+        ui->durationTypeUnitsRadio->setChecked(dt_flag == 1);
+        ui->durationTypeSecondsRadio->setChecked(dt_flag == 2);
 
         // environment
         if (type != bottom) {

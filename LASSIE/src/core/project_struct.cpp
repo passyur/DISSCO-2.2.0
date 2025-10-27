@@ -129,7 +129,7 @@ namespace XercesParser {
 
         DOMElement *tempo_el = timesig_el->getNextElementSibling();
         DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
-        event.tempo.method_flag = (Numchildrenflag)getFunctionString(tempomethodflag_el).toUInt();
+        event.tempo.method_flag = getFunctionString(tempomethodflag_el).toUInt();
 
         DOMElement *tempoprefix_el = tempomethodflag_el->getNextElementSibling();
         event.tempo.prefix = getFunctionString(tempoprefix_el);
@@ -148,7 +148,7 @@ namespace XercesParser {
 
         DOMElement *numchildren_el = tempo_el->getNextElementSibling();
         DOMElement *numchildrenmethodflag_el = numchildren_el->getFirstElementChild();
-        event.numchildren.method_flag = (Numchildrenflag)getFunctionString(numchildrenmethodflag_el).toUInt();
+        event.numchildren.method_flag = getFunctionString(numchildrenmethodflag_el).toUInt();
 
         DOMElement *curr = numchildrenmethodflag_el->getNextElementSibling();
         event.numchildren.entry_1 = getFunctionString(curr);
@@ -177,13 +177,13 @@ namespace XercesParser {
         event.child_event_def.duration_sieve = getFunctionString(curr);
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.definition_flag = (Childdefnflag)getFunctionString(curr).toUInt();
+        event.child_event_def.definition_flag = getFunctionString(curr).toUInt();
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.starttype_flag = (Childdeftimeflag)getFunctionString(curr).toUInt();
+        event.child_event_def.starttype_flag = getFunctionString(curr).toUInt();
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.durationtype_flag = (Childdeftimeflag)getFunctionString(curr).toUInt();
+        event.child_event_def.durationtype_flag = getFunctionString(curr).toUInt();
 
         DOMElement *layers_el = childdef_el->getNextElementSibling();
         DOMElement *layer_el = layers_el->getFirstElementChild();
@@ -257,10 +257,10 @@ namespace XercesParser {
         ExtraInfo extrainfo;
         DOMElement *freqinfo_el = extrainfo_el->getFirstElementChild();
         DOMElement *freqflag_el = freqinfo_el->getFirstElementChild();
-        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)getFunctionString(freqflag_el).toUInt();
+        extrainfo.freq_info.freq_flag = getFunctionString(freqflag_el).toUInt();
 
         DOMElement *freqcontflag_el = freqflag_el->getNextElementSibling();
-        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)getFunctionString(freqcontflag_el).toUInt();
+        extrainfo.freq_info.continuum_flag = getFunctionString(freqcontflag_el).toUInt();
 
         DOMElement *freqentry1_el = freqcontflag_el->getNextElementSibling();
         extrainfo.freq_info.entry_1 = getFunctionString(freqentry1_el);
