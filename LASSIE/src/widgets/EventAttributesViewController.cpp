@@ -191,7 +191,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
     HEvent& event = pm->topevent();
-    qDebug() << "event: " << event;
+    qDebug() << "event: " << &event;
     qDebug() << "old name: " << event.name;
 
 
@@ -202,14 +202,14 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             ExtraInfo& extra_info = bottom_event.extra_info;
 
             FreqInfo& freq_info = extra_info.freq_info;
-            if (ui->wellTemperedRadio->isChecked()) { freq_info.freq_flag = welltempered; }
-            if (ui->fundamentalRadio->isChecked()) { freq_info.freq_flag = fundamental; }
-            if (ui->continuumRadio->isChecked()) { freq_info.freq_flag = continuum; }
+            if (ui->wellTemperedRadio->isChecked()) { freq_info.freq_flag = 0; }
+            if (ui->fundamentalRadio->isChecked()) { freq_info.freq_flag = 1; }
+            if (ui->continuumRadio->isChecked()) { freq_info.freq_flag = 2; }
             freq_info.entry_1 = ui->wellTemperedEntry->text();
             freq_info.entry_1 = ui->funFreqEntry1->text();
             freq_info.entry_2 = ui->funFreqEntry2->text();
-            if (ui->hertzRadio->isChecked()) { freq_info.continuum_flag = hertz; }
-            if (ui->powerOfTwoRadio->isChecked()) { freq_info.continuum_flag = power_of_two; }
+            if (ui->hertzRadio->isChecked()) { freq_info.continuum_flag = 0; }
+            if (ui->powerOfTwoRadio->isChecked()) { freq_info.continuum_flag = 1; }
 
             extra_info.loudness = ui->loudnessEntry->text();
             extra_info.spa = ui->spaEntry->text();
@@ -253,11 +253,11 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
         NumChildren& num_children = event.numchildren;
         if (ui->fixedButton->isChecked()) {
-            num_children.method_flag = Numchildrenflag::fixed;
+            num_children.method_flag = 0;
         } else if (ui->densityButton->isChecked()) {
-            num_children.method_flag = density;
+            num_children.method_flag = 1;
         } else if (ui->byLayerButton->isChecked()) {
-            num_children.method_flag = bylayer;
+            num_children.method_flag = 2;
         }  
         num_children.entry_1 = ui->childCountEntry1->text();
         num_children.entry_2 = ui->childCountEntry2->text();
@@ -267,11 +267,11 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         
         ChildDef& childeventdef = event.child_event_def;
         if (ui->discreteButton->isChecked()) {
-            childeventdef.definition_flag = discrete;
+            childeventdef.definition_flag = 2;
         } else if (ui->continuumButton->isChecked()) {
-            childeventdef.definition_flag = continuumdef;
+            childeventdef.definition_flag = 0;
         } else if (ui->sweepButton->isChecked()) {
-            childeventdef.definition_flag = sweep;
+            childeventdef.definition_flag = 1;
         }
         childeventdef.entry_1 = ui->childDefEntry1->text();
         childeventdef.entry_2 = ui->childDefEntry2->text();
@@ -280,19 +280,19 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         childeventdef.duration_sieve = ui->durationSieveEntry->text();
 
         if (ui->startTypePercentRadio->isChecked()) {
-            childeventdef.starttype_flag = percentage;
+            childeventdef.starttype_flag = 0;
         } else if (ui->startTypeUnitsRadio->isChecked()) {
-            childeventdef.starttype_flag = units;
+            childeventdef.starttype_flag = 1;
         } else if (ui->startTypeSecondsRadio->isChecked()) {
-            childeventdef.starttype_flag = seconds;
+            childeventdef.starttype_flag = 2;
         }
 
         if (ui->durationTypePercentRadio->isChecked()) {
-            childeventdef.durationtype_flag = percentage;
+            childeventdef.durationtype_flag = 0;
         } else if (ui->durationTypeUnitsRadio->isChecked()) {
-            childeventdef.durationtype_flag = units;
+            childeventdef.durationtype_flag = 1;
         } else if (ui->durationTypeSecondsRadio->isChecked()) {
-            childeventdef.durationtype_flag = seconds;
+            childeventdef.durationtype_flag = 2;
         }
 
         if (type != bottom) {
