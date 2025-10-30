@@ -133,6 +133,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     fixStackedWidgetLayout(ui->emptyPage);
 
     LayerBox* box = new LayerBox(this, e_projectView);
+    // connect(box, )
     ui->layersLayout->addWidget(box);
 }
 
@@ -192,6 +193,10 @@ LayerBox::LayerBox(EventAttributesViewController* parentController,
             this, &LayerBox::onWeightFunctionClicked);
     connect(m_deleteLayerButton, &QPushButton::clicked,
             this, &LayerBox::onDeleteLayerClicked);
+
+    // connect (this, [signalfordroppedevent], ...  things you may need to pass in , EventAttributesController::packageAdded))
+
+        // connect(treeview)
 
     weightHBox->addWidget(weightLabel);
     weightHBox->addWidget(m_weightEntry);
@@ -290,23 +295,6 @@ QStandardItem* LayerBox::extractItemFromDrop(QDropEvent* event)
             qDebug() << "    found name in user role:" << foundName;
         }
 
-        // if (!gotType && col == 0) {
-        //     QString disp = roleDataMap.value(Qt::DisplayRole).toString();
-        //     if (!disp.isEmpty()) {
-        //         foundType = disp;
-        //         gotType = true;
-        //         qDebug() << "    found type from column 0 display:" << foundType;
-        //     }
-        // }
-        // if (!gotName && col == 1) {
-        //     QString disp = roleDataMap.value(Qt::DisplayRole).toString();
-        //     if (!disp.isEmpty()) {
-        //         foundName = disp;
-        //         gotName = true;
-        //         qDebug() << "    found name from column 1 display:" << foundName;
-        //     }
-        // }
-
         // If both found, stop reading further entries
         if (gotType && gotName) break;
     }
@@ -362,14 +350,10 @@ void LayerBox::dropEvent(QDropEvent* event) {
 
 bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     if (obj == m_treeView->viewport()) {
-        if (event->type() == QEvent::DragEnter) {
-            qDebug() << "eventFilter: DragEnter on viewport";
-        }
-        if (event->type() == QEvent::DragMove) {
-            qDebug() << "eventFilter: DragMove on viewport";
-        }
         if (event->type() == QEvent::Drop) {
-            qDebug() << "eventFilter: Drop detected on viewport";
+
+            ///////////////////////////////////////////////////////////////
+            // STEP 1: Extract dropped item data
 
             QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
             QStandardItem* droppedItem = extractItemFromDrop(dropEvent);
@@ -381,14 +365,112 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
 
             qDebug() << "eventFilter: Item is" << droppedItem->data(Qt::UserRole + 2).toString();
 
+            QString droppedType = droppedItem->data(Qt::UserRole + 1).toString();
+            QString droppedName = droppedItem->data(Qt::UserRole + 2).toString();
+
             int index = m_model->rowCount();
             m_model->appendRow({
                 new QStandardItem(QString::number(index)),
-                new QStandardItem(droppedItem->data(Qt::UserRole + 1).toString()),
-                new QStandardItem(droppedItem->data(Qt::UserRole + 2).toString())
+                new QStandardItem(droppedType),
+                new QStandardItem(droppedName)
             });
 
             qDebug() << "eventFilter: Row appended, now" << m_model->rowCount() << "rows";
+
+            /// TODO: enable reordering ?
+            // renumberChildColumn();
+
+
+            ///////////////////////////////////////////////////////////////
+            // STEP 2: Access backend ProjectManager
+            ProjectManager* pm = Inst::get_project_manager();
+
+
+
+            ///////////////////////////////////////////////////////////////
+            // STEP 3: Determine which event list to search
+
+            // m_curreventtype
+
+            // wait a minute... we need to figure out whose layer we dropped into, not what was dropped in...
+            // we will only either be in the top event, or High, Mid, Low
+
+            QList<HEvent>* eventList = nullptr;
+            // // QString& topevent = &pm->topevent(); 
+            // eventList = &pm->hevents();
+
+            // check if topevent is null(?)
+            // check if eventList is null
+
+            // if (!eventList)
+            //     return false;
+
+            ///////////////////////////////////////////////////////////////
+            // STEP 4: Find the true backend object by name
+
+            HEvent backendEvent;
+            bool found = false;
+
+            for (const HEvent& evt : *eventList) {
+                if (evt.name == droppedName) {
+                    backendEvent = evt;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                qDebug() << "Dropped event not found in ProjectManager lists!";
+                return false;
+            }
+
+            ///////////////////////////////////////////////////////////////
+            // STEP 5: Create a Package struct using backend event info
+            
+            // figure out what event was dropped's event_type
+            Eventtype event_type;
+            if (droppedType == "Top") {
+                event_type = top;
+                // this shouldn't happen
+            } else if (droppedType == "High") {
+                event_type = high;
+            } else if (droppedType == "Mid") {
+                event_type = mid;
+            } else if (droppedType == "Low") {
+                event_type = low;
+            } else if (droppedType == "Bottom") {
+                event_type = bottom;
+            } else if (droppedType == "Spectrum") {
+                event_type = sound;
+            } else if (droppedType == "Envelope") {
+                event_type = env;
+            } else if (droppedType == "Sieve") {
+                event_type = sieve;
+            } else if (droppedType == "Spatialization") {
+                event_type = spa;
+            } else if (droppedType == "Reverb") {
+                event_type = reverb;
+            } else if (droppedType == "Note") {
+                event_type = note;
+            } else if (droppedType == "Filter") {
+                event_type = filter;
+            } else if (droppedType == "Measurement") {
+                event_type = mea;
+            }
+
+            Package pkg;
+            pkg.event_name = backendEvent.name;
+            pkg.event_type = event_type;
+            pkg.weight = "";
+            pkg.attack_envelope = "";
+            pkg.attackenvelope_scale = "";
+            pkg.duration_envelope = "";
+            pkg.durationenvelope_scale = "";
+
+            ///////////////////////////////////////////////////////////////
+            // STEP 6: Add to this event's Layer
+            Layer layer;
+            layer.discrete_packages.append(pkg);
 
             return true; // handled
         }
@@ -396,104 +478,6 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     return QFrame::eventFilter(obj, event);
 }
 
-
-// bool LayerBox::eventFilter(QObject* obj, QEvent* event)
-// {
-//     if (obj == m_treeView->viewport() && event->type() == QEvent::Drop) {
-
-//         ///////////////////////////////////////////////////////////////
-//         // STEP 1: Extract dropped item data
-//         QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-//         QStandardItem* droppedItem = extractItemFromDrop(dropEvent);
-//         if (!droppedItem)
-//             return false;
-
-//         QString droppedType = droppedItem->data(Qt::UserRole + 1).toString();
-//         QString droppedName = droppedItem->data(Qt::UserRole + 2).toString();
-
-//         ///////////////////////////////////////////////////////////////
-//         // STEP 2: Access backend ProjectManager
-//         // ProjectManager* pm = Inst::get_project_manager();
-
-//         ///////////////////////////////////////////////////////////////
-//         // STEP 3: Determine which event list to search
-//         // QList<HEvent>* eventList = nullptr;
-
-//         /*
-//         if (droppedType == "Top") {
-//             eventList = &pm->top_event;
-//         } else if (droppedType == "High") {
-//             eventList = &pm->highevents();
-//         } else if (droppedType == "Mid") {
-//             eventList = &pm->midevents();
-//         } else if (droppedType == "Low") {
-//             eventList = &pm->bottomevents();
-//         }
-
-//         if (!eventList)
-//             return false;
-//         */
-
-//         ///////////////////////////////////////////////////////////////
-//         // STEP 4: Find the true backend object by name
-//         ///////////////////////////////////////////////////////////////
-//         /*
-//         HEvent backendEvent;
-//         bool found = false;
-
-//         for (const HEvent& evt : *eventList) {
-//             if (evt.name == droppedName) {
-//                 backendEvent = evt;
-//                 found = true;
-//                 break;
-//             }
-//         }
-
-//         if (!found) {
-//             qDebug() << "Dropped event not found in ProjectManager lists!";
-//             return false;
-//         }
-//         */
-
-//         ///////////////////////////////////////////////////////////////
-//         // STEP 5: Create a Package struct using backend event info
-//         /*
-//         Package pkg;
-//         pkg.event_name = backendEvent.name;
-//         pkg.event_type = droppedType;
-//         pkg.weight = "";
-//         pkg.attack_envelope = "";
-//         pkg.attackenvelope_scale = "";
-//         pkg.duration_envelope = "";
-//         pkg.durationenvelope_scale = "";
-//         */
-
-//         ///////////////////////////////////////////////////////////////
-//         /// TODO: STEP 6: Add to this event's Layer
-//         // Layer layer;
-//         // layer.discrete_packages.append(pkg);
-
-//         ///////////////////////////////////////////////////////////////
-//         // STEP 7: Display in TreeView
-//         int rowIndex = m_model->rowCount();
-//         QList<QStandardItem*> newRow = {
-//             //new QStandardItem(QString::number(rowIndex)),    // Column 0: child number
-//             new QStandardItem(QString::number(13)),
-//             new QStandardItem(droppedType),                  // Column 1: "Class" or name
-//             new QStandardItem(droppedName)                   // Column 2: other info
-//         };
-//         m_model->appendRow(newRow);
-//         m_treeView->resizeColumnToContents(0);
-
-
-//         // renumberChildColumn();
-
-//         dropEvent->acceptProposedAction();
-//         return true;
-//     }
-
-//     return QFrame::eventFilter(obj, event);
-// }
 
 /*
 void LayerBox::renumberChildColumn() {

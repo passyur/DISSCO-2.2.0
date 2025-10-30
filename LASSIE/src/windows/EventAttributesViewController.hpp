@@ -198,6 +198,10 @@ public:
 signals:
     // void requestRefresh();
 
+// public slots:
+//     packageAdded();
+//     packageRemoved();
+
 private slots:
     void onWeightFunctionClicked() {};
     void onDeleteLayerClicked() {};
