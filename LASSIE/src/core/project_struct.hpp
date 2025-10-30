@@ -12,10 +12,6 @@
 #include <xercesc/dom/DOMElement.hpp>
 
 #include "event_struct.hpp"
-#include "EnvelopeLibraryEntry.hpp"
-
-// cmod
-#include "MarkovModel.h"
 
 /*
 the model: all transactions dealing with Projects must go through the ProjectManager to do so.
@@ -23,8 +19,11 @@ the model: all transactions dealing with Projects must go through the ProjectMan
               unnecessary to the caller. 
 */
 
+
 class ProjectManager;
 class EnvelopeLibraryEntry;
+template<typename T> 
+class MarkovModel; 
 
 class Project : public QObject {
     friend class ProjectManager;
@@ -129,7 +128,7 @@ class ProjectManager : public QObject {
         /* validates and, if successful, opens the file and creates a Project from that file */
         Project* open(const QString& filepath, const QByteArray& id = QByteArray());
         Project* build(const QString& filepath, const QByteArray& id = QByteArray());
-        void parse(Project *p, const QString& filepath);
+        void parse(Project*, const QString&);
         void close(Project*);
         int save(Project*);
         int saveAs(Project*);
@@ -137,7 +136,7 @@ class ProjectManager : public QObject {
         void set_curr_project(class Project* p) { curr_project_ = p; }
         Project *get_curr_project() { return curr_project_; }
 
-        QFileInfo fileinfo()        { return curr_project_->fileinfo; }
+        QFileInfo& fileinfo()        { return curr_project_->fileinfo; }
         // ALL GETTERS ASSUME THAT THERE IS A CURR_PROJECT!
         QString& title()            { return curr_project_->title; }
         QString& fileflag()         { return curr_project_->file_flag; }
@@ -148,8 +147,6 @@ class ProjectManager : public QObject {
         QString& samplesize()       { return curr_project_->sample_size; }
         QString& numthreads()       { return curr_project_->num_threads; }
         QString& numstaffs()        { return curr_project_->num_staffs; }
-        QString& datpath()          { return curr_project_->dat_path; }
-        QString& libpath()          { return curr_project_->lib_path; }
         QString& seed()             { return curr_project_->seed; }
         QString& measure()          { return curr_project_->measure; }
 

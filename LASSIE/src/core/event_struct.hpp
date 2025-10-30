@@ -8,6 +8,8 @@
    to the UI files in the corresponding window, and add to the save function. 
 */
 
+// When initializing defaults for unsigneds (and flags generally) preference should be given to the value that will correspond to the leftmost option (e.g., in a Radio of three elements from L-R, ABC, prefer A).
+
 #include <QList>
 #include <QString>
 
@@ -57,7 +59,7 @@ struct TimeSignature {
 
 typedef struct Tempo Tempo;
 struct Tempo {
-    unsigned method_flag; // true = as fraction, false = as note value
+    unsigned method_flag = 0; // true = as fraction, false = as note value
     QString prefix; /* both */
     QString note_value; /* both */
     QString frentry_1; /* as fraction */
@@ -65,20 +67,23 @@ struct Tempo {
     QString valentry; /* as note */
 };
 
+/*
 typedef enum {
     fixed,
     density,
     bylayer
 } Numchildrenflag;
+*/
 
 typedef struct NumChildren NumChildren;
 struct NumChildren {
-    Numchildrenflag method_flag;
+    unsigned method_flag = 1; /* from Numchildrenflag */
     QString entry_1;
     QString entry_2;
     QString entry_3;
 };
 
+/*
 typedef enum {
     continuumdef,
     sweep,
@@ -90,6 +95,7 @@ typedef enum {
     units,
     seconds
 } Childdeftimeflag;
+*/
 
 typedef struct ChildDef ChildDef;
 struct ChildDef {
@@ -98,9 +104,9 @@ struct ChildDef {
     QString entry_3; /* duration */
     QString attack_sieve;
     QString duration_sieve;
-    Childdefnflag definition_flag;
-    Childdeftimeflag starttype_flag;
-    Childdeftimeflag durationtype_flag;
+    unsigned definition_flag = 0; /* from Childdefnflag */
+    unsigned starttype_flag = 0; /* from Childdeftimeflag */
+    unsigned durationtype_flag = 0; /* from Childdeftimeflag */
 };
 
 typedef struct Package Package;
@@ -122,6 +128,7 @@ struct Layer {
     QList<Package> discrete_packages;
 };
 
+/*
 typedef enum {
     welltempered,
     fundamental,
@@ -132,19 +139,20 @@ typedef enum {
     hertz,
     power_of_two
 } Freqinfocontflag;
+*/
 
 typedef struct FreqInfo FreqInfo;
 struct FreqInfo {
-    Freqinfofreqflag freq_flag;
-    Freqinfocontflag continuum_flag;
+    unsigned freq_flag = 0; /* from Freqinfofreqflag */
+    unsigned continuum_flag = 0; /* from Freqinfocontflag */
     QString entry_1;
     QString entry_2;
 };
 
 typedef struct Modifier Modifier;
 struct Modifier {
-    unsigned type;
-    bool applyhow_flag; // false == SOUND, true == PARTIAL
+    unsigned type = 0;
+    bool applyhow_flag = false; // false == SOUND, true == PARTIAL
     QString probability;
     QString amplitude;
     QString rate;
@@ -158,7 +166,7 @@ struct Modifier {
 
 typedef struct ExtraInfo ExtraInfo;
 struct ExtraInfo {
-    unsigned childtype_flag;
+    unsigned childtype_flag = 0;
     FreqInfo freq_info;
     QString loudness;
     QString spa;
@@ -172,7 +180,7 @@ struct ExtraInfo {
 typedef struct HEvent HEvent;
 struct HEvent {
     QString orderinpalette;
-    Eventtype type;
+    Eventtype type = Eventtype::top;
     QString name;
     QString max_child_duration;
     QString edu_perbeat;

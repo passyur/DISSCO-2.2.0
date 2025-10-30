@@ -4,13 +4,17 @@ in the associated window (currently, the project view).
 */
 #include "project_struct.hpp"
 #include "event_struct.hpp"
-// #include "IEvent.h"
 
-#include "../windows/MainWindow.hpp"
+#include "../../LASS/src/LASS.h"
+#include "EnvelopeLibraryEntry.hpp"
+
+// cmod
+#include "MarkovModel.h"
 
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
+#include <QProcess>
 // #include <QtLogging>
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
@@ -126,7 +130,7 @@ namespace XercesParser {
 
         DOMElement *tempo_el = timesig_el->getNextElementSibling();
         DOMElement *tempomethodflag_el = tempo_el->getFirstElementChild();
-        event.tempo.method_flag = (Numchildrenflag)getFunctionString(tempomethodflag_el).toUInt();
+        event.tempo.method_flag = getFunctionString(tempomethodflag_el).toUInt();
 
         DOMElement *tempoprefix_el = tempomethodflag_el->getNextElementSibling();
         event.tempo.prefix = getFunctionString(tempoprefix_el);
@@ -145,7 +149,7 @@ namespace XercesParser {
 
         DOMElement *numchildren_el = tempo_el->getNextElementSibling();
         DOMElement *numchildrenmethodflag_el = numchildren_el->getFirstElementChild();
-        event.numchildren.method_flag = (Numchildrenflag)getFunctionString(numchildrenmethodflag_el).toUInt();
+        event.numchildren.method_flag = getFunctionString(numchildrenmethodflag_el).toUInt();
 
         DOMElement *curr = numchildrenmethodflag_el->getNextElementSibling();
         event.numchildren.entry_1 = getFunctionString(curr);
@@ -174,13 +178,13 @@ namespace XercesParser {
         event.child_event_def.duration_sieve = getFunctionString(curr);
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.definition_flag = (Childdefnflag)getFunctionString(curr).toUInt();
+        event.child_event_def.definition_flag = getFunctionString(curr).toUInt();
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.starttype_flag = (Childdeftimeflag)getFunctionString(curr).toUInt();
+        event.child_event_def.starttype_flag = getFunctionString(curr).toUInt();
 
         curr = curr->getNextElementSibling();
-        event.child_event_def.durationtype_flag = (Childdeftimeflag)getFunctionString(curr).toUInt();
+        event.child_event_def.durationtype_flag = getFunctionString(curr).toUInt();
 
         DOMElement *layers_el = childdef_el->getNextElementSibling();
         DOMElement *layer_el = layers_el->getFirstElementChild();
@@ -254,10 +258,10 @@ namespace XercesParser {
         ExtraInfo extrainfo;
         DOMElement *freqinfo_el = extrainfo_el->getFirstElementChild();
         DOMElement *freqflag_el = freqinfo_el->getFirstElementChild();
-        extrainfo.freq_info.freq_flag = (Freqinfofreqflag)getFunctionString(freqflag_el).toUInt();
+        extrainfo.freq_info.freq_flag = getFunctionString(freqflag_el).toUInt();
 
         DOMElement *freqcontflag_el = freqflag_el->getNextElementSibling();
-        extrainfo.freq_info.continuum_flag = (Freqinfocontflag)getFunctionString(freqcontflag_el).toUInt();
+        extrainfo.freq_info.continuum_flag = getFunctionString(freqcontflag_el).toUInt();
 
         DOMElement *freqentry1_el = freqcontflag_el->getNextElementSibling();
         extrainfo.freq_info.entry_1 = getFunctionString(freqentry1_el);
@@ -628,24 +632,26 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     DOMElement *envlibelement = noteModifiers->getNextElementSibling();
     char_data = (DOMCharacterData*) envlibelement->getFirstChild();
 
-    buffer = XMLString::transcode(char_data->getData());
-    std::string fileString = file_name + ".lib.temp";
-    QFile file(QString::fromStdString(fileString));
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)){
-        return;
+    EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
+    if(char_data != nullptr){
+        buffer = XMLString::transcode(char_data->getData());
+        std::string fileString = file_name + ".lib.temp"; /* the conversion from char* to QString is MUCH better than the other way around */
+        QFile file(QString::fromStdString(fileString));
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+            return;
+            
+        QTextStream out(&file);
+        out << buffer;
+        XMLString::release(&buffer);
+        file.close();
+
+        envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
+        QString deleteCommand = "rm " + QString::fromStdString(fileString);
+        QProcess::execute(deleteCommand);
     }
 
-    QTextStream out(&file);
-    out << buffer;
-    XMLString::release(&buffer);
-    file.close();
-
-    EnvelopeLibrary* envelopeLibrary = new EnvelopeLibrary();
-    envelopeLibrary->loadLibraryNewFormat((char*)fileString.c_str());
-    std::string deleteCommand = "rm " + fileString;
-    system(deleteCommand.c_str());
-
-    EnvelopeLibraryEntry* previousEntry = NULL;
+    /// \todo refactor this (from old lassie)
+    EnvelopeLibraryEntry* previousEntry = nullptr;
     Envelope* thisEnvelope;
 
     for (int i = 1; i <= envelopeLibrary->size(); i ++){
@@ -653,10 +659,10 @@ void ProjectManager::parse(Project *p, const QString& filepath){
         EnvelopeLibraryEntry* thisEntry = new EnvelopeLibraryEntry(thisEnvelope, i);
         delete thisEnvelope;
 
-        if (previousEntry ==NULL){
+        if (previousEntry == nullptr){
             p->elentry = thisEntry;
             previousEntry = thisEntry;
-            thisEntry->prev = NULL;
+            thisEntry->prev = nullptr;
         }else{
             previousEntry->next = thisEntry;
             thisEntry->prev = previousEntry;
@@ -778,23 +784,9 @@ Project* ProjectManager::open(const QString& filepath, const QByteArray& id){
     QString cpath = info.canonicalFilePath();
     info.setFile(cpath);
 
-    if(cpath.isEmpty() == true){
-        MainWindow::instance()->showStatusMessage(QStringLiteral("Cannot open file: file does not exist at %s\n").arg(filepath));
-        return 0;
-    }
-
-    QFile file(cpath);
-    if(file.open(QIODevice::ReadWrite) == false){
-        MainWindow::instance()->showStatusMessage("Cannot open file: cannot read and write\n");
-        return 0;
-    }
-    file.close();
-
     Project *project = create(info.baseName(), id);
     QFileInfo fileinfo(filepath);
     project->fileinfo = fileinfo;
-    project->dat_path = fileinfo.absolutePath();
-    project->lib_path = fileinfo.absoluteFilePath();
 
     curr_project_ = project;
 

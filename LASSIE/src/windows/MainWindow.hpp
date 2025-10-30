@@ -1,20 +1,11 @@
-// Copyright (C) 2016 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
 #include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
-#include <QAction>
 #include <memory>
-#include <QTextEdit>
-// #include <QtLogging>
 #include <QStatusBar>
 
 #include "../inst.hpp"
-#include "../widgets/ProjectViewController.hpp" //nhi:  use ProjectViewController.hpp instead of projectview.hpp
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -39,7 +30,7 @@ class MainWindow : public QMainWindow
         std::unique_ptr<MarkovModelLibraryWindow> markovWindow;
 
     public slots:
-        void showStatusMessage(const QString& message);
+        void showStatusMessage(const QString& message) { statusBar()->showMessage(message, 5000); }
 
     private slots:
         // File operations
@@ -49,8 +40,9 @@ class MainWindow : public QMainWindow
         void saveFileAs();
 
         // Edit operations
-        void undo();
-        void redo();
+         /* TODO: implement undo /edo */
+        void undo() { statusBar()->showMessage(tr("Undo"), 2000); }
+        void redo() { statusBar()->showMessage(tr("Redo"), 2000); }
 
         // Window operations
         void showEnvelopeLibraryWindow();
@@ -68,10 +60,9 @@ class MainWindow : public QMainWindow
         void enableProjectActions(bool enabled);
         void createMenus();
         void createToolBars();
-        void createStatusBar();
-        void loadFile(const QString &fileName);
-        void saveFile(const QString &fileName);
+        void createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
+        void showFile();
 
         QString currentFile;
         
@@ -113,7 +104,6 @@ class MainWindow : public QMainWindow
         QStatusBar *statusbar_;
         
         // projectView pointer for testing
-        std::vector<ProjectView*> projects;
         ProjectView* projectView;
         
         Inst *main_;

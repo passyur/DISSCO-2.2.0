@@ -170,7 +170,7 @@ void ProjectView::save(){
     }
 
     // creates the file with the specified /path/name.dissco
-    QFile file(pm->libpath());
+    QFile file(pm->fileinfo().absoluteFilePath());
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qDebug() << "Failed to open file:" << file.fileName();
         qDebug() << "Error reason:" << file.errorString();
@@ -274,7 +274,7 @@ void ProjectView::save(){
         xmlWriter.writeEndElement(); 
 
         xmlWriter.writeStartElement("EnvelopeLibrary");
-            QString stringBuffer = "";
+            QString stringBuffer;
             if (pm->envlibentries() != NULL){
                 EnvelopeLibraryEntry* envLib = pm->envlibentries();
                 int count = envLib->count();
@@ -319,8 +319,8 @@ void ProjectView::save(){
                     count++;
                     envLib = envLib->next;
                 }
+                stringBuffer = stringBuffer + "    "; 
             }
-            stringBuffer = stringBuffer + "    ";
             xmlWriter.writeCharacters(stringBuffer);
         xmlWriter.writeEndElement();
 
@@ -916,10 +916,9 @@ void ProjectView::setProperties() {
         pm->duration() = projectPropertiesDialog->ui->durationEntry->text();
 
         if (new_title != pm->title()) {
-            QString old_pathAndName = pm->libpath();
-            QString new_pathAndName = pm->datpath() + "/" + new_title + ".dissco";
+            QString old_pathAndName = pm->fileinfo().absoluteFilePath();
+            QString new_pathAndName = pm->fileinfo().absolutePath() + "/" + new_title + ".dissco";
             if (QFile::rename(old_pathAndName, new_pathAndName)) {
-                pm->libpath() = new_pathAndName;
                 pm->title() = new_title;
             }
         }
