@@ -2,7 +2,7 @@
 #include "../ui/ui_Attributes.h"
 
 #include "../inst.hpp"
-
+#include "../core/event_struct.hpp"
 #include "../dialogs/FunctionGenerator.hpp"
 #include "ProjectViewController.hpp"
 //#include "PaletteViewController.h"
@@ -175,14 +175,135 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsign
 
     /// \todo implemenet saveCurrentShownEventData();
     // saveCurrentShownEventData();
+    if (m_curreventtype != type || m_curreventindex != index) {
+        saveCurrentShownEventData();
+    }
     m_curreventtype = type;
     m_curreventindex = index;
     
     showCurrentEventData();
 }
-/*
+
 void EventAttributesViewController::saveCurrentShownEventData() {
-    if (!m_currentlyShownEvent) return;
+
+    qDebug() << "saveCurrentShownEventData called";
+
+    Eventtype type = m_curreventtype;
+    ProjectManager *pm = Inst::get_project_manager();
+    HEvent& event = pm->topevent();
+    qDebug() << "event: " << event;
+    qDebug() << "old name: " << event.name;
+
+
+    if (type <= bottom) {
+        if (type == bottom) {
+    
+            BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
+            ExtraInfo& extra_info = bottom_event.extra_info;
+
+            FreqInfo& freq_info = extra_info.freq_info;
+            if (ui->wellTemperedRadio->isChecked()) { freq_info.freq_flag = welltempered; }
+            if (ui->fundamentalRadio->isChecked()) { freq_info.freq_flag = fundamental; }
+            if (ui->continuumRadio->isChecked()) { freq_info.freq_flag = continuum; }
+            freq_info.entry_1 = ui->wellTemperedEntry->text();
+            freq_info.entry_1 = ui->funFreqEntry1->text();
+            freq_info.entry_2 = ui->funFreqEntry2->text();
+            if (ui->hertzRadio->isChecked()) { freq_info.continuum_flag = hertz; }
+            if (ui->powerOfTwoRadio->isChecked()) { freq_info.continuum_flag = power_of_two; }
+
+            extra_info.loudness = ui->loudnessEntry->text();
+            extra_info.spa = ui->spaEntry->text();
+            extra_info.reverb = ui->revEntry->text();
+            extra_info.filter = ui->filEntry->text();
+            extra_info.modifier_group = ui->modifierGroupEntry->text();
+
+            event = bottom_event.event;
+        }else if(type == top){
+            event = pm->topevent();
+        }else if(type == high){
+            event = pm->highevents()[m_curreventindex];
+        }else if(type == mid){
+            event = pm->midevents()[m_curreventindex];
+        }else{
+            event = pm->lowevents()[m_curreventindex];
+        }
+        event.name = ui->nameEntry->text();
+
+        qDebug() << "event.name: " << event.name;
+
+        event.max_child_duration = ui->maxChildDurEntry->text();
+        event.timesig.bar_value = ui->timeSig1Entry->text();
+        event.timesig.note_value = ui->timeSig2Entry->text();
+        event.edu_perbeat = ui->unitsPerSecondEntry->text();
+
+
+        Tempo& temp = event.tempo;
+        if (ui->tempoAsNoteValueRadio->isChecked()) { /* as note */
+            temp.method_flag = 0;
+            temp.prefix = ui->tempoNotePrefixCombo1->currentText();
+
+            temp.note_value = ui->tempoNoteCombo1->currentText();
+            temp.valentry = ui->tempoValueEntry->text();
+        } else { /* as note */
+            temp.frentry_1 = ui->tempoFractionEntry1->text();
+            temp.frentry_2 = ui->tempoFractionEntry2->text();
+            temp.prefix = ui->tempoNotePrefixCombo2->currentText();
+            temp.note_value = ui->tempoNoteCombo2->currentText();
+        }  
+
+        NumChildren& num_children = event.numchildren;
+        if (ui->fixedButton->isChecked()) {
+            num_children.method_flag = Numchildrenflag::fixed;
+        } else if (ui->densityButton->isChecked()) {
+            num_children.method_flag = density;
+        } else if (ui->byLayerButton->isChecked()) {
+            num_children.method_flag = bylayer;
+        }  
+        num_children.entry_1 = ui->childCountEntry1->text();
+        num_children.entry_2 = ui->childCountEntry2->text();
+        num_children.entry_3 = ui->childCountEntry3->text();
+
+        // Save layers
+        
+        ChildDef& childeventdef = event.child_event_def;
+        if (ui->discreteButton->isChecked()) {
+            childeventdef.definition_flag = discrete;
+        } else if (ui->continuumButton->isChecked()) {
+            childeventdef.definition_flag = continuumdef;
+        } else if (ui->sweepButton->isChecked()) {
+            childeventdef.definition_flag = sweep;
+        }
+        childeventdef.entry_1 = ui->childDefEntry1->text();
+        childeventdef.entry_2 = ui->childDefEntry2->text();
+        childeventdef.entry_3 = ui->childDefEntry3->text();
+        childeventdef.attack_sieve = ui->attackSieveEntry->text();
+        childeventdef.duration_sieve = ui->durationSieveEntry->text();
+
+        if (ui->startTypePercentRadio->isChecked()) {
+            childeventdef.starttype_flag = percentage;
+        } else if (ui->startTypeUnitsRadio->isChecked()) {
+            childeventdef.starttype_flag = units;
+        } else if (ui->startTypeSecondsRadio->isChecked()) {
+            childeventdef.starttype_flag = seconds;
+        }
+
+        if (ui->durationTypePercentRadio->isChecked()) {
+            childeventdef.durationtype_flag = percentage;
+        } else if (ui->durationTypeUnitsRadio->isChecked()) {
+            childeventdef.durationtype_flag = units;
+        } else if (ui->durationTypeSecondsRadio->isChecked()) {
+            childeventdef.durationtype_flag = seconds;
+        }
+
+        if (type != bottom) {
+            event.spa = ui->spaEntry->text();
+            event.reverb = ui->revEntry->text();
+            event.filter = ui->filEntry->text();
+        }
+    }
+        
+
+    /*if (!m_currentlyShownEvent) return;
 
     // Name
     m_currentlyShownEvent->setEventName(ui->nameEntry->text().toStdString());
@@ -327,9 +448,9 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                     extra->addNoteModifiers(cb->text().toStdString());
             }
         }
-    }
+    }*/
 }
-*/
+
 
 void EventAttributesViewController::showCurrentEventData() {
     // clear dynamic widgets
@@ -478,7 +599,7 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->tempoNotePrefixCombo1->setCurrentIndex(tempo.prefix.toUInt());
             ui->tempoNoteCombo1->setCurrentIndex(tempo.note_value.toUInt());
             ui->tempoValueEntry->setText(tempo.valentry);
-        }else{ /* as fraction */
+        }else{ /* as note */
             ui->tempoAsFractionRadio->click();
             ui->tempoFractionEntry1->setText(tempo.frentry_1);
             ui->tempoFractionEntry2->setText(tempo.frentry_2);
@@ -534,7 +655,7 @@ void EventAttributesViewController::showCurrentEventData() {
         Childdeftimeflag st_flag = childeventdef.starttype_flag;
         ui->startTypePercentRadio->setChecked(st_flag == percentage);
         ui->startTypeUnitsRadio->setChecked(st_flag == units);
-        ui->startTypeSecondsRadio->setChecked(st_flag == seconds);
+        ui->startTypeSecondsRadio->setChecked(st_flag == units);
 
         Childdeftimeflag dt_flag = childeventdef.durationtype_flag;
         ui->durationTypePercentRadio->setChecked(dt_flag == percentage);
@@ -986,11 +1107,64 @@ void EventAttributesViewController::addModifierButtonClicked() {
     //     tail->next = align;
     //     align->prev = tail;
     // }
+
+    // TO DO: connect add modifier to data structure
+    
     ui->modScrollWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->modScrollWindowContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     Modifiers* newMod = new Modifiers(ui->modScrollWindow);
     ui->modScrollWindowContent->layout()->addWidget(newMod);
+
+    /*Modifier newModData = {};
+
+    if (newMod->ui->modifierApply->currentText() == "SOUND") {
+        newModData.applyhow_flag = false;
+    } else if (newMod->ui->modifierApply->currentText() == "PARTIAL") {
+        newModData.applyhow_flag = true;
+    }
+    newModData.group_name = newMod->ui->modifierNameEdit->text();
+    qDebug() << "newModData.group_name: " << newModData.group_name;
+    newModData.probability = newMod->ui->modifierProbEdit->text();
+    newModData.detune_spread = newMod->ui->modifierSpreadEdit->text();
+    newModData.detune_direction = newMod->ui->modifierDirEdit->text();
+    newModData.detune_velocity = newMod->ui->modifierVelEdit->text();
+    newModData.amplitude = newMod->ui->modifierMagEdit->text();
+    newModData.width = newMod->ui->modifierWidthEdit->text();
+    newModData.partialresult_string = newMod->ui->modifierResEdit->text();
+    newModData.rate = newMod->ui->modifierRateEdit->text();
+
+    Eventtype type = m_curreventtype;
+    ProjectManager *pm = Inst::get_project_manager();
+    switch(type) {
+        case top: {
+            HEvent& top_event = pm->topevent();
+            top_event.modifiers.push_back(newModData);
+            break;
+        }
+        case high: {
+            HEvent& high_event = pm->highevents()[m_curreventindex];
+            high_event.modifiers.push_back(newModData);
+            break;
+        }
+        case mid: {
+            HEvent& mid_event = pm->midevents()[m_curreventindex];
+            mid_event.modifiers.push_back(newModData);
+            break;   
+        }   
+        case low: {
+            HEvent& low_event = pm->lowevents()[m_curreventindex];
+            low_event.modifiers.push_back(newModData);
+            break;
+        }
+        case bottom: {
+            BottomEvent& bot_event = pm->bottomevents()[m_curreventindex];
+            bot_event.event.modifiers.push_back(newModData);
+            break;
+        }
+        default:
+            break;
+    }*/
 }
 /*
 void EventAttributesViewController::addPartialButtonClicked() {

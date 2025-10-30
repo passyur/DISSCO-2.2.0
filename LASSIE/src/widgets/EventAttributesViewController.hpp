@@ -66,6 +66,8 @@ public:
     //  */
     void showAttributesOfEvent(Eventtype type, unsigned index); //IEvent* event
 
+    void saveCurrentShownEventData();
+
     // /*! \brief get the currently shown event */
     // IEvent* getCurrentEvent() const;
 
@@ -150,7 +152,6 @@ private:
     // QList<class QCheckBox*>          m_noteModifierCheckBoxes;
 
     // // internal helpers
-    // void saveCurrentShownEventData();
     void showCurrentEventData();
     void insertFunctionString(FunctionButton fn);
     // void refreshChildTypeInLayer();

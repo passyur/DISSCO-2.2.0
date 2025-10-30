@@ -154,6 +154,8 @@ void ProjectView::writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xml
 void ProjectView::save(){
     qDebug() << "In Project View Save Function";
 
+    eventAttributesView->saveCurrentShownEventData();
+
     ProjectManager *pm = Inst::get_project_manager();
     modifiedButNotSaved = false; // changes bool value because file is being saved
 
@@ -474,7 +476,7 @@ void ProjectView::save(){
                         xmlWriter.writeCharacters(item.filter);
                     xmlWriter.writeEndElement(); 
                     xmlWriter.writeStartElement("Modifiers");
-                    xmlWriter.writeCharacters("");
+                    //xmlWriter.writeCharacters("");
                     for (const Modifier& itemMod : item.modifiers) {
                         xmlWriter.writeStartElement("Modifier");
                             xmlWriter.writeStartElement("Type");
