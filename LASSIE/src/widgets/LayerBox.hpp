@@ -10,6 +10,13 @@
 #include <QStandardItemModel>
 #include <QAbstractItemView>
 #include <QLabel>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QDebug>
+#include <QHeaderView>
+
+#include "../core/event_struct.hpp"
 
 class EventAttributesViewController;
 class ProjectView;
@@ -26,6 +33,9 @@ public:
             //  bool                           showDiscreteColumns
              );
     ~LayerBox() override;
+
+    QStandardItem* extractItemFromDrop(QDropEvent* event);
+    bool eventFilter(QObject* obj, QEvent* event) override;
 
     // /*! \brief refresh child‐type index numbers, returns next index */
     // int refreshChildTypeIndex(int start);
@@ -48,6 +58,8 @@ private slots:
 
 protected:
     // bool event(QEvent* e) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private:
     EventAttributesViewController* m_attributesView;
