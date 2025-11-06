@@ -16,6 +16,8 @@
 #include <QKeyEvent>
 #include <QScrollBar>
 
+#include <functional>
+
 // EventAttributesViewController::EventAttributesViewController(SharedPointers* sharedPointers,
 //                                                              QWidget* parent)
 EventAttributesViewController::EventAttributesViewController(ProjectView* projectView)
@@ -190,43 +192,42 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
-    HEvent& event = pm->topevent();
-    qDebug() << "event: " << &event;
-    qDebug() << "old name: " << event.name;
+    if (type == bottom) {
+        // qDebug() << "bottom event: " << &event;
+        BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
+        ExtraInfo& extra_info = bottom_event.extra_info;
 
+        FreqInfo& freq_info = extra_info.freq_info;
+        if (ui->wellTemperedRadio->isChecked()) { freq_info.freq_flag = 0; }
+        if (ui->fundamentalRadio->isChecked()) { freq_info.freq_flag = 1; }
+        if (ui->continuumRadio->isChecked()) { freq_info.freq_flag = 2; }
+        freq_info.entry_1 = ui->wellTemperedEntry->text();
+        freq_info.entry_1 = ui->funFreqEntry1->text();
+        freq_info.entry_2 = ui->funFreqEntry2->text();
+        if (ui->hertzRadio->isChecked()) { freq_info.continuum_flag = 0; }
+        if (ui->powerOfTwoRadio->isChecked()) { freq_info.continuum_flag = 1; }
 
-    if (type <= bottom) {
-        if (type == bottom) {
-    
-            BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
-            ExtraInfo& extra_info = bottom_event.extra_info;
+        extra_info.loudness = ui->loudnessEntry->text();
+        extra_info.spa = ui->spaEntry->text();
+        extra_info.reverb = ui->revEntry->text();
+        extra_info.filter = ui->filEntry->text();
+        extra_info.modifier_group = ui->modifierGroupEntry->text();
+    }
 
-            FreqInfo& freq_info = extra_info.freq_info;
-            if (ui->wellTemperedRadio->isChecked()) { freq_info.freq_flag = 0; }
-            if (ui->fundamentalRadio->isChecked()) { freq_info.freq_flag = 1; }
-            if (ui->continuumRadio->isChecked()) { freq_info.freq_flag = 2; }
-            freq_info.entry_1 = ui->wellTemperedEntry->text();
-            freq_info.entry_1 = ui->funFreqEntry1->text();
-            freq_info.entry_2 = ui->funFreqEntry2->text();
-            if (ui->hertzRadio->isChecked()) { freq_info.continuum_flag = 0; }
-            if (ui->powerOfTwoRadio->isChecked()) { freq_info.continuum_flag = 1; }
+    if(type <= bottom){
+        HEvent& event = [&]() -> HEvent& {
+            if(type == top)
+                return pm->topevent();
+            if(type == high)
+                return pm->highevents()[m_curreventindex];
+            if(type == mid)
+                return pm->midevents()[m_curreventindex];
+            if(type == low)
+                return pm->lowevents()[m_curreventindex];
+            else // bottom, use of 'else' silences a (stupid) compiler warning ;)
+                return pm->bottomevents()[m_curreventindex].event;
+        }();
 
-            extra_info.loudness = ui->loudnessEntry->text();
-            extra_info.spa = ui->spaEntry->text();
-            extra_info.reverb = ui->revEntry->text();
-            extra_info.filter = ui->filEntry->text();
-            extra_info.modifier_group = ui->modifierGroupEntry->text();
-
-            event = bottom_event.event;
-        }else if(type == top){
-            event = pm->topevent();
-        }else if(type == high){
-            event = pm->highevents()[m_curreventindex];
-        }else if(type == mid){
-            event = pm->midevents()[m_curreventindex];
-        }else{
-            event = pm->lowevents()[m_curreventindex];
-        }
         event.name = ui->nameEntry->text();
 
         qDebug() << "event.name: " << event.name;
@@ -301,7 +302,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             event.filter = ui->filEntry->text();
         }
     }
-        
 
     /*if (!m_currentlyShownEvent) return;
 
