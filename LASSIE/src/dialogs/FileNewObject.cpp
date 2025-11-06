@@ -22,3 +22,19 @@ FileNewObject::~FileNewObject()
 {
     delete ui;
 }
+
+void FileNewObject::accept()
+{
+    if(
+        (ui->buttonHigh->isChecked() || ui->buttonMid->isChecked() || ui->buttonLow->isChecked()
+        || ui->buttonBottom->isChecked() || ui->buttonSpectrum->isChecked() || ui->buttonNote->isChecked()
+        || ui->buttonEnv->isChecked() || ui->buttonSiv->isChecked() || ui->buttonSpa->isChecked()
+        || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked()
+        || ui->buttonMea->isChecked())
+      && 
+        !(ui->objNameEntry->text().simplified().isEmpty())
+    )
+        QDialog::accept();
+    else
+        return;
+}

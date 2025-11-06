@@ -19,6 +19,8 @@ public:
     
     Ui::FileNewObject *ui;
     
+public slots:
+    void accept() override;
 };
 
 #endif // FILENEWOBJECT_HPP
