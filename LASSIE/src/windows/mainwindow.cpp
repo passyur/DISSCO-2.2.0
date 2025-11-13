@@ -1,10 +1,10 @@
 #include <QtWidgets>
 
-#include "MainWindow.hpp"
-#include "EnvelopeLibraryWindow.hpp"
+#include "MainWindow.h"
+#include "EnvelopeLibraryWindow.h"
 #include "../ui/ui_mainwindow.h"
-#include "MarkovModelLibraryWindow.hpp"
-#include "ProjectViewController.hpp"
+#include "MarkovModelLibraryWindow.h"
+#include "ProjectViewController.h"
 #include "../core/project_struct.hpp"
 
 #include <QApplication>
@@ -34,7 +34,7 @@ MainWindow::MainWindow(Inst* m)
     , envelopeLibraryWindow(std::make_unique<EnvelopeLibraryWindow>(this))
     , markovWindow(std::make_unique<MarkovModelLibraryWindow>(this))
 {
-    qDebug() << "In MAIN WINDOW CONSTRUCTOR BEFORE CONNECT";
+
     Q_ASSERT(instance_ == nullptr);
     instance_ = this;
     main_ = m;
@@ -60,7 +60,6 @@ MainWindow::MainWindow(Inst* m)
             showEnvelopeLibraryWindow();
         }
     });
-    qDebug() << "In MAIN WINDOW CONSTRUCTOR AFTER CONNECT";
 
 }
 
