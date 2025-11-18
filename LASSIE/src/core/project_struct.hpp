@@ -89,7 +89,7 @@ class Project : public QObject {
         EnvelopeLibraryEntry *elentry = nullptr;
         QList<MarkovModel<float>> markov_models;
 
-        xercesc_3_3::DOMElement *config_el = nullptr;
+        xercesc::DOMElement *config_el = nullptr;
 
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
