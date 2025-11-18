@@ -106,7 +106,7 @@ class MainWindow : public QMainWindow
         QStatusBar *statusbar_;
         
         // projectView pointer for testing
-        ProjectView* projectView;
+        ProjectView* projectView = nullptr;
         
         Inst *main_;
         static MainWindow *instance_;
