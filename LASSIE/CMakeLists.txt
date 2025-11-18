@@ -17,10 +17,10 @@ qt_add_executable(LASSIE
     src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp 
     src/widgets/EnvLibDrawingArea.cpp src/widgets/EnvLibDrawingArea.hpp 
     src/core/EnvelopeLibraryEntry.cpp src/core/EnvelopeLibraryEntry.hpp
-    src/dialogs/FunctionGenerator.cpp src/dialogs/FunctionGenerator.hpp src/UI/FunctionGenerator.ui
-    src/widgets/REVPartialAlignment.cpp src/widgets/REVPartialAlignment.hpp src/UI/FunGenREVPartialAlignment.ui
-    src/widgets/SPAPartialAlignment.cpp src/widgets/SPAPartialAlignment.hpp src/UI/FunGenSPAPartialAlignment.ui
-    src/dialogs/ProjectPropertiesDialog.cpp src/dialogs/ProjectPropertiesDialog.hpp src/UI/ProjectPropertiesDialog.ui
+    src/dialogs/FunctionGenerator.cpp src/dialogs/FunctionGenerator.hpp src/ui/FunctionGenerator.ui
+    src/widgets/REVPartialAlignment.cpp src/widgets/REVPartialAlignment.hpp src/ui/FunGenREVPartialAlignment.ui
+    src/widgets/SPAPartialAlignment.cpp src/widgets/SPAPartialAlignment.hpp src/ui/FunGenSPAPartialAlignment.ui
+    src/dialogs/ProjectPropertiesDialog.cpp src/dialogs/ProjectPropertiesDialog.hpp src/ui/ProjectPropertiesDialog.ui
     src/inst.hpp
     src/widgets/ProjectViewController.cpp src/widgets/ProjectViewController.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
