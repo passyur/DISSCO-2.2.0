@@ -15,7 +15,6 @@ set(CMAKE_AUTORCC ON)
 qt_add_executable(LASSIE
     src/main.cpp
     src/windows/MainWindow.cpp src/windows/MainWindow.hpp src/ui/mainwindow.ui
-    # src/windows/markovwindow.cpp src/windows/markovwindow.hpp
     src/windows/MarkovModelLibraryWindow.cpp src/windows/MarkovModelLibraryWindow.hpp
     src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp 
     src/widgets/EnvLibDrawingArea.cpp src/widgets/EnvLibDrawingArea.hpp 
@@ -33,7 +32,6 @@ qt_add_executable(LASSIE
     src/dialogs/FileNewObject.cpp src/dialogs/FileNewObject.hpp src/ui/FileNewObject.ui
     src/widgets/LayerBox.cpp src/widgets/LayerBox.hpp
     src/widgets/Modifiers.cpp src/widgets/Modifiers.hpp src/ui/Modifiers.ui
-    # src/core/IEvent.cpp src/core/IEvent.h
 )
 
 target_link_libraries(LASSIE PRIVATE 
