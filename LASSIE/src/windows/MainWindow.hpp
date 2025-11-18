@@ -50,6 +50,8 @@ class MainWindow : public QMainWindow
         void showPropertiesDialog();
         void showFileNewObjectDialog();
 
+        
+
     protected:
         void closeEvent(QCloseEvent *event) override;
         void readSettings();
@@ -61,7 +63,7 @@ class MainWindow : public QMainWindow
         void createMenus();
         void createToolBars();
         void createStatusBar() { statusBar()->showMessage(tr("Ready")); }
-
+        void runProject();
         void showFile();
 
         QString currentFile;

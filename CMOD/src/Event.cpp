@@ -53,7 +53,9 @@ Event::Event(DOMElement* _element,
   restartsRemaining(0),
   currChildNum(0), childType(0),
   matrix(0),
-  discreteFailedResponse("") {
+  utilities(_utilities),
+  discreteFailedResponse("")
+   {
 
   //Initialize parameters
   DOMElement* thisEventElement = _element->GFEC();

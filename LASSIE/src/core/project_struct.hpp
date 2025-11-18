@@ -89,6 +89,8 @@ class Project : public QObject {
         EnvelopeLibraryEntry *elentry = nullptr;
         QList<MarkovModel<float>> markov_models;
 
+        xercesc_3_3::DOMElement *config_el = nullptr;
+
         /* list of custom note modifiers, per user */
         QList<QString> custom_note_modifiers;
         /* dict of known default modifiers */
@@ -182,6 +184,8 @@ class ProjectManager : public QObject {
         QList<Project*> get_projects() { return project_hash_.values(); }
         QList<QByteArray> get_project_IDs() { return project_hash_.keys(); }
 #endif
+
+        void writeSeedEntry(std::string);
     private:
 #ifdef TABEDITOR
         QHash<QByteArray, Project*> project_hash_;
