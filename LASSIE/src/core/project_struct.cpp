@@ -45,6 +45,7 @@ namespace XercesParser {
 
         delete theSerializer;
         returnString = returnString.substr(tagLength+2, returnString.size() - tagLength * 2 - 5);
+        std::cout << "pre-QString-from-stdstring conversion: " << returnString << std::endl;
         return QString::fromStdString(returnString);
     }
 
@@ -534,7 +535,8 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     //Configurations
     DOMElement* configuration = root->getFirstElementChild();
-    
+    p->config_el = configuration;
+
     //fileFlag
     DOMElement* element = configuration->getFirstElementChild();
     element = element->getNextElementSibling(); // skip Title attribute
@@ -815,3 +817,12 @@ Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
     return project;
 }
 
+void ProjectManager::writeSeedEntry(std::string seed) {
+    if(!curr_project_->config_el) // "New" projects will not have been parsed, so now that they've been saved (right?), we parse them
+        parse(curr_project_, curr_project_->fileinfo.absoluteFilePath());
+    
+    using namespace xercesc;
+    XMLCh *seed_data = XMLString::transcode(seed.c_str());
+    curr_project_->config_el->setAttribute(u"Seed", seed_data);
+    XMLString::release(&seed_data);
+}

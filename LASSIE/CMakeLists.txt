@@ -64,4 +64,6 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(LASSIE)
 endif()
 
+target_compile_definitions(LASSIE PUBLIC "CMOD_BINARY=${CMOD_BINARY}")
+
 message(STATUS "DONE!")
