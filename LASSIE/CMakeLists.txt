@@ -9,8 +9,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-# qt_standard_project_setup()
-
 ### This will need to be updated as we add more windows/classes
 qt_add_executable(LASSIE
     src/main.cpp
