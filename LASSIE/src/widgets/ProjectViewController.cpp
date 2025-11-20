@@ -483,7 +483,7 @@ void ProjectView::save(){
                                 xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("ApplyHow");
-                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "0" : "1");
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("Probability");
                                 writeInlineXml(xmlWriter, itemMod.probability);
@@ -678,14 +678,13 @@ void ProjectView::save(){
                             writeInlineXml(xmlWriter, item.extra_info.modifier_group);
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("Modifiers");
-                        xmlWriter.writeCharacters("");
                         for (const Modifier& itemMod : item.extra_info.modifiers) {
                             xmlWriter.writeStartElement("Modifier");
                                 xmlWriter.writeStartElement("Type");
                                     xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("ApplyHow");
-                                    xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                                    xmlWriter.writeCharacters(itemMod.applyhow_flag ? "0" : "1");
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Probability");
                                     writeInlineXml(xmlWriter, itemMod.probability);
@@ -765,7 +764,6 @@ void ProjectView::save(){
                         xmlWriter.writeCharacters(item.note_info.staffs);	
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Modifiers");
-                    xmlWriter.writeCharacters("");	
                     for (QString modifier : item.note_info.modifiers) {
                         xmlWriter.writeStartElement("Modifier");
                             writeInlineXml(xmlWriter, modifier);	
