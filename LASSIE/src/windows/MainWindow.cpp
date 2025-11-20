@@ -4,6 +4,7 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "MarkovModelLibraryWindow.hpp"
 #include "../widgets/ProjectViewController.hpp"
+#include "PostWindow.hpp"
 
 #include "../core/project_struct.hpp"
 
@@ -225,6 +226,11 @@ void MainWindow::runProject()
             }
         );
     qDebug() << QString(TEST_FUNC_NAME) + " " + pm->fileinfo().canonicalFilePath();
+
+    PostWindow *pw = new PostWindow(cmod);
+    pw->resize(600,400);
+    pw->show();
+
     cmod->start(QString(TEST_FUNC_NAME), QStringList() << pm->fileinfo().canonicalFilePath());
 }
 

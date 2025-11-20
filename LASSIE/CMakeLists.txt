@@ -15,6 +15,7 @@ qt_add_executable(LASSIE
     src/windows/MainWindow.cpp src/windows/MainWindow.hpp src/ui/mainwindow.ui
     src/windows/MarkovModelLibraryWindow.cpp src/windows/MarkovModelLibraryWindow.hpp
     src/windows/EnvelopeLibraryWindow.cpp src/windows/EnvelopeLibraryWindow.hpp 
+    src/windows/PostWindow.cpp src/windows/PostWindow.hpp 
     src/widgets/EnvLibDrawingArea.cpp src/widgets/EnvLibDrawingArea.hpp 
     src/core/EnvelopeLibraryEntry.cpp src/core/EnvelopeLibraryEntry.hpp
     src/dialogs/FunctionGenerator.cpp src/dialogs/FunctionGenerator.hpp src/ui/FunctionGenerator.ui
