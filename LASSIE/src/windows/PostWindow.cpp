@@ -1,6 +1,7 @@
 #include "PostWindow.hpp"
 
 #include <QMessageBox>
+#include <QCloseEvent>
 
 #include <QVBoxLayout>
 #include <QTextCharFormat>
@@ -59,6 +60,7 @@ void PostWindow::closeEvent(QCloseEvent *event)
                 proc->kill();
                 break;
             case QMessageBox::No:
+                event->ignore();
                 return;
         }
     }
