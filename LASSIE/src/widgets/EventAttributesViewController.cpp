@@ -172,11 +172,7 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     ui->stackedWidget->adjustSize();
 }
 
-void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsigned index) {
-
-
-    /// \todo implemenet saveCurrentShownEventData();
-    // saveCurrentShownEventData();
+void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
     }
@@ -187,8 +183,9 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsign
 }
 
 void EventAttributesViewController::saveCurrentShownEventData() {
+    if(m_curreventindex == -1) return;
     qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
-
+    
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
     if (type == bottom) {

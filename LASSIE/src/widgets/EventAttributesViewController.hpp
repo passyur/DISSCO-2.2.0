@@ -64,7 +64,7 @@ public:
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
     //  */
-    void showAttributesOfEvent(Eventtype type, unsigned index); //IEvent* event
+    void showAttributesOfEvent(Eventtype type, int index); //IEvent* event
 
     void saveCurrentShownEventData();
 
@@ -144,7 +144,7 @@ private:
     
     Eventtype m_curreventtype;
     // index of event in QList in ProjectManager
-    unsigned m_curreventindex;
+    int m_curreventindex = -1;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
