@@ -294,7 +294,39 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             event.reverb = ui->revEntry->text();
             event.filter = ui->filEntry->text();
         }
+    }else if (type == env){
+        EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
+        event.name = ui->envNameEntry->text();
+        event.envelope_builder = ui->envBuilderEntry->text();
+    }else if (type == sieve){
+        SieveEvent& event = pm->sieveevents()[m_curreventindex];
+        event.name = ui->sieveNameEntry->text();
+        event.sieve_builder = ui->sieveBuilderEntry->text();
+    }else if(type == spa){
+        SpaEvent& event = pm->spaevents()[m_curreventindex];
+        event.name = ui->spaNameEntry->text();
+        event.spatialization = ui->spaBuilderEntry->text();
+    }else if(type == pattern){
+        PatternEvent& event = pm->patternevents()[m_curreventindex];
+        event.name = ui->patNameEntry->text();
+        event.pattern_builder = ui->patBuilderEntry->text();
+    }else if(type == reverb){
+        ReverbEvent& event = pm->reverbevents()[m_curreventindex];
+        event.name = ui->revNameEntry->text();
+        event.reverberation = ui->revBuilderEntry->text();
+    }else if(type == note){
+        NoteEvent& event = pm->noteevents()[m_curreventindex];
+        event.name = ui->noteNameEntry->text();
+        event.note_info.staffs = ui->staffNumberEntry->text();
+    }else if(type == filter){
+        FilterEvent& event = pm->filterevents()[m_curreventindex];
+        event.name = ui->filNameEntry->text();
+        event.filter_builder = ui->filBuilderEntry->text();
+    }else{
+        qDebug() << "Cannot save event data: type of event not valid";
     }
+
+}
 
     /*if (!m_currentlyShownEvent) return;
 
@@ -442,7 +474,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             }
         }
     }*/
-}
 
 
 void EventAttributesViewController::showCurrentEventData() {
