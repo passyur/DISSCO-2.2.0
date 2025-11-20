@@ -661,13 +661,14 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->filEntry->setText(event.filter);
         }
     }else{
-        // if(type == sound){
-            /// \todo implement partials info display
-            // auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-            // ui->spectrumNumPartialEntry->setText(QString::fromStdString(extra->getNumPartials()));
-            // ui->spectrumDeviationEntry->setText(QString::fromStdString(extra->getDeviation()));
-            // ui->spectrumGenEntry->setText(QString::fromStdString(extra->getSpectrumGenBuilder()));
-            /// \todo implement partials display
+        if(type == sound){
+            const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
+            ui->soundNameEntry->setText(event.name);
+            ui->spectrumNumPartialEntry->setText(event.num_partials);
+            ui->spectrumDeviationEntry->setText(event.deviation);
+            ui->spectrumGenEntry->setText(event.generate_spectrum);
+
+            /// \todo partials
             // auto* sp = extra->getSpectrumPartials();
             // if (sp) {
             //     m_soundPartialHboxes = new SoundPartialHBox(sp, this);
@@ -683,8 +684,7 @@ void EventAttributesViewController::showCurrentEventData() {
             //     m_soundPartialHboxes->setPartialNumber(1);
             // }
 
-        // }else
-        if(type == env){
+        }else if(type == env){
             const EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
             ui->envNameEntry->setText(event.name);
             ui->envBuilderEntry->setText(event.envelope_builder);
