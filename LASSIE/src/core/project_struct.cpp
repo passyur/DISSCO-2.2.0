@@ -554,6 +554,7 @@ void ProjectManager::parse(Project *p, const QString& filepath){
 
     // topEvent
     element = element->getNextElementSibling(); //skipped, always = "0"
+    p->top_event.name = "0";
 
     // pieceStartTime
     element = element->getNextElementSibling();
