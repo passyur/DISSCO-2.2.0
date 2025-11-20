@@ -46,7 +46,6 @@ namespace XercesParser {
 
         delete theSerializer;
         returnString = returnString.substr(tagLength+2, returnString.size() - tagLength * 2 - 5);
-        std::cout << "pre-QString-from-stdstring conversion: " << returnString << std::endl;
         return QString::fromStdString(returnString);
     }
 
@@ -164,7 +163,6 @@ namespace XercesParser {
         DOMElement *childdef_el = numchildren_el->getNextElementSibling();
         curr = childdef_el->getFirstElementChild();
         event.child_event_def.entry_1 = getFunctionString(curr);
-        qDebug() << event.child_event_def.entry_1;
          
         curr = curr->getNextElementSibling();
         event.child_event_def.entry_2 = getFunctionString(curr);
@@ -421,8 +419,6 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
     char* buffer = XMLString::transcode(textdata->getData());
     Eventtype type = (Eventtype)std::stoi(buffer);
     XMLString::release(&buffer);
-    qDebug() << "eventtype_el: " << eventtype_el;
-    qDebug() << "event type: " << type;
 
     switch(type){
         case top:
@@ -434,10 +430,14 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             eh.type = type;
             DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eh);
             XercesParser::parseEndOfHEvent(filter_el, eh);
-            qDebug() << "event name " << eh.name << " of type " << eh.type;
+            qDebug() << "parsed" << eh.type << "event named" << eh.name;
             switch(type){
                 case top: 
                     top_event = eh;
+                    // qDebug() << "--- TOP EVENT ---";
+                    // qDebug() << "name: " << top_event.name;
+                    // qDebug() << "mcd: " << top_event.max_child_duration;
+                    // qDebug() << "edu_per_beat: " << top_event.edu_perbeat;
                     break;
                 case high:
                     high_events.append(eh);
@@ -457,6 +457,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             eb.event.type = type;
             DOMElement *filter_el = XercesParser::parseHEvent(eventtype_el, eb.event);
             XercesParser::parseEndOfBottomEvent(filter_el, eb);
+            qDebug() << "parsed Bottom event named" << eb.event.name;
             bottom_events.append(eb);
             break;
         }
@@ -464,6 +465,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             SpectrumEvent espec;
             espec.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseSpectrumEvent(eventtype_el, espec);
+            qDebug() << "parsed Spectrum event named" << espec.name;
             spectrum_events.append(espec);
             break;
         }
@@ -471,6 +473,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             NoteEvent en;
             en.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseNoteEvent(eventtype_el, en);
+            qDebug() << "parsed Note event named " << en.name;
             note_events.append(en);
             break;
         }
@@ -478,6 +481,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             EnvelopeEvent ee;
             ee.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseEnvelopeEvent(eventtype_el, ee);
+            qDebug() << "parsed Envelope event named" << ee.name;
             envelope_events.append(ee);
             break;
         }
@@ -485,6 +489,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             SieveEvent esi;
             esi.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseSieveEvent(eventtype_el, esi);
+            qDebug() << "parsed Sieve event named" << esi.name;
             sieve_events.append(esi);
             break;
         }
@@ -492,6 +497,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             SpaEvent espa;
             espa.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseSpaEvent(eventtype_el, espa);
+            qDebug() << "parsed Spa event named" << espa.name;
             spa_events.append(espa);
             break;
         }
@@ -499,6 +505,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             PatternEvent ep;
             ep.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parsePatternEvent(eventtype_el, ep);
+            qDebug() << "parsed Pattern event named" << ep.name;
             pattern_events.append(ep);
             break;
         }
@@ -506,6 +513,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             ReverbEvent er;
             er.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseReverbEvent(eventtype_el, er);
+            qDebug() << "parsed Reverb event named" << er.name;
             reverb_events.append(er);
             break;
         }
@@ -513,6 +521,7 @@ void Project::parseEvent(xercesc::DOMElement *event_start){
             FilterEvent ef;
             ef.orderinpalette = QString::fromStdString(orderinpalette);
             XercesParser::parseFilterEvent(eventtype_el, ef);
+            qDebug() << "parsed Filter event named" << ef.name;
             filter_events.append(ef);
             break;
         }

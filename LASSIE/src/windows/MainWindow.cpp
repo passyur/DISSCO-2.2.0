@@ -436,7 +436,6 @@ void MainWindow::showFile()
 }
 
 void MainWindow::setUnsavedTitle(QString unsavedFile){
-    qDebug() << "In setUnsavedTitle";
     currentFile = unsavedFile;
     setWindowTitle(tr("%1 - %2").arg("*" + currentFile, tr("LASSIE")));
     qDebug() << "*currentFile: " << currentFile;

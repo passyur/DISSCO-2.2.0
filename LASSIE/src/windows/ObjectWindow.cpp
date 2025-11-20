@@ -99,7 +99,7 @@ ObjectWindow::ObjectWindow(EventType _type, ProjectView* _projectView)
     setCentralWidget(scrollArea);
 
     // Debug output
-    qDebug() << "Created ObjectWindow:" << title << "with" << (objects ? "some" : "no") << "objects";
+    // qDebug() << "Created ObjectWindow:" << title << "with" << (objects ? "some" : "no") << "objects";
 
     // Populate initial content
     numOfObjectsChange();

@@ -187,13 +187,11 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsign
 }
 
 void EventAttributesViewController::saveCurrentShownEventData() {
-
-    qDebug() << "saveCurrentShownEventData called";
+    qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
 
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
     if (type == bottom) {
-        // qDebug() << "bottom event: " << &event;
         BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
         ExtraInfo& extra_info = bottom_event.extra_info;
 
@@ -229,8 +227,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         }();
 
         event.name = ui->nameEntry->text();
-
-        qDebug() << "event.name: " << event.name;
 
         event.max_child_duration = ui->maxChildDurEntry->text();
         event.timesig.bar_value = ui->timeSig1Entry->text();
@@ -575,14 +571,13 @@ void EventAttributesViewController::showCurrentEventData() {
             event = pm->topevent();
         }else if(type == high){
             event = pm->highevents()[m_curreventindex];
-            qDebug() << "got high";
         }else if(type == mid){
             event = pm->midevents()[m_curreventindex];
         }else{
             event = pm->lowevents()[m_curreventindex];
         }
         ui->nameEntry->setText(event.name);
-
+        
         ui->maxChildDurEntry->setText(event.max_child_duration);
         ui->timeSig1Entry->setText(event.timesig.bar_value);
         ui->timeSig2Entry->setText(event.timesig.note_value);

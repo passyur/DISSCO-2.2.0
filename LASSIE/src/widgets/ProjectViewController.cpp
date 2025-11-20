@@ -1148,7 +1148,7 @@ void ProjectView::updatePaletteView() {
 void ProjectView::showAttributes(QString eventType, int index) {
     // TODO: Implement event attributes display
     // This would typically show the event in an EventAttributesViewController
-    qDebug() << "Showing attributes for event:" << eventType << " at index " << index;
+    qDebug() << "Showing attributes for event:" << eventType << "at index" << index;
 
     // Show the ObjectWindows
     if (eventType == "Top" ){ 
