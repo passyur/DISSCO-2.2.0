@@ -222,7 +222,6 @@ void MainWindow::runProject()
             [=](int exit_code)
             { 
                 statusBar()->showMessage(tr("CMOD exited with code %1").arg(exit_code)); 
-                qDebug() << "Hello"; 
             }
         );
     qDebug() << QString(TEST_FUNC_NAME) + " " + pm->fileinfo().canonicalFilePath();
