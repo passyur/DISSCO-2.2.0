@@ -1,7 +1,10 @@
 #include "PostWindow.hpp"
 
+#include "../inst.hpp"
+
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QOverload>
 
 #include <QVBoxLayout>
 #include <QTextCharFormat>
@@ -23,6 +26,21 @@ PostWindow::PostWindow(QProcess *process, QWidget *parent)
     toggleScroll->setCheckable(true);
     toggleScroll->setChecked(true);
 
+    // spacer for clarity since the remaining actions will be related to the process
+    QWidget *spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolbar->addWidget(spacer);
+
+    QAction *termProc = toolbar->addAction("Terminate");
+    termProc->setToolTip("Ask CMOD to stop running");
+    termProc->setEnabled(false);
+    QAction *killProc = toolbar->addAction("Kill");
+    killProc->setToolTip("Force CMOD to stop running");
+    killProc->setEnabled(false);
+    QAction *runProc = toolbar->addAction("Run");
+    runProc->setToolTip("Run project (if none currently running)");
+    runProc->setEnabled(false);
+    
     connect(bigger, &QAction::triggered, this, &PostWindow::increaseFont);
     connect(smaller, &QAction::triggered, this, &PostWindow::decreaseFont);
     connect(clear, &QAction::triggered, this, &PostWindow::clearOutput);
@@ -30,6 +48,28 @@ PostWindow::PostWindow(QProcess *process, QWidget *parent)
         [this](bool checked){
             autoscroll = checked;
         });
+    connect(termProc, &QAction::triggered, this, &PostWindow::termProcess);
+    connect(killProc, &QAction::triggered, this, &PostWindow::killProcess);
+    connect(runProc, &QAction::triggered, this, &PostWindow::runProcess);
+    
+    connect(proc, &QProcess::stateChanged, this, [=]{
+        if(proc->state() != QProcess::NotRunning){
+            termProc->setEnabled(true);
+            killProc->setEnabled(true);
+            runProc->setEnabled(false);
+        }else{
+            termProc->setEnabled(false);
+            killProc->setEnabled(false);
+        }
+    });
+
+    connect(proc, &QProcess::finished, this, [=]{
+        runProc->setEnabled(true);
+        if(proc->exitStatus() == QProcess::NormalExit)
+            appendColored("*** Process exited normally (exit code" + QString::number(proc->exitCode()) + ") ***", Qt::black);
+        else
+            appendColored("*** Process crashed (abnormal exit; exit code" + QString::number(proc->exitCode()) + ") *** ", Qt::red);
+    });
     
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(toolbar);
@@ -110,6 +150,22 @@ void PostWindow::clearOutput()
     textEdit->clear();
 }
 
+void PostWindow::termProcess()
+{
+    proc->terminate();
+    appendColored("*** User requested process terminate ***", Qt::red);
+}
+
+void PostWindow::killProcess()
+{
+    proc->kill();
+    appendColored("*** Process killed by user ***", Qt::red);
+}
+
+void PostWindow::runProcess()
+{
+    proc->start(proc->program(), proc->arguments());
+}
 
 void PostWindow::scrollToBottom()
 {

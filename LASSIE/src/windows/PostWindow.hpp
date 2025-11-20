@@ -18,6 +18,9 @@ private slots:
     void increaseFont();
     void decreaseFont();
     void clearOutput();
+    void termProcess();
+    void killProcess();
+    void runProcess();
 
 private:
     QTextEdit *textEdit;
