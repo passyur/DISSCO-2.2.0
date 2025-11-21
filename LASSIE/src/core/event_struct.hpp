@@ -169,6 +169,7 @@ struct ExtraInfo {
     unsigned childtype_flag = 0;
     FreqInfo freq_info;
     QString loudness;
+    QString phase;
     QString spa;
     QString reverb;
     QString filter;

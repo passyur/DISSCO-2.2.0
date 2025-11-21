@@ -665,6 +665,9 @@ void ProjectView::save(){
                         xmlWriter.writeStartElement("Loudness");
                             writeInlineXml(xmlWriter, item.extra_info.loudness);
                         xmlWriter.writeEndElement(); 
+                        xmlWriter.writeStartElement("Phase");
+                            writeInlineXml(xmlWriter, item.extra_info.phase);
+                        xmlWriter.writeEndElement();
                         xmlWriter.writeStartElement("Spatialization");
                             writeInlineXml(xmlWriter, item.extra_info.spa);
                         xmlWriter.writeEndElement();

@@ -203,6 +203,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         if (ui->powerOfTwoRadio->isChecked()) { freq_info.continuum_flag = 1; }
 
         extra_info.loudness = ui->loudnessEntry->text();
+        extra_info.phase = ui->phaseEntry->text();
         extra_info.spa = ui->spaEntry->text();
         extra_info.reverb = ui->revEntry->text();
         extra_info.filter = ui->filEntry->text();
@@ -294,6 +295,8 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             event.reverb = ui->revEntry->text();
             event.filter = ui->filEntry->text();
         }
+
+
     }else if (type == env){
         EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
         event.name = ui->envNameEntry->text();
@@ -501,10 +504,12 @@ void EventAttributesViewController::showCurrentEventData() {
             if (type == bottom) {  
                 ui->frequencyContainer->setVisible(true);
                 ui->loudnessContainer->setVisible(true);
+                ui->phaseContainer->setVisible(true);
                 ui->modGroupContainer->setVisible(true);
             } else {
                 ui->frequencyContainer->setVisible(false);
                 ui->loudnessContainer->setVisible(false);
+                ui->phaseContainer->setVisible(false);
                 ui->modGroupContainer->setVisible(false);
             }
             fixStackedWidgetLayout(ui->standardPage);
@@ -571,28 +576,11 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->powerOfTwoRadio->setChecked(freq_info.continuum_flag == 1);
 
             ui->loudnessEntry->setText(extra_info.loudness);
+            ui->phaseEntry->setText(extra_info.phase);
             ui->spaEntry->setText(extra_info.spa);
             ui->revEntry->setText(extra_info.reverb);
             ui->filEntry->setText(extra_info.filter);
             ui->modifierGroupEntry->setText(extra_info.modifier_group);
-
-            /// \todo modifiers
-            // if (ui->childTypeSoundRadio->isChecked()) {
-            //     auto* em = extra->getModifiers();
-            //     while (em) {
-            //         auto* align = new EventBottomModifierAlignment(em, this);
-            //         if (!m_modifiers) m_modifiers = align;
-            //         else {
-            //             auto* tail = m_modifiers;
-            //             while (tail->next) tail = tail->next;
-            //             tail->next = align;
-            //             align->prev = tail;
-            //         }
-            //         ui.modifiersLayout->addWidget(align);
-            //         em = em->next;
-            //     }
-            //     for(auto iter : )
-            // }
 
             event = bottom_event.event;
         }else if(type == top){
@@ -691,6 +679,22 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->revEntry->setText(event.reverb);
             ui->filEntry->setText(event.filter);
         }
+
+        // /// \todo modifiers
+        // const QList<Modifier>& mods = event.modifiers();
+        // foreach (Modifier mod, mods) {
+        //     auto* align = new EventBottomModifierAlignment(em, this);
+        //     if (!m_modifiers) m_modifiers = align;
+        //     else {
+        //         auto* tail = m_modifiers;
+        //         while (tail->next) tail = tail->next;
+        //         tail->next = align;
+        //         align->prev = tail;
+        //     }
+        //     ui.modifiersLayout->addWidget(align);
+        //     em = em->next;
+        // }
+
     }else{
         if(type == sound){
             const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
@@ -1139,7 +1143,7 @@ void EventAttributesViewController::addModifierButtonClicked() {
     Modifiers* newMod = new Modifiers(ui->modScrollWindow);
     ui->modScrollWindowContent->layout()->addWidget(newMod);
 
-    /*Modifier newModData = {};
+    Modifier newModData = {};
 
     if (newMod->ui->modifierApply->currentText() == "SOUND") {
         newModData.applyhow_flag = false;
@@ -1187,7 +1191,7 @@ void EventAttributesViewController::addModifierButtonClicked() {
         }
         default:
             break;
-    }*/
+    }
 }
 /*
 void EventAttributesViewController::addPartialButtonClicked() {

@@ -825,6 +825,27 @@
                         </widget>
                         </item>
                         <item>
+                        <widget class="QWidget" name="phaseContainer">
+                        <layout class="QHBoxLayout" name="phaseLayout">
+                            <item>
+                                <widget class="QLabel" name="phaseLabel">
+                                <property name="text"><string>Phase:</string></property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="phaseEntry"/>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="phaseButton">
+                                <property name="text">
+                                    <string>Insert Function</string>
+                                </property>
+                                </widget>
+                            </item>
+                        </layout>
+                        </widget>
+                        </item>
+                        <item>
                         <layout class="QHBoxLayout" name="spaLayout">
                             <item>
                                 <widget class="QLabel" name="spaLabel">

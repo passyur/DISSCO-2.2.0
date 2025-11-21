@@ -271,6 +271,13 @@ namespace XercesParser {
         DOMElement *loudness_el = freqinfo_el->getNextElementSibling();
         extrainfo.loudness = getFunctionString(loudness_el);
 
+        // for backwards compatibility with .dissco files that existed prior to the introduction of the Phase change
+        DOMElement *phase_or_spa_el = loudness_el->getNextElementSibling();
+        if(std::string(XMLString::transcode(phase_or_spa_el->getTagName())) == "Phase"){
+            extrainfo.phase = getFunctionString(phase_or_spa_el);
+            loudness_el = phase_or_spa_el;
+        }
+
         DOMElement *spa_el = loudness_el->getNextElementSibling();
         extrainfo.spa = getFunctionString(spa_el);
 
@@ -820,12 +827,11 @@ Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
     curr_project_ = project;  
 
     // Create a default top event
-    HEvent& topevent = this->topevent();
     HEvent defaultTop;
     defaultTop.type = top;
     defaultTop.name = "0";
     defaultTop.orderinpalette = "-1";
-    topevent = defaultTop;
+    this->topevent() = defaultTop;
 
     return project;
 }
