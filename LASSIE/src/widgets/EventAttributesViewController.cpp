@@ -172,11 +172,7 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     ui->stackedWidget->adjustSize();
 }
 
-void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsigned index) {
-
-
-    /// \todo implemenet saveCurrentShownEventData();
-    // saveCurrentShownEventData();
+void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
     }
@@ -187,13 +183,12 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsign
 }
 
 void EventAttributesViewController::saveCurrentShownEventData() {
-
-    qDebug() << "saveCurrentShownEventData called";
-
+    if(m_curreventindex == -1) return;
+    qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
+    
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
     if (type == bottom) {
-        // qDebug() << "bottom event: " << &event;
         BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
         ExtraInfo& extra_info = bottom_event.extra_info;
 
@@ -229,8 +224,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         }();
 
         event.name = ui->nameEntry->text();
-
-        qDebug() << "event.name: " << event.name;
 
         event.max_child_duration = ui->maxChildDurEntry->text();
         event.timesig.bar_value = ui->timeSig1Entry->text();
@@ -510,7 +503,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             }
         }
     }*/
-}
 
 
 void EventAttributesViewController::showCurrentEventData() {
@@ -639,7 +631,6 @@ void EventAttributesViewController::showCurrentEventData() {
             event = pm->topevent();
         }else if(type == high){
             event = pm->highevents()[m_curreventindex];
-            qDebug() << "got high";
         }else if(type == mid){
             qDebug() << "getting mid event at index " << m_curreventindex;
             event = pm->midevents()[m_curreventindex];
@@ -647,7 +638,7 @@ void EventAttributesViewController::showCurrentEventData() {
             event = pm->lowevents()[m_curreventindex];
         }
         ui->nameEntry->setText(event.name);
-
+        
         ui->maxChildDurEntry->setText(event.max_child_duration);
         ui->timeSig1Entry->setText(event.timesig.bar_value);
         ui->timeSig2Entry->setText(event.timesig.note_value);
@@ -758,13 +749,14 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->filEntry->setText(event.filter);
         }
     }else{
-        // if(type == sound){
-            /// \todo implement partials info display
-            // auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-            // ui->spectrumNumPartialEntry->setText(QString::fromStdString(extra->getNumPartials()));
-            // ui->spectrumDeviationEntry->setText(QString::fromStdString(extra->getDeviation()));
-            // ui->spectrumGenEntry->setText(QString::fromStdString(extra->getSpectrumGenBuilder()));
-            /// \todo implement partials display
+        if(type == sound){
+            const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
+            ui->soundNameEntry->setText(event.name);
+            ui->spectrumNumPartialEntry->setText(event.num_partials);
+            ui->spectrumDeviationEntry->setText(event.deviation);
+            ui->spectrumGenEntry->setText(event.generate_spectrum);
+
+            /// \todo partials
             // auto* sp = extra->getSpectrumPartials();
             // if (sp) {
             //     m_soundPartialHboxes = new SoundPartialHBox(sp, this);

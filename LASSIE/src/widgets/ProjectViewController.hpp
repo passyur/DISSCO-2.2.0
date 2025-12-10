@@ -50,11 +50,11 @@ class ProjectView : public QObject {
 
     private:
         /* storing pointers */
-        MainWindow* mainWindow;
-        ProjectPropertiesDialog* projectPropertiesDialog;
-        FileNewObject* newObject;
-        PaletteViewController* paletteView;
-        EventAttributesViewController* eventAttributesView;
+        MainWindow* mainWindow = nullptr;
+        ProjectPropertiesDialog* projectPropertiesDialog = nullptr;
+        FileNewObject* newObject = nullptr;
+        PaletteViewController* paletteView = nullptr;
+        EventAttributesViewController* eventAttributesView = nullptr;
         
         /* storing saved state of project */
         bool modifiedButNotSaved;

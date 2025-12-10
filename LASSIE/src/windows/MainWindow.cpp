@@ -4,6 +4,7 @@
 #include "EnvelopeLibraryWindow.hpp"
 #include "MarkovModelLibraryWindow.hpp"
 #include "../widgets/ProjectViewController.hpp"
+#include "PostWindow.hpp"
 
 #include "../core/project_struct.hpp"
 
@@ -13,13 +14,17 @@
 #include <QStatusBar>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QTabWidget>
 #include <QCloseEvent>
 #include <QSettings>
 #include <QStyle>
 #include <QFileInfo>
 #include <QDir>
-#include<QDebug>
+#include <QDebug>
+
+#include <QProcess>
+#include <QMessageBox>
 
 MainWindow *MainWindow::instance_ = 0;
 
@@ -171,6 +176,63 @@ void MainWindow::showFileNewObjectDialog()
     
 }
 
+// namespace Helper {
+//     QXMLStreamReader* get
+// }
+
+void MainWindow::runProject()
+{
+    ProjectManager *pm = Inst::get_project_manager();
+    if(pm->modified()){
+        QMessageBox msgbox;
+        msgbox.setText("This project has been modified.");
+        msgbox.setText("Do you want to save your changes before running?");
+        msgbox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
+        
+        int ret = msgbox.exec();
+        switch(ret) {
+            case QMessageBox::Save:
+                saveFile();
+                break;
+            case QMessageBox::Ignore:
+                break;
+            case QMessageBox::Cancel:
+                return;
+        }
+    }
+
+    bool ok{};
+    QString seed = QInputDialog::getText(this, tr("QInputDialog::getText()"), 
+                                        tr("Enter a seed:"), QLineEdit::Normal,
+                                        "abcd", &ok);
+    if(!ok) return;
+    pm->seed() = seed;
+    // pm->writeSeedEntry(seed.toStdString());
+    saveFile();
+
+    using namespace Qt::StringLiterals;
+
+#define STR_VALUE(arg)      #arg
+#define FUNCTION_NAME(name) STR_VALUE(name)
+
+#define TEST_FUNC_NAME FUNCTION_NAME(CMOD_BINARY)
+
+    QProcess *cmod = new QProcess(this);
+    connect(cmod, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), 
+            [=](int exit_code)
+            { 
+                statusBar()->showMessage(tr("CMOD exited with code %1").arg(exit_code)); 
+            }
+        );
+    qDebug() << QString(TEST_FUNC_NAME) + " " + pm->fileinfo().canonicalFilePath();
+
+    PostWindow *pw = new PostWindow(cmod);
+    pw->resize(600,400);
+    pw->show();
+
+    cmod->start(QString(TEST_FUNC_NAME), QStringList() << pm->fileinfo().canonicalFilePath());
+}
+
 void MainWindow::readSettings()
 {
     QSettings settings;
@@ -253,6 +315,7 @@ void MainWindow::createActions()
 
     runAct = new QAction(tr("Run"), this);
     runAct->setStatusTip(tr("Run"));
+    connect(runAct, &QAction::triggered, this, &MainWindow::runProject);
 
     configNoteModAct = new QAction(tr("Configure Note Modifiers"), this);
     configNoteModAct->setStatusTip(tr("Configure note modifiers"));
@@ -378,7 +441,6 @@ void MainWindow::showFile()
 }
 
 void MainWindow::setUnsavedTitle(QString unsavedFile){
-    qDebug() << "In setUnsavedTitle";
     currentFile = unsavedFile;
     setWindowTitle(tr("%1 - %2").arg("*" + currentFile, tr("LASSIE")));
     qDebug() << "*currentFile: " << currentFile;

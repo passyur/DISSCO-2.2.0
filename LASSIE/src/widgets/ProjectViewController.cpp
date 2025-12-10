@@ -360,7 +360,7 @@ void ProjectView::save(){
                     xmlWriter.writeCharacters(item.max_child_duration);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("EDUPerBeat");
-                    xmlWriter.writeCharacters(item.edu_perbeat);	
+                    writeInlineXml(xmlWriter, item.edu_perbeat);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("TimeSignature");
                     xmlWriter.writeStartElement("Entry1");
@@ -395,24 +395,24 @@ void ProjectView::save(){
                         xmlWriter.writeCharacters(QString("%1").arg(item.numchildren.method_flag));
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(item.numchildren.entry_1);
+                        writeInlineXml(xmlWriter, item.numchildren.entry_1);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(item.numchildren.entry_2);
+                        writeInlineXml(xmlWriter, item.numchildren.entry_2);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry3");
-                        xmlWriter.writeCharacters(item.numchildren.entry_3);
+                        writeInlineXml(xmlWriter, item.numchildren.entry_3);
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("ChildEventDefinition");
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(item.child_event_def.entry_1);
+                        writeInlineXml(xmlWriter, item.child_event_def.entry_1);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(item.child_event_def.entry_2);
+                        writeInlineXml(xmlWriter, item.child_event_def.entry_2);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry3");
-                        xmlWriter.writeCharacters(item.child_event_def.entry_3);
+                        writeInlineXml(xmlWriter, item.child_event_def.entry_3);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("AttackSieve");
                         xmlWriter.writeCharacters(item.child_event_def.attack_sieve);
@@ -483,19 +483,19 @@ void ProjectView::save(){
                                 xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("ApplyHow");
-                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                                xmlWriter.writeCharacters(itemMod.applyhow_flag ? "0" : "1");
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("Probability");
-                                xmlWriter.writeCharacters(itemMod.probability);
+                                writeInlineXml(xmlWriter, itemMod.probability);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("Amplitude");
-                                xmlWriter.writeCharacters(itemMod.amplitude);
+                                writeInlineXml(xmlWriter, itemMod.amplitude);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("Rate");
-                                xmlWriter.writeCharacters(itemMod.rate);
+                                writeInlineXml(xmlWriter, itemMod.rate);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("Width");
-                                xmlWriter.writeCharacters(itemMod.width);
+                                writeInlineXml(xmlWriter, itemMod.width);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("DetuneSpread");
                                 xmlWriter.writeCharacters(itemMod.detune_spread);
@@ -510,7 +510,7 @@ void ProjectView::save(){
                                 xmlWriter.writeCharacters(itemMod.group_name);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement("PartialResultString");
-                                xmlWriter.writeCharacters(itemMod.partialresult_string);
+                                writeInlineXml(xmlWriter, itemMod.partialresult_string);
                             xmlWriter.writeEndElement();
                         xmlWriter.writeEndElement(); 
                     }   
@@ -529,7 +529,7 @@ void ProjectView::save(){
                     xmlWriter.writeCharacters(item.event.name);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("MaxChildDuration");
-                    xmlWriter.writeCharacters(item.event.max_child_duration);	
+                    writeInlineXml(xmlWriter, item.event.max_child_duration);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("EDUPerBeat");
                     xmlWriter.writeCharacters(item.event.edu_perbeat);	
@@ -567,24 +567,24 @@ void ProjectView::save(){
                         xmlWriter.writeCharacters(QString("%1").arg(item.event.numchildren.method_flag));
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(item.event.numchildren.entry_1);
+                        writeInlineXml(xmlWriter, item.event.numchildren.entry_1);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(item.event.numchildren.entry_2);
+                        writeInlineXml(xmlWriter, item.event.numchildren.entry_2);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry3");
-                        xmlWriter.writeCharacters(item.event.numchildren.entry_3);
+                        writeInlineXml(xmlWriter, item.event.numchildren.entry_3);
                     xmlWriter.writeEndElement();
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("ChildEventDefinition");
                     xmlWriter.writeStartElement("Entry1");
-                        xmlWriter.writeCharacters(item.event.child_event_def.entry_1);
+                        writeInlineXml(xmlWriter, item.event.child_event_def.entry_1);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry2");
-                        xmlWriter.writeCharacters(item.event.child_event_def.entry_2);
+                        writeInlineXml(xmlWriter, item.event.child_event_def.entry_2);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Entry3");
-                        xmlWriter.writeCharacters(item.event.child_event_def.entry_3);
+                        writeInlineXml(xmlWriter, item.event.child_event_def.entry_3);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("AttackSieve");
                         xmlWriter.writeCharacters(item.event.child_event_def.attack_sieve);
@@ -639,13 +639,13 @@ void ProjectView::save(){
                 }
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Spatialization");
-                        xmlWriter.writeCharacters(item.event.spa);
+                        writeInlineXml(xmlWriter, item.event.spa);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Reverb");
-                        xmlWriter.writeCharacters(item.event.reverb);
+                        writeInlineXml(xmlWriter, item.event.reverb);
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Filter");
-                        xmlWriter.writeCharacters(item.event.filter);
+                        writeInlineXml(xmlWriter, item.event.filter);
                     xmlWriter.writeEndElement();  
                     xmlWriter.writeStartElement("ExtraInfo");
                         xmlWriter.writeStartElement("FrequencyInfo");
@@ -656,48 +656,47 @@ void ProjectView::save(){
                                 xmlWriter.writeCharacters(QString("%1").arg(item.extra_info.freq_info.continuum_flag));
                             xmlWriter.writeEndElement(); 
                             xmlWriter.writeStartElement("FrequencyEntry1");
-                                xmlWriter.writeCharacters(item.extra_info.freq_info.entry_1);
+                                writeInlineXml(xmlWriter, item.extra_info.freq_info.entry_1);
                             xmlWriter.writeEndElement(); 
                             xmlWriter.writeStartElement("FrequencyEntry2");
-                                xmlWriter.writeCharacters(item.extra_info.freq_info.entry_2);
+                                writeInlineXml(xmlWriter, item.extra_info.freq_info.entry_2);
                             xmlWriter.writeEndElement(); 
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("Loudness");
-                            xmlWriter.writeCharacters(item.extra_info.loudness);
+                            writeInlineXml(xmlWriter, item.extra_info.loudness);
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("Spatialization");
-                            xmlWriter.writeCharacters(item.extra_info.spa);
+                            writeInlineXml(xmlWriter, item.extra_info.spa);
                         xmlWriter.writeEndElement();
                         xmlWriter.writeStartElement("Reverb");
-                            xmlWriter.writeCharacters(item.extra_info.reverb);
+                            writeInlineXml(xmlWriter, item.extra_info.reverb);
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("Filter");
-                            xmlWriter.writeCharacters(item.extra_info.filter);
+                            writeInlineXml(xmlWriter, item.extra_info.filter);
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("ModifierGroup");
-                            xmlWriter.writeCharacters(item.extra_info.modifier_group);
+                            writeInlineXml(xmlWriter, item.extra_info.modifier_group);
                         xmlWriter.writeEndElement(); 
                         xmlWriter.writeStartElement("Modifiers");
-                        xmlWriter.writeCharacters("");
                         for (const Modifier& itemMod : item.extra_info.modifiers) {
                             xmlWriter.writeStartElement("Modifier");
                                 xmlWriter.writeStartElement("Type");
                                     xmlWriter.writeCharacters(QString("%1").arg(itemMod.type));
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("ApplyHow");
-                                    xmlWriter.writeCharacters(itemMod.applyhow_flag ? "True" : "False");
+                                    xmlWriter.writeCharacters(itemMod.applyhow_flag ? "0" : "1");
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Probability");
-                                    xmlWriter.writeCharacters(itemMod.probability);
+                                    writeInlineXml(xmlWriter, itemMod.probability);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Amplitude");
-                                    xmlWriter.writeCharacters(itemMod.amplitude);
+                                    writeInlineXml(xmlWriter, itemMod.amplitude);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Rate");
-                                    xmlWriter.writeCharacters(itemMod.rate);
+                                    writeInlineXml(xmlWriter, itemMod.rate);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("Width");
-                                    xmlWriter.writeCharacters(itemMod.width);
+                                    writeInlineXml(xmlWriter, itemMod.width);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("DetuneSpread");
                                     xmlWriter.writeCharacters(itemMod.detune_spread);
@@ -712,7 +711,7 @@ void ProjectView::save(){
                                     xmlWriter.writeCharacters(itemMod.group_name);
                                 xmlWriter.writeEndElement();
                                 xmlWriter.writeStartElement("PartialResultString");
-                                    xmlWriter.writeCharacters(itemMod.partialresult_string);
+                                    writeInlineXml(xmlWriter, itemMod.partialresult_string);
                                 xmlWriter.writeEndElement();
                             xmlWriter.writeEndElement(); 
                         }  
@@ -765,7 +764,6 @@ void ProjectView::save(){
                         xmlWriter.writeCharacters(item.note_info.staffs);	
                     xmlWriter.writeEndElement();
                     xmlWriter.writeStartElement("Modifiers");
-                    xmlWriter.writeCharacters("");	
                     for (QString modifier : item.note_info.modifiers) {
                         xmlWriter.writeStartElement("Modifier");
                             writeInlineXml(xmlWriter, modifier);	
@@ -1148,7 +1146,7 @@ void ProjectView::updatePaletteView() {
 void ProjectView::showAttributes(QString eventType, int index) {
     // TODO: Implement event attributes display
     // This would typically show the event in an EventAttributesViewController
-    qDebug() << "Showing attributes for event:" << eventType << " at index " << index;
+    qDebug() << "Showing attributes for event:" << eventType << "at index" << index;
 
     // Show the ObjectWindows
     if (eventType == "Top" ){ 

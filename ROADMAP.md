@@ -6,12 +6,12 @@ Of extreme importance:
 
 Of roughly equal importance:
 - [ ] macOS support
-    - [ ] CMOD
+    - [x] CMOD
         - [x] Compiles
-        - [ ] Works
-    - [ ] LASS
+        - [x] Works
+    - [x] LASS
         - [x] Compiles
-        - [ ] Works
+        - [x] Works
     - [ ] LASSIE
         - [x] Compiles
         - [ ] Works
