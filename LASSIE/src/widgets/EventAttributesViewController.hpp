@@ -146,6 +146,7 @@ private:
     // index of event in QList in ProjectManager
     unsigned m_curreventindex;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
+    QList<Modifiers*>               m_modifiers;     
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
     // QList<class LayerBox*>           m_layerBoxesStorage;

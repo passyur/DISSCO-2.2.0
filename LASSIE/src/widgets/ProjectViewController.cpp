@@ -971,7 +971,7 @@ void ProjectView::insertObject() {
             paletteView->folderHigh->appendRow({newObjectType, newObjectName});
         }
         else if (newObject->ui->buttonMid->isChecked()) {
-            pm->addEvent(high, objName);
+            pm->addEvent(mid, objName);
             QStandardItem* newObjectType = new QStandardItem("Mid");
             QStandardItem* newObjectName = new QStandardItem(objName);
             paletteView->folderMid->appendRow({newObjectType, newObjectName});
@@ -1158,6 +1158,7 @@ void ProjectView::showAttributes(QString eventType, int index) {
         eventAttributesView->showAttributesOfEvent(high, index);
     }
     else if (eventType == "Mid" ){
+        qDebug() << "Showing attributes for mid event";
         eventAttributesView->showAttributesOfEvent(mid, index);
     }
     else if (eventType == "Low" ){ 

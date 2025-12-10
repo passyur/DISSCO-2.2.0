@@ -215,7 +215,7 @@ namespace XercesParser {
         DOMElement *probability_el = applyhow_el->getNextElementSibling();
         modifier.probability = getFunctionString(probability_el);
 
-        DOMElement *amplitude_el = applyhow_el->getNextElementSibling();
+        DOMElement *amplitude_el = probability_el->getNextElementSibling();
         modifier.amplitude = getFunctionString(amplitude_el);
 
         DOMElement *rate_el = amplitude_el->getNextElementSibling();
@@ -235,9 +235,11 @@ namespace XercesParser {
 
         DOMElement *group_name_el = detune_velocity_el->getNextElementSibling();
         modifier.group_name = getFunctionString(group_name_el);
+        qDebug() << "SHOWING modifier.group_name: " << modifier.group_name;
 
         DOMElement *partialresultstring_el = group_name_el->getNextElementSibling();
         modifier.partialresult_string = getFunctionString(partialresultstring_el);
+        qDebug() << "SHOWING modifier.partialresult_string: " << modifier.partialresult_string;
 
         return modifier;
     }
