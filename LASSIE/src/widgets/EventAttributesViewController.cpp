@@ -503,7 +503,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             }
         }
     }*/
-
+}
 
 void EventAttributesViewController::showCurrentEventData() {
     qDebug() << "In showCurrentEventData:";
@@ -854,6 +854,7 @@ void EventAttributesViewController::showCurrentEventData() {
         //     }
         // }
     } /* not hevent nor bottom event */
+}
 }
 
 void EventAttributesViewController::fixedButtonClicked() {
