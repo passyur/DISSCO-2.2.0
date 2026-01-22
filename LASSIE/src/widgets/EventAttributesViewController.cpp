@@ -175,6 +175,7 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
+        m_modifiers.clear();
     }
     m_curreventtype = type;
     m_curreventindex = index;
@@ -207,6 +208,30 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         extra_info.reverb = ui->revEntry->text();
         extra_info.filter = ui->filEntry->text();
         extra_info.modifier_group = ui->modifierGroupEntry->text();
+
+        extra_info.modifiers.clear();
+        for (int i = 0; i < m_modifiers.count(); ++i) {
+            qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
+            Modifier newUIMod = {};
+            // newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
+            // if (((m_modifiers.at(i))->ui->modifierApply->currentIndex()) == 0) {
+            //     newUIMod.applyhow_flag = false;
+            // } else {
+            //     newUIMod.applyhow_flag = true;
+            // }
+            newUIMod.probability = (m_modifiers.at(i))->ui->modifierProbEdit->text();
+            newUIMod.amplitude = (m_modifiers.at(i))->ui->modifierMagEdit->text();
+            newUIMod.rate = (m_modifiers.at(i))->ui->modifierRateEdit->text();
+            newUIMod.width = (m_modifiers.at(i))->ui->modifierWidthEdit->text();
+            newUIMod.detune_spread = (m_modifiers.at(i))->ui->modifierSpreadEdit->text();
+            newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
+            newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
+            newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
+            qDebug() << "\t\t\tnewUIMod.group_name: " << newUIMod.group_name;
+            newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
+            extra_info.modifiers.append(newUIMod);
+        }
+        // m_modifiers.clear();
     }
 
     if(type <= bottom){
@@ -296,23 +321,32 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         }
 
         // save modifiers
-        for (int i = 0; i < m_modifiers.count(); ++i) {
-            qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
-            Modifier newUIMod = {};
-            newUIMod.probability = (m_modifiers.at(i))->ui->modifierProbEdit->text();
-            newUIMod.amplitude = (m_modifiers.at(i))->ui->modifierMagEdit->text();
-            newUIMod.rate = (m_modifiers.at(i))->ui->modifierRateEdit->text();
-            newUIMod.width = (m_modifiers.at(i))->ui->modifierWidthEdit->text();
-            newUIMod.detune_spread = (m_modifiers.at(i))->ui->modifierSpreadEdit->text();
-            newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
-            newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
-            newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
-            qDebug() << "newUIMod.group_name: " << newUIMod.group_name;
-            newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
-            qDebug() << "newUIMod.partialresult_string: " << newUIMod.partialresult_string;
-            event.modifiers.append(newUIMod);
+        if (type != bottom) {
+            qDebug() << "About to save Modifiers";
+            event.modifiers.clear();
+            for (int i = 0; i < m_modifiers.count(); ++i) {
+                qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
+                Modifier newUIMod = {};
+                // newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
+                // if (((m_modifiers.at(i))->ui->modifierApply->currentIndex()) == 0) {
+                //     newUIMod.applyhow_flag = false;
+                // } else {
+                //     newUIMod.applyhow_flag = true;
+                // }
+                newUIMod.probability = (m_modifiers.at(i))->ui->modifierProbEdit->text();
+                newUIMod.amplitude = (m_modifiers.at(i))->ui->modifierMagEdit->text();
+                newUIMod.rate = (m_modifiers.at(i))->ui->modifierRateEdit->text();
+                newUIMod.width = (m_modifiers.at(i))->ui->modifierWidthEdit->text();
+                newUIMod.detune_spread = (m_modifiers.at(i))->ui->modifierSpreadEdit->text();
+                newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
+                newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
+                newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
+                qDebug() << "newUIMod.group_name: " << newUIMod.group_name;
+                newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
+                event.modifiers.append(newUIMod);
+            }
+            // m_modifiers.clear();
         }
-        m_modifiers.clear();
     } else {
 
         if (type == sound) {
@@ -607,24 +641,36 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->filEntry->setText(extra_info.filter);
             ui->modifierGroupEntry->setText(extra_info.modifier_group);
 
-            /// \todo modifiers
+            // save modifiers for bottom event
+            QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
+            for (auto widget : childWidgets) { delete widget; }
 
-            // if (ui->childTypeSoundRadio->isChecked()) {
-            //     auto* em = extra->getModifiers();
-            //     while (em) {
-            //         auto* align = new EventBottomModifierAlignment(em, this);
-            //         if (!m_modifiers) m_modifiers = align;
-            //         else {
-            //             auto* tail = m_modifiers;
-            //             while (tail->next) tail = tail->next;
-            //             tail->next = align;
-            //             align->prev = tail;
-            //         }
-            //         ui.modifiersLayout->addWidget(align);
-            //         em = em->next;
-            //     }
-            //     for(auto iter : )
-            // }
+            for (int i = 0; i < extra_info.modifiers.count(); ++i) {
+                qDebug() << "Saving event.modifiers to scroll window";
+                // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
+                Modifiers* newMod = new Modifiers(ui->modScrollWindow);
+
+                // newMod->ui->modifierType->setCurrentIndex(extra_info.modifiers.at(i).type);
+                // if (extra_info.modifiers.at(i).applyhow_flag == false) {
+                //     newMod->ui->modifierApply->setCurrentIndex(0);
+                // } else {
+                //     newMod->ui->modifierApply->setCurrentIndex(1);
+                // }
+                newMod->ui->modifierProbEdit->setText(extra_info.modifiers.at(i).probability);
+                newMod->ui->modifierMagEdit->setText(extra_info.modifiers.at(i).amplitude);
+                newMod->ui->modifierRateEdit->setText(extra_info.modifiers.at(i).rate);
+                newMod->ui->modifierWidthEdit->setText(extra_info.modifiers.at(i).width);
+                newMod->ui->modifierSpreadEdit->setText(extra_info.modifiers.at(i).detune_spread);
+                newMod->ui->modifierDirEdit->setText(extra_info.modifiers.at(i).detune_direction);
+                newMod->ui->modifierVelEdit->setText(extra_info.modifiers.at(i).detune_velocity);
+                qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
+                newMod->ui->modifierNameEdit->setText(extra_info.modifiers.at(i).group_name);
+                qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
+                newMod->ui->modifierResEdit->setText(extra_info.modifiers.at(i).partialresult_string);
+
+                ui->modScrollWindowContent->layout()->addWidget(newMod);
+                m_modifiers.append(newMod);
+            }
 
             event = bottom_event.event;
         }else if(type == top){
@@ -719,29 +765,37 @@ void EventAttributesViewController::showCurrentEventData() {
         ui->durationTypeSecondsRadio->setChecked(dt_flag == 2);
 
         // save modifiers
-        QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
-        for (auto widget : childWidgets) { delete widget; }
+        if (type != bottom) {
+            QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
+            for (auto widget : childWidgets) { delete widget; }
 
-        for (int i = 0; i < event.modifiers.count(); ++i) {
-            qDebug() << "Saving event.modifiers to scroll window";
-            // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
-            Modifiers* newMod = new Modifiers(ui->modScrollWindow);
+            for (int i = 0; i < event.modifiers.count(); ++i) {
+                qDebug() << "Saving event.modifiers to scroll window";
+                // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
+                Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
-            newMod->ui->modifierProbEdit->setText(event.modifiers.at(i).probability);
-            newMod->ui->modifierMagEdit->setText(event.modifiers.at(i).amplitude);
-            newMod->ui->modifierRateEdit->setText(event.modifiers.at(i).rate);
-            newMod->ui->modifierWidthEdit->setText(event.modifiers.at(i).width);
-            newMod->ui->modifierSpreadEdit->setText(event.modifiers.at(i).detune_spread);
-            newMod->ui->modifierDirEdit->setText(event.modifiers.at(i).detune_direction);
-            newMod->ui->modifierVelEdit->setText(event.modifiers.at(i).detune_velocity);
-            qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
-            newMod->ui->modifierNameEdit->setText(event.modifiers.at(i).group_name);
-            qDebug() << "event.modifiers.at(i).partialresult_string: " << event.modifiers.at(i).partialresult_string;
-            newMod->ui->modifierResEdit->setText(event.modifiers.at(i).partialresult_string);
+                // newMod->ui->modifierType->setCurrentIndex(event.modifiers.at(i).type);
+                // if (event.modifiers.at(i).applyhow_flag == false) {
+                //     newMod->ui->modifierApply->setCurrentIndex(0);
+                // } else {
+                //     newMod->ui->modifierApply->setCurrentIndex(1);
+                // }
+                newMod->ui->modifierProbEdit->setText(event.modifiers.at(i).probability);
+                newMod->ui->modifierMagEdit->setText(event.modifiers.at(i).amplitude);
+                newMod->ui->modifierRateEdit->setText(event.modifiers.at(i).rate);
+                newMod->ui->modifierWidthEdit->setText(event.modifiers.at(i).width);
+                newMod->ui->modifierSpreadEdit->setText(event.modifiers.at(i).detune_spread);
+                newMod->ui->modifierDirEdit->setText(event.modifiers.at(i).detune_direction);
+                newMod->ui->modifierVelEdit->setText(event.modifiers.at(i).detune_velocity);
+                qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
+                newMod->ui->modifierNameEdit->setText(event.modifiers.at(i).group_name);
+                qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
+                newMod->ui->modifierResEdit->setText(event.modifiers.at(i).partialresult_string);
 
-            ui->modScrollWindowContent->layout()->addWidget(newMod);
+                ui->modScrollWindowContent->layout()->addWidget(newMod);
+                m_modifiers.append(newMod);
+            }
         }
-
         // environment
         if (type != bottom) {
             ui->spaEntry->setText(event.spa);
@@ -1183,20 +1237,6 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
 }
 */
 void EventAttributesViewController::addModifierButtonClicked() {
-    // if (!m_currentlyShownEvent) return;
-    // EventBottomModifier* mod = (m_currentlyShownEvent->getEventType()==eventBottom)
-    //     ? m_currentlyShownEvent->getEventExtraInfo()->addModifier()
-    //     : m_currentlyShownEvent->addModifier();
-
-    // auto* align = new EventBottomModifierAlignment(mod, this);
-    // if (!m_modifiers) m_modifiers = align;
-    // else {
-    //     auto* tail = m_modifiers;
-    //     while (tail->next) tail = tail->next;
-    //     tail->next = align;
-    //     align->prev = tail;
-    // }
-
     // TO DO: connect add modifier to data structure
     
     ui->modScrollWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -1205,56 +1245,6 @@ void EventAttributesViewController::addModifierButtonClicked() {
     Modifiers* newMod = new Modifiers(ui->modScrollWindow);
     ui->modScrollWindowContent->layout()->addWidget(newMod);
     m_modifiers.append(newMod);
-
-    /*Modifier newModData = {};
-
-    if (newMod->ui->modifierApply->currentText() == "SOUND") {
-        newModData.applyhow_flag = false;
-    } else if (newMod->ui->modifierApply->currentText() == "PARTIAL") {
-        newModData.applyhow_flag = true;
-    }
-    newModData.group_name = newMod->ui->modifierNameEdit->text();
-    qDebug() << "newModData.group_name: " << newModData.group_name;
-    newModData.probability = newMod->ui->modifierProbEdit->text();
-    newModData.detune_spread = newMod->ui->modifierSpreadEdit->text();
-    newModData.detune_direction = newMod->ui->modifierDirEdit->text();
-    newModData.detune_velocity = newMod->ui->modifierVelEdit->text();
-    newModData.amplitude = newMod->ui->modifierMagEdit->text();
-    newModData.width = newMod->ui->modifierWidthEdit->text();
-    newModData.partialresult_string = newMod->ui->modifierResEdit->text();
-    newModData.rate = newMod->ui->modifierRateEdit->text();
-
-    Eventtype type = m_curreventtype;
-    ProjectManager *pm = Inst::get_project_manager();
-    switch(type) {
-        case top: {
-            HEvent& top_event = pm->topevent();
-            top_event.modifiers.push_back(newModData);
-            break;
-        }
-        case high: {
-            HEvent& high_event = pm->highevents()[m_curreventindex];
-            high_event.modifiers.push_back(newModData);
-            break;
-        }
-        case mid: {
-            HEvent& mid_event = pm->midevents()[m_curreventindex];
-            mid_event.modifiers.push_back(newModData);
-            break;   
-        }   
-        case low: {
-            HEvent& low_event = pm->lowevents()[m_curreventindex];
-            low_event.modifiers.push_back(newModData);
-            break;
-        }
-        case bottom: {
-            BottomEvent& bot_event = pm->bottomevents()[m_curreventindex];
-            bot_event.event.modifiers.push_back(newModData);
-            break;
-        }
-        default:
-            break;
-    }*/
 }
 /*
 void EventAttributesViewController::addPartialButtonClicked() {
