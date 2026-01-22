@@ -188,7 +188,7 @@ struct HEvent {
     Tempo tempo;
     NumChildren numchildren;
     ChildDef child_event_def;
-    QList<Layer> event_layers;
+    QList<Layer> event_layers; //
     QString spa;
     QString reverb;
     QString filter;

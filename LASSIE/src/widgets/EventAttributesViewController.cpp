@@ -116,12 +116,13 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     connect(ui->BSContinuumButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSContinuumButtonClicked);
 
-/*
-    // --- additional controls ---
+
+    // --- additional controls --
+
     connect(ui->addNewLayerButton, &QPushButton::clicked,
-            this, &EventAttributesViewController::addNewLayerButtonClicked);*/
-    connect(ui->addModifierButton, &QPushButton::clicked,
-            this, &EventAttributesViewController::addModifierButtonClicked);
+            this, &EventAttributesViewController::addNewLayerButtonClicked);
+    // connect(ui->addModifierButton, &QPushButton::clicked,
+    //         this, &EventAttributesViewController::addModifierButtonClicked);
 /*    connect(ui->addPartialButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addPartialButtonClicked);
 
@@ -141,8 +142,13 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
     fixStackedWidgetLayout(ui->emptyPage);
 
-    LayerBox* box = new LayerBox(this, e_projectView);
-    ui->layersLayout->addWidget(box);
+    // Previous
+    // Layer l;
+    // LayerBox* box = new LayerBox(l);
+    // ui->layersLayout->addWidget(box);
+
+    ui->layersLayout->setSpacing(8);
+    ui->layersLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 EventAttributesViewController::~EventAttributesViewController() {
@@ -228,7 +234,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 return pm->bottomevents()[m_curreventindex].event;
         }();
 
-        event.name = ui->nameEntry->text();
+        event.name = ui->nameEntry->text(); // Lowkey this isn't working
 
         qDebug() << "event.name: " << event.name;
 
@@ -263,8 +269,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         num_children.entry_1 = ui->childCountEntry1->text();
         num_children.entry_2 = ui->childCountEntry2->text();
         num_children.entry_3 = ui->childCountEntry3->text();
-
-        // Save layers
         
         ChildDef& childeventdef = event.child_event_def;
         if (ui->discreteButton->isChecked()) {
@@ -453,6 +457,9 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
 
 void EventAttributesViewController::showCurrentEventData() {
+
+    qDebug() << "showCurrentEventData() called";
+
     // clear dynamic widgets
     // qDeleteAll(m_layerBoxesStorage);
     // m_layerBoxesStorage.clear();
@@ -622,15 +629,6 @@ void EventAttributesViewController::showCurrentEventData() {
         ui->childCountEntry1->setText(num_children.entry_1);
         ui->childCountEntry2->setText(num_children.entry_2);
         ui->childCountEntry3->setText(num_children.entry_3);
-
-        // build layers
-        // for (auto* layer : m_currentlyShownEvent->layers) {
-        //     LayerBox* box = new LayerBox(this, m_sharedPointers->projectView, layer,
-        //                                 (event.numchildren.method_flag == bylayer));
-        //     ui->layersLayout->addWidget(box);
-        //     m_layerBoxesStorage.push_back(box);
-        // }
-        // refreshChildTypeInLayer();
 
         // child‐event‐def
         ChildDef childeventdef = event.child_event_def;
@@ -1079,20 +1077,30 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
         delete gen;
     }
 }
-/*
-void EventAttributesViewController::addNewLayerButtonClicked() {
-    if (!m_currentlyShownEvent || m_currentlyShownEvent->getEventType() >= eventSound)
-        return;
 
-    auto* newLayer = m_currentlyShownEvent->addLayer();
-    LayerBox* box = new LayerBox(this,
-                                 m_sharedPointers->projectView,
-                                 newLayer,
-                                 ui->discreteButton->isChecked());
+void EventAttributesViewController::addNewLayerButtonClicked() {
+
+    qDebug("add new layer button clicked");
+
+    ProjectManager *pm = Inst::get_project_manager();
+    HEvent event = [=]() -> HEvent {
+        if (m_curreventtype == top)   return pm->topevent();
+        if (m_curreventtype == high)  return pm->highevents()[m_curreventindex];
+        if (m_curreventtype == mid)   return pm->midevents()[m_curreventindex];
+        if (m_curreventtype == low)   return pm->lowevents()[m_curreventindex];
+        return pm->bottomevents()[m_curreventindex].event;
+    }();
+
+    // --- backend ---
+    event.event_layers.append(Layer());
+    Layer& backend_layer = event.event_layers.back();
+
+    // --- frontend ---
+    LayerBox* box = new LayerBox(backend_layer, this);
     ui->layersLayout->addWidget(box);
-    m_layerBoxesStorage.push_back(box);
 }
-*/
+
+
 void EventAttributesViewController::addModifierButtonClicked() {
     // if (!m_currentlyShownEvent) return;
     // EventBottomModifier* mod = (m_currentlyShownEvent->getEventType()==eventBottom)

@@ -27,11 +27,7 @@ class LayerBox : public QFrame {
     Q_OBJECT
 
 public:
-    LayerBox(EventAttributesViewController* parentController,
-             ProjectView*         projectView
-            //  EventLayer*                    layerModel,
-            //  bool                           showDiscreteColumns
-             );
+    LayerBox(Layer layer, QWidget* parent);
     ~LayerBox() override;
 
     QStandardItem* extractItemFromDrop(QDropEvent* event);
@@ -64,6 +60,8 @@ protected:
 private:
     EventAttributesViewController* m_attributesView;
     ProjectView*                   m_projectView;
+
+    Layer m_layer;
 
     // UI elements
     QVBoxLayout*                   m_mainLayout;

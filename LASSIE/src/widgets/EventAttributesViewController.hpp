@@ -124,7 +124,7 @@ private slots:
     void BSContinuumButtonClicked();
 
     // // main actions
-    // void addNewLayerButtonClicked();
+    void addNewLayerButtonClicked();
     void addModifierButtonClicked();
     // void addPartialButtonClicked();
 
