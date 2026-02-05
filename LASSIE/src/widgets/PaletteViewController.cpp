@@ -2,6 +2,8 @@
 #include "ProjectViewController.hpp"
 #include "../windows/ObjectWindow.hpp"
 #include "../core/event_struct.hpp"
+#include "../core/project_struct.hpp"
+#include "../inst.hpp"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -83,6 +85,9 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
 
     // Calls objectActivated
     connect(treeView, &QTreeView::doubleClicked, this, &PaletteViewController::objectActivated);
+
+    // Connect to itemChanged signal to sync palette names with backend
+    connect(model, &QStandardItemModel::itemChanged, this, &PaletteViewController::onItemChanged);
 
     // // Delete right click Menu
     // this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -179,5 +184,101 @@ void PaletteViewController::removeEvent(IEvent* event, const QString& type)
     if (eventsByType.contains(type)) {
         auto& events = eventsByType[type];
         events.erase(std::remove(events.begin(), events.end(), event), events.end());
+    }
+}
+
+void PaletteViewController::onItemChanged(QStandardItem* item)
+{
+    // Only handle changes to name items (column 1)
+    if (!item || item->column() != 1) {
+        return;
+    }
+
+    // Get the parent item to determine the folder/event type
+    QStandardItem* parent = item->parent();
+    if (!parent) {
+        return; // This is a folder name, not an event name
+    }
+
+    // Get the new name from the item
+    QString newName = item->text();
+
+    // Get the row index within the parent folder
+    int index = item->row();
+
+    // Get the event type from the type column (column 0)
+    QStandardItem* typeItem = parent->child(item->row(), 0);
+    if (!typeItem) {
+        return;
+    }
+    QString eventType = typeItem->text();
+
+    // Get project manager
+    ProjectManager* pm = Inst::get_project_manager();
+
+    // Update the corresponding event name in the backend
+    if (eventType == "Top") {
+        // Top event is singular, index should be 0
+        pm->topevent().name = newName;
+    }
+    else if (eventType == "High") {
+        if (index < pm->highevents().size()) {
+            pm->highevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Mid") {
+        if (index < pm->midevents().size()) {
+            pm->midevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Low") {
+        if (index < pm->lowevents().size()) {
+            pm->lowevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Bottom") {
+        if (index < pm->bottomevents().size()) {
+            pm->bottomevents()[index].event.name = newName;
+        }
+    }
+    else if (eventType == "Spectrum") {
+        if (index < pm->spectrumevents().size()) {
+            pm->spectrumevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Note") {
+        if (index < pm->noteevents().size()) {
+            pm->noteevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Envelope") {
+        if (index < pm->envelopeevents().size()) {
+            pm->envelopeevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Sieve") {
+        if (index < pm->sieveevents().size()) {
+            pm->sieveevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Spatialization") {
+        if (index < pm->spaevents().size()) {
+            pm->spaevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Pattern") {
+        if (index < pm->patternevents().size()) {
+            pm->patternevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Reverb") {
+        if (index < pm->reverbevents().size()) {
+            pm->reverbevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Filter") {
+        if (index < pm->filterevents().size()) {
+            pm->filterevents()[index].name = newName;
+        }
     }
 }

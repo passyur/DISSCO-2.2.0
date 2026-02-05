@@ -31,6 +31,9 @@ public:
     // Opens Object Window
     void objectActivated(const QModelIndex &index);
 
+    // Handle name changes in palette items
+    void onItemChanged(QStandardItem* item);
+
     // Object Folders under tree view
     QStandardItem* folderTop;
     QStandardItem* folderHigh;
