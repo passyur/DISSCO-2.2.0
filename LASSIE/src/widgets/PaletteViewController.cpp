@@ -1,5 +1,8 @@
 #include "PaletteViewController.hpp"
 #include "ProjectViewController.hpp"
+#include "../core/event_struct.hpp"
+#include "../core/project_struct.hpp"
+#include "../inst.hpp"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -19,7 +22,7 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     // Creates Tree View
     treeView = new QTreeView(this);
     model = new QStandardItemModel(this);
-        model->setHorizontalHeaderLabels({"Type", "Name"});
+    model->setHorizontalHeaderLabels({"Type", "Name"});
     treeView->setModel(model);
     treeView->header()->setSectionResizeMode(QHeaderView::Fixed);
     layout->addWidget(treeView, 1);
@@ -113,6 +116,15 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     // Calls objectActivated
     connect(treeView, &QTreeView::doubleClicked, this, &PaletteViewController::objectActivated);
 
+    // Connect to itemChanged signal to sync palette names with backend
+    connect(model, &QStandardItemModel::itemChanged, this, &PaletteViewController::onItemChanged);
+
+    // Connect to rowsAboutToBeRemoved signal to sync deletions with backend
+    connect(model, &QStandardItemModel::rowsAboutToBeRemoved, this, &PaletteViewController::onRowsAboutToBeRemoved);
+
+    // Connect to rowsInserted signal to sync additions with backend
+    connect(model, &QStandardItemModel::rowsInserted, this, &PaletteViewController::onRowsInserted);
+
     // // Delete right click Menu
     // this->setContextMenuPolicy(Qt::CustomContextMenu);
     // connect(this,&QWidget::customContextMenuRequested,this,&PaletteViewController::slotCustomMenuRequested);
@@ -178,5 +190,328 @@ void PaletteViewController::removeEvent(IEvent* event, const QString& type)
     if (eventsByType.contains(type)) {
         auto& events = eventsByType[type];
         events.erase(std::remove(events.begin(), events.end(), event), events.end());
+    }
+}
+
+void PaletteViewController::onItemChanged(QStandardItem* item)
+{
+    // Only handle changes to name items (column 1)
+    if (!item || item->column() != 1) {
+        return;
+    }
+
+    // Get the parent item to determine the folder/event type
+    QStandardItem* parent = item->parent();
+    if (!parent) {
+        return; // This is a folder name, not an event name
+    }
+
+    // Get the new name from the item
+    QString newName = item->text();
+
+    // Get the row index within the parent folder
+    int index = item->row();
+
+    // Get the event type from the type column (column 0)
+    QStandardItem* typeItem = parent->child(item->row(), 0);
+    if (!typeItem) {
+        return;
+    }
+    QString eventType = typeItem->text();
+
+    // Get project manager
+    ProjectManager* pm = Inst::get_project_manager();
+
+    // Update the corresponding event name in the backend
+    if (eventType == "Top") {
+        // Top event is singular, index should be 0
+        pm->topevent().name = newName;
+    }
+    else if (eventType == "High") {
+        if (index < pm->highevents().size()) {
+            pm->highevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Mid") {
+        if (index < pm->midevents().size()) {
+            pm->midevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Low") {
+        if (index < pm->lowevents().size()) {
+            pm->lowevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Bottom") {
+        if (index < pm->bottomevents().size()) {
+            pm->bottomevents()[index].event.name = newName;
+        }
+    }
+    else if (eventType == "Spectrum") {
+        if (index < pm->spectrumevents().size()) {
+            pm->spectrumevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Note") {
+        if (index < pm->noteevents().size()) {
+            pm->noteevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Envelope") {
+        if (index < pm->envelopeevents().size()) {
+            pm->envelopeevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Sieve") {
+        if (index < pm->sieveevents().size()) {
+            pm->sieveevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Spatialization") {
+        if (index < pm->spaevents().size()) {
+            pm->spaevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Pattern") {
+        if (index < pm->patternevents().size()) {
+            pm->patternevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Reverb") {
+        if (index < pm->reverbevents().size()) {
+            pm->reverbevents()[index].name = newName;
+        }
+    }
+    else if (eventType == "Filter") {
+        if (index < pm->filterevents().size()) {
+            pm->filterevents()[index].name = newName;
+        }
+    }
+}
+
+void PaletteViewController::onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
+{
+    // Only handle removals from folder items (not root level)
+    if (!parent.isValid()) {
+        return; // This would be removing a folder itself, not an event
+    }
+
+    // Get the parent item to determine the event type
+    QStandardItem* parentItem = model->itemFromIndex(parent);
+    if (!parentItem) {
+        return;
+    }
+
+    // Get the folder name from the sibling column (column 1)
+    QModelIndex parentSibling = parent.sibling(parent.row(), 1);
+    QStandardItem* folderNameItem = model->itemFromIndex(parentSibling);
+    if (!folderNameItem) {
+        return;
+    }
+
+    QString folderName = folderNameItem->text();
+
+    // Get project manager
+    ProjectManager* pm = Inst::get_project_manager();
+
+    // Remove events from backend in reverse order (to maintain correct indices)
+    for (int row = last; row >= first; --row) {
+        if (folderName == "Top") {
+            // Top event is singular - shouldn't normally be deleted
+            // but if it is, we could reset it to a default state
+            // For now, we'll skip this case
+        }
+        else if (folderName == "High") {
+            if (row < pm->highevents().size()) {
+                pm->highevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Mid") {
+            if (row < pm->midevents().size()) {
+                pm->midevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Low") {
+            if (row < pm->lowevents().size()) {
+                pm->lowevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Bottom") {
+            if (row < pm->bottomevents().size()) {
+                pm->bottomevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Spectrum") {
+            if (row < pm->spectrumevents().size()) {
+                pm->spectrumevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Note") {
+            if (row < pm->noteevents().size()) {
+                pm->noteevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Envelope") {
+            if (row < pm->envelopeevents().size()) {
+                pm->envelopeevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Sieve") {
+            if (row < pm->sieveevents().size()) {
+                pm->sieveevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Spatialization") {
+            if (row < pm->spaevents().size()) {
+                pm->spaevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Pattern") {
+            if (row < pm->patternevents().size()) {
+                pm->patternevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Reverb") {
+            if (row < pm->reverbevents().size()) {
+                pm->reverbevents().removeAt(row);
+            }
+        }
+        else if (folderName == "Filter") {
+            if (row < pm->filterevents().size()) {
+                pm->filterevents().removeAt(row);
+            }
+        }
+    }
+}
+
+void PaletteViewController::onRowsInserted(const QModelIndex &parent, int first, int last)
+{
+    // Only handle insertions into folder items (not root level)
+    if (!parent.isValid()) {
+        return; // This would be inserting a folder itself
+    }
+
+    // Get the parent item to determine the event type
+    QStandardItem* parentItem = model->itemFromIndex(parent);
+    if (!parentItem) {
+        return;
+    }
+
+    // Get the folder name from the sibling column (column 1)
+    QModelIndex parentSibling = parent.sibling(parent.row(), 1);
+    QStandardItem* folderNameItem = model->itemFromIndex(parentSibling);
+    if (!folderNameItem) {
+        return;
+    }
+
+    QString folderName = folderNameItem->text();
+
+    // Get project manager
+    ProjectManager* pm = Inst::get_project_manager();
+
+    // Map folder names to event types
+    Eventtype eventType;
+    if (folderName == "Top") {
+        eventType = Eventtype::top;
+    }
+    else if (folderName == "High") {
+        eventType = Eventtype::high;
+    }
+    else if (folderName == "Mid") {
+        eventType = Eventtype::mid;
+    }
+    else if (folderName == "Low") {
+        eventType = Eventtype::low;
+    }
+    else if (folderName == "Bottom") {
+        eventType = Eventtype::bottom;
+    }
+    else if (folderName == "Spectrum") {
+        eventType = Eventtype::sound;
+    }
+    else if (folderName == "Note") {
+        eventType = Eventtype::note;
+    }
+    else if (folderName == "Envelope") {
+        eventType = Eventtype::env;
+    }
+    else if (folderName == "Sieve") {
+        eventType = Eventtype::sieve;
+    }
+    else if (folderName == "Spatialization") {
+        eventType = Eventtype::spa;
+    }
+    else if (folderName == "Pattern") {
+        eventType = Eventtype::pattern;
+    }
+    else if (folderName == "Reverb") {
+        eventType = Eventtype::reverb;
+    }
+    else if (folderName == "Filter") {
+        eventType = Eventtype::filter;
+    }
+    else if (folderName == "Measurement") {
+        eventType = Eventtype::mea;
+    }
+    else {
+        return; // Unknown folder type
+    }
+
+    // Add events to backend for each inserted row
+    for (int row = first; row <= last; ++row) {
+        // Get the name from the inserted row
+        QStandardItem* nameItem = parentItem->child(row, 1);
+        QString eventName = nameItem ? nameItem->text() : "New Event";
+
+        // Check if we need to add a new event to the backend
+        // This handles cases where rows are inserted directly into the model
+        // (not through the normal insertObject flow)
+        bool needsBackendEvent = false;
+
+        if (folderName == "Top") {
+            // Top is singular, shouldn't insert multiple
+            needsBackendEvent = false;
+        }
+        else if (folderName == "High") {
+            needsBackendEvent = (row >= pm->highevents().size());
+        }
+        else if (folderName == "Mid") {
+            needsBackendEvent = (row >= pm->midevents().size());
+        }
+        else if (folderName == "Low") {
+            needsBackendEvent = (row >= pm->lowevents().size());
+        }
+        else if (folderName == "Bottom") {
+            needsBackendEvent = (row >= pm->bottomevents().size());
+        }
+        else if (folderName == "Spectrum") {
+            needsBackendEvent = (row >= pm->spectrumevents().size());
+        }
+        else if (folderName == "Note") {
+            needsBackendEvent = (row >= pm->noteevents().size());
+        }
+        else if (folderName == "Envelope") {
+            needsBackendEvent = (row >= pm->envelopeevents().size());
+        }
+        else if (folderName == "Sieve") {
+            needsBackendEvent = (row >= pm->sieveevents().size());
+        }
+        else if (folderName == "Spatialization") {
+            needsBackendEvent = (row >= pm->spaevents().size());
+        }
+        else if (folderName == "Pattern") {
+            needsBackendEvent = (row >= pm->patternevents().size());
+        }
+        else if (folderName == "Reverb") {
+            needsBackendEvent = (row >= pm->reverbevents().size());
+        }
+        else if (folderName == "Filter") {
+            needsBackendEvent = (row >= pm->filterevents().size());
+        }
+
+        // Add to backend if needed
+        if (needsBackendEvent) {
+            pm->addEvent(eventType, eventName);
+        }
     }
 }
