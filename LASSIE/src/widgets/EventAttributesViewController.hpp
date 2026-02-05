@@ -43,8 +43,16 @@ typedef enum {
     BSWellTemperedFunButton,
     BSFunFreq1FunButton,
     BSFunFreq2FunButton,
-    BSContinuumFunButton
+    BSContinuumFunButton,
 } FunctionButton;
+
+typedef enum {
+    modProbabilityButton,
+    modMagnitudeButton,
+    modRateButton,
+    modWidthButton,
+    modPartialButton
+} ModButtonType;
 
 // forward enums from original GTK version - now defined in LASSIE.h
 // enum TempoPrefix;
@@ -127,6 +135,10 @@ private slots:
     // void addNewLayerButtonClicked();
     void addModifierButtonClicked();
     // void addPartialButtonClicked();
+
+    // modifier buttons
+    void modFunctionButtonClicked(Modifiers* mod, ModButtonType type);
+    void modRemoveButtonClicked(Modifiers* mod);
 
     // // tempo controls
     void tempoAsNoteValueButtonClicked();

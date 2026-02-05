@@ -15,6 +15,8 @@
 #include <QMessageBox>
 #include <QKeyEvent>
 #include <QScrollBar>
+#include <QTimer>
+#include <QMetaObject>
 
 #include <functional>
 
@@ -167,7 +169,15 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     }
     if (currPage) {
         currPage->adjustSize();
-        ui->stackedWidget->setFixedSize(600, currPage->sizeHint().height());
+        ui->stackedWidget->setFixedWidth(600);
+        ui->stackedWidget->setMaximumHeight(currPage->sizeHint().height());
+        ui->stackedWidget->adjustSize();
+        // ui->stackedWidget->setFixedSize(600, currPage->sizeHint().height());
+        ui->modScrollWindow->setWidget(ui->modScrollWindowContent);
+        ui->modScrollWindow->setWidgetResizable(true);
+        auto* layout = qobject_cast<QVBoxLayout*>(ui->modScrollWindowContent->layout());
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
     }
     ui->stackedWidget->adjustSize();
 }
@@ -213,12 +223,10 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         for (int i = 0; i < m_modifiers.count(); ++i) {
             qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
             Modifier newUIMod = {};
-            // newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
-            // if (((m_modifiers.at(i))->ui->modifierApply->currentIndex()) == 0) {
-            //     newUIMod.applyhow_flag = false;
-            // } else {
-            //     newUIMod.applyhow_flag = true;
-            // }
+
+            newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
+            newUIMod.applyhow_flag = (m_modifiers.at(i))->ui->modifierApply->currentIndex();
+
             newUIMod.probability = (m_modifiers.at(i))->ui->modifierProbEdit->text();
             newUIMod.amplitude = (m_modifiers.at(i))->ui->modifierMagEdit->text();
             newUIMod.rate = (m_modifiers.at(i))->ui->modifierRateEdit->text();
@@ -324,15 +332,14 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         if (type != bottom) {
             qDebug() << "About to save Modifiers";
             event.modifiers.clear();
+            qDebug() << "event.modifiers cleared";
             for (int i = 0; i < m_modifiers.count(); ++i) {
                 qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
                 Modifier newUIMod = {};
-                // newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
-                // if (((m_modifiers.at(i))->ui->modifierApply->currentIndex()) == 0) {
-                //     newUIMod.applyhow_flag = false;
-                // } else {
-                //     newUIMod.applyhow_flag = true;
-                // }
+
+                newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
+                newUIMod.applyhow_flag = (m_modifiers.at(i))->ui->modifierApply->currentIndex();
+
                 newUIMod.probability = (m_modifiers.at(i))->ui->modifierProbEdit->text();
                 newUIMod.amplitude = (m_modifiers.at(i))->ui->modifierMagEdit->text();
                 newUIMod.rate = (m_modifiers.at(i))->ui->modifierRateEdit->text();
@@ -650,26 +657,52 @@ void EventAttributesViewController::showCurrentEventData() {
                 // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
                 Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
-                // newMod->ui->modifierType->setCurrentIndex(extra_info.modifiers.at(i).type);
-                // if (extra_info.modifiers.at(i).applyhow_flag == false) {
-                //     newMod->ui->modifierApply->setCurrentIndex(0);
-                // } else {
-                //     newMod->ui->modifierApply->setCurrentIndex(1);
-                // }
+            
+                newMod->ui->modifierType->setCurrentIndex(extra_info.modifiers.at(i).type);
+                newMod->ui->modifierApply->setCurrentIndex(extra_info.modifiers.at(i).applyhow_flag);
                 newMod->ui->modifierProbEdit->setText(extra_info.modifiers.at(i).probability);
+                connect(newMod->ui->modifierProbFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modProbabilityButton);
+                    });
+
                 newMod->ui->modifierMagEdit->setText(extra_info.modifiers.at(i).amplitude);
+                connect(newMod->ui->modifierMagFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modMagnitudeButton);
+                    });
+
                 newMod->ui->modifierRateEdit->setText(extra_info.modifiers.at(i).rate);
+                connect(newMod->ui->modifierRateFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modRateButton);
+                    });
+
                 newMod->ui->modifierWidthEdit->setText(extra_info.modifiers.at(i).width);
+                connect(newMod->ui->modifierWidthFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modWidthButton);
+                    });
+
                 newMod->ui->modifierSpreadEdit->setText(extra_info.modifiers.at(i).detune_spread);
                 newMod->ui->modifierDirEdit->setText(extra_info.modifiers.at(i).detune_direction);
                 newMod->ui->modifierVelEdit->setText(extra_info.modifiers.at(i).detune_velocity);
-                qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
+                // qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
                 newMod->ui->modifierNameEdit->setText(extra_info.modifiers.at(i).group_name);
-                qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
+                // qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
                 newMod->ui->modifierResEdit->setText(extra_info.modifiers.at(i).partialresult_string);
+                connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modPartialButton);
+                    });
 
                 ui->modScrollWindowContent->layout()->addWidget(newMod);
                 m_modifiers.append(newMod);
+
+                connect(newMod->ui->modifierRemoveButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modRemoveButtonClicked(newMod);
+                    });
             }
 
             event = bottom_event.event;
@@ -774,26 +807,51 @@ void EventAttributesViewController::showCurrentEventData() {
                 // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
                 Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
-                // newMod->ui->modifierType->setCurrentIndex(event.modifiers.at(i).type);
-                // if (event.modifiers.at(i).applyhow_flag == false) {
-                //     newMod->ui->modifierApply->setCurrentIndex(0);
-                // } else {
-                //     newMod->ui->modifierApply->setCurrentIndex(1);
-                // }
+                newMod->ui->modifierType->setCurrentIndex(event.modifiers.at(i).type);
+                newMod->ui->modifierApply->setCurrentIndex(event.modifiers.at(i).applyhow_flag);
                 newMod->ui->modifierProbEdit->setText(event.modifiers.at(i).probability);
+                connect(newMod->ui->modifierProbFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modProbabilityButton);
+                    });
+
                 newMod->ui->modifierMagEdit->setText(event.modifiers.at(i).amplitude);
+                connect(newMod->ui->modifierMagFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modMagnitudeButton);
+                    });
+
                 newMod->ui->modifierRateEdit->setText(event.modifiers.at(i).rate);
+                connect(newMod->ui->modifierRateFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modRateButton);
+                    });
+
                 newMod->ui->modifierWidthEdit->setText(event.modifiers.at(i).width);
+                connect(newMod->ui->modifierWidthFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modWidthButton);
+                    });
+
                 newMod->ui->modifierSpreadEdit->setText(event.modifiers.at(i).detune_spread);
                 newMod->ui->modifierDirEdit->setText(event.modifiers.at(i).detune_direction);
                 newMod->ui->modifierVelEdit->setText(event.modifiers.at(i).detune_velocity);
-                qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
+                // qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
                 newMod->ui->modifierNameEdit->setText(event.modifiers.at(i).group_name);
-                qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
+                // qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
                 newMod->ui->modifierResEdit->setText(event.modifiers.at(i).partialresult_string);
+                connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modFunctionButtonClicked(newMod, modPartialButton);
+                    });
 
                 ui->modScrollWindowContent->layout()->addWidget(newMod);
                 m_modifiers.append(newMod);
+
+                connect(newMod->ui->modifierRemoveButton, &QPushButton::clicked,
+                    this, [this, newMod]() {
+                        modRemoveButtonClicked(newMod);
+                    });
             }
         }
         // environment
@@ -1081,6 +1139,9 @@ void EventAttributesViewController::attributesStandardSpaButtonClicked() {
 void EventAttributesViewController::BSLoudnessButtonClicked() {
     insertFunctionString(BSLoudnessFunButton);
 }
+void modFunctionButtonClicked(Modifiers* mod, ModButtonType type) {
+
+}
 /*
 void EventAttributesViewController::BSSpatializationButtonClicked() {
     if (m_currentlyShownEvent->getEventExtraInfo()->getChildTypeFlag() != 0) return;
@@ -1116,6 +1177,37 @@ void EventAttributesViewController::BSFunFreqButton2Clicked() {
 
 void EventAttributesViewController::BSContinuumButtonClicked() {
     insertFunctionString(BSContinuumFunButton);
+}
+void EventAttributesViewController::modFunctionButtonClicked(Modifiers* mod, ModButtonType type) {
+    QLineEdit* target = nullptr;
+    FunctionGenerator* gen = nullptr;
+
+    switch (type) {
+    case modProbabilityButton:
+        target = mod->ui->modifierProbEdit;
+        break;
+    case modMagnitudeButton:
+        target = mod->ui->modifierMagEdit;
+        break;
+    case modRateButton:
+        target = mod->ui->modifierRateEdit;
+        break;
+    case modWidthButton:
+        target = mod->ui->modifierWidthEdit;
+        break;
+    case modPartialButton:
+        target = mod->ui->modifierResEdit;
+        break;
+    }
+
+    if (!target) return;
+
+    gen = new FunctionGenerator(nullptr, functionReturnENV, target->text());
+    if (gen) {
+        if (gen->exec() == QDialog::Accepted && !gen->getResultString().isEmpty())
+            target->setText(gen->getResultString());
+        delete gen;
+    }
 }
 
 void EventAttributesViewController::insertFunctionString(FunctionButton button) {
@@ -1240,11 +1332,53 @@ void EventAttributesViewController::addModifierButtonClicked() {
     // TO DO: connect add modifier to data structure
     
     ui->modScrollWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    ui->modScrollWindowContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    // ui->modScrollWindowContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->modScrollWindowContent->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
     Modifiers* newMod = new Modifiers(ui->modScrollWindow);
+    connect(newMod->ui->modifierProbFunButton, &QPushButton::clicked,
+        this, [this, newMod]() {
+            modFunctionButtonClicked(newMod, modProbabilityButton);
+        });
+    connect(newMod->ui->modifierMagFunButton, &QPushButton::clicked,
+            this, [this, newMod]() {
+                modFunctionButtonClicked(newMod, modMagnitudeButton);
+            });
+    connect(newMod->ui->modifierRateFunButton, &QPushButton::clicked,
+            this, [this, newMod]() {
+                modFunctionButtonClicked(newMod, modRateButton);
+            });
+    connect(newMod->ui->modifierWidthFunButton, &QPushButton::clicked,
+            this, [this, newMod]() {
+                modFunctionButtonClicked(newMod, modWidthButton);
+            });
+    connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
+            this, [this, newMod]() {
+                modFunctionButtonClicked(newMod, modPartialButton);
+            });
+
     ui->modScrollWindowContent->layout()->addWidget(newMod);
     m_modifiers.append(newMod);
+
+    connect(newMod->ui->modifierRemoveButton, &QPushButton::clicked,
+            this, [this, newMod]() {
+                modRemoveButtonClicked(newMod);
+            });
+    
+    ui->modScrollWindowContent->adjustSize();
+
+    QTimer::singleShot(0, this, [this, newMod]() {
+    ui->modScrollWindow->ensureWidgetVisible(newMod, 0, 0);
+    });
+
+}
+
+void EventAttributesViewController::modRemoveButtonClicked(Modifiers* mod) {
+    // qDebug() << "mod remove button clicked on " << mod->ui->modifierNameEdit->text();
+    // qDebug() << "mod remove button for index " << index-1;
+    ui->modScrollWindowContent->layout()->removeWidget(mod);
+    delete mod;
+    m_modifiers.removeOne(mod);
 }
 /*
 void EventAttributesViewController::addPartialButtonClicked() {
