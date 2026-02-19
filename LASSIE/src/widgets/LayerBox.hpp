@@ -16,6 +16,9 @@
 #include <QDebug>
 #include <QHeaderView>
 #include <QMenu>
+#include <QAction>
+#include <QPoint>
+#include <QMenu>
 #include <QKeyEvent>
 #include <QShortcut>
 
@@ -42,6 +45,8 @@ public:
 
     // Called by EventAttributesViewController when layers above this one are deleted
     void setLayerIndex(int layerIndex) { m_layerIndex = layerIndex; }
+    // Called when a preceding sibling event is deleted (index shifts down by 1)
+    void setEventIndex(unsigned eventIndex) { m_eventIndex = eventIndex; }
 
     // Flush the weight entry text to the backend Layer::by_layer.
     // \todo this is tremendously chud and should be somehow delegated to ProjectManager, but for now is fine

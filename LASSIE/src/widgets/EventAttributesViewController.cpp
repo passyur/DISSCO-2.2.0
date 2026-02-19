@@ -181,20 +181,51 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
 }
 
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
-    if (m_curreventtype != type || m_curreventindex != index) {
+    if (m_hasCurrentEvent && (m_curreventtype != type || m_curreventindex != index)) {
         saveCurrentShownEventData();
         m_modifiers.clear();
     }
     m_curreventtype = type;
     m_curreventindex = index;
-    
+    m_hasCurrentEvent = true;
+
     showCurrentEventData();
+}
+
+void EventAttributesViewController::clearView() {
+    for (LayerBox* box : m_layerBoxes) {
+        ui->layersLayout->removeWidget(box);
+        box->deleteLater();
+    }
+    m_layerBoxes.clear();
+
+    ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+    fixStackedWidgetLayout(ui->emptyPage);
+    m_hasCurrentEvent = false;
+}
+
+void EventAttributesViewController::onEventDeleted(Eventtype type, int deletedIndex) {
+    if (!m_hasCurrentEvent || m_curreventtype != type) return;
+
+    if (m_curreventindex == static_cast<unsigned>(deletedIndex)) {
+        clearView();
+    } else if (m_curreventindex > static_cast<unsigned>(deletedIndex)) {
+        --m_curreventindex;
+        // Keep the LayerBox widgets pointing at the right (now-shifted) event
+        for (LayerBox* box : m_layerBoxes) {
+            box->setEventIndex(m_curreventindex);
+        }
+    }
 }
 
 void EventAttributesViewController::saveCurrentShownEventData() {
     if(m_curreventindex == -1) return;
     //qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
     
+    if (!m_hasCurrentEvent) return;
+
+    qDebug() << "saveCurrentShownEventData called";
+
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
     if (type == bottom) {
@@ -707,7 +738,6 @@ void EventAttributesViewController::showCurrentEventData() {
         }else if(type == high){
             event = pm->highevents()[m_curreventindex];
         }else if(type == mid){
-            //qDebug() << "getting mid event at index " << m_curreventindex;
             event = pm->midevents()[m_curreventindex];
         }else{
             event = pm->lowevents()[m_curreventindex];
@@ -854,14 +884,13 @@ void EventAttributesViewController::showCurrentEventData() {
             addLayerBoxUI(i);
         }
     }else{
-        if(type == sound){
-            const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
-            ui->soundNameEntry->setText(event.name);
-            ui->spectrumNumPartialEntry->setText(event.num_partials);
-            ui->spectrumDeviationEntry->setText(event.deviation);
-            ui->spectrumGenEntry->setText(event.generate_spectrum);
-
-            /// \todo partials
+        // if(type == sound){
+            /// \todo implement partials info display
+            // auto* extra = m_currentlyShownEvent->getEventExtraInfo();
+            // ui->spectrumNumPartialEntry->setText(QString::fromStdString(extra->getNumPartials()));
+            // ui->spectrumDeviationEntry->setText(QString::fromStdString(extra->getDeviation()));
+            // ui->spectrumGenEntry->setText(QString::fromStdString(extra->getSpectrumGenBuilder()));
+            /// \todo implement partials display
             // auto* sp = extra->getSpectrumPartials();
             // if (sp) {
             //     m_soundPartialHboxes = new SoundPartialHBox(sp, this);
@@ -914,7 +943,7 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->filNameEntry->setText(event.name);
             ui->filBuilderEntry->setText(event.filter_builder);
         }else{
-            //qDebug() << "Cannot show event data: type of event not valid";
+            qDebug() << "Cannot show event data: type of event not valid";
         }
         // Sound event
         // if (type == eventSound) {
@@ -959,7 +988,6 @@ void EventAttributesViewController::showCurrentEventData() {
         //     }
         // }
     } /* not hevent nor bottom event */
-}
 }
 
 void EventAttributesViewController::fixedButtonClicked() {

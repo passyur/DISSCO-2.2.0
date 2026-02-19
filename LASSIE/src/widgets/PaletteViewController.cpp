@@ -9,6 +9,7 @@
 #include <QTreeView>
 #include <QStandardItem>
 #include <QHeaderView>
+#include <algorithm>
 
 PaletteViewController::PaletteViewController(ProjectView* projectView)
     : QWidget(nullptr), projectView(projectView)
@@ -116,6 +117,10 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     // Calls objectActivated
     connect(treeView, &QTreeView::doubleClicked, this, &PaletteViewController::objectActivated);
 
+    // Right-click context menu on event items
+    treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(treeView, &QTreeView::customContextMenuRequested,
+            this, &PaletteViewController::onContextMenuRequested);
     // Connect to itemChanged signal to sync palette names with backend
     connect(model, &QStandardItemModel::itemChanged, this, &PaletteViewController::onItemChanged);
 
@@ -190,6 +195,34 @@ void PaletteViewController::removeEvent(IEvent* event, const QString& type)
     if (eventsByType.contains(type)) {
         auto& events = eventsByType[type];
         events.erase(std::remove(events.begin(), events.end(), event), events.end());
+    }
+}
+
+void PaletteViewController::onContextMenuRequested(const QPoint& pos)
+{
+    QModelIndex index = treeView->indexAt(pos);
+    if (!index.isValid()) return;
+
+    QStandardItem* item = model->itemFromIndex(index);
+    if (!item || !item->parent()) return; // folder row — ignore
+
+    // Type string lives in column 0 of this row
+    QString typeStr = model->itemFromIndex(index.sibling(index.row(), 0))->text();
+    if (typeStr == "Top") return; // Top is a singleton — cannot delete/duplicate
+
+    int eventIndex = index.row(); // row within folder == index in PM list
+
+    QMenu menu(this);
+    QAction* deleteAct    = menu.addAction("Delete");
+    QAction* duplicateAct = menu.addAction("Duplicate");
+
+    QAction* chosen = menu.exec(treeView->viewport()->mapToGlobal(pos));
+    if (!chosen) return;
+
+    if (chosen == deleteAct) {
+        projectView->deleteEvent(typeStr, eventIndex);
+    } else if (chosen == duplicateAct) {
+        projectView->duplicateEvent(typeStr, eventIndex);
     }
 }
 
