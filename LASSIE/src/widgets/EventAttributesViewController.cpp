@@ -684,10 +684,12 @@ void EventAttributesViewController::showCurrentEventData() {
                 for (int j = 0; j < m_layerBoxes.size(); ++j) {
                     m_layerBoxes[j]->setLayerIndex(j);
                 }
+                fixStackedWidgetLayout(ui->standardPage);
             });
             m_layerBoxes.append(box);
             ui->layersLayout->addWidget(box);
         }
+        fixStackedWidgetLayout(ui->standardPage);
     }else{
         // if(type == sound){
             /// \todo implement partials info display
@@ -1141,10 +1143,12 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
         for (int i = 0; i < m_layerBoxes.size(); ++i) {
             m_layerBoxes[i]->setLayerIndex(i);
         }
+        fixStackedWidgetLayout(ui->standardPage);
     });
 
     m_layerBoxes.append(box);
     ui->layersLayout->addWidget(box);
+    fixStackedWidgetLayout(ui->standardPage);
 }
 
 
