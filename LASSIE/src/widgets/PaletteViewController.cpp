@@ -1,7 +1,5 @@
 #include "PaletteViewController.hpp"
 #include "ProjectViewController.hpp"
-#include "../windows/ObjectWindow.hpp"
-#include "../core/event_struct.hpp"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -133,33 +131,6 @@ void PaletteViewController::objectActivated(const QModelIndex &index){
         eventName = model->itemFromIndex(index.sibling(index.row(), 1))->text();
         projectView->showAttributes(eventType, index.row());
     }
-}
-
-ObjectWindowObjectPackage* PaletteViewController::getObjectsLinkedList(const QString& type)
-{
-    if (!eventsByType.contains(type) || eventsByType[type].empty()) {
-        return nullptr;
-    }
-
-    // Create the first package
-    ObjectWindowObjectPackage* head = new ObjectWindowObjectPackage(projectView);
-    head->ievent = eventsByType[type][0];
-    head->prev = nullptr;
-    head->next = nullptr;
-
-    // Create packages for remaining events
-    ObjectWindowObjectPackage* current = head;
-    for (size_t i = 1; i < eventsByType[type].size(); ++i) {
-        ObjectWindowObjectPackage* next = new ObjectWindowObjectPackage(projectView);
-        next->ievent = eventsByType[type][i];
-        next->prev = current;
-        next->next = nullptr;
-        
-        current->next = next;
-        current = next;
-    }
-
-    return head;
 }
 
 void PaletteViewController::insertEvent(IEvent* event, const QString& type)

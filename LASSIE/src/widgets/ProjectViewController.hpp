@@ -14,7 +14,6 @@
 class MainWindow;
 class EnvelopeLibraryEntry;
 class EventAttributesViewController;
-class ObjectWindow;
 class PaletteViewController;
 
 class ProjectView : public QObject {
@@ -61,23 +60,6 @@ class ProjectView : public QObject {
 
         /* set properties insert function button */
         void propertiesInsertFunction();
-
-        // ObjectWindow instances
-        /* these hold pointers to linked lists for their respective event type  */
-        ObjectWindow* topWindow;
-        ObjectWindow* highWindow;
-        ObjectWindow* midWindow;
-        ObjectWindow* lowWindow;
-        ObjectWindow* bottomWindow;
-        ObjectWindow* spectrumWindow;
-        ObjectWindow* envWindow;
-        ObjectWindow* sivWindow;
-        ObjectWindow* spaWindow;
-        ObjectWindow* patWindow;
-        ObjectWindow* revWindow;
-        ObjectWindow* filWindow;
-        ObjectWindow* noteWindow;
-        ObjectWindow* meaWindow;
 
         QMap<QString, bool> default_note_modifiers{
             {"+8va", true},          {"-8va", true},

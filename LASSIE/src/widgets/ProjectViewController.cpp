@@ -33,7 +33,6 @@
 #include "../ui/ui_ProjectPropertiesDialog.h"
 #include "../dialogs/FunctionGenerator.hpp"
 #include "../ui/ui_FunctionGenerator.h"
-#include "../windows/ObjectWindow.hpp"
 #include "PaletteViewController.hpp"
 #include "../core/event_struct.hpp"
 #include "EventAttributesViewController.hpp"
@@ -114,22 +113,6 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     mainWindow->ui->eventsScrollArea->setWidgetResizable(true);
     eventAttributesView = new EventAttributesViewController(this);
     mainWindow->ui->eventsScrollArea->setWidget(eventAttributesView);
-
-    // // Create ObjectWindow instances
-    topWindow = new ObjectWindow(eventTop, this);
-    highWindow = new ObjectWindow(eventHigh, this);
-    midWindow = new ObjectWindow(eventMid, this);
-    lowWindow = new ObjectWindow(eventLow, this);
-    bottomWindow = new ObjectWindow(eventBottom, this);
-    spectrumWindow = new ObjectWindow(eventSound, this);
-    envWindow = new ObjectWindow(eventEnv, this);
-    sivWindow = new ObjectWindow(eventSiv, this);
-    spaWindow = new ObjectWindow(eventSpa, this);
-    patWindow = new ObjectWindow(eventPat, this);
-    revWindow = new ObjectWindow(eventRev, this);
-    filWindow = new ObjectWindow(eventFil, this);
-    noteWindow = new ObjectWindow(eventNote, this);
-    meaWindow = new ObjectWindow(eventMea, this);
 
     updatePaletteView();
 }
