@@ -56,6 +56,9 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
 
     m_treeView->viewport()->installEventFilter(this);
 
+    connect(m_treeView, &QTreeView::customContextMenuRequested,
+            this, &LayerBox::onPackageContextMenu);
+
     m_mainLayout->addWidget(m_treeView);
 
     this->setMinimumHeight(200);
@@ -199,6 +202,46 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
         }
     }
     return QFrame::eventFilter(obj, event);
+}
+
+void LayerBox::onPackageContextMenu(const QPoint& pos) {
+    QModelIndex index = m_treeView->indexAt(pos);
+    if (!index.isValid()) return;
+
+    int row = index.row();
+
+    QMenu menu(this);
+    QAction* deleteAct   = menu.addAction("Delete");
+    QAction* duplicateAct = menu.addAction("Duplicate");
+
+    QAction* chosen = menu.exec(m_treeView->viewport()->mapToGlobal(pos));
+    if (!chosen) return;
+
+    Layer& layer = getBackendLayer();
+
+    if (chosen == deleteAct) {
+        if (row >= layer.discrete_packages.size()) return;
+        layer.discrete_packages.removeAt(row);
+        m_model->removeRow(row);
+        // Renumber the index column
+        for (int i = 0; i < m_model->rowCount(); ++i)
+            m_model->item(i, 0)->setText(QString::number(i));
+
+    } else if (chosen == duplicateAct) {
+        if (row >= layer.discrete_packages.size()) return;
+        Package copy = layer.discrete_packages[row];
+        layer.discrete_packages.insert(row + 1, copy);
+
+        QList<QStandardItem*> newRow = {
+            new QStandardItem(QString::number(row + 1)),
+            new QStandardItem(copy.event_type),
+            new QStandardItem(copy.event_name)
+        };
+        m_model->insertRow(row + 1, newRow);
+        // Renumber
+        for (int i = 0; i < m_model->rowCount(); ++i)
+            m_model->item(i, 0)->setText(QString::number(i));
+    }
 }
 
 void LayerBox::onWeightChanged(const QString& text) {

@@ -15,6 +15,9 @@
 #include <QMimeData>
 #include <QDebug>
 #include <QHeaderView>
+#include <QMenu>
+#include <QAction>
+#include <QPoint>
 
 #include "../core/event_struct.hpp"
 
@@ -39,6 +42,8 @@ public:
 
     // Called by EventAttributesViewController when layers above this one are deleted
     void setLayerIndex(int layerIndex) { m_layerIndex = layerIndex; }
+    // Called when a preceding sibling event is deleted (index shifts down by 1)
+    void setEventIndex(unsigned eventIndex) { m_eventIndex = eventIndex; }
 
 signals:
     void deleteRequested(LayerBox* self);
@@ -47,6 +52,7 @@ private slots:
     void onWeightFunctionClicked() {};
     void onDeleteLayerClicked();
     void onWeightChanged(const QString& text);
+    void onPackageContextMenu(const QPoint& pos);
 
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;

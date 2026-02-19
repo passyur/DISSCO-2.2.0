@@ -69,6 +69,13 @@ public:
 
     void saveCurrentShownEventData();
 
+    // Blank the panel (e.g. when the viewed event is deleted)
+    void clearView();
+
+    // Called by ProjectView after an event is removed from the backend; adjusts
+    // the tracked index or clears the view if the deleted event was being shown.
+    void onEventDeleted(Eventtype type, int deletedIndex);
+
     // /*! \brief get the currently shown event */
     // IEvent* getCurrentEvent() const;
 
@@ -146,6 +153,7 @@ private:
     Eventtype m_curreventtype;
     // index of event in QList in ProjectManager
     unsigned m_curreventindex;
+    bool m_hasCurrentEvent = false;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 

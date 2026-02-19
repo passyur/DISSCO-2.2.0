@@ -7,6 +7,9 @@
 #include <vector>
 #include <QTreeView>
 #include <QStandardItemModel>
+#include <QMenu>
+#include <QAction>
+#include <QPoint>
 
 class ProjectView;
 class IEvent;
@@ -47,18 +50,18 @@ public:
     QStandardItem* folderFil;
     QStandardItem* folderMea;
 
+private slots:
+    void onContextMenuRequested(const QPoint& pos);
+
 private:
     ProjectView* projectView;
-    
+
     // Store events by type
     QMap<QString, std::vector<IEvent*>> eventsByType;
-    
+
     // Tree View
     QTreeView* treeView;
     QStandardItemModel* model;
-    // void slotCustomMenuRequested(QPoint pos);
-    // QAction *delAct;
-    // void deleteObject();
 
 };
 

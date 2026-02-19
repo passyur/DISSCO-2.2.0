@@ -180,19 +180,45 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
 
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, unsigned index) {
 
-
-    /// \todo implemenet saveCurrentShownEventData();
-    // saveCurrentShownEventData();
-    if (m_curreventtype != type || m_curreventindex != index) {
+    if (m_hasCurrentEvent && (m_curreventtype != type || m_curreventindex != index)) {
         saveCurrentShownEventData();
     }
     m_curreventtype = type;
     m_curreventindex = index;
-    
+    m_hasCurrentEvent = true;
+
     showCurrentEventData();
 }
 
+void EventAttributesViewController::clearView() {
+    for (LayerBox* box : m_layerBoxes) {
+        ui->layersLayout->removeWidget(box);
+        box->deleteLater();
+    }
+    m_layerBoxes.clear();
+
+    ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+    fixStackedWidgetLayout(ui->emptyPage);
+    m_hasCurrentEvent = false;
+}
+
+void EventAttributesViewController::onEventDeleted(Eventtype type, int deletedIndex) {
+    if (!m_hasCurrentEvent || m_curreventtype != type) return;
+
+    if (m_curreventindex == static_cast<unsigned>(deletedIndex)) {
+        clearView();
+    } else if (m_curreventindex > static_cast<unsigned>(deletedIndex)) {
+        --m_curreventindex;
+        // Keep the LayerBox widgets pointing at the right (now-shifted) event
+        for (LayerBox* box : m_layerBoxes) {
+            box->setEventIndex(m_curreventindex);
+        }
+    }
+}
+
 void EventAttributesViewController::saveCurrentShownEventData() {
+
+    if (!m_hasCurrentEvent) return;
 
     qDebug() << "saveCurrentShownEventData called";
 
