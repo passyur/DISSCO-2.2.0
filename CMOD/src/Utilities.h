@@ -427,8 +427,8 @@ private:
   vector< MarkovModel<float> > markovModelLibrary;
 
   // Piece Configurations
-  bool soundSynthesis;
-  bool outputParticel;
+  bool soundSynthesis = true;
+  bool outputParticel = true;
   int numThreads;
   int numChannels;
   int samplingRate;

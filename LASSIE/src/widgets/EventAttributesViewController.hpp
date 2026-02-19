@@ -44,8 +44,16 @@ typedef enum {
     BSWellTemperedFunButton,
     BSFunFreq1FunButton,
     BSFunFreq2FunButton,
-    BSContinuumFunButton
+    BSContinuumFunButton,
 } FunctionButton;
+
+typedef enum {
+    modProbabilityButton,
+    modMagnitudeButton,
+    modRateButton,
+    modWidthButton,
+    modPartialButton
+} ModButtonType;
 
 // forward enums from original GTK version - now defined in LASSIE.h
 // enum TempoPrefix;
@@ -65,7 +73,7 @@ public:
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
     //  */
-    void showAttributesOfEvent(Eventtype type, unsigned index); //IEvent* event
+    void showAttributesOfEvent(Eventtype type, int index); //IEvent* event
 
     void saveCurrentShownEventData();
 
@@ -129,6 +137,10 @@ private slots:
     void addModifierButtonClicked();
     // void addPartialButtonClicked();
 
+    // modifier buttons
+    void modFunctionButtonClicked(Modifiers* mod, ModButtonType type);
+    void modRemoveButtonClicked(Modifiers* mod);
+
     // // tempo controls
     void tempoAsNoteValueButtonClicked();
     void tempoAsFractionButtonClicked();
@@ -145,8 +157,9 @@ private:
     
     Eventtype m_curreventtype;
     // index of event in QList in ProjectManager
-    unsigned m_curreventindex;
+    int m_curreventindex = -1;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
+    QList<Modifiers*>               m_modifiers;     
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
     QList<LayerBox*>                 m_layerBoxes;

@@ -10,7 +10,6 @@
 
 class ProjectView;
 class IEvent;
-class ObjectWindowObjectPackage;
 
 class PaletteViewController : public QWidget {
     Q_OBJECT
@@ -18,9 +17,6 @@ class PaletteViewController : public QWidget {
 public:
     explicit PaletteViewController(ProjectView* projectView);
     ~PaletteViewController();
-
-    // Get the linked list of objects for a specific type
-    ObjectWindowObjectPackage* getObjectsLinkedList(const QString& type);
     
     // Insert a new event into the palette
     void insertEvent(IEvent* event, const QString& type);

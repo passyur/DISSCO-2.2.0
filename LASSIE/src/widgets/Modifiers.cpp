@@ -20,6 +20,7 @@ Modifiers::Modifiers(QWidget *parent)
     , ui(new Ui::Modifiers)
 {
     ui->setupUi(this); 
+    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setupUi(); 
 }
 

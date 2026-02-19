@@ -35,4 +35,11 @@ else()
     message(STATUS "Found libxerces-c install!")
 endif()
 
+# set "default" location of the CMOD binary (directory) for use in LASSIE
+if(NOT CMOD_BINARY)
+    set(CMOD_BINARY "${CMAKE_CURRENT_BINARY_DIR}/CMOD" PARENT_SCOPE)
+    message(STATUS "CMOD_BINARY set")
+endif()
+message(STATUS "CMOD_BINARY set to ${CMOD_BINARY}")
+
 message(STATUS "DONE!")
