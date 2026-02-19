@@ -45,6 +45,13 @@ class ProjectView : public QObject {
         PaletteViewController* getPalette() { return paletteView; }
         void updatePaletteView();
         void showAttributes(QString eventType, int index);
+
+        // Remove the event at index from the backend and the palette.
+        // If it is currently being viewed, the attributes panel is blanked.
+        void deleteEvent(const QString& typeStr, int index);
+
+        // Append a copy of the event at index to the backend and the palette.
+        void duplicateEvent(const QString& typeStr, int index);
         //void showAttributes(class IEvent* event);
 
     private:

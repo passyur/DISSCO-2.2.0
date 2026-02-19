@@ -1243,3 +1243,151 @@ void ProjectView::showAttributes(QString eventType, int index) {
     mainWindow->ui->eventsScrollArea->widget()->adjustSize();
     mainWindow->ui->eventsScrollArea->updateGeometry();
 }
+
+// ---------------------------------------------------------------------------
+// Helpers shared by deleteEvent / duplicateEvent
+// ---------------------------------------------------------------------------
+
+static Eventtype eventtypeFromString(const QString& s) {
+    if (s == "High")          return high;
+    if (s == "Mid")           return mid;
+    if (s == "Low")           return low;
+    if (s == "Bottom")        return bottom;
+    if (s == "Spectrum")      return sound;
+    if (s == "Note")          return note;
+    if (s == "Envelope")      return env;
+    if (s == "Sieve")         return sieve;
+    if (s == "Spatialization") return spa;
+    if (s == "Pattern")       return pattern;
+    if (s == "Reverb")        return reverb;
+    if (s == "Filter")        return filter;
+    if (s == "Measurement")   return mea;
+    return top; // fallback (should not happen for deletable types)
+}
+
+static QStandardItem* folderForType(PaletteViewController* pv, const QString& s) {
+    if (s == "High")          return pv->folderHigh;
+    if (s == "Mid")           return pv->folderMid;
+    if (s == "Low")           return pv->folderLow;
+    if (s == "Bottom")        return pv->folderBottom;
+    if (s == "Spectrum")      return pv->folderSpectrum;
+    if (s == "Note")          return pv->folderNote;
+    if (s == "Envelope")      return pv->folderEnv;
+    if (s == "Sieve")         return pv->folderSiv;
+    if (s == "Spatialization") return pv->folderSpa;
+    if (s == "Pattern")       return pv->folderPat;
+    if (s == "Reverb")        return pv->folderRev;
+    if (s == "Filter")        return pv->folderFil;
+    if (s == "Measurement")   return pv->folderMea;
+    return nullptr;
+}
+
+void ProjectView::deleteEvent(const QString& typeStr, int index)
+{
+    ProjectManager* pm = Inst::get_project_manager();
+    Eventtype etype = eventtypeFromString(typeStr);
+
+    // Notify the attributes view before touching the backend
+    eventAttributesView->onEventDeleted(etype, index);
+
+    // Remove from the backend list
+    if      (typeStr == "High")          pm->highevents().removeAt(index);
+    else if (typeStr == "Mid")           pm->midevents().removeAt(index);
+    else if (typeStr == "Low")           pm->lowevents().removeAt(index);
+    else if (typeStr == "Bottom")        pm->bottomevents().removeAt(index);
+    else if (typeStr == "Spectrum")      pm->spectrumevents().removeAt(index);
+    else if (typeStr == "Note")          pm->noteevents().removeAt(index);
+    else if (typeStr == "Envelope")      pm->envelopeevents().removeAt(index);
+    else if (typeStr == "Sieve")         pm->sieveevents().removeAt(index);
+    else if (typeStr == "Spatialization") pm->spaevents().removeAt(index);
+    else if (typeStr == "Pattern")       pm->patternevents().removeAt(index);
+    else if (typeStr == "Reverb")        pm->reverbevents().removeAt(index);
+    else if (typeStr == "Filter")        pm->filterevents().removeAt(index);
+
+    // Remove from the palette model
+    QStandardItem* folder = folderForType(paletteView, typeStr);
+    if (folder) folder->removeRow(index);
+}
+
+void ProjectView::duplicateEvent(const QString& typeStr, int index)
+{
+    ProjectManager* pm = Inst::get_project_manager();
+
+    // Append a copy to the backend list and record the new item's display name
+    QString newName;
+    QStandardItem* folder = folderForType(paletteView, typeStr);
+    if (!folder) return;
+
+    if (typeStr == "High") {
+        HEvent copy = pm->highevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->highevents().append(copy);
+    } else if (typeStr == "Mid") {
+        HEvent copy = pm->midevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->midevents().append(copy);
+    } else if (typeStr == "Low") {
+        HEvent copy = pm->lowevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->lowevents().append(copy);
+    } else if (typeStr == "Bottom") {
+        BottomEvent copy = pm->bottomevents()[index];
+        copy.event.name += " (copy)";
+        newName = copy.event.name;
+        pm->bottomevents().append(copy);
+    } else if (typeStr == "Spectrum") {
+        SpectrumEvent copy = pm->spectrumevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->spectrumevents().append(copy);
+    } else if (typeStr == "Note") {
+        NoteEvent copy = pm->noteevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->noteevents().append(copy);
+    } else if (typeStr == "Envelope") {
+        EnvelopeEvent copy = pm->envelopeevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->envelopeevents().append(copy);
+    } else if (typeStr == "Sieve") {
+        SieveEvent copy = pm->sieveevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->sieveevents().append(copy);
+    } else if (typeStr == "Spatialization") {
+        SpaEvent copy = pm->spaevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->spaevents().append(copy);
+    } else if (typeStr == "Pattern") {
+        PatternEvent copy = pm->patternevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->patternevents().append(copy);
+    } else if (typeStr == "Reverb") {
+        ReverbEvent copy = pm->reverbevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->reverbevents().append(copy);
+    } else if (typeStr == "Filter") {
+        FilterEvent copy = pm->filterevents()[index];
+        copy.name += " (copy)";
+        newName = copy.name;
+        pm->filterevents().append(copy);
+    } else {
+        return;
+    }
+
+    // Add the new entry to the palette
+    QStandardItem* typeItem = new QStandardItem(typeStr);
+    QStandardItem* nameItem = new QStandardItem(newName);
+    typeItem->setData(typeStr, Qt::UserRole + 1);
+    typeItem->setData(newName, Qt::UserRole + 2);
+    nameItem->setData(typeStr, Qt::UserRole + 1);
+    nameItem->setData(newName, Qt::UserRole + 2);
+    folder->appendRow({typeItem, nameItem});
+}
