@@ -21,55 +21,54 @@
 class EventAttributesViewController;
 class ProjectView;
 
-// LayerBox: represents a single layer's UI and logic
-// Note: LayerBoxes correspond to a Layer in event_struct.hpp, whereas the contents of the QTreeView will be the Packages
+// LayerBox: represents a single layer's UI and logic.
+// Instead of holding a copy of the Layer struct (which would be disconnected from
+// the backend), LayerBox stores the event type/index and layer index so it can
+// always reach the authoritative Layer object via Inst::get_project_manager().
 class LayerBox : public QFrame {
     Q_OBJECT
 
 public:
-    LayerBox(Layer layer, QWidget* parent);
+    // eventType / eventIndex identify the parent HEvent in the ProjectManager.
+    // layerIndex is the position of this layer within HEvent::event_layers.
+    LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent);
     ~LayerBox() override;
 
     QStandardItem* extractItemFromDrop(QDropEvent* event);
     bool eventFilter(QObject* obj, QEvent* event) override;
 
-    // /*! \brief refresh child‐type index numbers, returns next index */
-    // int refreshChildTypeIndex(int start);
-
-    // /*! \brief enable or disable the "by‐layer" weight field */
-    // void setWeightEnabled(bool enabled);
-
-    // /*! \brief write back the weight field into the underlying EventLayer */
-    // void applyWeightToModel();
-
-    // /*! \brief delete this layer from UI and model */
-    // void deleteObject();
+    // Called by EventAttributesViewController when layers above this one are deleted
+    void setLayerIndex(int layerIndex) { m_layerIndex = layerIndex; }
 
 signals:
-    // void requestRefresh();
+    void deleteRequested(LayerBox* self);
 
 private slots:
     void onWeightFunctionClicked() {};
-    void onDeleteLayerClicked() {};
+    void onDeleteLayerClicked();
+    void onWeightChanged(const QString& text);
 
 protected:
-    // bool event(QEvent* e) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dropEvent(QDropEvent* event) override;
 
 private:
-    EventAttributesViewController* m_attributesView;
-    ProjectView*                   m_projectView;
+    // Returns a reference to the actual Layer in the backend.
+    // Valid as long as the parent HEvent's event_layers list is not resized.
+    Layer& getBackendLayer();
 
-    Layer m_layer;
+    // Identity of the layer in the backend
+    Eventtype m_eventType;
+    unsigned  m_eventIndex;
+    int       m_layerIndex;
 
     // UI elements
-    QVBoxLayout*                   m_mainLayout;
-    QTreeView*                     m_treeView;
-    QStandardItemModel*            m_model;
-    QLineEdit*                     m_weightEntry;
-    QPushButton*                   m_weightFuncButton;
-    QPushButton*                   m_deleteLayerButton;
+    QVBoxLayout*        m_mainLayout;
+    QTreeView*          m_treeView;
+    QStandardItemModel* m_model;
+    QLineEdit*          m_weightEntry;
+    QPushButton*        m_weightFuncButton;
+    QPushButton*        m_deleteLayerButton;
 };
 
 #endif

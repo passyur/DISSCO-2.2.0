@@ -16,6 +16,7 @@ class SpectrumPartial;
 class EventLayer;
 class QKeyEvent;
 class Modifiers;
+class LayerBox;
 
 namespace Ui {
     class EventAttributesViewController;
@@ -148,7 +149,7 @@ private:
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
-    // QList<class LayerBox*>           m_layerBoxesStorage;
+    QList<LayerBox*>                 m_layerBoxes;
     // QList<class QCheckBox*>          m_noteModifierCheckBoxes;
 
     // // internal helpers

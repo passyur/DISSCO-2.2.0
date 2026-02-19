@@ -460,17 +460,12 @@ void EventAttributesViewController::showCurrentEventData() {
 
     qDebug() << "showCurrentEventData() called";
 
-    // clear dynamic widgets
-    // qDeleteAll(m_layerBoxesStorage);
-    // m_layerBoxesStorage.clear();
-    // if (m_modifiers) {
-    //     delete m_modifiers;
-    //     m_modifiers = nullptr;
-    // }
-    // if (m_soundPartialHboxes) {
-    //     m_soundPartialHboxes->clear();
-    //     m_soundPartialHboxes = nullptr;
-    // }
+    // Clear all existing LayerBox widgets so the panel reflects the new event
+    for (LayerBox* box : m_layerBoxes) {
+        ui->layersLayout->removeWidget(box);
+        box->deleteLater();
+    }
+    m_layerBoxes.clear();
 
     // Choose page based on type of currently shown event
     Eventtype type = m_curreventtype;
@@ -665,6 +660,33 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->spaEntry->setText(event.spa);
             ui->revEntry->setText(event.reverb);
             ui->filEntry->setText(event.filter);
+        }
+
+        // Rebuild LayerBoxes for the newly shown event
+        for (int i = 0; i < event.event_layers.size(); ++i) {
+            LayerBox* box = new LayerBox(m_curreventtype, m_curreventindex, i, this);
+            connect(box, &LayerBox::deleteRequested, this, [this](LayerBox* b) {
+                ProjectManager* pm2 = Inst::get_project_manager();
+                HEvent* he = nullptr;
+                if (m_curreventtype == top)        he = &pm2->topevent();
+                else if (m_curreventtype == high)  he = &pm2->highevents()[m_curreventindex];
+                else if (m_curreventtype == mid)   he = &pm2->midevents()[m_curreventindex];
+                else if (m_curreventtype == low)   he = &pm2->lowevents()[m_curreventindex];
+                else                               he = &pm2->bottomevents()[m_curreventindex].event;
+
+                int idx = m_layerBoxes.indexOf(b);
+                if (idx >= 0 && idx < he->event_layers.size()) {
+                    he->event_layers.removeAt(idx);
+                }
+                m_layerBoxes.removeOne(b);
+                ui->layersLayout->removeWidget(b);
+                b->deleteLater();
+                for (int j = 0; j < m_layerBoxes.size(); ++j) {
+                    m_layerBoxes[j]->setLayerIndex(j);
+                }
+            });
+            m_layerBoxes.append(box);
+            ui->layersLayout->addWidget(box);
         }
     }else{
         // if(type == sound){
@@ -1083,20 +1105,45 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
     qDebug("add new layer button clicked");
 
     ProjectManager *pm = Inst::get_project_manager();
-    HEvent event = [=]() -> HEvent {
-        if (m_curreventtype == top)   return pm->topevent();
-        if (m_curreventtype == high)  return pm->highevents()[m_curreventindex];
-        if (m_curreventtype == mid)   return pm->midevents()[m_curreventindex];
-        if (m_curreventtype == low)   return pm->lowevents()[m_curreventindex];
-        return pm->bottomevents()[m_curreventindex].event;
-    }();
 
-    // --- backend ---
-    event.event_layers.append(Layer());
-    Layer& backend_layer = event.event_layers.back();
+    // Get a REFERENCE to the actual backend HEvent so the append is not lost
+    HEvent* hevent = nullptr;
+    if (m_curreventtype == top)         hevent = &pm->topevent();
+    else if (m_curreventtype == high)   hevent = &pm->highevents()[m_curreventindex];
+    else if (m_curreventtype == mid)    hevent = &pm->midevents()[m_curreventindex];
+    else if (m_curreventtype == low)    hevent = &pm->lowevents()[m_curreventindex];
+    else                                hevent = &pm->bottomevents()[m_curreventindex].event;
 
-    // --- frontend ---
-    LayerBox* box = new LayerBox(backend_layer, this);
+    // Append a new Layer to the backend and record its index
+    hevent->event_layers.append(Layer());
+    int layerIndex = hevent->event_layers.size() - 1;
+
+    // Create the UI widget using indices so it can always find the backend Layer
+    LayerBox* box = new LayerBox(m_curreventtype, m_curreventindex, layerIndex, this);
+    connect(box, &LayerBox::deleteRequested, this, [this](LayerBox* b) {
+        // Remove from backend
+        ProjectManager* pm2 = Inst::get_project_manager();
+        HEvent* he = nullptr;
+        if (m_curreventtype == top)        he = &pm2->topevent();
+        else if (m_curreventtype == high)  he = &pm2->highevents()[m_curreventindex];
+        else if (m_curreventtype == mid)   he = &pm2->midevents()[m_curreventindex];
+        else if (m_curreventtype == low)   he = &pm2->lowevents()[m_curreventindex];
+        else                               he = &pm2->bottomevents()[m_curreventindex].event;
+
+        int idx = m_layerBoxes.indexOf(b);
+        if (idx >= 0 && idx < he->event_layers.size()) {
+            he->event_layers.removeAt(idx);
+        }
+        m_layerBoxes.removeOne(b);
+        ui->layersLayout->removeWidget(b);
+        b->deleteLater();
+        // Update layer indices for all remaining boxes
+        for (int i = 0; i < m_layerBoxes.size(); ++i) {
+            m_layerBoxes[i]->setLayerIndex(i);
+        }
+    });
+
+    m_layerBoxes.append(box);
     ui->layersLayout->addWidget(box);
 }
 

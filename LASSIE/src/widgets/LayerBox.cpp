@@ -1,9 +1,11 @@
 #include "LayerBox.hpp"
 #include "../inst.hpp"
 
-LayerBox::LayerBox(Layer layer, QWidget* parent)
+LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent)
     : QFrame(parent),
-      m_layer(layer)
+      m_eventType(eventType),
+      m_eventIndex(eventIndex),
+      m_layerIndex(layerIndex)
 {
     // Main Layout
     m_mainLayout = new QVBoxLayout();
@@ -22,6 +24,8 @@ LayerBox::LayerBox(Layer layer, QWidget* parent)
             this, &LayerBox::onWeightFunctionClicked);
     connect(m_deleteLayerButton, &QPushButton::clicked,
             this, &LayerBox::onDeleteLayerClicked);
+    connect(m_weightEntry, &QLineEdit::textChanged,
+            this, &LayerBox::onWeightChanged);
 
     weightHBox->addWidget(weightLabel);
     weightHBox->addWidget(m_weightEntry);
@@ -55,6 +59,41 @@ LayerBox::LayerBox(Layer layer, QWidget* parent)
     m_mainLayout->addWidget(m_treeView);
 
     this->setMinimumHeight(200);
+
+    // Populate UI from backend (handles reload when switching events)
+    Layer& layer = getBackendLayer();
+
+    // Block signals so onWeightChanged doesn't write back during initialisation
+    m_weightEntry->blockSignals(true);
+    m_weightEntry->setText(layer.by_layer);
+    m_weightEntry->blockSignals(false);
+
+    for (const Package& pkg : layer.discrete_packages) {
+        int row = m_model->rowCount();
+        m_model->appendRow({
+            new QStandardItem(QString::number(row)),
+            new QStandardItem(pkg.event_type),
+            new QStandardItem(pkg.event_name)
+        });
+    }
+}
+
+
+Layer& LayerBox::getBackendLayer() {
+    ProjectManager* pm = Inst::get_project_manager();
+    HEvent* hevent = nullptr;
+    if (m_eventType == top) {
+        hevent = &pm->topevent();
+    } else if (m_eventType == high) {
+        hevent = &pm->highevents()[m_eventIndex];
+    } else if (m_eventType == mid) {
+        hevent = &pm->midevents()[m_eventIndex];
+    } else if (m_eventType == low) {
+        hevent = &pm->lowevents()[m_eventIndex];
+    } else { // bottom
+        hevent = &pm->bottomevents()[m_eventIndex].event;
+    }
+    return hevent->event_layers[m_layerIndex];
 }
 
 
@@ -69,7 +108,6 @@ QStandardItem* LayerBox::extractItemFromDrop(QDropEvent* event)
     QByteArray encoded = mime->data("application/x-qabstractitemmodeldatalist");
     QDataStream stream(&encoded, QIODevice::ReadOnly);
 
-    // To be extracted
     QString foundType;
     QString foundName;
     bool gotType = false;
@@ -80,23 +118,10 @@ QStandardItem* LayerBox::extractItemFromDrop(QDropEvent* event)
         QMap<int, QVariant> roleDataMap;
         stream >> row >> col >> roleDataMap;
 
-        // qDebug() << "  stream entry: row=" << row << " col=" << col;
-        // for (auto it = roleDataMap.constBegin(); it != roleDataMap.constEnd(); ++it) {
-        //     qDebug() << "    role" << it.key() << "=" << it.value().toString();
-        // }
-
         QString roleType = roleDataMap.value(Qt::UserRole + 1).toString();
         QString roleName = roleDataMap.value(Qt::UserRole + 2).toString();
-        if (!roleType.isEmpty()) {
-            foundType = roleType;
-            gotType = true;
-        }
-        if (!roleName.isEmpty()) {
-            foundName = roleName;
-            gotName = true;
-        }
-
-        // If both found, stop reading further entries
+        if (!roleType.isEmpty()) { foundType = roleType; gotType = true; }
+        if (!roleName.isEmpty()) { foundName = roleName; gotName = true; }
         if (gotType && gotName) break;
     }
 
@@ -105,17 +130,10 @@ QStandardItem* LayerBox::extractItemFromDrop(QDropEvent* event)
         return nullptr;
     }
 
-    // Build a temporary QStandardItem and attach both pieces of info in UserRole slots
     QStandardItem* item = new QStandardItem;
-    if (gotName) {
-        item->setText(foundName);
-    } else {
-        item->setText(foundType);
-    }
+    item->setText(gotName ? foundName : foundType);
     item->setData(foundType, Qt::UserRole + 1);
     item->setData(foundName, Qt::UserRole + 2);
-
-    // qDebug() << "extractItemFromDrop: returning item -> type:" << foundType << " name:" << foundName;
     return item;
 }
 
@@ -128,7 +146,6 @@ void LayerBox::dragEnterEvent(QDragEnterEvent* event) {
 }
 
 void LayerBox::dropEvent(QDropEvent* event) {
-
     event->acceptProposedAction();
 
     QStandardItem* droppedItem = extractItemFromDrop(event);
@@ -143,16 +160,11 @@ void LayerBox::dropEvent(QDropEvent* event) {
         new QStandardItem(droppedItem->text()),
         new QStandardItem("Dropped item info here")
     });
-
-    // qDebug() << "Row added, total rows:" << m_model->rowCount();
 }
 
 bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     if (obj == m_treeView->viewport()) {
         if (event->type() == QEvent::Drop) {
-
-            ///////////////////////////////////////////////////////////////
-            // Extract dropped item data
 
             QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
             QStandardItem* droppedItem = extractItemFromDrop(dropEvent);
@@ -162,10 +174,10 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
                 return false;
             }
 
-            qDebug() << "eventFilter: Item is" << droppedItem->data(Qt::UserRole + 2).toString();
-
             QString droppedType = droppedItem->data(Qt::UserRole + 1).toString();
             QString droppedName = droppedItem->data(Qt::UserRole + 2).toString();
+
+            qDebug() << "eventFilter: Item is" << droppedName;
 
             int index = m_model->rowCount();
             m_model->appendRow({
@@ -174,25 +186,14 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
                 new QStandardItem(droppedName)
             });
 
-            ///////////////////////////////////////////////////////////////
-            // Create a Package struct using backend event info
-            
+            // Write the new package directly into the backend layer
             Package pkg;
             pkg.event_name = droppedName;
             pkg.event_type = droppedType;
-            // pkg.weight = "";
-            // pkg.attack_envelope = "";
-            // pkg.attackenvelope_scale = "";
-            // pkg.duration_envelope = "";
-            // pkg.durationenvelope_scale = "";
+            getBackendLayer().discrete_packages.append(pkg);
 
-            qDebug() << "Created package";
-
-            ///////////////////////////////////////////////////////////////
-            // Add to this event's Layer
-            m_layer.discrete_packages.append(pkg);
-            qDebug() << "Added package" << droppedName 
-                    << "- total packages:" << m_layer.discrete_packages.size();
+            qDebug() << "Added package" << droppedName
+                     << "- total packages:" << getBackendLayer().discrete_packages.size();
 
             return true;
         }
@@ -200,5 +201,12 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     return QFrame::eventFilter(obj, event);
 }
 
+void LayerBox::onWeightChanged(const QString& text) {
+    getBackendLayer().by_layer = text;
+}
+
+void LayerBox::onDeleteLayerClicked() {
+    emit deleteRequested(this);
+}
 
 LayerBox::~LayerBox() {}
