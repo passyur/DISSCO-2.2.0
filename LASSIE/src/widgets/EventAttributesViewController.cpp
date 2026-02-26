@@ -158,6 +158,7 @@ EventAttributesViewController::~EventAttributesViewController() {
 }
 
 void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
+    // Keep inactive pages from inflating the stacked widget's sizeHint.
     QList<QWidget*> pages = {
         ui->emptyPage,
         ui->soundPage,
@@ -173,19 +174,19 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     for (QWidget* page : pages) {
         page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     }
+
     if (currPage) {
-        currPage->adjustSize();
         ui->stackedWidget->setFixedWidth(600);
-        ui->stackedWidget->setMaximumHeight(currPage->sizeHint().height());
-        ui->stackedWidget->adjustSize();
-        // ui->stackedWidget->setFixedSize(600, currPage->sizeHint().height());
         ui->modScrollWindow->setWidget(ui->modScrollWindowContent);
         ui->modScrollWindow->setWidgetResizable(true);
         auto* layout = qobject_cast<QVBoxLayout*>(ui->modScrollWindowContent->layout());
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
     }
-    ui->stackedWidget->adjustSize();
+
+    // Notify the parent scroll area that our sizeHint has changed so it
+    // re-evaluates the widget size rather than relying on the stale value.
+    updateGeometry();
 }
 
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
@@ -245,7 +246,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
             extra_info.modifiers.append(newUIMod);
         }
-        // m_modifiers.clear();
     }
 
     if(type <= bottom){
@@ -855,32 +855,8 @@ void EventAttributesViewController::showCurrentEventData() {
 
         // Rebuild LayerBoxes for the newly shown event
         for (int i = 0; i < event.event_layers.size(); ++i) {
-            LayerBox* box = new LayerBox(m_curreventtype, m_curreventindex, i, this);
-            connect(box, &LayerBox::deleteRequested, this, [this](LayerBox* b) {
-                ProjectManager* pm2 = Inst::get_project_manager();
-                HEvent* he = nullptr;
-                if (m_curreventtype == top)        he = &pm2->topevent();
-                else if (m_curreventtype == high)  he = &pm2->highevents()[m_curreventindex];
-                else if (m_curreventtype == mid)   he = &pm2->midevents()[m_curreventindex];
-                else if (m_curreventtype == low)   he = &pm2->lowevents()[m_curreventindex];
-                else                               he = &pm2->bottomevents()[m_curreventindex].event;
-
-                int idx = m_layerBoxes.indexOf(b);
-                if (idx >= 0 && idx < he->event_layers.size()) {
-                    he->event_layers.removeAt(idx);
-                }
-                m_layerBoxes.removeOne(b);
-                ui->layersLayout->removeWidget(b);
-                b->deleteLater();
-                for (int j = 0; j < m_layerBoxes.size(); ++j) {
-                    m_layerBoxes[j]->setLayerIndex(j);
-                }
-                fixStackedWidgetLayout(ui->standardPage);
-            });
-            m_layerBoxes.append(box);
-            ui->layersLayout->addWidget(box);
+            addLayerBoxUI(i);
         }
-        fixStackedWidgetLayout(ui->standardPage);
     }else{
         if(type == sound){
             const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
@@ -1336,28 +1312,9 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
     }
 }
 
-void EventAttributesViewController::addNewLayerButtonClicked() {
-
-    qDebug("add new layer button clicked");
-
-    ProjectManager *pm = Inst::get_project_manager();
-
-    // Get a REFERENCE to the actual backend HEvent so the append is not lost
-    HEvent* hevent = nullptr;
-    if (m_curreventtype == top)         hevent = &pm->topevent();
-    else if (m_curreventtype == high)   hevent = &pm->highevents()[m_curreventindex];
-    else if (m_curreventtype == mid)    hevent = &pm->midevents()[m_curreventindex];
-    else if (m_curreventtype == low)    hevent = &pm->lowevents()[m_curreventindex];
-    else                                hevent = &pm->bottomevents()[m_curreventindex].event;
-
-    // Append a new Layer to the backend and record its index
-    hevent->event_layers.append(Layer());
-    int layerIndex = hevent->event_layers.size() - 1;
-
-    // Create the UI widget using indices so it can always find the backend Layer
+void EventAttributesViewController::addLayerBoxUI(int layerIndex) {
     LayerBox* box = new LayerBox(m_curreventtype, m_curreventindex, layerIndex, this);
     connect(box, &LayerBox::deleteRequested, this, [this](LayerBox* b) {
-        // Remove from backend
         ProjectManager* pm2 = Inst::get_project_manager();
         HEvent* he = nullptr;
         if (m_curreventtype == top)        he = &pm2->topevent();
@@ -1373,16 +1330,29 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
         m_layerBoxes.removeOne(b);
         ui->layersLayout->removeWidget(b);
         b->deleteLater();
-        // Update layer indices for all remaining boxes
         for (int i = 0; i < m_layerBoxes.size(); ++i) {
             m_layerBoxes[i]->setLayerIndex(i);
         }
         fixStackedWidgetLayout(ui->standardPage);
     });
-
     m_layerBoxes.append(box);
     ui->layersLayout->addWidget(box);
-    fixStackedWidgetLayout(ui->standardPage);
+}
+
+void EventAttributesViewController::addNewLayerButtonClicked() {
+    qDebug("add new layer button clicked");
+
+    ProjectManager *pm = Inst::get_project_manager();
+
+    HEvent* hevent = nullptr;
+    if (m_curreventtype == top)         hevent = &pm->topevent();
+    else if (m_curreventtype == high)   hevent = &pm->highevents()[m_curreventindex];
+    else if (m_curreventtype == mid)    hevent = &pm->midevents()[m_curreventindex];
+    else if (m_curreventtype == low)    hevent = &pm->lowevents()[m_curreventindex];
+    else                                hevent = &pm->bottomevents()[m_curreventindex].event;
+
+    hevent->event_layers.append(Layer());
+    addLayerBoxUI(hevent->event_layers.size() - 1);
 }
 
 

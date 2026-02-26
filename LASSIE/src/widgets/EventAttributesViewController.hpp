@@ -167,12 +167,11 @@ private:
 
     // // internal helpers
     void showCurrentEventData();
+    // Creates a LayerBox UI for the given layerIndex and attaches it to the panel.
+    // Does NOT touch the backend — callers are responsible for ensuring the backend
+    // layer already exists at that index before calling this.
+    void addLayerBoxUI(int layerIndex);
     void insertFunctionString(FunctionButton fn);
-    // void refreshChildTypeInLayer();
-    // bool deleteLayer(class LayerBox* box);
-    // void buildNoteModifiersList();
-    // QString generateTempoStringByNoteValue() const;
-    // QString generateTempoStringByFraction() const;
     void fixStackedWidgetLayout(QWidget* currPage);
 };
 
