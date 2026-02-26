@@ -1113,6 +1113,10 @@ void ProjectView::updatePaletteView() {
         newObjectType->setData(itemName, Qt::UserRole + 2);
         newObjectName->setData(typeStr, Qt::UserRole + 1);
         newObjectName->setData(itemName, Qt::UserRole + 2);
+        if (item.type == top) {
+            newObjectType->setFlags(newObjectType->flags() & ~Qt::ItemIsDragEnabled);
+            newObjectName->setFlags(newObjectName->flags() & ~Qt::ItemIsDragEnabled);
+        }
         folder->appendRow({newObjectType, newObjectName});
     }
 
