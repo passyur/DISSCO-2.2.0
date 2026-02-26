@@ -45,6 +45,7 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
 
     m_treeView->setModel(m_model);
     m_treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_treeView->setAcceptDrops(true);
     m_treeView->setDropIndicatorShown(true);
