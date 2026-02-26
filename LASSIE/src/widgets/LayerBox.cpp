@@ -1,5 +1,6 @@
 #include "LayerBox.hpp"
 #include "../inst.hpp"
+#include <algorithm>
 
 LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent)
     : QFrame(parent),
@@ -55,7 +56,26 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
     m_treeView->setRootIsDecorated(false);
     m_treeView->setIndentation(0);
 
+    m_treeView->installEventFilter(this);
     m_treeView->viewport()->installEventFilter(this);
+
+    connect(m_treeView, &QTreeView::customContextMenuRequested,
+            this, &LayerBox::onContextMenu);
+
+    // Widget-scope shortcuts override the window-level copyAct/pasteAct in MainWindow
+    auto* copyShortcut = new QShortcut(QKeySequence::Copy, m_treeView);
+    copyShortcut->setContext(Qt::WidgetShortcut);
+    connect(copyShortcut, &QShortcut::activated, this, [this](){
+        qDebug() << "[DEBUG] LayerBox widget-scope copy shortcut activated";
+        onCopySelected();
+    });
+
+    auto* pasteShortcut = new QShortcut(QKeySequence::Paste, m_treeView);
+    pasteShortcut->setContext(Qt::WidgetShortcut);
+    connect(pasteShortcut, &QShortcut::activated, this, [this](){
+        qDebug() << "[DEBUG] LayerBox widget-scope paste shortcut activated";
+        onPasteClipboard();
+    });
 
     m_mainLayout->addWidget(m_treeView);
 
@@ -164,6 +184,16 @@ void LayerBox::dropEvent(QDropEvent* event) {
 }
 
 bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
+    if (obj == m_treeView && event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        const Qt::Key key = static_cast<Qt::Key>(keyEvent->key());
+
+        if (key == Qt::Key_Delete || key == Qt::Key_Backspace) {
+            onDeleteSelected();
+            return true;
+        }
+    }
+
     if (obj == m_treeView->viewport()) {
         if (event->type() == QEvent::Drop) {
 
@@ -208,6 +238,74 @@ void LayerBox::onWeightChanged(const QString& text) {
 
 void LayerBox::onDeleteLayerClicked() {
     emit deleteRequested(this);
+}
+
+QList<int> LayerBox::selectedRows() const {
+    QList<int> rows;
+    for (const QModelIndex& idx : m_treeView->selectionModel()->selectedRows()) {
+        rows.append(idx.row());
+    }
+    std::sort(rows.begin(), rows.end());
+    return rows;
+}
+
+void LayerBox::onCopySelected() {
+    qDebug() << "[DEBUG] LayerBox::onCopySelected called, selected rows:" << selectedRows();
+    QList<int> rows = selectedRows();
+    if (rows.isEmpty()) return;
+    Layer& layer = getBackendLayer();
+    m_clipboard.clear();
+    for (int row : rows) {
+        m_clipboard.append(layer.discrete_packages[row]);
+    }
+}
+
+void LayerBox::onPasteClipboard() {
+    qDebug() << "[DEBUG] LayerBox::onPasteClipboard called, clipboard size:" << m_clipboard.size();
+    if (m_clipboard.isEmpty()) return;
+    Layer& layer = getBackendLayer();
+    for (const Package& pkg : m_clipboard) {
+        int index = m_model->rowCount();
+        m_model->appendRow({
+            new QStandardItem(QString::number(index)),
+            new QStandardItem(pkg.event_type),
+            new QStandardItem(pkg.event_name)
+        });
+        layer.discrete_packages.append(pkg);
+    }
+}
+
+void LayerBox::onDeleteSelected() {
+    QList<int> rows = selectedRows();
+    if (rows.isEmpty()) return;
+    Layer& layer = getBackendLayer();
+    // Remove in reverse order so indices stay valid
+    for (int i = rows.size() - 1; i >= 0; --i) {
+        int row = rows[i];
+        m_model->removeRow(row);
+        layer.discrete_packages.removeAt(row);
+    }
+    // Refresh row-number column
+    for (int i = 0; i < m_model->rowCount(); ++i) {
+        m_model->item(i, 0)->setText(QString::number(i));
+    }
+}
+
+void LayerBox::onContextMenu(const QPoint& pos) {
+    bool hasSelection = !selectedRows().isEmpty();
+    QMenu menu(this);
+    QAction* dupAction  = menu.addAction("Duplicate");
+    QAction* delAction  = menu.addAction("Delete");
+    dupAction->setEnabled(hasSelection);
+    delAction->setEnabled(hasSelection);
+
+    QAction* chosen = menu.exec(m_treeView->viewport()->mapToGlobal(pos));
+    if (chosen == dupAction) {
+        onCopySelected();
+        onPasteClipboard();
+    } else if (chosen == delAction) {
+        onDeleteSelected();
+    }
 }
 
 LayerBox::~LayerBox() {}

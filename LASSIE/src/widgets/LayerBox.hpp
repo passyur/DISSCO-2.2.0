@@ -15,6 +15,9 @@
 #include <QMimeData>
 #include <QDebug>
 #include <QHeaderView>
+#include <QMenu>
+#include <QKeyEvent>
+#include <QShortcut>
 
 #include "../core/event_struct.hpp"
 
@@ -47,6 +50,10 @@ private slots:
     void onWeightFunctionClicked() {};
     void onDeleteLayerClicked();
     void onWeightChanged(const QString& text);
+    void onContextMenu(const QPoint& pos);
+    void onCopySelected();
+    void onPasteClipboard();
+    void onDeleteSelected();
 
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
@@ -57,10 +64,14 @@ private:
     // Valid as long as the parent HEvent's event_layers list is not resized.
     Layer& getBackendLayer();
 
+    QList<int> selectedRows() const;
+
     // Identity of the layer in the backend
     Eventtype m_eventType;
     unsigned  m_eventIndex;
     int       m_layerIndex;
+
+    QList<Package> m_clipboard;
 
     // UI elements
     QVBoxLayout*        m_mainLayout;
