@@ -1100,87 +1100,94 @@ void ProjectView::updatePaletteView() {
     pHevents.append(pm->lowevents());
     for (const HEvent& item : pHevents) {
         QString itemName = item.name;
+        QString typeStr;
+        QStandardItem* folder = nullptr;
+        if (item.type == top) { typeStr = "Top"; folder = paletteView->folderTop; }
+        else if (item.type == high) { typeStr = "High"; folder = paletteView->folderHigh; }
+        else if (item.type == mid) { typeStr = "Mid"; folder = paletteView->folderMid; }
+        else if (item.type == low) { typeStr = "Low"; folder = paletteView->folderLow; }
+        if (!folder) continue;
+        QStandardItem* newObjectType = new QStandardItem(typeStr);
         QStandardItem* newObjectName = new QStandardItem(itemName);
-        if (item.type == top) {
-            QStandardItem* newObjectType = new QStandardItem("Top");
-            paletteView->folderTop->appendRow({newObjectType, newObjectName});
-        }
-        else if (item.type == high) {
-            QStandardItem* newObjectType = new QStandardItem("High");
-            paletteView->folderHigh->appendRow({newObjectType, newObjectName});
-        }
-        else if (item.type == mid) {
-            QStandardItem* newObjectType = new QStandardItem("Mid");
-            paletteView->folderMid->appendRow({newObjectType, newObjectName});
-        }
-        else if (item.type == low) {
-            QStandardItem* newObjectType = new QStandardItem("Low");
-            paletteView->folderLow->appendRow({newObjectType, newObjectName});
-        }
+        newObjectType->setData(typeStr, Qt::UserRole + 1);
+        newObjectType->setData(itemName, Qt::UserRole + 2);
+        newObjectName->setData(typeStr, Qt::UserRole + 1);
+        newObjectName->setData(itemName, Qt::UserRole + 2);
+        folder->appendRow({newObjectType, newObjectName});
     }
+
+    auto makeItems = [](const QString& typeStr, const QString& nameStr,
+                        QStandardItem*& outType, QStandardItem*& outName) {
+        outType = new QStandardItem(typeStr);
+        outName = new QStandardItem(nameStr);
+        outType->setData(typeStr, Qt::UserRole + 1);
+        outType->setData(nameStr, Qt::UserRole + 2);
+        outName->setData(typeStr, Qt::UserRole + 1);
+        outName->setData(nameStr, Qt::UserRole + 2);
+    };
 
     const QList<BottomEvent>& pBevents = pm->bottomevents();
     for (const BottomEvent& item : pBevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.event.name);
-        QStandardItem* newObjectType = new QStandardItem("Bottom");
-        paletteView->folderBottom->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Bottom", item.event.name, t, n);
+        paletteView->folderBottom->appendRow({t, n});
     }
 
     const QList<SpectrumEvent>& pSpeEvents = pm->spectrumevents();
     for (const SpectrumEvent& item : pSpeEvents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Spectrum");
-        paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Spectrum", item.name, t, n);
+        paletteView->folderSpectrum->appendRow({t, n});
     }
 
     const QList<NoteEvent>& pNevents = pm->noteevents();
     for (const NoteEvent& item : pNevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Note");
-        paletteView->folderNote->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Note", item.name, t, n);
+        paletteView->folderNote->appendRow({t, n});
     }
 
-   const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
+    const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
     for (const EnvelopeEvent& item : pEevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Envelope");
-        paletteView->folderEnv->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Envelope", item.name, t, n);
+        paletteView->folderEnv->appendRow({t, n});
     }
 
     const QList<SieveEvent>& pSivEvents = pm->sieveevents();
     for (const SieveEvent& item : pSivEvents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Sieve");
-        paletteView->folderSiv->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Sieve", item.name, t, n);
+        paletteView->folderSiv->appendRow({t, n});
     }
 
     const QList<SpaEvent>& pSpaEvents = pm->spaevents();
     for (const SpaEvent& item : pSpaEvents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Spatialization");
-        paletteView->folderSpa->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Spatialization", item.name, t, n);
+        paletteView->folderSpa->appendRow({t, n});
     }
 
     const QList<PatternEvent>& pPevents = pm->patternevents();
     for (const PatternEvent& item : pPevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Pattern");
-        paletteView->folderPat->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Pattern", item.name, t, n);
+        paletteView->folderPat->appendRow({t, n});
     }
 
     const QList<ReverbEvent>& pRevents = pm->reverbevents();
     for (const ReverbEvent& item : pRevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Reverb");
-        paletteView->folderRev->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Reverb", item.name, t, n);
+        paletteView->folderRev->appendRow({t, n});
     }
 
     const QList<FilterEvent>& pFevents = pm->filterevents();
     for (const FilterEvent& item : pFevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Filter");
-        paletteView->folderFil->appendRow({newObjectType, newObjectName});
-    }   
+        QStandardItem *t, *n;
+        makeItems("Filter", item.name, t, n);
+        paletteView->folderFil->appendRow({t, n});
+    }
 }
 
 //nhi: show attributes
