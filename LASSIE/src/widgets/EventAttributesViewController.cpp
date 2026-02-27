@@ -195,7 +195,7 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int in
 
 void EventAttributesViewController::saveCurrentShownEventData() {
     if(m_curreventindex == -1) return;
-    qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
+    //qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
     
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
@@ -221,7 +221,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
         extra_info.modifiers.clear();
         for (int i = 0; i < m_modifiers.count(); ++i) {
-            qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
+            //qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
             Modifier newUIMod = {};
 
             newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
@@ -235,7 +235,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
             newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
             newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
-            qDebug() << "\t\t\tnewUIMod.group_name: " << newUIMod.group_name;
+            //qDebug() << "\t\t\tnewUIMod.group_name: " << newUIMod.group_name;
             newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
             extra_info.modifiers.append(newUIMod);
         }
@@ -330,11 +330,11 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
         // save modifiers
         if (type != bottom) {
-            qDebug() << "About to save Modifiers";
+            //qDebug() << "About to save Modifiers";
             event.modifiers.clear();
-            qDebug() << "event.modifiers cleared";
+            //qDebug() << "event.modifiers cleared";
             for (int i = 0; i < m_modifiers.count(); ++i) {
-                qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
+                //qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
                 Modifier newUIMod = {};
 
                 newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
@@ -348,7 +348,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
                 newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
                 newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
-                qDebug() << "newUIMod.group_name: " << newUIMod.group_name;
+                //qDebug() << "newUIMod.group_name: " << newUIMod.group_name;
                 newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
                 event.modifiers.append(newUIMod);
             }
@@ -393,7 +393,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             event.name = ui->filNameEntry->text();
             event.filter_builder = ui->filBuilderEntry->text();
         } else {
-            qDebug() << "Cannot save event data: type of event not valid";
+            //qDebug() << "Cannot save event data: type of event not valid";
         }
 
     }
@@ -547,7 +547,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 }
 
 void EventAttributesViewController::showCurrentEventData() {
-    qDebug() << "In showCurrentEventData:";
+    //qDebug() << "In showCurrentEventData:";
     // clear dynamic widgets
     // qDeleteAll(m_layerBoxesStorage);
     // m_layerBoxesStorage.clear();
@@ -562,7 +562,7 @@ void EventAttributesViewController::showCurrentEventData() {
 
     // Choose page based on type of currently shown event
     Eventtype type = m_curreventtype;
-    qDebug() << "In showCurrentEventData saving " << type;
+    //qDebug() << "In showCurrentEventData saving " << type;
     switch(type) {
         case top: 
         case high: 
@@ -653,8 +653,8 @@ void EventAttributesViewController::showCurrentEventData() {
             for (auto widget : childWidgets) { delete widget; }
 
             for (int i = 0; i < extra_info.modifiers.count(); ++i) {
-                qDebug() << "Saving event.modifiers to scroll window";
-                // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
+                //qDebug() << "Saving event.modifiers to scroll window";
+                // //qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
                 Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
             
@@ -687,9 +687,9 @@ void EventAttributesViewController::showCurrentEventData() {
                 newMod->ui->modifierSpreadEdit->setText(extra_info.modifiers.at(i).detune_spread);
                 newMod->ui->modifierDirEdit->setText(extra_info.modifiers.at(i).detune_direction);
                 newMod->ui->modifierVelEdit->setText(extra_info.modifiers.at(i).detune_velocity);
-                // qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
+                // //qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
                 newMod->ui->modifierNameEdit->setText(extra_info.modifiers.at(i).group_name);
-                // qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
+                // //qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
                 newMod->ui->modifierResEdit->setText(extra_info.modifiers.at(i).partialresult_string);
                 connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
                     this, [this, newMod]() {
@@ -711,7 +711,7 @@ void EventAttributesViewController::showCurrentEventData() {
         }else if(type == high){
             event = pm->highevents()[m_curreventindex];
         }else if(type == mid){
-            qDebug() << "getting mid event at index " << m_curreventindex;
+            //qDebug() << "getting mid event at index " << m_curreventindex;
             event = pm->midevents()[m_curreventindex];
         }else{
             event = pm->lowevents()[m_curreventindex];
@@ -803,8 +803,8 @@ void EventAttributesViewController::showCurrentEventData() {
             for (auto widget : childWidgets) { delete widget; }
 
             for (int i = 0; i < event.modifiers.count(); ++i) {
-                qDebug() << "Saving event.modifiers to scroll window";
-                // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
+                //qDebug() << "Saving event.modifiers to scroll window";
+                // //qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
                 Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
                 newMod->ui->modifierType->setCurrentIndex(event.modifiers.at(i).type);
@@ -836,9 +836,9 @@ void EventAttributesViewController::showCurrentEventData() {
                 newMod->ui->modifierSpreadEdit->setText(event.modifiers.at(i).detune_spread);
                 newMod->ui->modifierDirEdit->setText(event.modifiers.at(i).detune_direction);
                 newMod->ui->modifierVelEdit->setText(event.modifiers.at(i).detune_velocity);
-                // qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
+                // //qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
                 newMod->ui->modifierNameEdit->setText(event.modifiers.at(i).group_name);
-                // qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
+                // //qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
                 newMod->ui->modifierResEdit->setText(event.modifiers.at(i).partialresult_string);
                 connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
                     this, [this, newMod]() {
@@ -921,7 +921,7 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->filNameEntry->setText(event.name);
             ui->filBuilderEntry->setText(event.filter_builder);
         }else{
-            qDebug() << "Cannot show event data: type of event not valid";
+            //qDebug() << "Cannot show event data: type of event not valid";
         }
         // Sound event
         // if (type == eventSound) {
@@ -1374,8 +1374,8 @@ void EventAttributesViewController::addModifierButtonClicked() {
 }
 
 void EventAttributesViewController::modRemoveButtonClicked(Modifiers* mod) {
-    // qDebug() << "mod remove button clicked on " << mod->ui->modifierNameEdit->text();
-    // qDebug() << "mod remove button for index " << index-1;
+    // //qDebug() << "mod remove button clicked on " << mod->ui->modifierNameEdit->text();
+    // //qDebug() << "mod remove button for index " << index-1;
     ui->modScrollWindowContent->layout()->removeWidget(mod);
     delete mod;
     m_modifiers.removeOne(mod);
