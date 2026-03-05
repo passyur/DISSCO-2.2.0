@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QTreeView>
 #include <QStandardItem>
+#include <QHeaderView>
 
 PaletteViewController::PaletteViewController(ProjectView* projectView)
     : QWidget(nullptr), projectView(projectView)
@@ -20,6 +21,7 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"Type", "Name"});
     treeView->setModel(model);
+    treeView->header()->setSectionResizeMode(QHeaderView::Fixed);
     layout->addWidget(treeView, 1);
 
     // Adds folder events to tree view
