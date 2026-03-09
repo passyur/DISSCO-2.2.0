@@ -186,7 +186,7 @@ class ProjectManager : public QObject {
         QList<QByteArray> get_project_IDs() { return project_hash_.keys(); }
 #endif
 
-        void writeSeedEntry(std::string);
+        void writeSeedEntry(const QString& seed) const;
     private:
 #ifdef TABEDITOR
         QHash<QByteArray, Project*> project_hash_;
