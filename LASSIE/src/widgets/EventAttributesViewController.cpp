@@ -453,7 +453,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
     QString typeStr;
     QString savedName;
     switch (m_curreventtype) {
-        case top:     typeStr = "Top";            savedName = ui->nameEntry->text();      break;
+        case top:     /* Top name is fixed — never sync to palette */                    break;
         case high:    typeStr = "High";           savedName = ui->nameEntry->text();      break;
         case mid:     typeStr = "Mid";            savedName = ui->nameEntry->text();      break;
         case low:     typeStr = "Low";            savedName = ui->nameEntry->text();      break;
@@ -787,7 +787,8 @@ void EventAttributesViewController::showCurrentEventData() {
             event = pm->lowevents()[m_curreventindex];
         }
         ui->nameEntry->setText(event.name);
-        
+        ui->nameEntry->setEnabled(type != top);
+
         ui->maxChildDurEntry->setText(event.max_child_duration);
         ui->timeSig1Entry->setText(event.timesig.bar_value);
         ui->timeSig2Entry->setText(event.timesig.note_value);
