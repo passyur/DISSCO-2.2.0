@@ -221,7 +221,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         for (int i = 0; i < m_modifiers.count(); ++i) {
             //qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
             Modifier newUIMod = {};
-
+            
             newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
             newUIMod.applyhow_flag = (m_modifiers.at(i))->ui->modifierApply->currentIndex();
 
@@ -644,6 +644,7 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->modifierGroupEntry->setText(extra_info.modifier_group);
 
             // save modifiers for bottom event
+            m_modifiers.clear();
             QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
             for (auto widget : childWidgets) { delete widget; }
 
@@ -785,6 +786,7 @@ void EventAttributesViewController::showCurrentEventData() {
 
         // save modifiers
         if (type != bottom) {
+            m_modifiers.clear();
             QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
             for (auto widget : childWidgets) { delete widget; }
 
