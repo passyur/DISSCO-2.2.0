@@ -30,87 +30,87 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
 
     // Adds folder events to tree view
     folderTop = new QStandardItem("Folder");
-    folderTop->setFlags(folderTop->flags() & ~Qt::ItemIsDragEnabled);
+    folderTop->setFlags(folderTop->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameTop = new QStandardItem("Top");
-    nameTop->setFlags(nameTop->flags() & ~Qt::ItemIsDragEnabled);
+    nameTop->setFlags(nameTop->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderTop, nameTop});
 
     folderHigh = new QStandardItem("Folder");
-    folderHigh->setFlags(folderHigh->flags() & ~Qt::ItemIsDragEnabled);
+    folderHigh->setFlags(folderHigh->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameHigh = new QStandardItem("High");
-    nameHigh->setFlags(nameHigh->flags() & ~Qt::ItemIsDragEnabled);
+    nameHigh->setFlags(nameHigh->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderHigh, nameHigh});
 
     folderMid = new QStandardItem("Folder");
-    folderMid->setFlags(folderMid->flags() & ~Qt::ItemIsDragEnabled);
+    folderMid->setFlags(folderMid->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameMid = new QStandardItem("Mid");
-    nameMid->setFlags(nameMid->flags() & ~Qt::ItemIsDragEnabled);
+    nameMid->setFlags(nameMid->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderMid, nameMid});
 
     folderLow = new QStandardItem("Folder");
-    folderLow->setFlags(folderLow->flags() & ~Qt::ItemIsDragEnabled);
+    folderLow->setFlags(folderLow->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameLow = new QStandardItem("Low");
-    nameLow->setFlags(nameLow->flags() & ~Qt::ItemIsDragEnabled);
+    nameLow->setFlags(nameLow->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderLow, nameLow});
 
     folderBottom = new QStandardItem("Folder");
-    folderBottom->setFlags(folderBottom->flags() & ~Qt::ItemIsDragEnabled);
+    folderBottom->setFlags(folderBottom->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameBottom = new QStandardItem("Bottom");
-    nameBottom->setFlags(nameBottom->flags() & ~Qt::ItemIsDragEnabled);
+    nameBottom->setFlags(nameBottom->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderBottom, nameBottom});
 
     folderSpectrum = new QStandardItem("Folder");
-    folderSpectrum->setFlags(folderSpectrum->flags() & ~Qt::ItemIsDragEnabled);
+    folderSpectrum->setFlags(folderSpectrum->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameSpectrum = new QStandardItem("Spectrum");
-    nameSpectrum->setFlags(nameSpectrum->flags() & ~Qt::ItemIsDragEnabled);
+    nameSpectrum->setFlags(nameSpectrum->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderSpectrum, nameSpectrum});
 
     folderNote = new QStandardItem("Folder");
-    folderNote->setFlags(folderNote->flags() & ~Qt::ItemIsDragEnabled);
+    folderNote->setFlags(folderNote->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameNote = new QStandardItem("Note");
-    nameNote->setFlags(nameNote->flags() & ~Qt::ItemIsDragEnabled);
+    nameNote->setFlags(nameNote->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderNote, nameNote});
 
     folderEnv = new QStandardItem("Folder");
-    folderEnv->setFlags(folderEnv->flags() & ~Qt::ItemIsDragEnabled);
+    folderEnv->setFlags(folderEnv->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameEnv = new QStandardItem("Envelope");
-    nameEnv->setFlags(nameEnv->flags() & ~Qt::ItemIsDragEnabled);
+    nameEnv->setFlags(nameEnv->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderEnv, nameEnv});
 
     folderSiv = new QStandardItem("Folder");
-    folderSiv->setFlags(folderSiv->flags() & ~Qt::ItemIsDragEnabled);
+    folderSiv->setFlags(folderSiv->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameSiv = new QStandardItem("Sieve");
-    nameSiv->setFlags(nameSiv->flags() & ~Qt::ItemIsDragEnabled);
+    nameSiv->setFlags(nameSiv->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderSiv, nameSiv});
 
     folderSpa = new QStandardItem("Folder");
-    folderSpa->setFlags(folderSpa->flags() & ~Qt::ItemIsDragEnabled);
+    folderSpa->setFlags(folderSpa->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameSpa = new QStandardItem("Spatialization");
-    nameSpa->setFlags(nameSpa->flags() & ~Qt::ItemIsDragEnabled);
+    nameSpa->setFlags(nameSpa->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderSpa, nameSpa});
 
     folderPat = new QStandardItem("Folder");
-    folderPat->setFlags(folderPat->flags() & ~Qt::ItemIsDragEnabled);
+    folderPat->setFlags(folderPat->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* namePat = new QStandardItem("Pattern");
-    namePat->setFlags(namePat->flags() & ~Qt::ItemIsDragEnabled);
+    namePat->setFlags(namePat->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderPat, namePat});
 
     folderRev = new QStandardItem("Folder");
-    folderRev->setFlags(folderRev->flags() & ~Qt::ItemIsDragEnabled);
+    folderRev->setFlags(folderRev->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameRev = new QStandardItem("Reverb");
-    nameRev->setFlags(nameRev->flags() & ~Qt::ItemIsDragEnabled);
+    nameRev->setFlags(nameRev->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderRev, nameRev});
 
     folderFil = new QStandardItem("Folder");
-    folderFil->setFlags(folderFil->flags() & ~Qt::ItemIsDragEnabled);
+    folderFil->setFlags(folderFil->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameFil = new QStandardItem("Filter");
-    nameFil->setFlags(nameFil->flags() & ~Qt::ItemIsDragEnabled);
+    nameFil->setFlags(nameFil->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderFil, nameFil});
 
     folderMea = new QStandardItem("Folder");
-    folderMea->setFlags(folderMea->flags() & ~Qt::ItemIsDragEnabled);
+    folderMea->setFlags(folderMea->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     QStandardItem* nameMea = new QStandardItem("Measurement");
-    nameMea->setFlags(nameMea->flags() & ~Qt::ItemIsDragEnabled);
+    nameMea->setFlags(nameMea->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderMea, nameMea});
 
     // Calls objectActivated
