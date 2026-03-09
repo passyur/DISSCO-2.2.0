@@ -63,4 +63,8 @@ endif()
 
 target_compile_definitions(LASSIE PUBLIC "CMOD_BINARY=${CMOD_BINARY}")
 
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(LASSIE PRIVATE QT_NO_DEBUG_OUTPUT)
+endif()
+
 message(STATUS "DONE!")
