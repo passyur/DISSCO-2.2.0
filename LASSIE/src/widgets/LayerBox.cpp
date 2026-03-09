@@ -39,7 +39,8 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
     m_treeView = new QTreeView;
     m_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     m_model = new QStandardItemModel;
-    m_model->setHorizontalHeaderLabels({"Child Type", "Class", "Name"});
+    m_model->setHorizontalHeaderLabels({"Child Type", "Class", "Name",
+        "Weight", "Attack Env.", "A. Env. Scaler", "Duration Env.", "D. Env. Scaler"});
 
     m_treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     m_treeView->header()->setStretchLastSection(false);
@@ -47,7 +48,7 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
     m_treeView->setModel(m_model);
     m_treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    m_treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_treeView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
     m_treeView->setAcceptDrops(true);
     m_treeView->setDropIndicatorShown(true);
 
@@ -91,12 +92,45 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
 
     for (const Package& pkg : layer.discrete_packages) {
         int row = m_model->rowCount();
-        m_model->appendRow({
-            new QStandardItem(QString::number(row)),
-            new QStandardItem(pkg.event_type),
-            new QStandardItem(pkg.event_name)
+        auto* rowItem  = new QStandardItem(QString::number(row));
+        auto* typeItem = new QStandardItem(pkg.event_type);
+        auto* nameItem = new QStandardItem(pkg.event_name);
+        rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
+        typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
+        nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+        m_model->appendRow({rowItem, typeItem, nameItem,
+            new QStandardItem(pkg.weight),
+            new QStandardItem(pkg.attack_envelope),
+            new QStandardItem(pkg.attackenvelope_scale),
+            new QStandardItem(pkg.duration_envelope),
+            new QStandardItem(pkg.durationenvelope_scale)
         });
     }
+
+    // Sync editable package-field columns back to the backend on edit
+    connect(m_model, &QStandardItemModel::dataChanged,
+            this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+        for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+            for (int col = topLeft.column(); col <= bottomRight.column(); ++col) {
+                if (col < 3) continue;
+                Layer& layer = getBackendLayer();
+                if (row < 0 || row >= layer.discrete_packages.size()) continue;
+                Package& pkg = layer.discrete_packages[row];
+                QString val = m_model->item(row, col)->text();
+                switch (col) {
+                    case 3: pkg.weight                  = val; break;
+                    case 4: pkg.attack_envelope         = val; break;
+                    case 5: pkg.attackenvelope_scale    = val; break;
+                    case 6: pkg.duration_envelope       = val; break;
+                    case 7: pkg.durationenvelope_scale  = val; break;
+                }
+            }
+        }
+    });
+
+    // Package-field columns are hidden until Discrete mode is active
+    for (int col = 3; col <= 7; ++col)
+        m_treeView->setColumnHidden(col, true);
 }
 
 
@@ -211,10 +245,18 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
             qDebug() << "eventFilter: Item is" << droppedName;
 
             int index = m_model->rowCount();
-            m_model->appendRow({
-                new QStandardItem(QString::number(index)),
-                new QStandardItem(droppedType),
-                new QStandardItem(droppedName)
+            auto* rowItem  = new QStandardItem(QString::number(index));
+            auto* typeItem = new QStandardItem(droppedType);
+            auto* nameItem = new QStandardItem(droppedName);
+            rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
+            typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
+            nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+            m_model->appendRow({rowItem, typeItem, nameItem,
+                new QStandardItem(""),
+                new QStandardItem(""),
+                new QStandardItem(""),
+                new QStandardItem(""),
+                new QStandardItem("")
             });
 
             // Write the new package directly into the backend layer
@@ -266,10 +308,18 @@ void LayerBox::onPasteClipboard() {
     Layer& layer = getBackendLayer();
     for (const Package& pkg : m_clipboard) {
         int index = m_model->rowCount();
-        m_model->appendRow({
-            new QStandardItem(QString::number(index)),
-            new QStandardItem(pkg.event_type),
-            new QStandardItem(pkg.event_name)
+        auto* rowItem  = new QStandardItem(QString::number(index));
+        auto* typeItem = new QStandardItem(pkg.event_type);
+        auto* nameItem = new QStandardItem(pkg.event_name);
+        rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
+        typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
+        nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+        m_model->appendRow({rowItem, typeItem, nameItem,
+            new QStandardItem(pkg.weight),
+            new QStandardItem(pkg.attack_envelope),
+            new QStandardItem(pkg.attackenvelope_scale),
+            new QStandardItem(pkg.duration_envelope),
+            new QStandardItem(pkg.durationenvelope_scale)
         });
         layer.discrete_packages.append(pkg);
     }

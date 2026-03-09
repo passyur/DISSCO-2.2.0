@@ -43,6 +43,26 @@ public:
     // Called by EventAttributesViewController when layers above this one are deleted
     void setLayerIndex(int layerIndex) { m_layerIndex = layerIndex; }
 
+    // Flush the weight entry text to the backend Layer::by_layer.
+    // \todo this is tremendously chud and should be somehow delegated to ProjectManager, but for now is fine
+    void saveWeightToBackend() {
+        getBackendLayer().by_layer = m_weightEntry->text();
+    }
+
+    // Show or hide the per-package editing columns (Weight, envelopes, scalers).
+    // Call with true when Discrete child-event-definition is selected.
+    void setPackageFieldsVisible(bool visible) {
+        for (int col = 3; col <= 7; ++col)
+            m_treeView->setColumnHidden(col, !visible);
+    }
+
+    // Enable or disable the weight entry and Insert Function button.
+    // Text is preserved when disabling.
+    void setWeightEnabled(bool enabled) {
+        m_weightEntry->setEnabled(enabled);
+        m_weightFuncButton->setEnabled(enabled);
+    }
+
 signals:
     void deleteRequested(LayerBox* self);
 
@@ -74,12 +94,12 @@ private:
     QList<Package> m_clipboard;
 
     // UI elements
-    QVBoxLayout*        m_mainLayout;
-    QTreeView*          m_treeView;
-    QStandardItemModel* m_model;
-    QLineEdit*          m_weightEntry;
-    QPushButton*        m_weightFuncButton;
-    QPushButton*        m_deleteLayerButton;
+    QVBoxLayout*        m_mainLayout = nullptr;
+    QTreeView*          m_treeView = nullptr;
+    QStandardItemModel* m_model = nullptr;
+    QLineEdit*          m_weightEntry = nullptr;
+    QPushButton*        m_weightFuncButton = nullptr;
+    QPushButton*        m_deleteLayerButton = nullptr;
 };
 
 #endif

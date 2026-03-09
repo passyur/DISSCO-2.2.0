@@ -68,7 +68,7 @@ public:
     // explicit EventAttributesViewController(SharedPointers* sharedPointers,
     //                                        QWidget* parent = nullptr);                                       
     ~EventAttributesViewController() override;
-    ProjectView* e_projectView;
+    ProjectView* e_projectView = nullptr;
 
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown

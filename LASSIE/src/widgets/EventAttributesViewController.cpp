@@ -24,10 +24,6 @@
 //                                                              QWidget* parent)
 EventAttributesViewController::EventAttributesViewController(ProjectView* projectView)
   : QFrame(nullptr),
-//   : QFrame(parent),
-    // m_sharedPointers(sharedPointers),
-    // m_currentlyShownEvent(nullptr),
-    // m_modifiers(nullptr),
     // m_soundPartialHboxes(nullptr),
     ui(new Ui::EventAttributesViewController)
 {
@@ -144,18 +140,11 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
     fixStackedWidgetLayout(ui->emptyPage);
 
-    // Previous
-    // Layer l;
-    // LayerBox* box = new LayerBox(l);
-    // ui->layersLayout->addWidget(box);
-
     ui->layersLayout->setSpacing(8);
     ui->layersLayout->setContentsMargins(0, 0, 0, 0);
 }
 
-EventAttributesViewController::~EventAttributesViewController() {
-    // Qt will delete child widgets automatically
-}
+EventAttributesViewController::~EventAttributesViewController() = default;
 
 void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     // Keep inactive pages from inflating the stacked widget's sizeHint.
@@ -186,6 +175,8 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
 
     // Notify the parent scroll area that our sizeHint has changed so it
     // re-evaluates the widget size rather than relying on the stale value.
+    // Subjective: this seems to positively impact the appearance when you add
+    // LayerBoxes. -Jacob, 3/9/26
     updateGeometry();
 }
 
@@ -258,17 +249,15 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 return pm->midevents()[m_curreventindex];
             if(type == low)
                 return pm->lowevents()[m_curreventindex];
-            else // bottom, use of 'else' silences a (stupid) compiler warning ;)
-                return pm->bottomevents()[m_curreventindex].event;
+            return pm->bottomevents()[m_curreventindex].event;
         }();
 
-        event.name = ui->nameEntry->text(); // Lowkey this isn't working
+        event.name = ui->nameEntry->text();
 
         event.max_child_duration = ui->maxChildDurEntry->text();
         event.timesig.bar_value = ui->timeSig1Entry->text();
         event.timesig.note_value = ui->timeSig2Entry->text();
         event.edu_perbeat = ui->unitsPerSecondEntry->text();
-
 
         Tempo& temp = event.tempo;
         if (ui->tempoAsNoteValueRadio->isChecked()) { /* as note */
@@ -357,6 +346,11 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 event.modifiers.append(newUIMod);
             }
             // m_modifiers.clear();
+        }
+
+        // save layer weights
+        for (LayerBox* box : m_layerBoxes) {
+            box->saveWeightToBackend();
         }
     } else {
 
@@ -973,7 +967,7 @@ void EventAttributesViewController::fixedButtonClicked() {
     ui->numOfChildLabel3->setText("");
     ui->childCountEntry2->setEnabled(false);
     ui->childCountEntry3->setEnabled(false);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::densityButtonClicked() {
@@ -983,7 +977,7 @@ void EventAttributesViewController::densityButtonClicked() {
     ui->childCountEntry1->setEnabled(true);
     ui->childCountEntry2->setEnabled(true);
     ui->childCountEntry3->setEnabled(true);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::byLayerButtonClicked() {
@@ -993,7 +987,7 @@ void EventAttributesViewController::byLayerButtonClicked() {
     ui->childCountEntry1->setEnabled(false);
     ui->childCountEntry2->setEnabled(false);
     ui->childCountEntry3->setEnabled(false);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(true);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(true);
 }
 
 void EventAttributesViewController::continuumButtonClicked() {
@@ -1003,6 +997,7 @@ void EventAttributesViewController::continuumButtonClicked() {
     ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->childEventDefContSweepPage->adjustSize();
     ui->childEventDefStack->adjustSize();
+    for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(false);
     // ui->childDefEntry1->setEnabled(true);
     // ui->childDefEntry2->setEnabled(true);
     // ui->childDefEntry3->setEnabled(true);
@@ -1038,6 +1033,7 @@ void EventAttributesViewController::discreteButtonClicked() {
     // ui->durationTypePercentRadio->setEnabled(false);
     // ui->durationTypeUnitsRadio->setEnabled(false);
     // ui->durationTypeSecondsRadio->setEnabled(false);
+    for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(true);
 }
 
 void EventAttributesViewController::wellTemperedRadioButtonClicked() {
@@ -1335,6 +1331,8 @@ void EventAttributesViewController::addLayerBoxUI(int layerIndex) {
         }
         fixStackedWidgetLayout(ui->standardPage);
     });
+    box->setWeightEnabled(ui->byLayerButton->isChecked());
+    box->setPackageFieldsVisible(ui->discreteButton->isChecked());
     m_layerBoxes.append(box);
     ui->layersLayout->addWidget(box);
 }
