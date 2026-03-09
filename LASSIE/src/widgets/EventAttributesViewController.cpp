@@ -119,8 +119,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
 
     connect(ui->addNewLayerButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addNewLayerButtonClicked);
-    // connect(ui->addModifierButton, &QPushButton::clicked,
-    //         this, &EventAttributesViewController::addModifierButtonClicked);
+    connect(ui->addModifierButton, &QPushButton::clicked,
+            this, &EventAttributesViewController::addModifierButtonClicked);
 /*    connect(ui->addPartialButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addPartialButtonClicked);
 
