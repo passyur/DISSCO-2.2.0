@@ -864,19 +864,6 @@ void ProjectView::setProperties() {
             }
         }
 
-        // if (new_topevent != pm->topevent().name) {            
-        //     /// \todo connect topevent names to folder names (in paletteviewcontroller most likely)? -jacob
-        //     for (int row = 0; row < paletteView->folderTop->rowCount(); row++) {
-        //         QStandardItem* oldTopName = paletteView->folderTop->child(row, 1);
-        //         if (oldTopName && oldTopName->text() == pm->topevent().name) {
-        //             oldTopName->setText(new_topevent);
-        //             break;
-        //         }
-        //     }
-        //
-        //     pm->topevent().name = projectPropertiesDialog->ui->topEventEntry->text();
-        // }
-
         MUtilities::modified();
         delete projectPropertiesDialog;
         projectPropertiesDialog = NULL;

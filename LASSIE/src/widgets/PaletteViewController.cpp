@@ -282,15 +282,14 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
     }
     QString eventType = typeItem->text();
 
+    // Top event name is fixed — ignore any attempted change
+    if (eventType == "Top") return;
+
     // Get project manager
     ProjectManager* pm = Inst::get_project_manager();
 
     // Update the corresponding event name in the backend
-    if (eventType == "Top") {
-        // Top event is singular, index should be 0
-        pm->topevent().name = newName;
-    }
-    else if (eventType == "High") {
+    if (eventType == "High") {
         if (index < pm->highevents().size()) {
             pm->highevents()[index].name = newName;
         }
