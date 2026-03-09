@@ -1265,23 +1265,6 @@ static Eventtype eventtypeFromString(const QString& s) {
     return top; // fallback (should not happen for deletable types)
 }
 
-static QStandardItem* folderForType(PaletteViewController* pv, const QString& s) {
-    if (s == "High")          return pv->folderHigh;
-    if (s == "Mid")           return pv->folderMid;
-    if (s == "Low")           return pv->folderLow;
-    if (s == "Bottom")        return pv->folderBottom;
-    if (s == "Spectrum")      return pv->folderSpectrum;
-    if (s == "Note")          return pv->folderNote;
-    if (s == "Envelope")      return pv->folderEnv;
-    if (s == "Sieve")         return pv->folderSiv;
-    if (s == "Spatialization") return pv->folderSpa;
-    if (s == "Pattern")       return pv->folderPat;
-    if (s == "Reverb")        return pv->folderRev;
-    if (s == "Filter")        return pv->folderFil;
-    if (s == "Measurement")   return pv->folderMea;
-    return nullptr;
-}
-
 void ProjectView::deleteEvent(const QString& typeStr, int index)
 {
     ProjectManager* pm = Inst::get_project_manager();
@@ -1291,21 +1274,21 @@ void ProjectView::deleteEvent(const QString& typeStr, int index)
     eventAttributesView->onEventDeleted(etype, index);
 
     // Remove from the backend list
-    if      (typeStr == "High")          pm->highevents().removeAt(index);
-    else if (typeStr == "Mid")           pm->midevents().removeAt(index);
-    else if (typeStr == "Low")           pm->lowevents().removeAt(index);
-    else if (typeStr == "Bottom")        pm->bottomevents().removeAt(index);
-    else if (typeStr == "Spectrum")      pm->spectrumevents().removeAt(index);
-    else if (typeStr == "Note")          pm->noteevents().removeAt(index);
-    else if (typeStr == "Envelope")      pm->envelopeevents().removeAt(index);
-    else if (typeStr == "Sieve")         pm->sieveevents().removeAt(index);
-    else if (typeStr == "Spatialization") pm->spaevents().removeAt(index);
-    else if (typeStr == "Pattern")       pm->patternevents().removeAt(index);
-    else if (typeStr == "Reverb")        pm->reverbevents().removeAt(index);
-    else if (typeStr == "Filter")        pm->filterevents().removeAt(index);
+    if      (etype == high)    pm->highevents().removeAt(index);
+    else if (etype == mid)     pm->midevents().removeAt(index);
+    else if (etype == low)     pm->lowevents().removeAt(index);
+    else if (etype == bottom)  pm->bottomevents().removeAt(index);
+    else if (etype == sound)   pm->spectrumevents().removeAt(index);
+    else if (etype == note)    pm->noteevents().removeAt(index);
+    else if (etype == env)     pm->envelopeevents().removeAt(index);
+    else if (etype == sieve)   pm->sieveevents().removeAt(index);
+    else if (etype == spa)     pm->spaevents().removeAt(index);
+    else if (etype == pattern) pm->patternevents().removeAt(index);
+    else if (etype == reverb)  pm->reverbevents().removeAt(index);
+    else if (etype == filter)  pm->filterevents().removeAt(index);
 
     // Remove from the palette model
-    QStandardItem* folder = folderForType(paletteView, typeStr);
+    QStandardItem* folder = paletteView->folderForType(typeStr);
     if (folder) folder->removeRow(index);
 }
 
@@ -1315,7 +1298,7 @@ void ProjectView::duplicateEvent(const QString& typeStr, int index)
 
     // Append a copy to the backend list and record the new item's display name
     QString newName;
-    QStandardItem* folder = folderForType(paletteView, typeStr);
+    QStandardItem* folder = paletteView->folderForType(typeStr);
     if (!folder) return;
 
     if (typeStr == "High") {
@@ -1385,9 +1368,20 @@ void ProjectView::duplicateEvent(const QString& typeStr, int index)
     // Add the new entry to the palette
     QStandardItem* typeItem = new QStandardItem(typeStr);
     QStandardItem* nameItem = new QStandardItem(newName);
+    typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
     typeItem->setData(typeStr, Qt::UserRole + 1);
     typeItem->setData(newName, Qt::UserRole + 2);
     nameItem->setData(typeStr, Qt::UserRole + 1);
     nameItem->setData(newName, Qt::UserRole + 2);
     folder->appendRow({typeItem, nameItem});
+}
+
+void ProjectView::updatePaletteItemName(const QString& typeStr, int index, const QString& name)
+{
+    if (paletteView) paletteView->updateItemName(typeStr, index, name);
+}
+
+void ProjectView::updateAttributesNameEntry(const QString& typeStr, int index, const QString& name)
+{
+    if (eventAttributesView) eventAttributesView->updateNameEntryIfShowing(typeStr, index, name);
 }

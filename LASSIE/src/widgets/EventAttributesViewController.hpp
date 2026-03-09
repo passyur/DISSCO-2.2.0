@@ -77,6 +77,9 @@ public:
 
     void saveCurrentShownEventData();
 
+    // Update the displayed name entry if typeStr/index matches the currently shown event
+    void updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name);
+
     // Blank the panel (e.g. when the viewed event is deleted)
     void clearView();
 

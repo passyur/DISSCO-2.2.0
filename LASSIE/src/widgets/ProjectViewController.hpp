@@ -52,6 +52,10 @@ class ProjectView : public QObject {
 
         // Append a copy of the event at index to the backend and the palette.
         void duplicateEvent(const QString& typeStr, int index);
+
+        // Two-way name sync between palette and attributes view
+        void updatePaletteItemName(const QString& typeStr, int index, const QString& name);
+        void updateAttributesNameEntry(const QString& typeStr, int index, const QString& name);
         //void showAttributes(class IEvent* event);
 
     private:
