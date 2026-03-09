@@ -121,9 +121,6 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     // delAct = new QAction("Delete Object", this);
     // connect(delAct, &QAction::triggered, this, &PaletteViewController::deleteObject);
 
-    treeView->expandAll();
-
-
     // Initialize empty vectors for each event type
     eventsByType["Top"] = std::vector<IEvent*>();
     eventsByType["High"] = std::vector<IEvent*>();
