@@ -180,6 +180,28 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     updateGeometry();
 }
 
+void EventAttributesViewController::updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name)
+{
+    static const QMap<QString, Eventtype> typeMap = {
+        {"Top", top}, {"High", high}, {"Mid", mid}, {"Low", low}, {"Bottom", bottom},
+        {"Spectrum", sound}, {"Note", note}, {"Envelope", env}, {"Sieve", sieve},
+        {"Spatialization", spa}, {"Pattern", pattern}, {"Reverb", reverb}, {"Filter", filter}
+    };
+    if (!typeMap.contains(typeStr)) return;
+    Eventtype et = typeMap[typeStr];
+    if (!m_hasCurrentEvent || m_curreventtype != et || m_curreventindex != index) return;
+
+    if (et <= bottom)         ui->nameEntry->setText(name);
+    else if (et == sound)     ui->soundNameEntry->setText(name);
+    else if (et == env)       ui->envNameEntry->setText(name);
+    else if (et == sieve)     ui->sieveNameEntry->setText(name);
+    else if (et == spa)       ui->spaNameEntry->setText(name);
+    else if (et == pattern)   ui->patNameEntry->setText(name);
+    else if (et == reverb)    ui->revNameEntry->setText(name);
+    else if (et == note)      ui->noteNameEntry->setText(name);
+    else if (et == filter)    ui->filNameEntry->setText(name);
+}
+
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
     if (m_hasCurrentEvent && (m_curreventtype != type || m_curreventindex != index)) {
         saveCurrentShownEventData();
@@ -426,6 +448,28 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         }
 
     }
+
+    // Sync the saved name back to the palette
+    QString typeStr;
+    QString savedName;
+    switch (m_curreventtype) {
+        case top:     typeStr = "Top";            savedName = ui->nameEntry->text();      break;
+        case high:    typeStr = "High";           savedName = ui->nameEntry->text();      break;
+        case mid:     typeStr = "Mid";            savedName = ui->nameEntry->text();      break;
+        case low:     typeStr = "Low";            savedName = ui->nameEntry->text();      break;
+        case bottom:  typeStr = "Bottom";         savedName = ui->nameEntry->text();      break;
+        case sound:   typeStr = "Spectrum";       savedName = ui->soundNameEntry->text(); break;
+        case env:     typeStr = "Envelope";       savedName = ui->envNameEntry->text();   break;
+        case sieve:   typeStr = "Sieve";          savedName = ui->sieveNameEntry->text(); break;
+        case spa:     typeStr = "Spatialization"; savedName = ui->spaNameEntry->text();   break;
+        case pattern: typeStr = "Pattern";        savedName = ui->patNameEntry->text();   break;
+        case reverb:  typeStr = "Reverb";         savedName = ui->revNameEntry->text();   break;
+        case note:    typeStr = "Note";           savedName = ui->noteNameEntry->text();  break;
+        case filter:  typeStr = "Filter";         savedName = ui->filNameEntry->text();   break;
+        default: break;
+    }
+    if (!typeStr.isEmpty())
+        e_projectView->updatePaletteItemName(typeStr, m_curreventindex, savedName);
 
     /*if (!m_currentlyShownEvent) return;
 

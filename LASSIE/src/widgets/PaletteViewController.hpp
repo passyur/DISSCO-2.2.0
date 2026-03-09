@@ -33,6 +33,12 @@ public:
     // Handle name changes in palette items
     void onItemChanged(QStandardItem* item);
 
+    // Update a specific palette item's name (signals blocked to avoid re-entry)
+    void updateItemName(const QString& typeStr, int index, const QString& name);
+
+    // Return the folder item for the given type string, or nullptr if unknown
+    QStandardItem* folderForType(const QString& typeStr) const;
+
     // Handle row removals from palette
     void onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 

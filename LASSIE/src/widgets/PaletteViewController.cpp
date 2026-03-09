@@ -198,6 +198,36 @@ void PaletteViewController::removeEvent(IEvent* event, const QString& type)
     }
 }
 
+QStandardItem* PaletteViewController::folderForType(const QString& typeStr) const {
+    if (typeStr == "Top")            return folderTop;
+    if (typeStr == "High")           return folderHigh;
+    if (typeStr == "Mid")            return folderMid;
+    if (typeStr == "Low")            return folderLow;
+    if (typeStr == "Bottom")         return folderBottom;
+    if (typeStr == "Spectrum")       return folderSpectrum;
+    if (typeStr == "Note")           return folderNote;
+    if (typeStr == "Envelope")       return folderEnv;
+    if (typeStr == "Sieve")          return folderSiv;
+    if (typeStr == "Spatialization") return folderSpa;
+    if (typeStr == "Pattern")        return folderPat;
+    if (typeStr == "Reverb")         return folderRev;
+    if (typeStr == "Filter")         return folderFil;
+    if (typeStr == "Measurement")    return folderMea;
+    return nullptr;
+}
+
+void PaletteViewController::updateItemName(const QString& typeStr, int index, const QString& name)
+{
+    QStandardItem* folder = folderForType(typeStr);
+
+    QStandardItem* nameItem = folder->child(index, 1);
+    if (!nameItem || nameItem->text() == name) return;
+
+    model->blockSignals(true);
+    nameItem->setText(name);
+    model->blockSignals(false);
+}
+
 void PaletteViewController::onContextMenuRequested(const QPoint& pos)
 {
     QModelIndex index = treeView->indexAt(pos);
@@ -320,6 +350,9 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
             pm->filterevents()[index].name = newName;
         }
     }
+
+    // Sync name change to the attributes view if it's currently showing this event
+    projectView->updateAttributesNameEntry(eventType, index, newName);
 }
 
 void PaletteViewController::onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
