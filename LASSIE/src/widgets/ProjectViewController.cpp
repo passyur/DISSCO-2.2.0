@@ -944,79 +944,138 @@ void ProjectView::insertObject() {
 
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
-        QString objName = newObject->ui->objNameEntry->text();
+        QString nameStr = newObject->ui->objNameEntry->text();
+        QString typeStr;
+        QStandardItem* folder = nullptr;
+
+        // Determine type and folder based on checked button
         if (newObject->ui->buttonHigh->isChecked()) {
-            pm->addEvent(high, objName);
-            QStandardItem* newObjectType = new QStandardItem("High");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderHigh->appendRow({newObjectType, newObjectName});
+            typeStr = "High";
+            QList<HEvent>& eventList = pm->highevents();
+            HEvent newObj = {};
+            newObj.type = high;
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderHigh;
         }
         else if (newObject->ui->buttonMid->isChecked()) {
-            pm->addEvent(mid, objName);
-            QStandardItem* newObjectType = new QStandardItem("Mid");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderMid->appendRow({newObjectType, newObjectName});
+            typeStr = "Mid";
+            QList<HEvent>& eventList = pm->midevents();
+            HEvent newObj = {};
+            newObj.type = mid;
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderMid;
         }
         else if (newObject->ui->buttonLow->isChecked()) {
-            pm->addEvent(low, objName);
-            QStandardItem* newObjectType = new QStandardItem("Low");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderLow->appendRow({newObjectType, newObjectName});
+            typeStr = "Low";
+            QList<HEvent>& eventList = pm->lowevents();
+            HEvent newObj = {};
+            newObj.type = low;
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderLow;
         }
-        else if (newObject->ui->buttonBottom->isChecked()) {
-            pm->addEvent(bottom, objName);
-            QStandardItem* newObjectType = new QStandardItem("Bottom");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderBottom->appendRow({newObjectType, newObjectName});
+         else if (newObject->ui->buttonBottom->isChecked()) {
+            typeStr = "Bottom";
+            QList<BottomEvent>& eventList = pm->bottomevents();
+            BottomEvent newObj = {};
+            newObj.event.type = bottom;
+            newObj.event.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderBottom;
         }
         else if (newObject->ui->buttonSpectrum->isChecked()) {
-            pm->addEvent(sound, objName);
-            QStandardItem* newObjectType = new QStandardItem("Spectrum");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
+            typeStr = "Spectrum";
+            QList<SpectrumEvent>& eventList = pm->spectrumevents();
+            SpectrumEvent newObj;
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderSpectrum;
         }
         else if (newObject->ui->buttonNote->isChecked()) {
-            pm->addEvent(note, objName);
-            QStandardItem* newObjectType = new QStandardItem("Note");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderNote->appendRow({newObjectType, newObjectName});
+            typeStr = "Note";
+            QList<NoteEvent>& eventList = pm->noteevents();
+            NoteEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderNote;
         }
         else if (newObject->ui->buttonEnv->isChecked()) {
-            pm->addEvent(env, objName);
-            QStandardItem* newObjectType = new QStandardItem("Envelope");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderEnv->appendRow({newObjectType, newObjectName});
+            typeStr = "Envelope";
+            QList<EnvelopeEvent>& eventList = pm->envelopeevents();
+            EnvelopeEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderEnv;
         }
         else if (newObject->ui->buttonSiv->isChecked()) {
-            pm->addEvent(sieve, objName);
-            QStandardItem* newObjectType = new QStandardItem("Sieve");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderSiv->appendRow({newObjectType, newObjectName});
+            typeStr = "Sieve";
+            QList<SieveEvent>& eventList = pm->sieveevents();
+            SieveEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderSiv;
         }
         else if (newObject->ui->buttonSpa->isChecked()) {
-            pm->addEvent(spa, objName);
-            QStandardItem* newObjectType = new QStandardItem("Spatialization");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderSpa->appendRow({newObjectType, newObjectName});
+            typeStr = "Spatialization";
+            QList<SpaEvent>& eventList = pm->spaevents();
+            SpaEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderSpa;
         }
         else if (newObject->ui->buttonPat->isChecked()) {
-            pm->addEvent(pattern, objName);
-            QStandardItem* newObjectType = new QStandardItem("Pattern");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderPat->appendRow({newObjectType, newObjectName});
+            typeStr = "Pattern";
+            QList<PatternEvent>& eventList = pm->patternevents();
+            PatternEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderPat;
         }
         else if (newObject->ui->buttonRev->isChecked()) {
-            pm->addEvent(reverb, objName);
-            QStandardItem* newObjectType = new QStandardItem("Reverb");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderRev->appendRow({newObjectType, newObjectName});
+            typeStr = "Reverb";
+            QList<ReverbEvent>& eventList = pm->reverbevents();
+            ReverbEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderRev;
         }
         else if (newObject->ui->buttonFil->isChecked()) {
-            pm->addEvent(filter, objName);
-            QStandardItem* newObjectType = new QStandardItem("Filter");
-            QStandardItem* newObjectName = new QStandardItem(objName);
-            paletteView->folderFil->appendRow({newObjectType, newObjectName});
+            typeStr = "Filter";
+            QList<FilterEvent>& eventList = pm->filterevents();
+            FilterEvent newObj = {};
+            newObj.orderinpalette = QString::number(eventList.size() + 1);
+            newObj.name = nameStr;
+            eventList.push_back(newObj);
+            folder = paletteView->folderFil;
         }
+
+        if (!folder) {
+            qWarning() << "insertObject: No folder found for type" << typeStr;
+            delete newObject;
+            newObject = nullptr;
+            return;
+        }
+
+        // Create QStandardItems with proper user roles
+        QStandardItem* newObjectType = new QStandardItem(typeStr);
+        QStandardItem* newObjectName = new QStandardItem(nameStr);
+
+        newObjectType->setData(typeStr, Qt::UserRole + 1);
+        newObjectType->setData(nameStr, Qt::UserRole + 2);
+        newObjectName->setData(typeStr, Qt::UserRole + 1);
+        newObjectName->setData(nameStr, Qt::UserRole + 2);
+
+        folder->appendRow({newObjectType, newObjectName});
+
         // Commented out because no structs for mea event yet
         /* else if (newObject->ui->buttonMea->isChecked()) {
             QStandardItem* newObjectType = new QStandardItem("Measurement");
@@ -1041,87 +1100,98 @@ void ProjectView::updatePaletteView() {
     pHevents.append(pm->lowevents());
     for (const HEvent& item : pHevents) {
         QString itemName = item.name;
+        QString typeStr;
+        QStandardItem* folder = nullptr;
+        if (item.type == top) { typeStr = "Top"; folder = paletteView->folderTop; }
+        else if (item.type == high) { typeStr = "High"; folder = paletteView->folderHigh; }
+        else if (item.type == mid) { typeStr = "Mid"; folder = paletteView->folderMid; }
+        else if (item.type == low) { typeStr = "Low"; folder = paletteView->folderLow; }
+        if (!folder) continue;
+        QStandardItem* newObjectType = new QStandardItem(typeStr);
         QStandardItem* newObjectName = new QStandardItem(itemName);
+        newObjectType->setData(typeStr, Qt::UserRole + 1);
+        newObjectType->setData(itemName, Qt::UserRole + 2);
+        newObjectName->setData(typeStr, Qt::UserRole + 1);
+        newObjectName->setData(itemName, Qt::UserRole + 2);
         if (item.type == top) {
-            QStandardItem* newObjectType = new QStandardItem("Top");
-            paletteView->folderTop->appendRow({newObjectType, newObjectName});
+            newObjectType->setFlags(newObjectType->flags() & ~Qt::ItemIsDragEnabled);
+            newObjectName->setFlags(newObjectName->flags() & ~Qt::ItemIsDragEnabled);
         }
-        else if (item.type == high) {
-            QStandardItem* newObjectType = new QStandardItem("High");
-            paletteView->folderHigh->appendRow({newObjectType, newObjectName});
-        }
-        else if (item.type == mid) {
-            QStandardItem* newObjectType = new QStandardItem("Mid");
-            paletteView->folderMid->appendRow({newObjectType, newObjectName});
-        }
-        else if (item.type == low) {
-            QStandardItem* newObjectType = new QStandardItem("Low");
-            paletteView->folderLow->appendRow({newObjectType, newObjectName});
-        }
+        folder->appendRow({newObjectType, newObjectName});
     }
+
+    auto makeItems = [](const QString& typeStr, const QString& nameStr,
+                        QStandardItem*& outType, QStandardItem*& outName) {
+        outType = new QStandardItem(typeStr);
+        outName = new QStandardItem(nameStr);
+        outType->setData(typeStr, Qt::UserRole + 1);
+        outType->setData(nameStr, Qt::UserRole + 2);
+        outName->setData(typeStr, Qt::UserRole + 1);
+        outName->setData(nameStr, Qt::UserRole + 2);
+    };
 
     const QList<BottomEvent>& pBevents = pm->bottomevents();
     for (const BottomEvent& item : pBevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.event.name);
-        QStandardItem* newObjectType = new QStandardItem("Bottom");
-        paletteView->folderBottom->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Bottom", item.event.name, t, n);
+        paletteView->folderBottom->appendRow({t, n});
     }
 
     const QList<SpectrumEvent>& pSpeEvents = pm->spectrumevents();
     for (const SpectrumEvent& item : pSpeEvents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Spectrum");
-        paletteView->folderSpectrum->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Spectrum", item.name, t, n);
+        paletteView->folderSpectrum->appendRow({t, n});
     }
 
     const QList<NoteEvent>& pNevents = pm->noteevents();
     for (const NoteEvent& item : pNevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Note");
-        paletteView->folderNote->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Note", item.name, t, n);
+        paletteView->folderNote->appendRow({t, n});
     }
 
-   const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
+    const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
     for (const EnvelopeEvent& item : pEevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Envelope");
-        paletteView->folderEnv->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Envelope", item.name, t, n);
+        paletteView->folderEnv->appendRow({t, n});
     }
 
     const QList<SieveEvent>& pSivEvents = pm->sieveevents();
     for (const SieveEvent& item : pSivEvents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Sieve");
-        paletteView->folderSiv->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Sieve", item.name, t, n);
+        paletteView->folderSiv->appendRow({t, n});
     }
 
     const QList<SpaEvent>& pSpaEvents = pm->spaevents();
     for (const SpaEvent& item : pSpaEvents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Spatialization");
-        paletteView->folderSpa->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Spatialization", item.name, t, n);
+        paletteView->folderSpa->appendRow({t, n});
     }
 
     const QList<PatternEvent>& pPevents = pm->patternevents();
     for (const PatternEvent& item : pPevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Pattern");
-        paletteView->folderPat->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Pattern", item.name, t, n);
+        paletteView->folderPat->appendRow({t, n});
     }
 
     const QList<ReverbEvent>& pRevents = pm->reverbevents();
     for (const ReverbEvent& item : pRevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Reverb");
-        paletteView->folderRev->appendRow({newObjectType, newObjectName});
+        QStandardItem *t, *n;
+        makeItems("Reverb", item.name, t, n);
+        paletteView->folderRev->appendRow({t, n});
     }
 
     const QList<FilterEvent>& pFevents = pm->filterevents();
     for (const FilterEvent& item : pFevents) {
-        QStandardItem* newObjectName = new QStandardItem(item.name);
-        QStandardItem* newObjectType = new QStandardItem("Filter");
-        paletteView->folderFil->appendRow({newObjectType, newObjectName});
-    }   
+        QStandardItem *t, *n;
+        makeItems("Filter", item.name, t, n);
+        paletteView->folderFil->appendRow({t, n});
+    }
 }
 
 //nhi: show attributes

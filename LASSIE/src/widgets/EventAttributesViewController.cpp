@@ -24,10 +24,6 @@
 //                                                              QWidget* parent)
 EventAttributesViewController::EventAttributesViewController(ProjectView* projectView)
   : QFrame(nullptr),
-//   : QFrame(parent),
-    // m_sharedPointers(sharedPointers),
-    // m_currentlyShownEvent(nullptr),
-    // m_modifiers(nullptr),
     // m_soundPartialHboxes(nullptr),
     ui(new Ui::EventAttributesViewController)
 {
@@ -118,10 +114,11 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     connect(ui->BSContinuumButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSContinuumButtonClicked);
 
-/*
-    // --- additional controls ---
+
+    // --- additional controls --
+
     connect(ui->addNewLayerButton, &QPushButton::clicked,
-            this, &EventAttributesViewController::addNewLayerButtonClicked);*/
+            this, &EventAttributesViewController::addNewLayerButtonClicked);
     connect(ui->addModifierButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addModifierButtonClicked);
 /*    connect(ui->addPartialButton, &QPushButton::clicked,
@@ -143,15 +140,14 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
     fixStackedWidgetLayout(ui->emptyPage);
 
-    LayerBox* box = new LayerBox(this, e_projectView);
-    ui->layersLayout->addWidget(box);
+    ui->layersLayout->setSpacing(8);
+    ui->layersLayout->setContentsMargins(0, 0, 0, 0);
 }
 
-EventAttributesViewController::~EventAttributesViewController() {
-    // Qt will delete child widgets automatically
-}
+EventAttributesViewController::~EventAttributesViewController() = default;
 
 void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
+    // Keep inactive pages from inflating the stacked widget's sizeHint.
     QList<QWidget*> pages = {
         ui->emptyPage,
         ui->soundPage,
@@ -167,19 +163,21 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     for (QWidget* page : pages) {
         page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     }
+
     if (currPage) {
-        currPage->adjustSize();
         ui->stackedWidget->setFixedWidth(600);
-        ui->stackedWidget->setMaximumHeight(currPage->sizeHint().height());
-        ui->stackedWidget->adjustSize();
-        // ui->stackedWidget->setFixedSize(600, currPage->sizeHint().height());
         ui->modScrollWindow->setWidget(ui->modScrollWindowContent);
         ui->modScrollWindow->setWidgetResizable(true);
         auto* layout = qobject_cast<QVBoxLayout*>(ui->modScrollWindowContent->layout());
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
     }
-    ui->stackedWidget->adjustSize();
+
+    // Notify the parent scroll area that our sizeHint has changed so it
+    // re-evaluates the widget size rather than relying on the stale value.
+    // Subjective: this seems to positively impact the appearance when you add
+    // LayerBoxes. -Jacob, 3/9/26
+    updateGeometry();
 }
 
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
@@ -239,7 +237,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
             extra_info.modifiers.append(newUIMod);
         }
-        // m_modifiers.clear();
     }
 
     if(type <= bottom){
@@ -252,8 +249,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 return pm->midevents()[m_curreventindex];
             if(type == low)
                 return pm->lowevents()[m_curreventindex];
-            else // bottom, use of 'else' silences a (stupid) compiler warning ;)
-                return pm->bottomevents()[m_curreventindex].event;
+            return pm->bottomevents()[m_curreventindex].event;
         }();
 
         event.name = ui->nameEntry->text();
@@ -262,7 +258,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         event.timesig.bar_value = ui->timeSig1Entry->text();
         event.timesig.note_value = ui->timeSig2Entry->text();
         event.edu_perbeat = ui->unitsPerSecondEntry->text();
-
 
         Tempo& temp = event.tempo;
         if (ui->tempoAsNoteValueRadio->isChecked()) { /* as note */
@@ -289,8 +284,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         num_children.entry_1 = ui->childCountEntry1->text();
         num_children.entry_2 = ui->childCountEntry2->text();
         num_children.entry_3 = ui->childCountEntry3->text();
-
-        // Save layers
         
         ChildDef& childeventdef = event.child_event_def;
         if (ui->discreteButton->isChecked()) {
@@ -353,6 +346,11 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 event.modifiers.append(newUIMod);
             }
             // m_modifiers.clear();
+        }
+
+        // save layer weights
+        for (LayerBox* box : m_layerBoxes) {
+            box->saveWeightToBackend();
         }
     } else {
 
@@ -547,18 +545,15 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 }
 
 void EventAttributesViewController::showCurrentEventData() {
-    //qDebug() << "In showCurrentEventData:";
-    // clear dynamic widgets
-    // qDeleteAll(m_layerBoxesStorage);
-    // m_layerBoxesStorage.clear();
-    // if (m_modifiers) {
-    //     delete m_modifiers;
-    //     m_modifiers = nullptr;
-    // }
-    // if (m_soundPartialHboxes) {
-    //     m_soundPartialHboxes->clear();
-    //     m_soundPartialHboxes = nullptr;
-    // }
+
+    qDebug() << "showCurrentEventData() called";
+
+    // Clear all existing LayerBox widgets so the panel reflects the new event
+    for (LayerBox* box : m_layerBoxes) {
+        ui->layersLayout->removeWidget(box);
+        box->deleteLater();
+    }
+    m_layerBoxes.clear();
 
     // Choose page based on type of currently shown event
     Eventtype type = m_curreventtype;
@@ -758,15 +753,6 @@ void EventAttributesViewController::showCurrentEventData() {
         ui->childCountEntry2->setText(num_children.entry_2);
         ui->childCountEntry3->setText(num_children.entry_3);
 
-        // build layers
-        // for (auto* layer : m_currentlyShownEvent->layers) {
-        //     LayerBox* box = new LayerBox(this, m_sharedPointers->projectView, layer,
-        //                                 (event.numchildren.method_flag == bylayer));
-        //     ui->layersLayout->addWidget(box);
-        //     m_layerBoxesStorage.push_back(box);
-        // }
-        // refreshChildTypeInLayer();
-
         // child‐event‐def
         ChildDef childeventdef = event.child_event_def;
         switch(childeventdef.definition_flag){
@@ -859,6 +845,11 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->spaEntry->setText(event.spa);
             ui->revEntry->setText(event.reverb);
             ui->filEntry->setText(event.filter);
+        }
+
+        // Rebuild LayerBoxes for the newly shown event
+        for (int i = 0; i < event.event_layers.size(); ++i) {
+            addLayerBoxUI(i);
         }
     }else{
         if(type == sound){
@@ -976,7 +967,7 @@ void EventAttributesViewController::fixedButtonClicked() {
     ui->numOfChildLabel3->setText("");
     ui->childCountEntry2->setEnabled(false);
     ui->childCountEntry3->setEnabled(false);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::densityButtonClicked() {
@@ -986,7 +977,7 @@ void EventAttributesViewController::densityButtonClicked() {
     ui->childCountEntry1->setEnabled(true);
     ui->childCountEntry2->setEnabled(true);
     ui->childCountEntry3->setEnabled(true);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::byLayerButtonClicked() {
@@ -996,7 +987,7 @@ void EventAttributesViewController::byLayerButtonClicked() {
     ui->childCountEntry1->setEnabled(false);
     ui->childCountEntry2->setEnabled(false);
     ui->childCountEntry3->setEnabled(false);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(true);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(true);
 }
 
 void EventAttributesViewController::continuumButtonClicked() {
@@ -1006,6 +997,7 @@ void EventAttributesViewController::continuumButtonClicked() {
     ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->childEventDefContSweepPage->adjustSize();
     ui->childEventDefStack->adjustSize();
+    for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(false);
     // ui->childDefEntry1->setEnabled(true);
     // ui->childDefEntry2->setEnabled(true);
     // ui->childDefEntry3->setEnabled(true);
@@ -1041,6 +1033,7 @@ void EventAttributesViewController::discreteButtonClicked() {
     // ui->durationTypePercentRadio->setEnabled(false);
     // ui->durationTypeUnitsRadio->setEnabled(false);
     // ui->durationTypeSecondsRadio->setEnabled(false);
+    for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(true);
 }
 
 void EventAttributesViewController::wellTemperedRadioButtonClicked() {
@@ -1314,20 +1307,53 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
         delete gen;
     }
 }
-/*
-void EventAttributesViewController::addNewLayerButtonClicked() {
-    if (!m_currentlyShownEvent || m_currentlyShownEvent->getEventType() >= eventSound)
-        return;
 
-    auto* newLayer = m_currentlyShownEvent->addLayer();
-    LayerBox* box = new LayerBox(this,
-                                 m_sharedPointers->projectView,
-                                 newLayer,
-                                 ui->discreteButton->isChecked());
+void EventAttributesViewController::addLayerBoxUI(int layerIndex) {
+    LayerBox* box = new LayerBox(m_curreventtype, m_curreventindex, layerIndex, this);
+    connect(box, &LayerBox::deleteRequested, this, [this](LayerBox* b) {
+        ProjectManager* pm2 = Inst::get_project_manager();
+        HEvent* he = nullptr;
+        if (m_curreventtype == top)        he = &pm2->topevent();
+        else if (m_curreventtype == high)  he = &pm2->highevents()[m_curreventindex];
+        else if (m_curreventtype == mid)   he = &pm2->midevents()[m_curreventindex];
+        else if (m_curreventtype == low)   he = &pm2->lowevents()[m_curreventindex];
+        else                               he = &pm2->bottomevents()[m_curreventindex].event;
+
+        int idx = m_layerBoxes.indexOf(b);
+        if (idx >= 0 && idx < he->event_layers.size()) {
+            he->event_layers.removeAt(idx);
+        }
+        m_layerBoxes.removeOne(b);
+        ui->layersLayout->removeWidget(b);
+        b->deleteLater();
+        for (int i = 0; i < m_layerBoxes.size(); ++i) {
+            m_layerBoxes[i]->setLayerIndex(i);
+        }
+        fixStackedWidgetLayout(ui->standardPage);
+    });
+    box->setWeightEnabled(ui->byLayerButton->isChecked());
+    box->setPackageFieldsVisible(ui->discreteButton->isChecked());
+    m_layerBoxes.append(box);
     ui->layersLayout->addWidget(box);
-    m_layerBoxesStorage.push_back(box);
 }
-*/
+
+void EventAttributesViewController::addNewLayerButtonClicked() {
+    qDebug("add new layer button clicked");
+
+    ProjectManager *pm = Inst::get_project_manager();
+
+    HEvent* hevent = nullptr;
+    if (m_curreventtype == top)         hevent = &pm->topevent();
+    else if (m_curreventtype == high)   hevent = &pm->highevents()[m_curreventindex];
+    else if (m_curreventtype == mid)    hevent = &pm->midevents()[m_curreventindex];
+    else if (m_curreventtype == low)    hevent = &pm->lowevents()[m_curreventindex];
+    else                                hevent = &pm->bottomevents()[m_curreventindex].event;
+
+    hevent->event_layers.append(Layer());
+    addLayerBoxUI(hevent->event_layers.size() - 1);
+}
+
+
 void EventAttributesViewController::addModifierButtonClicked() {
     // TO DO: connect add modifier to data structure
     

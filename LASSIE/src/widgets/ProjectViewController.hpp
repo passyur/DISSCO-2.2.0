@@ -35,7 +35,7 @@ class ProjectView : public QObject {
         /* new object pop up function */
         void insertObject();   
 
-         /* functions for modifying the Envelope list */
+        /* functions for modifying the Envelope list */
         // EnvelopeLibraryEntry* getEnvelopeLibraryEntries();
         // EnvelopeLibraryEntry* createNewEnvelope();
         // EnvelopeLibraryEntry* duplicateEnvelope(EnvelopeLibraryEntry* _originalEnvelope);

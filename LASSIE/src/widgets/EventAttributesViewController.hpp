@@ -16,6 +16,7 @@ class SpectrumPartial;
 class EventLayer;
 class QKeyEvent;
 class Modifiers;
+class LayerBox;
 
 namespace Ui {
     class EventAttributesViewController;
@@ -67,7 +68,7 @@ public:
     // explicit EventAttributesViewController(SharedPointers* sharedPointers,
     //                                        QWidget* parent = nullptr);                                       
     ~EventAttributesViewController() override;
-    ProjectView* e_projectView;
+    ProjectView* e_projectView = nullptr;
 
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
@@ -132,7 +133,7 @@ private slots:
     void BSContinuumButtonClicked();
 
     // // main actions
-    // void addNewLayerButtonClicked();
+    void addNewLayerButtonClicked();
     void addModifierButtonClicked();
     // void addPartialButtonClicked();
 
@@ -161,17 +162,16 @@ private:
     QList<Modifiers*>               m_modifiers;     
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
-    // QList<class LayerBox*>           m_layerBoxesStorage;
+    QList<LayerBox*>                 m_layerBoxes;
     // QList<class QCheckBox*>          m_noteModifierCheckBoxes;
 
     // // internal helpers
     void showCurrentEventData();
+    // Creates a LayerBox UI for the given layerIndex and attaches it to the panel.
+    // Does NOT touch the backend — callers are responsible for ensuring the backend
+    // layer already exists at that index before calling this.
+    void addLayerBoxUI(int layerIndex);
     void insertFunctionString(FunctionButton fn);
-    // void refreshChildTypeInLayer();
-    // bool deleteLayer(class LayerBox* box);
-    // void buildNoteModifiersList();
-    // QString generateTempoStringByNoteValue() const;
-    // QString generateTempoStringByFraction() const;
     void fixStackedWidgetLayout(QWidget* currPage);
 };
 
