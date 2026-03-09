@@ -769,6 +769,9 @@ void ProjectManager::parse(Project *p, const QString& filepath){
     // measurewin = NULL;
     // env_lib_entries = NULL;
 
+#include <QDomDocument>
+#include <QTextStream>
+
 Project::Project(const QString& _title, const QByteArray& _id){
     if(_title.isEmpty()){
         title = tr("Untitled");
@@ -938,12 +941,30 @@ void ProjectManager::addEvent(Eventtype newEvent, QString eventName) {
 
 }
 
-void ProjectManager::writeSeedEntry(std::string seed) {
-    if(!curr_project_->config_el) // "New" projects will not have been parsed, so now that they've been saved (right?), we parse them
-        parse(curr_project_, curr_project_->fileinfo.absoluteFilePath());
-    
-    using namespace xercesc;
-    XMLCh *seed_data = XMLString::transcode(seed.c_str());
-    curr_project_->config_el->setAttribute(u"Seed", seed_data);
-    XMLString::release(&seed_data);
+void ProjectManager::writeSeedEntry(const QString& seed) const {
+    QString filepath = curr_project_->fileinfo.absoluteFilePath();
+
+    QFile file(filepath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    QDomDocument doc;
+    doc.setContent(&file);
+    file.close();
+
+    QDomElement seedEl = doc.documentElement()
+        .firstChildElement("ProjectConfiguration")
+        .firstChildElement("Seed");
+
+    if (!seedEl.isNull()) {
+        QDomNode text = seedEl.firstChild();
+        if (!text.isNull())
+            seedEl.removeChild(text);
+        seedEl.appendChild(doc.createTextNode(seed));
+    }
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+    QTextStream out(&file);
+    out << doc.toString();
+    file.close();
 }
