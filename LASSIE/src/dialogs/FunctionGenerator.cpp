@@ -1498,7 +1498,9 @@ void FunctionGenerator::SPATextChanged() {
     stringbuffer = stringbuffer + "</Apply><Channels>";
     // TO DO: SPAChannelAlignments
     SPAPartialAlignment* temp = SPAPartialAlignments;
-    connect(temp->ui->spaPartialEnvelopeEdit, &QLineEdit::textChanged, this, &FunctionGenerator::SPATextChanged);
+    if(temp != nullptr){
+        connect(temp->ui->spaPartialEnvelopeEdit, &QLineEdit::textChanged, this, &FunctionGenerator::SPATextChanged);
+    }
     stringbuffer = stringbuffer + "<Partials>";
     while (temp != NULL){
         stringbuffer = stringbuffer + "<P>" + temp->textChanged() + "</P>";

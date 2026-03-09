@@ -28,7 +28,7 @@ Installing requirements and recommendations:
 <!-- *For all methods*, it's worth keeping in mind that we statically link `muparser`, meaning you don't need to worry about installing it. Please report any issues related to muparser during compilation. -->
 
 ### brew
-`brew`, or homebrew, is something like a package manager for macOS. It's widely used and tends to have better maintained packages than the equivalent ports on MacPorts. (As of 11/13/24: It has a newer stable version of `libxerces-c` and an older stable version of Qt6.) Read more and acquire it at [https://brew.sh](https://brew.sh). Simply:
+`brew`, or homebrew, is something like a package manager for macOS. It's widely used and tends to have better maintained packages than the equivalent ports on MacPorts. Read more and acquire it at [https://brew.sh](https://brew.sh). Simply:
 
     $ brew install libsndfile xerces-c qt@6
 

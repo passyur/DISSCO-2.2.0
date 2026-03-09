@@ -150,8 +150,8 @@ public:
     void REVTextChanged();
     void appendNewNode(REVPartialAlignment* _newNode);
     REVPartialAlignment* REVInsertPartial();
-    REVPartialAlignment* REVPartialAlignments;
-
+    REVPartialAlignment* REVPartialAlignments = nullptr;
+    
     // MakeSieve
     void makeSieveLowFunButtonClicked();
     void makeSieveHighFunButtonClicked();
@@ -163,7 +163,7 @@ public:
     // void SPAApplyByRadioButtonClicked();
     void SPATextChanged();
     SPAPartialAlignment* SPAInsertPartial();
-    SPAPartialAlignment* SPAPartialAlignments;
+    SPAPartialAlignment* SPAPartialAlignments = nullptr;
 
     // Spectrum Gen
     void Spectrum_GenEnvelopeFunButtonClicked();
