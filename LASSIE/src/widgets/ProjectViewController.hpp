@@ -9,7 +9,7 @@
 #include "../core/EnvelopeLibraryEntry.hpp"
 #include "../../CMOD/src/Markov.h"
 
-#include <QXmlStreamWriter>
+#include "../core/xmlwriter.hpp"
 
 class MainWindow;
 class EnvelopeLibraryEntry;
@@ -27,7 +27,6 @@ class ProjectView : public QObject {
 
         /* function to write to the xml .dissco file */
         void save();
-        void writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xmlString);
 
         /* set properties pop up function */
         void setProperties();

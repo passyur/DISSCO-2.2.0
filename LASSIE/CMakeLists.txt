@@ -25,6 +25,7 @@ qt_add_executable(LASSIE
     src/inst.hpp
     src/widgets/ProjectViewController.cpp src/widgets/ProjectViewController.hpp
     src/core/project_struct.cpp src/core/project_struct.hpp
+    src/core/xmlwriter.hpp
     src/widgets/PaletteViewController.cpp src/widgets/PaletteViewController.hpp
     src/widgets/EventAttributesViewController.cpp src/widgets/EventAttributesViewController.hpp src/ui/Attributes.ui
     src/dialogs/FileNewObject.cpp src/dialogs/FileNewObject.hpp src/ui/FileNewObject.ui
