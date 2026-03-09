@@ -130,7 +130,8 @@ class ProjectManager : public QObject {
         /* validates and, if successful, opens the file and creates a Project from that file */
         Project* open(const QString& filepath, const QByteArray& id = QByteArray());
         Project* build(const QString& filepath, const QByteArray& id = QByteArray());
-        void parse(Project*, const QString&);
+
+        static void parse(Project*, const QString&);
         void close(Project*);
         int save(Project*);
         int saveAs(Project*);
