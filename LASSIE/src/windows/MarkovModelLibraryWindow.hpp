@@ -31,9 +31,9 @@ public:
     // Set which project this window is editing
     void setActiveProject(ProjectView* project);
     // Create a brand-new Markov model
-    void createNewModel();
+    void createNewModel() const;
     // Duplicate the currently selected model
-    void duplicateModel();
+    void duplicateModel() const;
     // Remove the currently selected model
     void removeModel();
     // Refresh the view for a given model index
@@ -49,9 +49,9 @@ private slots:
     // (Re)build all the entry widgets based on current size
     void buildTable();
     // Handle editing of any entry cell
-    void onEntryChange();
+    static void onEntryChange();
     // Show context menu on right-click
-    void onRightClick(const QPoint& pos);
+    void onRightClick(const QPoint& pos) const;
     // Apply new chain size from sizeEntry
     void onSetSize();
 

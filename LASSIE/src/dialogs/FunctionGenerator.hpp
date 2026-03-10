@@ -24,7 +24,7 @@ public:
     /*Constructor to create the Function Generator Pop Up*/
     explicit FunctionGenerator(QWidget *parent = nullptr, FunctionReturnType _returnType = functionReturnFloat, QString _originalString = "");
     /*Destructor to delete the UI*/
-    ~FunctionGenerator();
+    ~FunctionGenerator() override;
     
     Ui::FunctionGenerator *ui;
 

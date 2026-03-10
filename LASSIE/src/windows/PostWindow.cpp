@@ -18,16 +18,16 @@ PostWindow::PostWindow(QProcess *process, QWidget *parent)
     textEdit->setReadOnly(true);
     textEdit->setStyleSheet("background:white;");
 
-    QToolBar *toolbar = new QToolBar(this);
-    QAction *bigger = toolbar->addAction("Zoom in");
-    QAction *smaller = toolbar->addAction("Zoom out");
-    QAction *clear = toolbar->addAction("Clear");
+    const auto toolbar = new QToolBar(this);
+    const QAction *bigger = toolbar->addAction("Zoom in");
+    const QAction *smaller = toolbar->addAction("Zoom out");
+    const QAction *clear = toolbar->addAction("Clear");
     QAction *toggleScroll = toolbar->addAction("Scroll");
     toggleScroll->setCheckable(true);
     toggleScroll->setChecked(true);
 
     // spacer for clarity since the remaining actions will be related to the process
-    QWidget *spacer = new QWidget(this);
+    const auto spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolbar->addWidget(spacer);
 
@@ -93,9 +93,7 @@ void PostWindow::closeEvent(QCloseEvent *event)
         message.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         message.setDefaultButton(QMessageBox::No);
 
-        int ret = message.exec();
-
-        switch(ret){
+        switch(int ret = message.exec()){
             case QMessageBox::Yes:
                 proc->kill();
                 break;
@@ -108,8 +106,7 @@ void PostWindow::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
-void PostWindow::appendColored(const QString &text, const QColor &color)
-{
+void PostWindow::appendColored(const QString &text, const QColor &color) const {
     QTextCharFormat fmt;
     fmt.setForeground(color);
 
@@ -119,56 +116,47 @@ void PostWindow::appendColored(const QString &text, const QColor &color)
     scrollToBottom();
 }
 
-void PostWindow::handleStdout()
-{
-    QString data = QString::fromLocal8Bit(proc->readAllStandardOutput());
+void PostWindow::handleStdout() const {
+    const QString data = QString::fromLocal8Bit(proc->readAllStandardOutput());
     appendColored(data.trimmed(), Qt::black);
 }
 
-void PostWindow::handleStderr()
-{
-    QString data = QString::fromLocal8Bit(proc->readAllStandardError());
+void PostWindow::handleStderr() const {
+    const QString data = QString::fromLocal8Bit(proc->readAllStandardError());
     appendColored(data.trimmed(), Qt::red);
 }
 
-void PostWindow::increaseFont()
-{
+void PostWindow::increaseFont() const {
     QFont f = textEdit->font();
     f.setPointSize(f.pointSize() + 1);
     textEdit->setFont(f);
 }
 
-void PostWindow::decreaseFont()
-{
+void PostWindow::decreaseFont() const {
     QFont f = textEdit->font();
     f.setPointSize(std::max(1, f.pointSize() - 1));
     textEdit->setFont(f);
 }
 
-void PostWindow::clearOutput()
-{
+void PostWindow::clearOutput() const {
     textEdit->clear();
 }
 
-void PostWindow::termProcess()
-{
+void PostWindow::termProcess() const {
     proc->terminate();
     appendColored("*** User requested process terminate ***", Qt::red);
 }
 
-void PostWindow::killProcess()
-{
+void PostWindow::killProcess() const {
     proc->kill();
     appendColored("*** Process killed by user ***", Qt::red);
 }
 
-void PostWindow::runProcess()
-{
+void PostWindow::runProcess() const {
     proc->start(proc->program(), proc->arguments());
 }
 
-void PostWindow::scrollToBottom()
-{
+void PostWindow::scrollToBottom() const {
     if (autoscroll) {
         textEdit->moveCursor(QTextCursor::End);
         textEdit->ensureCursorVisible();

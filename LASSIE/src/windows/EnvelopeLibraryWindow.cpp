@@ -144,7 +144,7 @@ void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
     EnvelopeLibraryEntry* entry = pm->envlibentries();
     while (entry) {
         // append each entry to the tree
-        QStandardItem* item = new QStandardItem(entry->getNumberString());
+        const auto item = new QStandardItem(entry->getNumberString());
         // store the pointer in UserRole
         item->setData(QVariant::fromValue<void*>(entry), Qt::UserRole);
         refModel->appendRow(item);
@@ -156,8 +156,7 @@ void EnvelopeLibraryWindow::setActiveProject(ProjectView* project)
 /**
  * @brief Create a new envelope via the project controller
  */
-void EnvelopeLibraryWindow::createNewEnvelope()
-{
+void EnvelopeLibraryWindow::createNewEnvelope() const {
     if (!activeProject) return;
 
     ProjectManager *pm = Inst::get_project_manager();
@@ -168,12 +167,12 @@ void EnvelopeLibraryWindow::createNewEnvelope()
 
     MUtilities::modified();
 
-    QStandardItem* item = new QStandardItem(newEnv->getNumberString());
+    const auto item = new QStandardItem(newEnv->getNumberString());
     item->setData(QVariant::fromValue<void*>(newEnv), Qt::UserRole);
     refModel->appendRow(item);
 
     // Automatically select the new envelope
-    QModelIndex newIndex = refModel->index(refModel->rowCount() - 1, 0);
+    const QModelIndex newIndex = refModel->index(refModel->rowCount() - 1, 0);
     envelopeLibrary->setCurrentIndex(newIndex);
     // This will trigger onCursorChanged and update the graph
 }
@@ -181,19 +180,18 @@ void EnvelopeLibraryWindow::createNewEnvelope()
 /**
  * @brief Duplicate the selected envelope
  */
-void EnvelopeLibraryWindow::duplicateEnvelope()
-{
-    QModelIndex idx = envelopeLibrary->currentIndex();
+void EnvelopeLibraryWindow::duplicateEnvelope() const {
+    const QModelIndex idx = envelopeLibrary->currentIndex();
     if (!idx.isValid()) return;
 
-    QStandardItem* origItem = refModel->itemFromIndex(idx);
-    auto ptr = static_cast<EnvelopeLibraryEntry*>(origItem->data(Qt::UserRole).value<void*>());
+    const QStandardItem* origItem = refModel->itemFromIndex(idx);
+    const auto ptr = static_cast<EnvelopeLibraryEntry*>(origItem->data(Qt::UserRole).value<void*>());
     if (!ptr || !activeProject) return;
 
     EnvelopeLibraryEntry* dupEnv = EnvelopeUtilities::duplicateEnvelopeHelper(Inst::get_project_manager()->envlibentries(), ptr);
     MUtilities::modified();
 
-    QStandardItem* newItem = new QStandardItem(dupEnv->getNumberString());
+    const auto newItem = new QStandardItem(dupEnv->getNumberString());
     newItem->setData(QVariant::fromValue<void*>(dupEnv), Qt::UserRole);
     refModel->appendRow(newItem);
 }
@@ -201,13 +199,12 @@ void EnvelopeLibraryWindow::duplicateEnvelope()
 /**
  * @brief Delete the selected envelope
  */
-void EnvelopeLibraryWindow::deleteEnvelope()
-{
-    QModelIndex idx = envelopeLibrary->currentIndex();
+void EnvelopeLibraryWindow::deleteEnvelope() const {
+    const QModelIndex idx = envelopeLibrary->currentIndex();
     if (!idx.isValid()) return;
 
-    QStandardItem* item = refModel->itemFromIndex(idx);
-    auto ptr = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
+    const QStandardItem* item = refModel->itemFromIndex(idx);
+    const auto ptr = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
     if (!ptr || !activeProject) return;
 
     EnvelopeUtilities::deleteEnvelope(Inst::get_project_manager()->envlibentries(), ptr);
@@ -263,26 +260,22 @@ void EnvelopeLibraryWindow::onCursorChanged(const QModelIndex& current,
  * @brief Show right‐click context menu
  * @param pos  position where right-click occurred
  */
-void EnvelopeLibraryWindow::onRightClick(const QPoint& pos)
-{
-    QModelIndex idx = envelopeLibrary->indexAt(pos);
-    if (!idx.isValid()) return;
+void EnvelopeLibraryWindow::onRightClick(const QPoint& pos) const {
+    if (const QModelIndex idx = envelopeLibrary->indexAt(pos); !idx.isValid()) return;
     popupMenu->exec(envelopeLibrary->viewport()->mapToGlobal(pos));
 }
 
 /**
  * @brief Clear and rebuild the model
  */
-void EnvelopeLibraryWindow::refreshEnvelopeList()
-{
+void EnvelopeLibraryWindow::refreshEnvelopeList() const {
     refModel->removeRows(0, refModel->rowCount());
 }
 
 /**
  * @brief Save via project controller
  */
-void EnvelopeLibraryWindow::fileSave()
-{
+void EnvelopeLibraryWindow::fileSave() const {
     if (activeProject) activeProject->save();
 }
 
@@ -302,8 +295,7 @@ void EnvelopeLibraryWindow::keyPressEvent(QKeyEvent* event)
 /**
  * @brief Called whenever X or Y entry changes
  */
-void EnvelopeLibraryWindow::valueEntriesChanged()
-{
+void EnvelopeLibraryWindow::valueEntriesChanged() const {
     if (!drawingArea) return;
     
     // Only update if we have valid numeric input

@@ -27,22 +27,10 @@
 #include "../utilities.hpp"
 #include "../core/xmlwriter.hpp"
 
-namespace PVCHelper {
-    QList<QStandardItem*> make_child_palette_tuple(const QString& type, const QString& name) {
-        auto* typeItem = new QStandardItem(type);
-        auto* nameItem = new QStandardItem(name);
-        typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
-        typeItem->setData(type, Qt::UserRole + 1);
-        typeItem->setData(name, Qt::UserRole + 2);
-        nameItem->setData(type, Qt::UserRole + 1);
-        nameItem->setData(name, Qt::UserRole + 2);
-        return {typeItem, nameItem};
-    }
-}
 /* ProjectView constructor initializing values for XML file*/
 ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
 
-    ProjectManager *pm = Inst::get_project_manager();
+    const ProjectManager *pm = Inst::get_project_manager();
     qDebug() << "In PV Constructor p:" << pm->get_curr_project();
 
     mainWindow = _mainWindow;
@@ -57,7 +45,7 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     eventAttributesView = new EventAttributesViewController(this);
     mainWindow->ui->eventsScrollArea->setWidget(eventAttributesView);
 
-    updatePaletteView();
+    paletteView->populate();
 }
 
 /* Function that creates and saves the xml .dissco file */
@@ -98,7 +86,7 @@ void ProjectView::setProperties() {
         connect(projectPropertiesDialog->ui->insertFunctionButton, &QPushButton::clicked, this, &ProjectView::propertiesInsertFunction);
     }
 
-    ProjectManager *pm = Inst::get_project_manager();
+    const ProjectManager *pm = Inst::get_project_manager();
 
     projectPropertiesDialog->ui->titleEntry->setText(pm->title());
     projectPropertiesDialog->ui->flagEntry->setText(pm->fileflag());
@@ -164,79 +152,30 @@ void ProjectView::insertObject() {
 
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
-        QString nameStr = newObject->ui->objNameEntry->text();
-        QString typeStr;
-        QStandardItem* folder = nullptr;
+        const QString nameStr = newObject->ui->objNameEntry->text();
+        Eventtype etype;
 
-        // Appends a new HEvent (High/Mid/Low) and sets typeStr/folder
-        auto addHEvent = [&](QList<HEvent>& list, const Eventtype t, const QString& ts, QStandardItem* f) {
-            HEvent obj = {};
-            obj.type = t;
-            obj.name = nameStr;
-            list.push_back(obj);
-            typeStr = ts;
-            folder = f;
-        };
-
-        // Appends a new simple event (with .orderinpalette/.name) and sets typeStr/folder
-        auto addSimple = [&](auto& list, const QString& ts, QStandardItem* f) {
-            using T = typename std::decay_t<decltype(list)>::value_type;
-            T obj = {};
-            obj.orderinpalette = QString::number(list.size() + 1);
-            obj.name = nameStr;
-            list.push_back(obj);
-            typeStr = ts;
-            folder = f;
-        };
-
-        if      (newObject->ui->buttonHigh->isChecked())
-            addHEvent(pm->highevents(), high, "High", paletteView->folderHigh);
-        else if (newObject->ui->buttonMid->isChecked())
-            addHEvent(pm->midevents(),  mid,  "Mid",  paletteView->folderMid);
-        else if (newObject->ui->buttonLow->isChecked())
-            addHEvent(pm->lowevents(),  low,  "Low",  paletteView->folderLow);
-        else if (newObject->ui->buttonBottom->isChecked()) {
-            BottomEvent obj = {};
-            obj.event.type = bottom;
-            obj.event.name = nameStr;
-            pm->bottomevents().push_back(obj);
-            typeStr = "Bottom";
-            folder = paletteView->folderBottom;
-        }
-        else if (newObject->ui->buttonSpectrum->isChecked())
-            addSimple(pm->spectrumevents(),  "Spectrum",       paletteView->folderSpectrum);
-        else if (newObject->ui->buttonNote->isChecked())
-            addSimple(pm->noteevents(),      "Note",           paletteView->folderNote);
-        else if (newObject->ui->buttonEnv->isChecked())
-            addSimple(pm->envelopeevents(),  "Envelope",       paletteView->folderEnv);
-        else if (newObject->ui->buttonSiv->isChecked())
-            addSimple(pm->sieveevents(),     "Sieve",          paletteView->folderSiv);
-        else if (newObject->ui->buttonSpa->isChecked())
-            addSimple(pm->spaevents(),       "Spatialization", paletteView->folderSpa);
-        else if (newObject->ui->buttonPat->isChecked())
-            addSimple(pm->patternevents(),   "Pattern",        paletteView->folderPat);
-        else if (newObject->ui->buttonRev->isChecked())
-            addSimple(pm->reverbevents(),    "Reverb",         paletteView->folderRev);
-        else if (newObject->ui->buttonFil->isChecked())
-            addSimple(pm->filterevents(),    "Filter",         paletteView->folderFil);
-
-        if (!folder) {
-            qWarning() << "insertObject: No folder found for type" << typeStr;
+        if      (newObject->ui->buttonHigh->isChecked())     etype = high;
+        else if (newObject->ui->buttonMid->isChecked())      etype = mid;
+        else if (newObject->ui->buttonLow->isChecked())      etype = low;
+        else if (newObject->ui->buttonBottom->isChecked())   etype = bottom;
+        else if (newObject->ui->buttonSpectrum->isChecked()) etype = sound;
+        else if (newObject->ui->buttonNote->isChecked())     etype = note;
+        else if (newObject->ui->buttonEnv->isChecked())      etype = env;
+        else if (newObject->ui->buttonSiv->isChecked())      etype = sieve;
+        else if (newObject->ui->buttonSpa->isChecked())      etype = spa;
+        else if (newObject->ui->buttonPat->isChecked())      etype = pattern;
+        else if (newObject->ui->buttonRev->isChecked())      etype = reverb;
+        else if (newObject->ui->buttonFil->isChecked())      etype = filter;
+        else {
             delete newObject;
             newObject = nullptr;
             return;
         }
 
-        // Create QStandardItems with proper user roles
-        folder->appendRow(PVCHelper::make_child_palette_tuple(typeStr, nameStr));
+        pm->addEvent(etype, nameStr);
+        paletteView->appendEventRow(etype, nameStr);
 
-        // Commented out because no structs for mea event yet
-        /* else if (newObject->ui->buttonMea->isChecked()) {
-            QStandardItem* newObjectType = new QStandardItem("Measurement");
-            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
-            paletteView->folderMea->appendRow({newObjectType, newObjectName});
-        } */
-        
         modifiedButNotSaved = true;
         MUtilities::modified();
         delete newObject;
@@ -244,123 +183,11 @@ void ProjectView::insertObject() {
     }
 }
 
-static Eventtype eventtypeFromString(const QString& s) {
-    if (s == "High")          return high;
-    if (s == "Mid")           return mid;
-    if (s == "Low")           return low;
-    if (s == "Bottom")        return bottom;
-    if (s == "Spectrum")      return sound;
-    if (s == "Note")          return note;
-    if (s == "Envelope")      return env;
-    if (s == "Sieve")         return sieve;
-    if (s == "Spatialization") return spa;
-    if (s == "Pattern")       return pattern;
-    if (s == "Reverb")        return reverb;
-    if (s == "Filter")        return filter;
-    if (s == "Measurement")   return mea;
-    return top; // fallback (should not happen for deletable types)
-}
-
-void ProjectView::updatePaletteView() const {
-    ProjectManager *pm = Inst::get_project_manager();
-
-    auto makeItems = [](const QString& typeStr, const QString& nameStr,
-                        QStandardItem*& outType, QStandardItem*& outName) {
-        outType = new QStandardItem(typeStr);
-        outName = new QStandardItem(nameStr);
-        outType->setFlags(outType->flags() & ~Qt::ItemIsEditable);
-        outType->setData(typeStr, Qt::UserRole + 1);
-        outType->setData(nameStr, Qt::UserRole + 2);
-        outName->setData(typeStr, Qt::UserRole + 1);
-        outName->setData(nameStr, Qt::UserRole + 2);
-    };
-
-    // Top event is singular — add directly without a loop
-    {
-        QStandardItem *t, *n;
-        makeItems("Top", pm->topevent().name, t, n);
-        t->setFlags(t->flags() & ~Qt::ItemIsDragEnabled);
-        n->setFlags(n->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
-        paletteView->folderTop->appendRow({t, n});
-    }
-
-    for (const HEvent& item : pm->highevents()) {
-        QStandardItem *t, *n;
-        makeItems("High", item.name, t, n);
-        paletteView->folderHigh->appendRow({t, n});
-    }
-
-    for (const HEvent& item : pm->midevents()) {
-        QStandardItem *t, *n;
-        makeItems("Mid", item.name, t, n);
-        paletteView->folderMid->appendRow({t, n});
-    }
-
-    for (const HEvent& item : pm->lowevents()) {
-        QStandardItem *t, *n;
-        makeItems("Low", item.name, t, n);
-        paletteView->folderLow->appendRow({t, n});
-    }
-
-    for (const BottomEvent& item : pm->bottomevents()) {
-        QStandardItem *t, *n;
-        makeItems("Bottom", item.event.name, t, n);
-        paletteView->folderBottom->appendRow({t, n});
-    }
-
-    for (const SpectrumEvent& item : pm->spectrumevents()) {
-        QStandardItem *t, *n;
-        makeItems("Spectrum", item.name, t, n);
-        paletteView->folderSpectrum->appendRow({t, n});
-    }
-
-    for (const NoteEvent& item : pm->noteevents()) {
-        QStandardItem *t, *n;
-        makeItems("Note", item.name, t, n);
-        paletteView->folderNote->appendRow({t, n});
-    }
-
-    for (const EnvelopeEvent& item : pm->envelopeevents()) {
-        QStandardItem *t, *n;
-        makeItems("Envelope", item.name, t, n);
-        paletteView->folderEnv->appendRow({t, n});
-    }
-
-    for (const SieveEvent& item : pm->sieveevents()) {
-        QStandardItem *t, *n;
-        makeItems("Sieve", item.name, t, n);
-        paletteView->folderSiv->appendRow({t, n});
-    }
-
-    for (const SpaEvent& item : pm->spaevents()) {
-        QStandardItem *t, *n;
-        makeItems("Spatialization", item.name, t, n);
-        paletteView->folderSpa->appendRow({t, n});
-    }
-
-    for (const PatternEvent& item : pm->patternevents()) {
-        QStandardItem *t, *n;
-        makeItems("Pattern", item.name, t, n);
-        paletteView->folderPat->appendRow({t, n});
-    }
-
-    for (const ReverbEvent& item : pm->reverbevents()) {
-        QStandardItem *t, *n;
-        makeItems("Reverb", item.name, t, n);
-        paletteView->folderRev->appendRow({t, n});
-    }
-
-    for (const FilterEvent& item : pm->filterevents()) {
-        QStandardItem *t, *n;
-        makeItems("Filter", item.name, t, n);
-        paletteView->folderFil->appendRow({t, n});
-    }
-}
 
 void ProjectView::showAttributes(const QString &eventType, const int index) const {
     qDebug() << "Showing attributes for event:" << eventType << "at index" << index;
 
-    if (Eventtype type = eventtypeFromString(eventType); type == top)
+    if (const Eventtype type = string_to_eventtype[eventType]; type == top)
         eventAttributesView->showAttributesOfEvent(top, 0);
     else
         eventAttributesView->showAttributesOfEvent(type, index);
@@ -370,8 +197,8 @@ void ProjectView::showAttributes(const QString &eventType, const int index) cons
 }
 
 void ProjectView::deleteEvent(const QString& typeStr, const int index) const {
-    ProjectManager* pm = Inst::get_project_manager();
-    const Eventtype etype = eventtypeFromString(typeStr);
+    const ProjectManager* pm = Inst::get_project_manager();
+    const Eventtype etype = string_to_eventtype[typeStr];
 
     // Notify the attributes view before touching the backend
     eventAttributesView->onEventDeleted(etype, index);
@@ -391,14 +218,13 @@ void ProjectView::deleteEvent(const QString& typeStr, const int index) const {
     else if (etype == filter)  pm->filterevents().removeAt(index);
 
     // Remove from the palette model
-    if (QStandardItem* folder = paletteView->folderForType(typeStr)) folder->removeRow(index);
+    if (QStandardItem* folder = paletteView->string_to_folder(typeStr)) folder->removeRow(index);
 }
 
 void ProjectView::duplicateEvent(const QString& typeStr, int index) const {
     ProjectManager* pm = Inst::get_project_manager();
 
-    QStandardItem* folder = paletteView->folderForType(typeStr);
-    if (!folder) return;
+    const Eventtype etype = string_to_eventtype[typeStr];
 
     // Copies element at index, appends " (copy)" to .name, appends to list, returns new name
     auto dup = [index](auto& list) -> QString {
@@ -408,7 +234,6 @@ void ProjectView::duplicateEvent(const QString& typeStr, int index) const {
         return copy.name;
     };
 
-    const Eventtype etype = eventtypeFromString(typeStr);
     QString newName;
     if      (etype == high)    newName = dup(pm->highevents());
     else if (etype == mid)     newName = dup(pm->midevents());
@@ -429,7 +254,7 @@ void ProjectView::duplicateEvent(const QString& typeStr, int index) const {
     else if (etype == filter)  newName = dup(pm->filterevents());
     else return;
 
-    folder->appendRow(PVCHelper::make_child_palette_tuple(typeStr, newName));
+    paletteView->appendEventRow(etype, newName);
 }
 
 void ProjectView::updatePaletteItemName(const QString& typeStr, const int index, const QString& name) const {
@@ -437,5 +262,5 @@ void ProjectView::updatePaletteItemName(const QString& typeStr, const int index,
 }
 
 void ProjectView::updateAttributesNameEntry(const QString& typeStr, const int index, const QString& name) const {
-    if (eventAttributesView) eventAttributesView->updateNameEntryIfShowing(typeStr, index, name);
+    if (eventAttributesView) eventAttributesView->updateNameEntryIfShowing(string_to_eventtype[typeStr], index, name);
 }

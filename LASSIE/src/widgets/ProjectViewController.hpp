@@ -19,8 +19,6 @@ class ProjectView : public QObject {
     Q_OBJECT
     
     public:
-        /* init/constructor to spawn a project_view inside of mainwin corresponding to an empty, new project */
-        // ProjectView();
         /* init/constructor to spawn a project_view inside of mainwin corresponding to a particular filepath and project_title; i.e., open project */
         ProjectView(MainWindow* _mainWindow, QString _pathAndName);
 
@@ -41,7 +39,6 @@ class ProjectView : public QObject {
 
         // ObjectWindow and Palette methods
         PaletteViewController* getPalette() const { return paletteView; }
-        void updatePaletteView() const;
         void showAttributes(const QString &eventType, int index) const;
 
         // Remove the event at index from the backend and the palette.

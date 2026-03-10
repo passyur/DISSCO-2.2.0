@@ -12,8 +12,7 @@
 namespace XmlWriter {
 
 inline void writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xmlString) {
-    QDomDocument tempDoc;
-    if (tempDoc.setContent(xmlString.trimmed()) && !tempDoc.documentElement().isNull()) {
+    if (QDomDocument tempDoc; tempDoc.setContent(xmlString.trimmed()) && !tempDoc.documentElement().isNull()) {
         // Write raw XML
         QString str = tempDoc.toString();
         str.remove(QRegularExpression("[\\n\\t\\r]+"));
@@ -97,9 +96,9 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
             xmlWriter.writeStartElement("DefaultModifiers");
                 auto iter = default_note_modifiers.begin();
                 while (iter != default_note_modifiers.end()){
-                    if ((*iter)) { xmlWriter.writeCharacters("1"); }
+                    if (*iter) { xmlWriter.writeCharacters("1"); }
                     else { xmlWriter.writeCharacters("0"); }
-                    iter++;
+                    ++iter;
                     if (iter != default_note_modifiers.end()){
                         xmlWriter.writeCharacters(", ");
                     }
@@ -114,7 +113,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
                         xmlWriter.writeStartElement("Modifier");
                         xmlWriter.writeCharacters(*iter2);
                         xmlWriter.writeEndElement();
-                        iter2++;
+                        ++iter2;
                     }
                 }
             xmlWriter.writeEndElement();
@@ -122,19 +121,19 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
 
         xmlWriter.writeStartElement("EnvelopeLibrary");
             QString stringBuffer;
-            if (pm->envlibentries() != NULL){
+            if (pm->envlibentries() != nullptr){
                 EnvelopeLibraryEntry* envLib = pm->envlibentries();
                 int count = envLib->count();
                 stringBuffer = stringBuffer + "\n" + QString::number(count) + "\n";
                 count = 1;
-                while (envLib != NULL) {
+                while (envLib != nullptr) {
                     stringBuffer = stringBuffer + "Envelope " + QString::number(count) + "\n";
                     int lineNumber = envLib->head->countNumOfNodes();
                     stringBuffer = stringBuffer + QString::number(lineNumber) + "\n";
 
                     EnvLibEntryNode* currentNode;
                     EnvLibEntrySeg* libSeg = envLib->head->rightSeg;
-                    while (libSeg != NULL){
+                    while (libSeg != nullptr){
                         currentNode = libSeg->leftNode;
                         stringBuffer = stringBuffer + QString::number(currentNode->x, 'f', 3);
                         stringBuffer = stringBuffer + "     ";
@@ -364,8 +363,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<BottomEvent>& pBevents = pm->bottomevents();
-            for (const BottomEvent& item : pBevents) {
+            for (const BottomEvent& item : pm->bottomevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.event.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -594,8 +592,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<NoteEvent>& pNevents = pm->noteevents();
-            for (const NoteEvent& item : pNevents) {
+            for (const NoteEvent& item : pm->noteevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -619,8 +616,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<EnvelopeEvent>& pEevents = pm->envelopeevents();
-            for (const EnvelopeEvent& item : pEevents) {
+            for (const EnvelopeEvent& item : pm->envelopeevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -635,8 +631,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<SieveEvent>& pSivevents = pm->sieveevents();
-            for (const SieveEvent& item : pSivevents) {
+            for (const SieveEvent& item : pm->sieveevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -651,8 +646,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<SpaEvent>& pSpaevents = pm->spaevents();
-            for (const SpaEvent& item : pSpaevents) {
+            for (const SpaEvent& item : pm->spaevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -667,8 +661,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<PatternEvent>& pPevents = pm->patternevents();
-            for (const PatternEvent& item : pPevents) {
+            for (const PatternEvent& item : pm->patternevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -683,8 +676,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<ReverbEvent>& pRevents = pm->reverbevents();
-            for (const ReverbEvent& item : pRevents) {
+            for (const ReverbEvent& item : pm->reverbevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");
@@ -699,8 +691,7 @@ inline void writeProject(QXmlStreamWriter& xmlWriter, ProjectManager* pm, const 
               xmlWriter.writeEndElement();
             }
 
-            const QList<FilterEvent>& pFevents = pm->filterevents();
-            for (const FilterEvent& item : pFevents) {
+            for (const FilterEvent& item : pm->filterevents()) {
               xmlWriter.writeStartElement("Event");
               xmlWriter.writeAttribute("orderInPalette", item.orderinpalette);
                 xmlWriter.writeStartElement("EventType");

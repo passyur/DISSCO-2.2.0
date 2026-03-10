@@ -12,7 +12,7 @@ class Inst : public QObject {
 
     public:
         static Inst* instance(void){
-            static Inst *that = new Inst;
+            static auto that = new Inst;
             return that;
         }
 

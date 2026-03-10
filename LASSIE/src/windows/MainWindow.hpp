@@ -41,8 +41,8 @@ class MainWindow : public QMainWindow
 
         // Edit operations
          /* TODO: implement undo /edo */
-        void undo() { statusBar()->showMessage(tr("Undo"), 2000); }
-        void redo() { statusBar()->showMessage(tr("Redo"), 2000); }
+        void undo() const { statusBar()->showMessage(tr("Undo"), 2000); }
+        void redo() const { statusBar()->showMessage(tr("Redo"), 2000); }
 
         // Window operations
         void showEnvelopeLibraryWindow();

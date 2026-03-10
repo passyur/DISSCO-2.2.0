@@ -26,12 +26,12 @@ public:
      * @brief Constructor: builds the UI
      * @param parent  parent widget
      */
-    EnvelopeLibraryWindow(QWidget* parent = nullptr);
+    explicit EnvelopeLibraryWindow(QWidget* parent = nullptr);
     
     /**
      * @brief Destructor
      */
-    ~EnvelopeLibraryWindow();
+    ~EnvelopeLibraryWindow() override;
 
     /**
      * @brief Set the active project
@@ -42,17 +42,17 @@ public:
     /**
      * @brief Create a brand‐new envelope
      */
-    void createNewEnvelope();
+    void createNewEnvelope() const;
     
     /**
      * @brief Duplicate the selected envelope
      */
-    void duplicateEnvelope();
+    void duplicateEnvelope() const;
     
     /**
      * @brief Delete the selected envelope
      */
-    void deleteEnvelope();
+    void deleteEnvelope() const;
     
     /**
      * @brief Programmatically update the X/Y entries
@@ -88,23 +88,23 @@ protected slots:
      * @brief Show context menu on right‐click
      * @param pos  position where right-click occurred
      */
-    void onRightClick(const QPoint& pos);
+    void onRightClick(const QPoint& pos) const;
     
     /**
      * @brief Called when either X or Y QLineEdit text changes
      */
-    void valueEntriesChanged();
+    void valueEntriesChanged() const;
 
 protected:
     /**
      * @brief Rebuild the entire envelope list from the project
      */
-    void refreshEnvelopeList();
+    void refreshEnvelopeList() const;
     
     /**
      * @brief Save via project controller (e.g. Ctrl+S)
      */
-    void fileSave();
+    void fileSave() const;
     
     /**
      * @brief Catch key presses for shortcuts

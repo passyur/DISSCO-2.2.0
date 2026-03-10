@@ -2,7 +2,7 @@
 #include "../inst.hpp"
 #include <algorithm>
 
-LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent)
+LayerBox::LayerBox(const Eventtype eventType, const unsigned eventIndex, const int layerIndex, QWidget* parent)
     : QFrame(parent),
       m_eventType(eventType),
       m_eventIndex(eventIndex),
@@ -116,7 +116,7 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
                 Layer& layer = getBackendLayer();
                 if (row < 0 || row >= layer.discrete_packages.size()) continue;
                 Package& pkg = layer.discrete_packages[row];
-                QString val = m_model->item(row, col)->text();
+                const QString val = m_model->item(row, col)->text();
                 switch (col) {
                     case 3: pkg.weight                  = val; break;
                     case 4: pkg.attack_envelope         = val; break;
@@ -133,8 +133,7 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
         m_treeView->setColumnHidden(col, true);
 }
 
-
-Layer& LayerBox::getBackendLayer() {
+Layer& LayerBox::getBackendLayer() const {
     ProjectManager* pm = Inst::get_project_manager();
     HEvent* hevent = nullptr;
     if (m_eventType == top) {
@@ -151,8 +150,7 @@ Layer& LayerBox::getBackendLayer() {
     return hevent->event_layers[m_layerIndex];
 }
 
-
-QStandardItem* LayerBox::extractItemFromDrop(QDropEvent* event)
+QStandardItem* LayerBox::extractItemFromDrop(const QDropEvent* event)
 {
     const QMimeData* mime = event->mimeData();
     if (!mime->hasFormat("application/x-qabstractitemmodeldatalist")) {
@@ -185,7 +183,7 @@ QStandardItem* LayerBox::extractItemFromDrop(QDropEvent* event)
         return nullptr;
     }
 
-    QStandardItem* item = new QStandardItem;
+    const auto item = new QStandardItem;
     item->setText(gotName ? foundName : foundType);
     item->setData(foundType, Qt::UserRole + 1);
     item->setData(foundName, Qt::UserRole + 2);
@@ -203,26 +201,27 @@ void LayerBox::dragEnterEvent(QDragEnterEvent* event) {
 void LayerBox::dropEvent(QDropEvent* event) {
     event->acceptProposedAction();
 
-    QStandardItem* droppedItem = extractItemFromDrop(event);
+    const QStandardItem* droppedItem = extractItemFromDrop(event);
     if (!droppedItem) {
         qDebug() << "extractItemFromDrop returned null";
         return;
     }
 
-    int newIndex = m_model->rowCount();
+    const int newIndex = m_model->rowCount();
     m_model->appendRow({
         new QStandardItem(QString::number(newIndex)),
         new QStandardItem(droppedItem->text()),
         new QStandardItem("Dropped item info here")
     });
+    
+    delete droppedItem;
 }
 
 bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     if (obj == m_treeView && event->type() == QEvent::KeyPress) {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        const Qt::Key key = static_cast<Qt::Key>(keyEvent->key());
+        const QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
-        if (key == Qt::Key_Delete || key == Qt::Key_Backspace) {
+        if (const auto key = static_cast<Qt::Key>(keyEvent->key()); key == Qt::Key_Delete || key == Qt::Key_Backspace) {
             onDeleteSelected();
             return true;
         }
@@ -231,20 +230,21 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     if (obj == m_treeView->viewport()) {
         if (event->type() == QEvent::Drop) {
 
-            QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-            QStandardItem* droppedItem = extractItemFromDrop(dropEvent);
+            const QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
+            const QStandardItem* droppedItem = extractItemFromDrop(dropEvent);
 
             if (!droppedItem) {
                 qDebug() << "eventFilter: extractItemFromDrop returned null";
                 return false;
             }
 
-            QString droppedType = droppedItem->data(Qt::UserRole + 1).toString();
-            QString droppedName = droppedItem->data(Qt::UserRole + 2).toString();
-
+            const QString droppedType = droppedItem->data(Qt::UserRole + 1).toString();
+            const QString droppedName = droppedItem->data(Qt::UserRole + 2).toString();
+            delete droppedItem;
+            
             qDebug() << "eventFilter: Item is" << droppedName;
 
-            int index = m_model->rowCount();
+            const int index = m_model->rowCount();
             auto* rowItem  = new QStandardItem(QString::number(index));
             auto* typeItem = new QStandardItem(droppedType);
             auto* nameItem = new QStandardItem(droppedName);
@@ -274,7 +274,7 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
     return QFrame::eventFilter(obj, event);
 }
 
-void LayerBox::onWeightChanged(const QString& text) {
+void LayerBox::onWeightChanged(const QString& text) const {
     getBackendLayer().by_layer = text;
 }
 
@@ -297,7 +297,7 @@ void LayerBox::onCopySelected() {
     if (rows.isEmpty()) return;
     Layer& layer = getBackendLayer();
     m_clipboard.clear();
-    for (int row : rows) {
+    for (const int row : rows) {
         m_clipboard.append(layer.discrete_packages[row]);
     }
 }
@@ -307,7 +307,7 @@ void LayerBox::onPasteClipboard() {
     if (m_clipboard.isEmpty()) return;
     Layer& layer = getBackendLayer();
     for (const Package& pkg : m_clipboard) {
-        int index = m_model->rowCount();
+        const int index = m_model->rowCount();
         auto* rowItem  = new QStandardItem(QString::number(index));
         auto* typeItem = new QStandardItem(pkg.event_type);
         auto* nameItem = new QStandardItem(pkg.event_name);
@@ -325,13 +325,13 @@ void LayerBox::onPasteClipboard() {
     }
 }
 
-void LayerBox::onDeleteSelected() {
+void LayerBox::onDeleteSelected() const {
     QList<int> rows = selectedRows();
     if (rows.isEmpty()) return;
     Layer& layer = getBackendLayer();
     // Remove in reverse order so indices stay valid
     for (int i = rows.size() - 1; i >= 0; --i) {
-        int row = rows[i];
+        const int row = rows[i];
         m_model->removeRow(row);
         layer.discrete_packages.removeAt(row);
     }
@@ -342,15 +342,14 @@ void LayerBox::onDeleteSelected() {
 }
 
 void LayerBox::onContextMenu(const QPoint& pos) {
-    bool hasSelection = !selectedRows().isEmpty();
+    const bool hasSelection = !selectedRows().isEmpty();
     QMenu menu(this);
     QAction* dupAction  = menu.addAction("Duplicate");
     QAction* delAction  = menu.addAction("Delete");
     dupAction->setEnabled(hasSelection);
     delAction->setEnabled(hasSelection);
 
-    QAction* chosen = menu.exec(m_treeView->viewport()->mapToGlobal(pos));
-    if (chosen == dupAction) {
+    if (const QAction* chosen = menu.exec(m_treeView->viewport()->mapToGlobal(pos)); chosen == dupAction) {
         onCopySelected();
         onPasteClipboard();
     } else if (chosen == delAction) {
