@@ -4,7 +4,6 @@
 #include "../windows/MainWindow.hpp"
 #include "../dialogs/ProjectPropertiesDialog.hpp"
 #include "../dialogs/FileNewObject.hpp"
-#include "../core/project_struct.hpp"
 #include "../../LASS/src/LASS.h"
 #include "../core/EnvelopeLibraryEntry.hpp"
 #include "../../CMOD/src/Markov.h"
@@ -41,20 +40,20 @@ class ProjectView : public QObject {
         // void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
         // ObjectWindow and Palette methods
-        PaletteViewController* getPalette() { return paletteView; }
-        void updatePaletteView();
-        void showAttributes(QString eventType, int index);
+        PaletteViewController* getPalette() const { return paletteView; }
+        void updatePaletteView() const;
+        void showAttributes(const QString &eventType, int index) const;
 
         // Remove the event at index from the backend and the palette.
         // If it is currently being viewed, the attributes panel is blanked.
-        void deleteEvent(const QString& typeStr, int index);
+        void deleteEvent(const QString& typeStr, int index) const;
 
         // Append a copy of the event at index to the backend and the palette.
-        void duplicateEvent(const QString& typeStr, int index);
+        void duplicateEvent(const QString& typeStr, int index) const;
 
         // Two-way name sync between palette and attributes view
-        void updatePaletteItemName(const QString& typeStr, int index, const QString& name);
-        void updateAttributesNameEntry(const QString& typeStr, int index, const QString& name);
+        void updatePaletteItemName(const QString& typeStr, int index, const QString& name) const;
+        void updateAttributesNameEntry(const QString& typeStr, int index, const QString& name) const;
         //void showAttributes(class IEvent* event);
 
     private:
@@ -69,7 +68,7 @@ class ProjectView : public QObject {
         bool modifiedButNotSaved;
 
         /* set properties insert function button */
-        void propertiesInsertFunction();
+        void propertiesInsertFunction() const;
 
         QMap<QString, bool> default_note_modifiers{
             {"+8va", true},          {"-8va", true},

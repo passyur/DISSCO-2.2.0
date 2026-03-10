@@ -8,27 +8,12 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QIODevice>
-#include <QXmlStreamWriter>
 #include <QDebug>
-#include <QTextStream>
-#include <QDomDocument>
-
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QCheckBox>
-#include <QDialogButtonBox>
-#include <QPushButton>
-#include <QMessageBox>
-#include <QScrollArea>
-#include <QTreeView>
-#include <QStandardItem>
 
 #include "ProjectViewController.hpp"
 #include "../windows/MainWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "../inst.hpp"
-#include "../core/EnvelopeLibraryEntry.hpp"
 #include "../dialogs/ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
 #include "../dialogs/FunctionGenerator.hpp"
@@ -38,8 +23,6 @@
 #include "EventAttributesViewController.hpp"
 #include "../dialogs/FileNewObject.hpp"
 #include "../ui/ui_FileNewObject.h"
-// #include "../core/IEvent.h"
-// #include "muParser.h"
 
 #include "../utilities.hpp"
 #include "../core/xmlwriter.hpp"
@@ -87,9 +70,8 @@ void ProjectView::save(){
     modifiedButNotSaved = false; // changes bool value because file is being saved
 
     // ensure directory exists before creating file
-    QFileInfo fileInfo = pm->fileinfo();
-    QDir dir = fileInfo.absoluteDir();
-    if (!dir.exists()) {
+    const QFileInfo fileInfo = pm->fileinfo();
+    if (const QDir dir = fileInfo.absoluteDir(); !dir.exists()) {
         if (!dir.mkpath(".")) {
             qDebug() << "Failed to create directory:" << dir.absolutePath();
             return;
@@ -135,7 +117,7 @@ void ProjectView::setProperties() {
 
  
     if (projectPropertiesDialog->exec() == QDialog::Accepted) {
-        QString new_title = projectPropertiesDialog->ui->titleEntry->text();
+        const QString new_title = projectPropertiesDialog->ui->titleEntry->text();
         pm->fileflag() = projectPropertiesDialog->ui->flagEntry->text();
         pm->numchannels() = projectPropertiesDialog->ui->numChannelsEntry->text();
         pm->samplerate() = projectPropertiesDialog->ui->rateEntry->text();
@@ -159,17 +141,16 @@ void ProjectView::setProperties() {
 
         MUtilities::modified();
         delete projectPropertiesDialog;
-        projectPropertiesDialog = NULL;
+        projectPropertiesDialog = nullptr;
     }
 }
 
-void ProjectView::propertiesInsertFunction() {
+void ProjectView::propertiesInsertFunction() const {
     if (!projectPropertiesDialog) return;
     ProjectManager *pm = Inst::get_project_manager();
     auto* generator = new FunctionGenerator(mainWindow, functionReturnFloat, pm->duration());
     if (generator->exec() == QDialog::Accepted) {
-        QString result = generator->getResultString();
-        if (!result.isEmpty()) {
+        if (const QString result = generator->getResultString(); !result.isEmpty()) {
             pm->duration() = result;
             projectPropertiesDialog->ui->durationEntry->setText(pm->duration());
         }
@@ -188,7 +169,7 @@ void ProjectView::insertObject() {
         QStandardItem* folder = nullptr;
 
         // Appends a new HEvent (High/Mid/Low) and sets typeStr/folder
-        auto addHEvent = [&](QList<HEvent>& list, Eventtype t, const QString& ts, QStandardItem* f) {
+        auto addHEvent = [&](QList<HEvent>& list, const Eventtype t, const QString& ts, QStandardItem* f) {
             HEvent obj = {};
             obj.type = t;
             obj.name = nameStr;
@@ -280,7 +261,7 @@ static Eventtype eventtypeFromString(const QString& s) {
     return top; // fallback (should not happen for deletable types)
 }
 
-void ProjectView::updatePaletteView() {
+void ProjectView::updatePaletteView() const {
     ProjectManager *pm = Inst::get_project_manager();
 
     auto makeItems = [](const QString& typeStr, const QString& nameStr,
@@ -376,11 +357,10 @@ void ProjectView::updatePaletteView() {
     }
 }
 
-void ProjectView::showAttributes(QString eventType, int index) {
+void ProjectView::showAttributes(const QString &eventType, const int index) const {
     qDebug() << "Showing attributes for event:" << eventType << "at index" << index;
 
-    Eventtype type = eventtypeFromString(eventType);
-    if (type == top)
+    if (Eventtype type = eventtypeFromString(eventType); type == top)
         eventAttributesView->showAttributesOfEvent(top, 0);
     else
         eventAttributesView->showAttributesOfEvent(type, index);
@@ -389,10 +369,9 @@ void ProjectView::showAttributes(QString eventType, int index) {
     mainWindow->ui->eventsScrollArea->updateGeometry();
 }
 
-void ProjectView::deleteEvent(const QString& typeStr, int index)
-{
+void ProjectView::deleteEvent(const QString& typeStr, const int index) const {
     ProjectManager* pm = Inst::get_project_manager();
-    Eventtype etype = eventtypeFromString(typeStr);
+    const Eventtype etype = eventtypeFromString(typeStr);
 
     // Notify the attributes view before touching the backend
     eventAttributesView->onEventDeleted(etype, index);
@@ -412,12 +391,10 @@ void ProjectView::deleteEvent(const QString& typeStr, int index)
     else if (etype == filter)  pm->filterevents().removeAt(index);
 
     // Remove from the palette model
-    QStandardItem* folder = paletteView->folderForType(typeStr);
-    if (folder) folder->removeRow(index);
+    if (QStandardItem* folder = paletteView->folderForType(typeStr)) folder->removeRow(index);
 }
 
-void ProjectView::duplicateEvent(const QString& typeStr, int index)
-{
+void ProjectView::duplicateEvent(const QString& typeStr, int index) const {
     ProjectManager* pm = Inst::get_project_manager();
 
     QStandardItem* folder = paletteView->folderForType(typeStr);
@@ -431,7 +408,7 @@ void ProjectView::duplicateEvent(const QString& typeStr, int index)
         return copy.name;
     };
 
-    Eventtype etype = eventtypeFromString(typeStr);
+    const Eventtype etype = eventtypeFromString(typeStr);
     QString newName;
     if      (etype == high)    newName = dup(pm->highevents());
     else if (etype == mid)     newName = dup(pm->midevents());
@@ -455,12 +432,10 @@ void ProjectView::duplicateEvent(const QString& typeStr, int index)
     folder->appendRow(PVCHelper::make_child_palette_tuple(typeStr, newName));
 }
 
-void ProjectView::updatePaletteItemName(const QString& typeStr, int index, const QString& name)
-{
+void ProjectView::updatePaletteItemName(const QString& typeStr, const int index, const QString& name) const {
     if (paletteView) paletteView->updateItemName(typeStr, index, name);
 }
 
-void ProjectView::updateAttributesNameEntry(const QString& typeStr, int index, const QString& name)
-{
+void ProjectView::updateAttributesNameEntry(const QString& typeStr, const int index, const QString& name) const {
     if (eventAttributesView) eventAttributesView->updateNameEntryIfShowing(typeStr, index, name);
 }
