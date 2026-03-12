@@ -1009,8 +1009,9 @@
                           </widget>
                         </item>
                         <item>
-                        <layout class="QHBoxLayout" name="partialsLayout">
-                            <item>
+                        <!-- Spectrum Partials -->
+                        <layout class="QVBoxLayout" name="partialsLayout">
+                            <!-- <item>
                             <layout class="QHBoxLayout" name="partial1Layout">
                                 <item>
                                     <widget class="QLabel" name="partial1Label">
@@ -1028,7 +1029,7 @@
                                     </widget>
                                 </item>
                             </layout>
-                            </item>
+                            </item> -->
                         </layout>
                         </item>
                         <item>

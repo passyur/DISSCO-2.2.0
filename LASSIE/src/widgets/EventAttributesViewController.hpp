@@ -16,6 +16,7 @@ class SpectrumPartial;
 class EventLayer;
 class QKeyEvent;
 class Modifiers;
+class Partials;
 
 namespace Ui {
     class EventAttributesViewController;
@@ -134,7 +135,7 @@ private slots:
     // // main actions
     // void addNewLayerButtonClicked();
     void addModifierButtonClicked();
-    // void addPartialButtonClicked();
+    void addPartialButtonClicked(int partialIndex);
 
     // modifier buttons
     void modFunctionButtonClicked(Modifiers* mod, ModButtonType type);
@@ -158,7 +159,8 @@ private:
     // index of event in QList in ProjectManager
     int m_curreventindex = -1;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
-    QList<Modifiers*>               m_modifiers;     
+    QList<Modifiers*>               m_modifiers;  
+    QList<Partials*>                m_partials;   
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
     // QList<class LayerBox*>           m_layerBoxesStorage;

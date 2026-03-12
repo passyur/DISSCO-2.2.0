@@ -8,6 +8,7 @@
 //#include "PaletteViewController.h"
 //#include "PartialWindow.h"
 #include "../widgets/LayerBox.hpp"
+#include "../widgets/Partials.hpp"
 
 #include "Modifiers.hpp"
 #include "../ui/ui_Modifiers.h"
@@ -124,10 +125,10 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::addNewLayerButtonClicked);*/
     connect(ui->addModifierButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addModifierButtonClicked);
-/*    connect(ui->addPartialButton, &QPushButton::clicked,
+    connect(ui->addPartialButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addPartialButtonClicked);
 
- */   // --- tempo controls ---
+    // --- tempo controls ---
     ui->tempoValuePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->tempoFractionPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     connect(ui->tempoAsNoteValueRadio, &QRadioButton::clicked,
@@ -145,6 +146,9 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
 
     LayerBox* box = new LayerBox(this, e_projectView);
     ui->layersLayout->addWidget(box);
+
+    // Partials* firstPartial = new Partials(m_curreventindex, 0, this);
+    // ui->partialsLayout->addWidget(firstPartial);
 }
 
 EventAttributesViewController::~EventAttributesViewController() {
@@ -186,6 +190,7 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int in
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
         m_modifiers.clear();
+        m_partials.clear();
     }
     m_curreventtype = type;
     m_curreventindex = index;
@@ -362,7 +367,13 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             event.num_partials = ui->spectrumNumPartialEntry->text();
             event.deviation = ui->spectrumDeviationEntry->text();
             event.generate_spectrum = ui->spectrumGenEntry->text();
+
             // to do: spectrum partials
+            event.spectrum.partials.clear();
+            for (int i = 0; i < m_partials.count(); ++i) {
+                qDebug() << "Partial at index" << i << ":" << m_partials.at(i);
+                event.spectrum.partials.append((m_partials.at(i))->m_partialEntry->text());
+            }
         }
         if (type == env){
             EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
@@ -559,6 +570,14 @@ void EventAttributesViewController::showCurrentEventData() {
     //     m_soundPartialHboxes->clear();
     //     m_soundPartialHboxes = nullptr;
     // }
+
+    for (Partials* par : m_partials) {
+        ui->partialsLayout->removeWidget(par);
+        par->deleteLater();
+    }
+    m_partials.clear(); 
+
+
 
     // Choose page based on type of currently shown event
     Eventtype type = m_curreventtype;
@@ -861,37 +880,37 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->filEntry->setText(event.filter);
         }
     }else{
-        if(type == sound){
-            const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
-            ui->soundNameEntry->setText(event.name);
-            ui->spectrumNumPartialEntry->setText(event.num_partials);
-            ui->spectrumDeviationEntry->setText(event.deviation);
-            ui->spectrumGenEntry->setText(event.generate_spectrum);
-
-            /// \todo partials
-            // auto* sp = extra->getSpectrumPartials();
-            // if (sp) {
-            //     m_soundPartialHboxes = new SoundPartialHBox(sp, this);
-            //     ui.partialsLayout->addWidget(m_soundPartialHboxes);
-            //     sp = sp->next;
-            //     while (sp) {
-            //         auto* nextBox = new SoundPartialHBox(sp, this);
-            //         m_soundPartialHboxes->next = nextBox;
-            //         nextBox->prev = m_soundPartialHboxes;
-            //         ui->partialsLayout->addWidget(nextBox);
-            //         sp = sp->next;
-            //     }
-            //     m_soundPartialHboxes->setPartialNumber(1);
-            // }
-
-        // }else
         if (type == sound) {
             const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
             ui->soundNameEntry->setText(event.name);
             ui->spectrumNumPartialEntry->setText(event.num_partials);
             ui->spectrumDeviationEntry->setText(event.deviation);
             ui->spectrumGenEntry->setText(event.generate_spectrum);
-            // to do: spectrum partials
+            
+            // Rebuild Partials for the newly shown sound event
+            for (int i = 0; i < event.spectrum.partials.size(); ++i) {
+                Partials* par = new Partials(m_curreventindex, i, this);
+                connect(par, &Partials::deleteRequested, this, [this](Partials* p) {
+                    ProjectManager* pm2 = Inst::get_project_manager();
+                    SpectrumEvent* se =  &pm2->spectrumevents()[m_curreventindex];
+                 
+                    int idx = m_partials.indexOf(p);
+                    if (idx >= 0 && idx < se->spectrum.partials.size()) {
+                        se->spectrum.partials.removeAt(idx);
+                    }
+                    m_partials.removeOne(p);
+                    ui->partialsLayout->removeWidget(p);
+                    p->deleteLater();
+                    for (int j = 0; j < m_partials.size(); ++j) {
+                        m_partials[j]->setPartialIndex(j);
+                    }
+                    fixStackedWidgetLayout(ui->soundPage);
+                });
+                m_partials.append(par);
+                ui->partialsLayout->addWidget(par);
+            }
+            fixStackedWidgetLayout(ui->soundPage);
+
         }else if(type == env){
             const EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
             ui->envNameEntry->setText(event.name);
@@ -966,7 +985,6 @@ void EventAttributesViewController::showCurrentEventData() {
         //     }
         // }
     } /* not hevent nor bottom event */
-}
 }
 
 void EventAttributesViewController::fixedButtonClicked() {
@@ -1328,6 +1346,46 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
     m_layerBoxesStorage.push_back(box);
 }
 */
+
+void EventAttributesViewController::addPartialButtonClicked(int partialIndex) {
+
+    qDebug("add new partial button clicked");
+
+    // ProjectManager *pm = Inst::get_project_manager();
+
+    // Get a REFERENCE to the actual backend SpectrumEvent so the append is not lost
+    // SpectrumEvent* sevent = &pm->spectrumevents()[m_curreventindex];
+
+    // Append a new pqartial to the backend and record its index
+    // sevent->spectrum.partials.append("");
+    // int partialIndex = sevent->spectrum.partials.size() - 1;
+
+    // Create the UI widget using indices so it can always find the backend Layer
+    Partials* par = new Partials(m_curreventindex, partialIndex, this);
+    connect(par, &Partials::deleteRequested, this, [this](Partials* p) {
+        // Remove from backend
+        ProjectManager* pm2 = Inst::get_project_manager();
+        SpectrumEvent* se =  &pm2->spectrumevents()[m_curreventindex];
+
+        int idx = m_partials.indexOf(p);
+        if (idx >= 0 && idx < se->spectrum.partials.size()) {
+            se->spectrum.partials.removeAt(idx);
+        }
+        m_partials.removeOne(p);
+        ui->partialsLayout->removeWidget(p);
+        p->deleteLater();
+        for (int i = 0; i < m_partials.size(); ++i) {
+            m_partials[i]->setPartialIndex(i);
+        }
+        fixStackedWidgetLayout(ui->soundPage);
+    });
+
+    m_partials.append(par);
+    ui->partialsLayout->addWidget(par);
+    // fixStackedWidgetLayout(ui->soundPage);
+
+}
+
 void EventAttributesViewController::addModifierButtonClicked() {
     // TO DO: connect add modifier to data structure
     
@@ -1380,22 +1438,7 @@ void EventAttributesViewController::modRemoveButtonClicked(Modifiers* mod) {
     delete mod;
     m_modifiers.removeOne(mod);
 }
-/*
-void EventAttributesViewController::addPartialButtonClicked() {
-    if (!m_currentlyShownEvent) return;
-    auto* partial = m_currentlyShownEvent->getEventExtraInfo()->addPartial();
-    auto* box = new SoundPartialHBox(partial, this);
-    if (!m_soundPartialHboxes) m_soundPartialHboxes = box;
-    else {
-        auto* tail = m_soundPartialHboxes;
-        while (tail->next) tail = tail->next;
-        tail->next = box;
-        box->prev = tail;
-    }
-    ui->partialsLayout->addWidget(box);
-    m_soundPartialHboxes->setPartialNumber(1);
-}
-*/
+
 void EventAttributesViewController::tempoAsNoteValueButtonClicked() {
     ui->tempoSecondaryStack->setCurrentWidget(ui->tempoValuePage);
     ui->emptyTempoPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
