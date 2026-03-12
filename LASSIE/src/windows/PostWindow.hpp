@@ -13,21 +13,21 @@ public:
     explicit PostWindow(QProcess *process, QWidget *parent = nullptr);
 
 private slots:
-    void handleStdout();
-    void handleStderr();
-    void increaseFont();
-    void decreaseFont();
-    void clearOutput();
-    void termProcess();
-    void killProcess();
-    void runProcess();
+    void handleStdout() const;
+    void handleStderr() const;
+    void increaseFont() const;
+    void decreaseFont() const;
+    void clearOutput() const;
+    void termProcess() const;
+    void killProcess() const;
+    void runProcess() const;
 
 private:
     QTextEdit *textEdit;
     QProcess *proc;
     bool autoscroll = true;
 
-    void closeEvent(QCloseEvent*);
-    void appendColored(const QString &text, const QColor &color);
-    void scrollToBottom();
+    void closeEvent(QCloseEvent*) override;
+    void appendColored(const QString &text, const QColor &color) const;
+    void scrollToBottom() const;
 };

@@ -180,26 +180,18 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     updateGeometry();
 }
 
-void EventAttributesViewController::updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name)
-{
-    static const QMap<QString, Eventtype> typeMap = {
-        {"Top", top}, {"High", high}, {"Mid", mid}, {"Low", low}, {"Bottom", bottom},
-        {"Spectrum", sound}, {"Note", note}, {"Envelope", env}, {"Sieve", sieve},
-        {"Spatialization", spa}, {"Pattern", pattern}, {"Reverb", reverb}, {"Filter", filter}
-    };
-    if (!typeMap.contains(typeStr)) return;
-    Eventtype et = typeMap[typeStr];
-    if (!m_hasCurrentEvent || m_curreventtype != et || m_curreventindex != index) return;
+void EventAttributesViewController::updateNameEntryIfShowing(const Eventtype type, const int index, const QString& name) const {
+    if (!m_hasCurrentEvent || m_curreventtype != type || m_curreventindex != index) return;
 
-    if (et <= bottom)         ui->nameEntry->setText(name);
-    else if (et == sound)     ui->soundNameEntry->setText(name);
-    else if (et == env)       ui->envNameEntry->setText(name);
-    else if (et == sieve)     ui->sieveNameEntry->setText(name);
-    else if (et == spa)       ui->spaNameEntry->setText(name);
-    else if (et == pattern)   ui->patNameEntry->setText(name);
-    else if (et == reverb)    ui->revNameEntry->setText(name);
-    else if (et == note)      ui->noteNameEntry->setText(name);
-    else if (et == filter)    ui->filNameEntry->setText(name);
+    if (type <= bottom)         ui->nameEntry->setText(name);
+    else if (type == sound)     ui->soundNameEntry->setText(name);
+    else if (type == env)       ui->envNameEntry->setText(name);
+    else if (type == sieve)     ui->sieveNameEntry->setText(name);
+    else if (type == spa)       ui->spaNameEntry->setText(name);
+    else if (type == pattern)   ui->patNameEntry->setText(name);
+    else if (type == reverb)    ui->revNameEntry->setText(name);
+    else if (type == note)      ui->noteNameEntry->setText(name);
+    else if (type == filter)    ui->filNameEntry->setText(name);
 }
 
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {

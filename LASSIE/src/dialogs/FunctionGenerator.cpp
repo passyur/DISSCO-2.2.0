@@ -404,25 +404,21 @@ void FunctionGenerator::setupUi()
 
     // TO DO: Parsing to set result string value for all input fields
     XMLPlatformUtils::Initialize();
-    XercesDOMParser* parser = new XercesDOMParser();
-    std::string stdOriginalString = originalString.toStdString();
-    xercesc::MemBufInputSource myxml_buf  ((const XMLByte*)stdOriginalString.c_str(), stdOriginalString.size(),
+    const auto parser = new XercesDOMParser();
+    const std::string stdOriginalString = originalString.toStdString();
+    const xercesc::MemBufInputSource myxml_buf  (reinterpret_cast<const XMLByte*>(stdOriginalString.c_str()), stdOriginalString.size(),
                                         "function (in memory)");
     parser->parse(myxml_buf);
-    DOMDocument* xmlDocument = parser->getDocument();
-    DOMElement* root = xmlDocument->getDocumentElement();
+    const DOMDocument* xmlDocument = parser->getDocument();
+    const DOMElement* root = xmlDocument->getDocumentElement();
 
     char* functionNameChars;
-    char* charBuffer;
-    DOMCharacterData* textData;
     std::string functionName;
-    DOMElement* thisElement;
 
     //emptyString
-    if (root == NULL){ return; }
-    DOMElement* functionNameElement = root->getFirstElementChild();
-    textData = ( DOMCharacterData*) functionNameElement->getFirstChild();
-    if (textData){
+    if (root == nullptr) return;
+    const DOMElement* functionNameElement = root->getFirstElementChild();
+    if (const DOMCharacterData *textData = static_cast<DOMCharacterData*>(functionNameElement->getFirstChild())){
         functionNameChars = XMLString::transcode(textData->getData());
         functionName = string(functionNameChars);
         XMLString::release(&functionNameChars);
@@ -430,8 +426,7 @@ void FunctionGenerator::setupUi()
     if (functionName == "RandomInt") {
         int index = -1;
         for (int i = 0; i < ui->functionOptions->count(); ++i) {
-            QString itemText = ui->functionOptions->itemText(i);
-            if (itemText.toStdString() == functionName) {
+            if (QString itemText = ui->functionOptions->itemText(i); itemText.toStdString() == functionName) {
                 index = i;
                 break;
             }
@@ -447,13 +442,12 @@ void FunctionGenerator::setupUi()
 std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElement){
 
   char* charBuffer;
-  DOMCharacterData* textData;
   string returnString;
-  DOMElement* child = _thisFunctionElement->getFirstElementChild();
-  if (child ==NULL){ //not containing any child, return string
+  const DOMElement* child = _thisFunctionElement->getFirstElementChild();
+  if (child == nullptr){
+      //not containing any child, return string
 
-    textData = ( DOMCharacterData*) _thisFunctionElement->getFirstChild();
-    if (textData){
+      if (const DOMCharacterData *textData = static_cast<DOMCharacterData *>(_thisFunctionElement->getFirstChild())){
       charBuffer = XMLString::transcode(textData->getData());
       returnString = string(charBuffer);
       XMLString::release(&charBuffer);
@@ -463,9 +457,9 @@ std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElemen
   }
 
   //contain function!
-  XMLCh tempStr[3] = {chLatin_L, chLatin_S, chNull};
+  constexpr XMLCh tempStr[3] = {chLatin_L, chLatin_S, chNull};
   DOMImplementation *impl          = DOMImplementationRegistry::getDOMImplementation(tempStr);
-  DOMLSSerializer   *theSerializer = ((DOMImplementationLS*)impl)->createLSSerializer();
+  DOMLSSerializer   *theSerializer = impl->createLSSerializer();
   XMLCh* bla = theSerializer->writeToString (child);
   returnString = XMLString::transcode(bla);
   XMLString::release(&bla);

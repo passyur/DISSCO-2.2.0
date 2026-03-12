@@ -79,27 +79,27 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
     m_listModel->removeRows(0, m_listModel->rowCount());
     if (!activeProject) return;
     ProjectManager *pm = Inst::get_project_manager();
-    auto& models = pm->markovmodels();
+    const auto& models = pm->markovmodels();
     for (int i = 0; i < models.size(); ++i) {
-        auto item = new QStandardItem(QString::number(i));
+        const auto item = new QStandardItem(QString::number(i));
         m_listModel->appendRow(item);
     }
 }
 
-void MarkovModelLibraryWindow::createNewModel() {
+void MarkovModelLibraryWindow::createNewModel() const {
     if (!activeProject) return;
-    int newIdx = MarkovUtilities::createNewMarkovModel();
+    const int newIdx = MarkovUtilities::createNewMarkovModel();
     MUtilities::modified();
-    auto item = new QStandardItem(QString::number(newIdx));
+    const auto item = new QStandardItem(QString::number(newIdx));
     m_listModel->appendRow(item);
 }
 
-void MarkovModelLibraryWindow::duplicateModel() {
+void MarkovModelLibraryWindow::duplicateModel() const {
     if (currentSelection < 0 || !activeProject) return;
-    int newIdx = MarkovUtilities::duplicateMarkovModel(currentSelection);
+    const int newIdx = MarkovUtilities::duplicateMarkovModel(currentSelection);
     if (newIdx < 0) return;
     MUtilities::modified();
-    auto item = new QStandardItem(QString::number(newIdx));
+    const auto item = new QStandardItem(QString::number(newIdx));
     m_listModel->appendRow(item);
 }
 
@@ -150,7 +150,7 @@ void MarkovModelLibraryWindow::update(int selection) {
 void MarkovModelLibraryWindow::buildTable() {
     // Clear old widgets
     auto clearArea = [&](QScrollArea* area, QVector<QLineEdit*>& vec){
-        QWidget* w = new QWidget;
+        const auto w = new QWidget;
         area->setWidget(w);
         vec.clear();
     };
@@ -160,7 +160,7 @@ void MarkovModelLibraryWindow::buildTable() {
 
     // Dist & values share similar layout logic...
     auto populateLinear = [&](QScrollArea* area, QVector<QLineEdit*>& vec){
-        QWidget* container = new QWidget;
+        const auto container = new QWidget;
         auto* layout = new QHBoxLayout(container);
         for (int i = 0; i < size; ++i) {
             auto* le = new QLineEdit;
@@ -175,7 +175,7 @@ void MarkovModelLibraryWindow::buildTable() {
     populateLinear(m_valueScroll, m_valueEntries);
 
     // Matrix as grid
-    QWidget* matrixContainer = new QWidget;
+    const auto matrixContainer = new QWidget;
     auto* grid = new QGridLayout(matrixContainer);
     for (int i = 0; i < size+1; ++i) {
         for (int j = 0; j < size+1; ++j) {
@@ -217,8 +217,8 @@ void MarkovModelLibraryWindow::onSetSize() {
     // Cache old
     QVector<QString> oldVals, oldDists; 
     QVector<QVector<QString>> oldMat(size, QVector<QString>(size));
-    for (auto* e : m_valueEntries) oldVals.push_back(e->text());
-    for (auto* e : m_distEntries)  oldDists.push_back(e->text());
+    for (const auto* e : m_valueEntries) oldVals.push_back(e->text());
+    for (const auto* e : m_distEntries)  oldDists.push_back(e->text());
     int k = 0;
     for (int i = 0; i < size; ++i)
         for (int j = 0; j < size; ++j, ++k)
@@ -226,8 +226,7 @@ void MarkovModelLibraryWindow::onSetSize() {
 
     // New size
     bool ok;
-    int newSize = m_sizeEntry->text().toInt(&ok);
-    if (ok && newSize > 0) {
+    if (int newSize = m_sizeEntry->text().toInt(&ok); ok && newSize > 0) {
         size = newSize;
         buildTable();
         // Restore overlaps
@@ -241,8 +240,8 @@ void MarkovModelLibraryWindow::onSetSize() {
     }
 }
 
-void MarkovModelLibraryWindow::onRightClick(const QPoint& pos) {
-    QPoint global = m_treeView->viewport()->mapToGlobal(pos);
+void MarkovModelLibraryWindow::onRightClick(const QPoint& pos) const {
+    const QPoint global = m_treeView->viewport()->mapToGlobal(pos);
     m_contextMenu->exec(global);
 }
 

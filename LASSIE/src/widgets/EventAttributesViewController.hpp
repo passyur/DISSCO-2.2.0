@@ -9,11 +9,9 @@
 
 #include "../core/event_struct.hpp"
 
-class SharedPointers;
 class ProjectView;
 class EventBottomModifier;
 class SpectrumPartial;
-class EventLayer;
 class QKeyEvent;
 class Modifiers;
 class LayerBox;
@@ -55,20 +53,12 @@ typedef enum {
     modPartialButton
 } ModButtonType;
 
-// forward enums from original GTK version - now defined in LASSIE.h
-// enum TempoPrefix;
-// enum TempoNoteValue;
-// enum ModifierType;
-
 class EventAttributesViewController : public QFrame {
     Q_OBJECT
 
 public:
     explicit EventAttributesViewController(ProjectView* projectView);
-    // explicit EventAttributesViewController(SharedPointers* sharedPointers,
-    //                                        QWidget* parent = nullptr);                                       
     ~EventAttributesViewController() override;
-    ProjectView* e_projectView = nullptr;
 
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
@@ -78,7 +68,7 @@ public:
     void saveCurrentShownEventData();
 
     // Update the displayed name entry if typeStr/index matches the currently shown event
-    void updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name);
+    void updateNameEntryIfShowing(Eventtype type, int index, const QString& name) const;
 
     // Blank the panel (e.g. when the viewed event is deleted)
     void clearView();
@@ -157,23 +147,19 @@ private slots:
     // void tempoAsNoteValueEntryChanged(const QString&);
 
 private:
+    ProjectView* e_projectView = nullptr;
     // UI loader
     Ui::EventAttributesViewController* ui;
-
-    // // data/model
-    // SharedPointers*              m_sharedPointers;
-    // IEvent*                      m_currentlyShownEvent;
-    // Eventtype                       m_currentlyShownEvent;
     
     Eventtype m_curreventtype;
     // index of event in QList in ProjectManager
     int m_curreventindex = -1;
     bool m_hasCurrentEvent = false;
-    // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
+    QList<LayerBox*>                 m_layerBoxes;
+
     QList<Modifiers*>               m_modifiers;     
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
-    QList<LayerBox*>                 m_layerBoxes;
     // QList<class QCheckBox*>          m_noteModifierCheckBoxes;
 
     // // internal helpers

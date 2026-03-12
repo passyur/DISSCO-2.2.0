@@ -40,7 +40,7 @@ public:
     LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent);
     ~LayerBox() override;
 
-    QStandardItem* extractItemFromDrop(QDropEvent* event);
+    static QStandardItem* extractItemFromDrop(const QDropEvent* event);
     bool eventFilter(QObject* obj, QEvent* event) override;
 
     // Called by EventAttributesViewController when layers above this one are deleted
@@ -74,11 +74,11 @@ signals:
 private slots:
     void onWeightFunctionClicked() {};
     void onDeleteLayerClicked();
-    void onWeightChanged(const QString& text);
+    void onWeightChanged(const QString& text) const;
     void onContextMenu(const QPoint& pos);
     void onCopySelected();
     void onPasteClipboard();
-    void onDeleteSelected();
+    void onDeleteSelected() const;
 
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
@@ -87,7 +87,7 @@ protected:
 private:
     // Returns a reference to the actual Layer in the backend.
     // Valid as long as the parent HEvent's event_layers list is not resized.
-    Layer& getBackendLayer();
+    Layer& getBackendLayer() const;
 
     QList<int> selectedRows() const;
 

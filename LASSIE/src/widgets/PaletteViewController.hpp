@@ -1,78 +1,73 @@
 #ifndef PALETTEVIEWCONTROLLER_HPP
 #define PALETTEVIEWCONTROLLER_HPP
 
-#include <QWidget>
-#include <QMap>
-#include <QString>
-#include <vector>
 #include <QTreeView>
 #include <QStandardItemModel>
 #include <QMenu>
-#include <QAction>
-#include <QPoint>
+
+#include "../core/event_struct.hpp"
 
 class ProjectView;
-class IEvent;
 
 class PaletteViewController : public QWidget {
     Q_OBJECT
 
 public:
     explicit PaletteViewController(ProjectView* projectView);
-    ~PaletteViewController();
+    ~PaletteViewController() override;
     
-    // Insert a new event into the palette
-    void insertEvent(IEvent* event, const QString& type);
-    
-    // Remove an event from the palette
-    void removeEvent(IEvent* event, const QString& type);
+    // Populate all palette folders from the current project's event lists
+    void populate() const;
 
-    // Opens Object Window
-    void objectActivated(const QModelIndex &index);
+    // Append a {type, name} row to the folder corresponding to the given Eventtype
+    void appendEventRow(Eventtype type, const QString& name) const;
+
+    // Handles activation of an object in the palette
+    void objectActivated(const QModelIndex &index) const;
 
     // Handle name changes in palette items
-    void onItemChanged(QStandardItem* item);
+    void onItemChanged(const QStandardItem* item) const;
 
     // Update a specific palette item's name (signals blocked to avoid re-entry)
-    void updateItemName(const QString& typeStr, int index, const QString& name);
+    void updateItemName(const QString& typeStr, int index, const QString& name) const;
 
     // Return the folder item for the given type string, or nullptr if unknown
-    QStandardItem* folderForType(const QString& typeStr) const;
+    QStandardItem* string_to_folder(const QString& s) const;
 
     // Handle row removals from palette
-    void onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
+    void onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last) const;
 
     // Handle row insertions to palette
-    void onRowsInserted(const QModelIndex &parent, int first, int last);
-
-    // Object Folders under tree view
-    QStandardItem* folderTop;
-    QStandardItem* folderHigh;
-    QStandardItem* folderMid;
-    QStandardItem* folderLow;
-    QStandardItem* folderBottom;
-    QStandardItem* folderSpectrum;
-    QStandardItem* folderNote;
-    QStandardItem* folderEnv;
-    QStandardItem* folderSiv;
-    QStandardItem* folderSpa;
-    QStandardItem* folderPat;
-    QStandardItem* folderRev;
-    QStandardItem* folderFil;
-    QStandardItem* folderMea;
+    void onRowsInserted(const QModelIndex &parent, int first, int last) const;
+    
+    // Build a two-column {type, name} row suitable for appendRow()
+    static QList<QStandardItem*> makeChildPaletteTuple(const QString& type, const QString& name);
 
 private slots:
     void onContextMenuRequested(const QPoint& pos);
 
 private:
-    ProjectView* projectView;
-
-    // Store events by type
-    QMap<QString, std::vector<IEvent*>> eventsByType;
-
+    ProjectView* projectView = nullptr;
+    
+    // Object Folders under tree view
+    QStandardItem* folderTop = nullptr;
+    QStandardItem* folderHigh = nullptr;
+    QStandardItem* folderMid = nullptr;
+    QStandardItem* folderLow = nullptr;
+    QStandardItem* folderBottom = nullptr;
+    QStandardItem* folderSpectrum = nullptr;
+    QStandardItem* folderNote = nullptr;
+    QStandardItem* folderEnv = nullptr;
+    QStandardItem* folderSiv = nullptr;
+    QStandardItem* folderSpa = nullptr;
+    QStandardItem* folderPat = nullptr;
+    QStandardItem* folderRev = nullptr;
+    QStandardItem* folderFil = nullptr;
+    QStandardItem* folderMea = nullptr;
+    
     // Tree View
-    QTreeView* treeView;
-    QStandardItemModel* model;
+    QTreeView* treeView = nullptr;
+    QStandardItemModel* model = nullptr;
 
 };
 

@@ -15,7 +15,7 @@ public:
     /*Constructor to create the Set Properties / Project Properties Dialog Interface*/
     explicit ProjectPropertiesDialog(QWidget *parent = nullptr);
     /*Destructor to delete the UI*/
-    ~ProjectPropertiesDialog();
+    ~ProjectPropertiesDialog() override;
     
     Ui::ProjectPropertiesDialog *ui;
     

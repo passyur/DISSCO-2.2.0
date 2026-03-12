@@ -15,7 +15,7 @@ public:
     /*Constructor to create the New Object Dialog Interface*/
     explicit FileNewObject(QWidget *parent = nullptr);
     /*Destructor to delete the UI*/
-    ~FileNewObject();
+    ~FileNewObject() override;
     
     Ui::FileNewObject *ui;
     

@@ -16,6 +16,13 @@ namespace MUtilities {
 
 }
 
+static const QMap<QString, Eventtype> string_to_eventtype = {
+    {"Top", top}, {"High", high}, {"Mid", mid}, {"Low", low}, {"Bottom", bottom},
+    {"Spectrum", sound}, {"Note", note}, {"Envelope", env}, {"Sieve", sieve},
+    {"Spatialization", spa}, {"Pattern", pattern}, {"Reverb", reverb}, {"Filter", filter},
+    {"Measurement", mea}
+};
+
 namespace MarkovUtilities {
     // nhi: Markov model methods
     inline int createNewMarkovModel() { 

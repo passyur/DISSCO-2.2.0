@@ -207,8 +207,7 @@ void MainWindow::runProject()
                                         "abcd", &ok);
     if(!ok) return;
     pm->seed() = seed;
-    // pm->writeSeedEntry(seed.toStdString());
-    saveFile();
+    pm->writeSeedEntry(seed);
 
     using namespace Qt::StringLiterals;
 
