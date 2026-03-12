@@ -66,6 +66,12 @@ class MainWindow : public QMainWindow
         void runProject();
         void showFile();
 
+        // Returns false if the user cancelled, true otherwise.
+        // Prompts to save unsaved changes when a project is already open.
+        bool maybeSaveBeforeClose();
+        // Tears down the current project view and project data, resetting UI state.
+        void closeCurrentProject();
+
         QString currentFile;
         
         // Actions

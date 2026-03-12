@@ -70,6 +70,57 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
+bool MainWindow::maybeSaveBeforeClose()
+{
+    if (!projectView)
+        return true;
+
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        tr("Save Changes"),
+        tr("Would you like to save your changes to the current project?"),
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel
+    );
+
+    if (reply == QMessageBox::Cancel)
+        return false;
+
+    if (reply == QMessageBox::Yes)
+        saveFile();
+
+    return true;
+}
+
+void MainWindow::closeCurrentProject()
+{
+    if (!projectView)
+        return;
+
+    // Detach and hide the auxiliary windows that reference the current project
+    envelopeLibraryWindow->hide();
+    markovWindow->hide();
+
+    // Grab the project pointer before tearing down the view
+    Project* oldProject = Inst::get_project_manager()->get_curr_project();
+
+    // Delete the view — its destructor removes palette/attributes widgets from the UI
+    delete projectView;
+    projectView = nullptr;
+
+    // Delete the project data
+    Inst::get_project_manager()->close(oldProject);
+
+    // Reset UI to the no-project state
+    ui->tabWidget->hide();
+    ui->paletteWidget->hide();
+    enableProjectActions(false);
+    openAct->setEnabled(true);
+    newAct->setEnabled(true);
+
+    currentFile = QString();
+    setWindowTitle(tr("LASSIE"));
+}
+
 void MainWindow::newFile()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
@@ -77,6 +128,11 @@ void MainWindow::newFile()
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
     if (fileName.isEmpty())
         return;
+
+    if (!maybeSaveBeforeClose())
+        return;
+
+    closeCurrentProject();
 
     QFileInfo fileInfo(fileName);
     QString projectName = fileInfo.completeBaseName();
@@ -98,21 +154,27 @@ void MainWindow::openFile()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                   QString(),
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (!fileName.isEmpty()){
-        QFile file(fileName);
-        if (!file.open(QFile::ReadOnly | QFile::Text)) {
-            QMessageBox::warning(this, tr("LASSIE"),
-                            tr("Cannot read file %1:\n%2.")
-                            .arg(QDir::toNativeSeparators(fileName),
-                                file.errorString()));
+    if (fileName.isEmpty())
+        return;
 
-            return;
-        }
-        currentFile = fileName;
-
-        Project *p = Inst::get_project_manager()->open(currentFile, NULL);
-        showFile();
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("LASSIE"),
+                        tr("Cannot read file %1:\n%2.")
+                        .arg(QDir::toNativeSeparators(fileName),
+                            file.errorString()));
+        return;
     }
+    file.close();
+
+    if (!maybeSaveBeforeClose())
+        return;
+
+    closeCurrentProject();
+
+    currentFile = fileName;
+    Project *p = Inst::get_project_manager()->open(currentFile, NULL);
+    showFile();
 }
 
 void MainWindow::saveFile()
@@ -427,16 +489,12 @@ void MainWindow::showFile()
 {
     if(currentFile != nullptr){
         if(projectView == nullptr){
-            // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
-            openAct->setDisabled(true);
-            newAct->setDisabled(true);
-
             projectView = new ProjectView(this, currentFile);
 
             setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
             statusBar()->showMessage(tr("Project loaded"), 2000);
             projectView->setProperties();
-            
+
             //nhi: connect envelope library to loaded project
             envelopeLibraryWindow->setActiveProject(projectView);
 

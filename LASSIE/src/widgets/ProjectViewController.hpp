@@ -24,6 +24,7 @@ class ProjectView : public QObject {
         // ProjectView();
         /* init/constructor to spawn a project_view inside of mainwin corresponding to a particular filepath and project_title; i.e., open project */
         ProjectView(MainWindow* _mainWindow, QString _pathAndName);
+        ~ProjectView();
 
         /* function to write to the xml .dissco file */
         void save();

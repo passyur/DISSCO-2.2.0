@@ -76,6 +76,26 @@ ProjectView::ProjectView(MainWindow* _mainWindow, QString _pathAndName) {
     updatePaletteView();
 }
 
+ProjectView::~ProjectView() {
+    // Clean up lazily-created dialogs
+    delete projectPropertiesDialog;
+    delete newObject;
+
+    // Remove palette widget from layout and delete it
+    if (mainWindow && paletteView) {
+        mainWindow->ui->paletteLayout->removeWidget(paletteView);
+        delete paletteView;
+        paletteView = nullptr;
+    }
+
+    // Remove event attributes widget from scroll area and delete it
+    if (mainWindow) {
+        QWidget* old = mainWindow->ui->eventsScrollArea->takeWidget();
+        delete old;
+        eventAttributesView = nullptr;
+    }
+}
+
 // Function to write XML Formatting
 void ProjectView::writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xmlString) {
     QDomDocument tempDoc;
