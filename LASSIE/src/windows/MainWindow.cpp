@@ -26,7 +26,7 @@
 #include <QProcess>
 #include <QMessageBox>
 
-MainWindow *MainWindow::instance_ = 0;
+MainWindow *MainWindow::instance_ = nullptr;
 
 MainWindow::MainWindow(Inst* m)
     : QMainWindow()
@@ -70,57 +70,110 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void MainWindow::newFile()
+bool MainWindow::maybeSaveBeforeClose()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
-                                                  QString(),
-                                                  tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (fileName.isEmpty())
+    if (!projectView)
+        return true;
+
+    const QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        tr("Save Changes"),
+        tr("Would you like to save your changes to the current project?"),
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel
+    );
+
+    if (reply == QMessageBox::Yes)
+        saveFile();
+
+    return reply != QMessageBox::Cancel;
+}
+
+void MainWindow::closeCurrentProject()
+{
+    if (!projectView)
         return;
 
-    QFileInfo fileInfo(fileName);
-    QString projectName = fileInfo.completeBaseName();
-    QString projectFolder = fileInfo.absolutePath() + "/" + projectName;
-    QDir dir;
-    if (!dir.exists(projectFolder))
+    // Detach and hide the auxiliary windows that reference the current project
+    envelopeLibraryWindow->hide();
+    markovWindow->hide();
+
+    // Delete the view — its destructor removes palette/attributes widgets from the UI
+    delete projectView;
+    projectView = nullptr;
+    
+    // Grab the project pointer before tearing down the view
+    ProjectManager *pm = Inst::get_project_manager();
+    // Delete the project data
+    pm->close(pm->get_curr_project());
+
+    // Reset UI to the no-project state
+    ui->tabWidget->hide();
+    ui->paletteWidget->hide();
+    enableProjectActions(false);
+    openAct->setEnabled(true);
+    newAct->setEnabled(true);
+
+    currentFile = QString();
+    setWindowTitle(tr("LASSIE"));
+}
+
+void MainWindow::newFile()
+{
+    const QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
+                                                  QString(),
+                                                  tr("DISSCO Files (*.dissco);;All Files (*)"));
+    if (fileName.isEmpty() || !maybeSaveBeforeClose())
+        return;
+    
+    closeCurrentProject();
+
+    const QFileInfo fileInfo(fileName);
+    const QString projectName = fileInfo.completeBaseName();
+    const QString projectFolder = fileInfo.absolutePath() + "/" + projectName;
+    if (const QDir dir; !dir.exists(projectFolder))
         dir.mkdir(projectFolder);
 
-    QString fullFilePath = projectFolder + "/" + projectName + ".dissco";
+    const QString fullFilePath = projectFolder + "/" + projectName + ".dissco";
     currentFile = fullFilePath;
 
     setUnsavedTitle(currentFile);
-    Project *p = Inst::get_project_manager()->build(currentFile, nullptr);
+    Inst::get_project_manager()->build(currentFile, nullptr);
     showFile();
 }
 
 void MainWindow::openFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                   QString(),
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
-    if (!fileName.isEmpty()){
-        QFile file(fileName);
-        if (!file.open(QFile::ReadOnly | QFile::Text)) {
-            QMessageBox::warning(this, tr("LASSIE"),
-                            tr("Cannot read file %1:\n%2.")
-                            .arg(QDir::toNativeSeparators(fileName),
-                                file.errorString()));
+    if (fileName.isEmpty())
+        return;
 
-            return;
-        }
-        currentFile = fileName;
-
-        Project *p = Inst::get_project_manager()->open(currentFile, NULL);
-        showFile();
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("LASSIE"),
+                        tr("Cannot read file %1:\n%2.")
+                        .arg(QDir::toNativeSeparators(fileName),
+                            file.errorString()));
+        return;
     }
+    file.close();
+
+    if (!maybeSaveBeforeClose())
+        return;
+
+    closeCurrentProject();
+
+    currentFile = fileName;
+    Inst::get_project_manager()->open(currentFile, nullptr);
+    showFile();
 }
 
 void MainWindow::saveFile()
 {    
     //nhi: ensure directory exists before saving
-    QFileInfo fileInfo(currentFile);
-    QDir dir = fileInfo.absoluteDir();
-    if (!dir.exists()) {
+    const QFileInfo fileInfo(currentFile);
+    if (const QDir dir = fileInfo.absoluteDir(); !dir.exists()) {
         if (!dir.mkpath(".")) {
             QMessageBox::critical(this, tr("Error"),
                                 tr("Failed to create directory:\n%1")
@@ -138,7 +191,7 @@ void MainWindow::saveFile()
 
 void MainWindow::saveFileAs()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
+    const QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
                                                   currentFile,
                                                   tr("DISSCO Files (*.dissco);;All Files (*)"));
     if (!fileName.isEmpty()){
@@ -149,8 +202,7 @@ void MainWindow::saveFileAs()
     }
 }
 
-void MainWindow::showEnvelopeLibraryWindow()
-{
+void MainWindow::showEnvelopeLibraryWindow() const {
     //nhi: use show() instead of showEnvelopeLibrary()
     envelopeLibraryWindow->show();
     //nhi: connect to current project if available
@@ -159,26 +211,19 @@ void MainWindow::showEnvelopeLibraryWindow()
     }
 }
 
-void MainWindow::showMarkovWindow()
-{
+void MainWindow::showMarkovWindow() const {
     //nhi: use show() instead of showMarkovLibrary()
     markovWindow->show();
 }
 
-void MainWindow::showPropertiesDialog()
-{
+void MainWindow::showPropertiesDialog() const {
     projectView->setProperties();
 }
 
-void MainWindow::showFileNewObjectDialog()
-{
+void MainWindow::showFileNewObjectDialog() const {
     projectView->insertObject();
     
 }
-
-// namespace Helper {
-//     QXMLStreamReader* get
-// }
 
 void MainWindow::runProject()
 {
@@ -188,9 +233,8 @@ void MainWindow::runProject()
         msgbox.setText("This project has been modified.");
         msgbox.setText("Do you want to save your changes before running?");
         msgbox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
-        
-        int ret = msgbox.exec();
-        switch(ret) {
+
+        switch(msgbox.exec()) {
             case QMessageBox::Save:
                 saveFile();
                 break;
@@ -202,7 +246,7 @@ void MainWindow::runProject()
     }
 
     bool ok{};
-    QString seed = QInputDialog::getText(this, tr("QInputDialog::getText()"), 
+    const QString seed = QInputDialog::getText(this, tr("QInputDialog::getText()"), 
                                         tr("Enter a seed:"), QLineEdit::Normal,
                                         "abcd", &ok);
     if(!ok) return;
@@ -214,29 +258,28 @@ void MainWindow::runProject()
 #define STR_VALUE(arg)      #arg
 #define FUNCTION_NAME(name) STR_VALUE(name)
 
-#define TEST_FUNC_NAME FUNCTION_NAME(CMOD_BINARY)
+#define LASSIE_CMOD_BINARY__ FUNCTION_NAME(CMOD_BINARY)
 
-    QProcess *cmod = new QProcess(this);
+    const auto cmod = new QProcess(this);
     connect(cmod, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), 
-            [=](int exit_code)
+            [=](const int exit_code)
             { 
                 statusBar()->showMessage(tr("CMOD exited with code %1").arg(exit_code)); 
             }
         );
-    qDebug() << QString(TEST_FUNC_NAME) + " " + pm->fileinfo().canonicalFilePath();
+    qDebug() << "Project run with string:" << QString(LASSIE_CMOD_BINARY__) + " " + pm->fileinfo().canonicalFilePath();
 
-    PostWindow *pw = new PostWindow(cmod);
+    const auto pw = new PostWindow(cmod);
     pw->resize(600,400);
     pw->show();
 
-    cmod->start(QString(TEST_FUNC_NAME), QStringList() << pm->fileinfo().canonicalFilePath());
+    cmod->start(QString(LASSIE_CMOD_BINARY__), QStringList() << pm->fileinfo().canonicalFilePath());
 }
 
 void MainWindow::readSettings()
 {
-    QSettings settings;
-    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
-    if (geometry.isEmpty()) {
+    const QSettings settings;
+    if (const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray(); geometry.isEmpty()) {
         const QRect availableGeometry = screen()->availableGeometry();
         resize(availableGeometry.width() * 2/3, availableGeometry.height() * 2/3);
         move((availableGeometry.width() - width()) / 2,
@@ -246,8 +289,7 @@ void MainWindow::readSettings()
     }
 }
 
-void MainWindow::writeSettings()
-{
+void MainWindow::writeSettings() const {
     QSettings settings;
     settings.setValue("geometry", saveGeometry());
 }
@@ -268,7 +310,7 @@ void MainWindow::createActions()
     saveAct = new QAction(QIcon::fromTheme("document-save"), tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the project to disk"));
-    connect(saveAct, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(saveAct, &QAction::triggered, this, &MainWindow::saveFile);
     
     saveAsAct = new QAction(QIcon::fromTheme("document-save"), tr("Save &As"), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
@@ -354,7 +396,7 @@ void MainWindow::createActions()
     connect(aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
 }
 
-void MainWindow::enableProjectActions(bool enabled) {
+void MainWindow::enableProjectActions(const bool enabled) const {
     saveAct->setEnabled(enabled);
     saveAsAct->setEnabled(enabled);
     showEnvelopeLibraryAct->setEnabled(enabled);
@@ -427,16 +469,12 @@ void MainWindow::showFile()
 {
     if(currentFile != nullptr){
         if(projectView == nullptr){
-            // PENDING TAB EDITOR: users should no longer be able to create a new project if there is a project opened
-            openAct->setDisabled(true);
-            newAct->setDisabled(true);
-
             projectView = new ProjectView(this, currentFile);
 
             setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
             statusBar()->showMessage(tr("Project loaded"), 2000);
             projectView->setProperties();
-            
+
             //nhi: connect envelope library to loaded project
             envelopeLibraryWindow->setActiveProject(projectView);
 
@@ -451,7 +489,7 @@ void MainWindow::showFile()
     }
 }
 
-void MainWindow::setUnsavedTitle(QString unsavedFile){
+void MainWindow::setUnsavedTitle(const QString &unsavedFile){
     currentFile = unsavedFile;
     setWindowTitle(tr("%1 - %2").arg("*" + currentFile, tr("LASSIE")));
     qDebug() << "*currentFile: " << currentFile;

@@ -835,6 +835,12 @@ Project* ProjectManager::build(const QString& filepath, const QByteArray& id){
     return project;
 }
 
+void ProjectManager::close(Project* project) {
+    if (curr_project_ == project)
+        curr_project_ = nullptr;
+    delete project;
+}
+
 void ProjectManager::addEvent(Eventtype newEvent, QString eventName) {
     switch(newEvent) {
         case high: {

@@ -20,17 +20,17 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     public:
         //MainWindow(QWidget *parent = nullptr);
-        MainWindow(Inst*);
+        explicit MainWindow(Inst*);
         static MainWindow* instance() { return instance_; }
-        ~MainWindow();
-        void setUnsavedTitle(QString unsavedFile);
+        ~MainWindow() override;
+        void setUnsavedTitle(const QString &unsavedFile);
 
         std::unique_ptr<Ui::MainWindow> ui;
         std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
         std::unique_ptr<MarkovModelLibraryWindow> markovWindow;
 
     public slots:
-        void showStatusMessage(const QString& message) { statusBar()->showMessage(message, 5000); }
+        void showStatusMessage(const QString& message) const { statusBar()->showMessage(message, 5000); }
 
     private slots:
         // File operations
@@ -45,65 +45,71 @@ class MainWindow : public QMainWindow
         void redo() { statusBar()->showMessage(tr("Redo"), 2000); }
 
         // Window operations
-        void showEnvelopeLibraryWindow();
-        void showMarkovWindow();
-        void showPropertiesDialog();
-        void showFileNewObjectDialog();
+        void showEnvelopeLibraryWindow() const;
+        void showMarkovWindow() const;
+        void showPropertiesDialog() const;
+        void showFileNewObjectDialog() const;
 
         
 
     protected:
         void closeEvent(QCloseEvent *event) override;
         void readSettings();
-        void writeSettings();
+        void writeSettings() const;
 
     private:
         void createActions();
-        void enableProjectActions(bool enabled);
+        void enableProjectActions(bool enabled) const;
         void createMenus();
         void createToolBars();
-        void createStatusBar() { statusBar()->showMessage(tr("Ready")); }
+        void createStatusBar() const { statusBar()->showMessage(tr("Ready")); }
         void runProject();
         void showFile();
+
+        // Returns false if the user cancelled, true otherwise.
+        // Prompts to save unsaved changes when a project is already open.
+        bool maybeSaveBeforeClose();
+        // Tears down the current project view and project data, resetting UI state.
+        void closeCurrentProject();
 
         QString currentFile;
         
         // Actions
-        QAction *newAct;
-        QAction *openAct;
-        QAction *saveAct;
-        QAction *saveAsAct;
-        QAction *exitAct;
+        QAction *newAct = nullptr;
+        QAction *openAct = nullptr;
+        QAction *saveAct = nullptr;
+        QAction *saveAsAct = nullptr;
+        QAction *exitAct = nullptr;
 
-        QAction *undoAct;
-        QAction *redoAct;
-        QAction *cutAct;
-        QAction *copyAct;
-        QAction *pasteAct;
+        QAction *undoAct = nullptr;
+        QAction *redoAct = nullptr;
+        QAction *cutAct = nullptr;
+        QAction *copyAct = nullptr;
+        QAction *pasteAct = nullptr;
 
-        QAction *newObjAct;
-        QAction *setPropAct;
-        QAction *runAct;
-        QAction *configNoteModAct;
+        QAction *newObjAct = nullptr;
+        QAction *setPropAct = nullptr;
+        QAction *runAct = nullptr;
+        QAction *configNoteModAct = nullptr;
 
-        QAction *showEnvelopeLibraryAct;
-        QAction *showMarkovAct;
-        QAction *aboutAct;
-        QAction *aboutQtAct;
+        QAction *showEnvelopeLibraryAct = nullptr;
+        QAction *showMarkovAct = nullptr;
+        QAction *aboutAct = nullptr;
+        QAction *aboutQtAct = nullptr;
 
         // Menus
-        QMenu *fileMenu;
-        QMenu *editMenu;
-        QMenu *projectMenu;
-        QMenu *viewMenu;
-        QMenu *helpMenu;
+        QMenu *fileMenu = nullptr;
+        QMenu *editMenu = nullptr;
+        QMenu *projectMenu = nullptr;
+        QMenu *viewMenu = nullptr;
+        QMenu *helpMenu = nullptr;
 
         // Toolbars
-        QToolBar *fileToolBar;
-        QToolBar *projectToolBar;
-        QToolBar *editToolBar;
+        QToolBar *fileToolBar = nullptr;
+        QToolBar *projectToolBar = nullptr;
+        QToolBar *editToolBar = nullptr;
 
-        QStatusBar *statusbar_;
+        QStatusBar *statusbar_ = nullptr;
         
         // projectView pointer for testing
         ProjectView* projectView = nullptr;
