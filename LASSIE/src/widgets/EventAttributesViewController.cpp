@@ -190,7 +190,11 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int in
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
         m_modifiers.clear();
-        m_partials.clear();
+        for (Partials* par : m_partials) {
+            ui->partialsLayout->removeWidget(par);
+            par->deleteLater();
+        }
+        m_partials.clear(); 
     }
     m_curreventtype = type;
     m_curreventindex = index;
@@ -570,12 +574,6 @@ void EventAttributesViewController::showCurrentEventData() {
     //     m_soundPartialHboxes->clear();
     //     m_soundPartialHboxes = nullptr;
     // }
-
-    for (Partials* par : m_partials) {
-        ui->partialsLayout->removeWidget(par);
-        par->deleteLater();
-    }
-    m_partials.clear(); 
 
 
 

@@ -36,7 +36,7 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
     this->setMinimumHeight(50);
 
     // Populate UI from backend (handles reload when switching events)
-    if (m_partialIndex > 0) {
+    if (m_partialIndex >= 0) {
         QString partial = getBackendLayer().partials[m_partialIndex];
         // Block signals so onPartialChanged doesn't write back during initialisation
         m_partialEntry->blockSignals(true);
