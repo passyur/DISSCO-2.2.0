@@ -190,11 +190,7 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int in
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
         m_modifiers.clear();
-        for (Partials* par : m_partials) {
-            ui->partialsLayout->removeWidget(par);
-            par->deleteLater();
-        }
-        m_partials.clear(); 
+        m_partials.clear();
     }
     m_curreventtype = type;
     m_curreventindex = index;
@@ -879,6 +875,11 @@ void EventAttributesViewController::showCurrentEventData() {
         }
     }else{
         if (type == sound) {
+            for (Partials* par : m_partials) {
+                ui->partialsLayout->removeWidget(par);
+                par->deleteLater();
+            }
+            m_partials.clear(); 
             const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
             ui->soundNameEntry->setText(event.name);
             ui->spectrumNumPartialEntry->setText(event.num_partials);
