@@ -570,7 +570,11 @@ void EventAttributesViewController::showCurrentEventData() {
     //     m_soundPartialHboxes->clear();
     //     m_soundPartialHboxes = nullptr;
     // }
-
+    for (Partials* par : m_partials) {
+        ui->partialsLayout->removeWidget(par);
+        delete par;
+    }
+    m_partials.clear();
 
 
     // Choose page based on type of currently shown event
@@ -875,11 +879,6 @@ void EventAttributesViewController::showCurrentEventData() {
         }
     }else{
         if (type == sound) {
-            for (Partials* par : m_partials) {
-                ui->partialsLayout->removeWidget(par);
-                par->deleteLater();
-            }
-            m_partials.clear(); 
             const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
             ui->soundNameEntry->setText(event.name);
             ui->spectrumNumPartialEntry->setText(event.num_partials);
