@@ -25,7 +25,10 @@ public:
     ~Partials() override;
 
     // Called by EventAttributesViewController when partials above this one are deleted
-    void setPartialIndex(int partialIndex) { m_partialIndex = partialIndex; }
+    void setPartialIndex(int partialIndex) {
+        m_partialIndex = partialIndex;
+        m_partialLabel->setText("Partial " + QString::number(partialIndex + 1) + ":");
+    }
 
     QLineEdit*          m_partialEntry;
 
@@ -47,6 +50,7 @@ private:
 
     // UI elements
     QVBoxLayout*        m_mainLayout;
+    QLabel*             m_partialLabel;
     QPushButton*        m_insertFuncButton;
     QPushButton*        m_removePartialButton;
 };

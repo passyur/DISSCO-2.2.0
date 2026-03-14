@@ -14,7 +14,7 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
 
     // Header
     auto* partialHBox = new QHBoxLayout;
-    auto* partialLabel = new QLabel("Partial " + QString::number(partialIndex) + ":");
+    m_partialLabel = new QLabel("Partial " + QString::number(partialIndex + 1) + ":");
     m_partialEntry = new QLineEdit;
     m_insertFuncButton = new QPushButton("Insert Function");
     m_removePartialButton = new QPushButton("Remove Partial");
@@ -26,7 +26,7 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
     connect(m_partialEntry, &QLineEdit::textChanged,
             this, &Partials::onPartialChanged);
 
-    partialHBox->addWidget(partialLabel);
+    partialHBox->addWidget(m_partialLabel);
     partialHBox->addWidget(m_partialEntry);
     partialHBox->addWidget(m_insertFuncButton);
     partialHBox->addWidget(m_removePartialButton);
