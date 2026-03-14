@@ -144,6 +144,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
     fixStackedWidgetLayout(ui->emptyPage);
 
+    ui->partialsLayout->setSpacing(0);
+
     LayerBox* box = new LayerBox(this, e_projectView);
     ui->layersLayout->addWidget(box);
 
@@ -190,7 +192,6 @@ void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int in
     if (m_curreventtype != type || m_curreventindex != index) {
         saveCurrentShownEventData();
         m_modifiers.clear();
-        m_partials.clear();
     }
     m_curreventtype = type;
     m_curreventindex = index;
@@ -600,7 +601,6 @@ void EventAttributesViewController::showCurrentEventData() {
             break;
         case sound:
             ui->stackedWidget->setCurrentWidget(ui->soundPage);
-            fixStackedWidgetLayout(ui->soundPage);
             break;
         case env:
             ui->stackedWidget->setCurrentWidget(ui->envPage);
@@ -907,7 +907,7 @@ void EventAttributesViewController::showCurrentEventData() {
                 m_partials.append(par);
                 ui->partialsLayout->addWidget(par);
             }
-            fixStackedWidgetLayout(ui->soundPage);
+            QTimer::singleShot(0, this, [this]() { fixStackedWidgetLayout(ui->soundPage); });
 
         }else if(type == env){
             const EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
@@ -1345,29 +1345,29 @@ void EventAttributesViewController::addNewLayerButtonClicked() {
 }
 */
 
-void EventAttributesViewController::addPartialButtonClicked(int partialIndex) {
+void EventAttributesViewController::addPartialButtonClicked(int) {
 
     qDebug("add new partial button clicked");
 
-    // ProjectManager *pm = Inst::get_project_manager();
+    ProjectManager *pm = Inst::get_project_manager();
 
-    // Get a REFERENCE to the actual backend SpectrumEvent so the append is not lost
-    // SpectrumEvent* sevent = &pm->spectrumevents()[m_curreventindex];
+    // Get a REFERENCE to the actual backend Spectrum so the append is not lost
+    QList<QString>& partials = pm->spectrumevents()[m_curreventindex].spectrum.partials;
 
-    // Append a new pqartial to the backend and record its index
-    // sevent->spectrum.partials.append("");
-    // int partialIndex = sevent->spectrum.partials.size() - 1;
+    // Append a new partial to the backend and record its index
+    partials.append("");
+    int partialIndex = partials.size() - 1;
 
     // Create the UI widget using indices so it can always find the backend Layer
     Partials* par = new Partials(m_curreventindex, partialIndex, this);
     connect(par, &Partials::deleteRequested, this, [this](Partials* p) {
         // Remove from backend
         ProjectManager* pm2 = Inst::get_project_manager();
-        SpectrumEvent* se =  &pm2->spectrumevents()[m_curreventindex];
+        QList<QString>& partials2 =  pm2->spectrumevents()[m_curreventindex].spectrum.partials;
 
         int idx = m_partials.indexOf(p);
-        if (idx >= 0 && idx < se->spectrum.partials.size()) {
-            se->spectrum.partials.removeAt(idx);
+        if (idx >= 0 && idx < partials2.size()) {
+            partials2.removeAt(idx);
         }
         m_partials.removeOne(p);
         ui->partialsLayout->removeWidget(p);
@@ -1380,7 +1380,7 @@ void EventAttributesViewController::addPartialButtonClicked(int partialIndex) {
 
     m_partials.append(par);
     ui->partialsLayout->addWidget(par);
-    // fixStackedWidgetLayout(ui->soundPage);
+    QTimer::singleShot(0, this, [this]() { fixStackedWidgetLayout(ui->soundPage); });
 
 }
 
