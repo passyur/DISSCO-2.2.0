@@ -150,6 +150,7 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     // Keep inactive pages from inflating the stacked widget's sizeHint.
     QList<QWidget*> pages = {
         ui->emptyPage,
+        ui->standardPage,
         ui->soundPage,
         ui->envPage,
         ui->sievePage,
@@ -169,8 +170,6 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
             // Keep inactive pages from inflating the container
             page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
         }
-        // page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-        // page->setMaximumHeight(currPage->sizeHint().height());
     }
 
     if (currPage->layout()) {
@@ -181,11 +180,11 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     currPage->adjustSize();
     ui->stackedWidget->setFixedWidth(600);
     
-    if (ui->soundPage->layout()) {
+    if (currPage == ui->soundPage && ui->soundPage->layout()) {
         ui->soundPage->layout()->setSpacing(10);
         ui->partialsLayout->setSpacing(0);
     }
-    if (ui->standardPage->layout()) {
+    if (currPage == ui->standardPage && ui->standardPage->layout()) {
         ui->standardPage->layout()->setSpacing(10);
         ui->modifiersLayout->setSpacing(0);
     }
