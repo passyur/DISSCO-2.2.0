@@ -25,10 +25,6 @@
 //                                                              QWidget* parent)
 EventAttributesViewController::EventAttributesViewController(ProjectView* projectView)
   : QFrame(nullptr),
-//   : QFrame(parent),
-    // m_sharedPointers(sharedPointers),
-    // m_currentlyShownEvent(nullptr),
-    // m_modifiers(nullptr),
     // m_soundPartialHboxes(nullptr),
     ui(new Ui::EventAttributesViewController)
 {
@@ -119,10 +115,11 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     connect(ui->BSContinuumButton, &QPushButton::clicked,
             this, &EventAttributesViewController::BSContinuumButtonClicked);
 
-/*
-    // --- additional controls ---
+
+    // --- additional controls --
+
     connect(ui->addNewLayerButton, &QPushButton::clicked,
-            this, &EventAttributesViewController::addNewLayerButtonClicked);*/
+            this, &EventAttributesViewController::addNewLayerButtonClicked);
     connect(ui->addModifierButton, &QPushButton::clicked,
             this, &EventAttributesViewController::addModifierButtonClicked);
     connect(ui->addPartialButton, &QPushButton::clicked,
@@ -144,20 +141,19 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui->stackedWidget->setCurrentWidget(ui->emptyPage);
     fixStackedWidgetLayout(ui->emptyPage);
 
-    ui->partialsLayout->setSpacing(0);
-
-    LayerBox* box = new LayerBox(this, e_projectView);
-    ui->layersLayout->addWidget(box);
+    ui->layersLayout->setSpacing(8);
+    ui->layersLayout->setContentsMargins(0, 0, 0, 0);
 
     // Partials* firstPartial = new Partials(m_curreventindex, 0, this);
     // ui->partialsLayout->addWidget(firstPartial);
 }
 
-EventAttributesViewController::~EventAttributesViewController() {
-    // Qt will delete child widgets automatically
-}
+EventAttributesViewController::~EventAttributesViewController() = default;
 
 void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
+    if (!currPage) return;
+    
+    // Keep inactive pages from inflating the stacked widget's sizeHint.
     QList<QWidget*> pages = {
         ui->emptyPage,
         ui->soundPage,
@@ -171,38 +167,122 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
         ui->notePage
     };
     for (QWidget* page : pages) {
-        page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        if (page == currPage) {
+            // Allow the current page to dictate its own size
+            page->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+            page->setMaximumHeight(16777215); // QWIDGETSIZE_MA
+        } else {
+            // Keep inactive pages from inflating the container
+            page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        }
+        // page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        // page->setMaximumHeight(currPage->sizeHint().height());
     }
-    if (currPage) {
-        currPage->adjustSize();
-        ui->stackedWidget->setFixedWidth(600);
-        ui->stackedWidget->setMaximumHeight(currPage->sizeHint().height());
-        ui->stackedWidget->adjustSize();
-        // ui->stackedWidget->setFixedSize(600, currPage->sizeHint().height());
-        ui->modScrollWindow->setWidget(ui->modScrollWindowContent);
-        ui->modScrollWindow->setWidgetResizable(true);
+
+    if (currPage->layout()) {
+        currPage->layout()->activate(); 
+        currPage->layout()->invalidate(); 
+    }
+
+    currPage->adjustSize();
+    ui->stackedWidget->setFixedWidth(600);
+    
+    ui->modScrollWindow->setWidget(ui->modScrollWindowContent);
+    ui->modScrollWindow->setWidgetResizable(true);
+
+    if (ui->modScrollWindowContent->layout()) {
         auto* layout = qobject_cast<QVBoxLayout*>(ui->modScrollWindowContent->layout());
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->setSpacing(0);
+        if (layout) {
+            layout->setContentsMargins(0, 0, 0, 0);
+            layout->setSpacing(0);
+        }
     }
-    ui->stackedWidget->adjustSize();
+    if (ui->soundPage->layout()) {
+        ui->soundPage->layout()->setSpacing(10);
+        ui->partialsLayout->setSpacing(0);
+    }
+
+    // Notify the parent scroll area that our sizeHint has changed so it
+    // re-evaluates the widget size rather than relying on the stale value.
+    // Subjective: this seems to positively impact the appearance when you add
+    // LayerBoxes. -Jacob, 3/9/26
+    updateGeometry();
+}
+
+void EventAttributesViewController::updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name)
+{
+    static const QMap<QString, Eventtype> typeMap = {
+        {"Top", top}, {"High", high}, {"Mid", mid}, {"Low", low}, {"Bottom", bottom},
+        {"Spectrum", sound}, {"Note", note}, {"Envelope", env}, {"Sieve", sieve},
+        {"Spatialization", spa}, {"Pattern", pattern}, {"Reverb", reverb}, {"Filter", filter}
+    };
+    if (!typeMap.contains(typeStr)) return;
+    Eventtype et = typeMap[typeStr];
+    if (!m_hasCurrentEvent || m_curreventtype != et || m_curreventindex != index) return;
+
+    if (et <= bottom)         ui->nameEntry->setText(name);
+    else if (et == sound)     ui->soundNameEntry->setText(name);
+    else if (et == env)       ui->envNameEntry->setText(name);
+    else if (et == sieve)     ui->sieveNameEntry->setText(name);
+    else if (et == spa)       ui->spaNameEntry->setText(name);
+    else if (et == pattern)   ui->patNameEntry->setText(name);
+    else if (et == reverb)    ui->revNameEntry->setText(name);
+    else if (et == note)      ui->noteNameEntry->setText(name);
+    else if (et == filter)    ui->filNameEntry->setText(name);
 }
 
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
-    if (m_curreventtype != type || m_curreventindex != index) {
+    if (m_hasCurrentEvent && (m_curreventtype != type || m_curreventindex != index)) {
         saveCurrentShownEventData();
         m_modifiers.clear();
     }
     m_curreventtype = type;
     m_curreventindex = index;
-    
+    m_hasCurrentEvent = true;
+
     showCurrentEventData();
+}
+
+void EventAttributesViewController::clearView() {
+    for (LayerBox* box : m_layerBoxes) {
+        ui->layersLayout->removeWidget(box);
+        box->deleteLater();
+    }
+    m_layerBoxes.clear();
+
+    for (Partials* par : m_partials) {
+        ui->partialsLayout->removeWidget(par);
+        par->deleteLater();
+    }
+    m_partials.clear();
+
+    ui->stackedWidget->setCurrentWidget(ui->emptyPage);
+    fixStackedWidgetLayout(ui->emptyPage);
+    m_hasCurrentEvent = false;
+}
+
+void EventAttributesViewController::onEventDeleted(Eventtype type, int deletedIndex) {
+    if (!m_hasCurrentEvent || m_curreventtype != type) return;
+
+    if (m_curreventindex == static_cast<unsigned>(deletedIndex)) {
+        clearView();
+    } else if (m_curreventindex > static_cast<unsigned>(deletedIndex)) {
+        --m_curreventindex;
+        // Keep the LayerBox widgets pointing at the right (now-shifted) event
+        for (LayerBox* box : m_layerBoxes) {
+            box->setEventIndex(m_curreventindex);
+        }
+    }
 }
 
 void EventAttributesViewController::saveCurrentShownEventData() {
     if(m_curreventindex == -1) return;
-    qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
+    //qDebug() << "saveCurrentShownEventData called on type" << (int)m_curreventtype << "of index" << m_curreventindex;
     
+    if (!m_hasCurrentEvent) return;
+
+    qDebug() << "saveCurrentShownEventData called";
+
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
     if (type == bottom) {
@@ -227,9 +307,9 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
         extra_info.modifiers.clear();
         for (int i = 0; i < m_modifiers.count(); ++i) {
-            qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
+            //qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
             Modifier newUIMod = {};
-
+            
             newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
             newUIMod.applyhow_flag = (m_modifiers.at(i))->ui->modifierApply->currentIndex();
 
@@ -241,11 +321,10 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
             newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
             newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
-            qDebug() << "\t\t\tnewUIMod.group_name: " << newUIMod.group_name;
+            //qDebug() << "\t\t\tnewUIMod.group_name: " << newUIMod.group_name;
             newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
             extra_info.modifiers.append(newUIMod);
         }
-        // m_modifiers.clear();
     }
 
     if(type <= bottom){
@@ -258,8 +337,7 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 return pm->midevents()[m_curreventindex];
             if(type == low)
                 return pm->lowevents()[m_curreventindex];
-            else // bottom, use of 'else' silences a (stupid) compiler warning ;)
-                return pm->bottomevents()[m_curreventindex].event;
+            return pm->bottomevents()[m_curreventindex].event;
         }();
 
         event.name = ui->nameEntry->text();
@@ -268,7 +346,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         event.timesig.bar_value = ui->timeSig1Entry->text();
         event.timesig.note_value = ui->timeSig2Entry->text();
         event.edu_perbeat = ui->unitsPerSecondEntry->text();
-
 
         Tempo& temp = event.tempo;
         if (ui->tempoAsNoteValueRadio->isChecked()) { /* as note */
@@ -295,8 +372,6 @@ void EventAttributesViewController::saveCurrentShownEventData() {
         num_children.entry_1 = ui->childCountEntry1->text();
         num_children.entry_2 = ui->childCountEntry2->text();
         num_children.entry_3 = ui->childCountEntry3->text();
-
-        // Save layers
         
         ChildDef& childeventdef = event.child_event_def;
         if (ui->discreteButton->isChecked()) {
@@ -336,11 +411,11 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
         // save modifiers
         if (type != bottom) {
-            qDebug() << "About to save Modifiers";
+            //qDebug() << "About to save Modifiers";
             event.modifiers.clear();
-            qDebug() << "event.modifiers cleared";
+            //qDebug() << "event.modifiers cleared";
             for (int i = 0; i < m_modifiers.count(); ++i) {
-                qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
+                //qDebug() << "Modifier at index" << i << ":" << m_modifiers.at(i);
                 Modifier newUIMod = {};
 
                 newUIMod.type = (m_modifiers.at(i))->ui->modifierType->currentIndex();
@@ -354,26 +429,30 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                 newUIMod.detune_direction = (m_modifiers.at(i))->ui->modifierDirEdit->text();
                 newUIMod.detune_velocity = (m_modifiers.at(i))->ui->modifierVelEdit->text();
                 newUIMod.group_name = (m_modifiers.at(i))->ui->modifierNameEdit->text();
-                qDebug() << "newUIMod.group_name: " << newUIMod.group_name;
+                //qDebug() << "newUIMod.group_name: " << newUIMod.group_name;
                 newUIMod.partialresult_string = (m_modifiers.at(i))->ui->modifierResEdit->text();
                 event.modifiers.append(newUIMod);
             }
             // m_modifiers.clear();
         }
+
+        // save layer weights
+        for (LayerBox* box : m_layerBoxes) {
+            box->saveWeightToBackend();
+        }
     } else {
 
         if (type == sound) {
+
             SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
             event.name = ui->soundNameEntry->text();
             event.num_partials = ui->spectrumNumPartialEntry->text();
             event.deviation = ui->spectrumDeviationEntry->text();
             event.generate_spectrum = ui->spectrumGenEntry->text();
 
-            // to do: spectrum partials
-            event.spectrum.partials.clear();
-            for (int i = 0; i < m_partials.count(); ++i) {
-                qDebug() << "Partial at index" << i << ":" << m_partials.at(i);
-                event.spectrum.partials.append((m_partials.at(i))->m_partialEntry->text());
+            qDebug() << "saving spectrum partials";
+            for (Partials* par : m_partials) {
+                par->saveWeightToBackend();
             }
         }
         if (type == env){
@@ -405,182 +484,48 @@ void EventAttributesViewController::saveCurrentShownEventData() {
             event.name = ui->filNameEntry->text();
             event.filter_builder = ui->filBuilderEntry->text();
         } else {
-            qDebug() << "Cannot save event data: type of event not valid";
+            //qDebug() << "Cannot save event data: type of event not valid";
         }
 
     }
 
-    /*if (!m_currentlyShownEvent) return;
-
-    // Name
-    m_currentlyShownEvent->setEventName(ui->nameEntry->text().toStdString());
-
-    // Only if not a folder
-    if (m_currentlyShownEvent->getEventType() <= eventBottom) {
-        m_currentlyShownEvent->setMaxChildDur(ui->maxChildDurEntry->text().toStdString());
-        m_currentlyShownEvent->setTimeSignatureEntry1(ui->timeSig1Entry->text().toStdString());
-        m_currentlyShownEvent->setTimeSignatureEntry2(ui->timeSig2Entry->text().toStdString());
-        m_currentlyShownEvent->setUnitsPerSecond(ui->unitsPerSecondEntry->text().toStdString());
-
-        // Tempo
-        bool asNote = ui.tempoAsNoteValueRadio->isChecked();
-        m_currentlyShownEvent->setTempoMethodFlag(asNote ? 0 : 1);
-        m_currentlyShownEvent->setTempoPrefix(
-            static_cast<TempoPrefix>(ui->tempoNotePrefixCombo->currentData().toInt()));
-        m_currentlyShownEvent->setTempoNoteValue(
-            static_cast<TempoNoteValue>(ui->tempoNoteValueCombo->currentData().toInt()));
-        m_currentlyShownEvent->setTempoFractionEntry1(ui->tempoFractionEntry1->text().toStdString());
-        m_currentlyShownEvent->setTempoFractionEntry2(ui->tempoValueEntry->text().toStdString());
-        m_currentlyShownEvent->setTempoValueEntry(ui->tempoValueEntry->text().toStdString());
-
-        // Num children
-        if (ui->fixedButton->isChecked()) {
-            m_currentlyShownEvent->setFlagNumChildren(0);
-            m_currentlyShownEvent->setNumChildrenEntry1(ui->childCountEntry1->text().toStdString());
-            m_currentlyShownEvent->setNumChildrenEntry2("0");
-            m_currentlyShownEvent->setNumChildrenEntry3("0");
-        } else if (ui.densityButton->isChecked()) {
-            m_currentlyShownEvent->setFlagNumChildren(1);
-            m_currentlyShownEvent->setNumChildrenEntry1(ui->childCountEntry1->text().toStdString());
-            m_currentlyShownEvent->setNumChildrenEntry2(ui->childCountEntry2->text().toStdString());
-            m_currentlyShownEvent->setNumChildrenEntry3(ui->childCountEntry3->text().toStdString());
-        } else {
-            m_currentlyShownEvent->setFlagNumChildren(2);
-        }
-
-        // Layers weights:
-        for (auto* layerWidget : m_layerBoxesStorage) {
-            layerWidget->applyWeightToModel();
-        }
-
-        // Child‐event‐definition
-        if (ui->continuumButton->isChecked()) {
-            m_currentlyShownEvent->setFlagChildEventDef(0);
-            m_currentlyShownEvent->setChildEventDefEntry1(ui->childDefEntry1->text().toStdString());
-            m_currentlyShownEvent->setChildEventDefEntry2(ui->childDefEntry2->text().toStdString());
-            m_currentlyShownEvent->setChildEventDefEntry3(ui->childDefEntry3->text().toStdString());
-            if (ui->startTypePercentRadio->isChecked())       m_currentlyShownEvent->setFlagChildEventDefStartType(0);
-            else if (ui->startTypeUnitsRadio->isChecked())    m_currentlyShownEvent->setFlagChildEventDefStartType(1);
-            else if (ui->startTypeSecondsRadio->isChecked())  m_currentlyShownEvent->setFlagChildEventDefStartType(2);
-            if (ui->durationTypePercentRadio->isChecked())    m_currentlyShownEvent->setFlagChildEventDefDurationType(0);
-            else if (ui->durationTypeUnitsRadio->isChecked()) m_currentlyShownEvent->setFlagChildEventDefDurationType(1);
-            else if (ui->durationTypeSecondsRadio->isChecked()) m_currentlyShownEvent->setFlagChildEventDefDurationType(2);
-        }
-        else if (ui->sweepButton->isChecked()) {
-            m_currentlyShownEvent->setFlagChildEventDef(1);
-            m_currentlyShownEvent->setChildEventDefEntry1(ui->childDefEntry1->text().toStdString());
-            m_currentlyShownEvent->setChildEventDefEntry2(ui->childDefEntry2->text().toStdString());
-            m_currentlyShownEvent->setChildEventDefEntry3(ui->childDefEntry3->text().toStdString());
-            if (ui->startTypePercentRadio->isChecked())       m_currentlyShownEvent->setFlagChildEventDefStartType(0);
-            else if (ui->startTypeUnitsRadio->isChecked())    m_currentlyShownEvent->setFlagChildEventDefStartType(1);
-            else if (ui->startTypeSecondsRadio->isChecked())  m_currentlyShownEvent->setFlagChildEventDefStartType(2);
-            if (ui->durationTypePercentRadio->isChecked())    m_currentlyShownEvent->setFlagChildEventDefDurationType(0);
-            else if (ui->durationTypeUnitsRadio->isChecked()) m_currentlyShownEvent->setFlagChildEventDefDurationType(1);
-            else if (ui->durationTypeSecondsRadio->isChecked()) m_currentlyShownEvent->setFlagChildEventDefDurationType(2);
-        }
-        else { // discrete
-            m_currentlyShownEvent->setFlagChildEventDef(2);
-            m_currentlyShownEvent->setChildEventDefAttackSieve(ui->attackSieveEntry->text().toStdString());
-            m_currentlyShownEvent->setChildEventDefDurationSieve(ui->durationSieveEntry->text().toStdString());
-        }
-
-        // Environment (top/high/mid/low)
-        if (m_currentlyShownEvent->getEventType() >= eventTop
-         && m_currentlyShownEvent->getEventType() <= eventLow)
-        {
-            m_currentlyShownEvent->setSpa(ui->spaEntry->text().toStdString());
-            m_currentlyShownEvent->setRev(ui->revEntry->text().toStdString());
-            m_currentlyShownEvent->setFil(ui->filEntry->text().toStdString());
-        }
-
-        // Bottom‐extra
-        if (m_currentlyShownEvent->getEventType() == eventBottom) {
-            auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-            if (ui->wellTemperedRadio->isChecked()) {
-                extra->setFrequencyFlag(0);
-                extra->setFrequencyEntry1(ui->wellTemperedEntry->text().toStdString());
-            }
-            else if (ui->fundamentalRadio->isChecked()) {
-                extra->setFrequencyFlag(1);
-                extra->setFrequencyEntry1(ui->funFreqEntry1->text().toStdString());
-                extra->setFrequencyEntry2(ui->funFreqEntry2->text().toStdString());
-            }
-            else {
-                extra->setFrequencyFlag(2);
-                extra->setFrequencyEntry1(ui->continuumFreqEntry->text().toStdString());
-                extra->setFrequencyContinuumFlag(ui->hertzRadio->isChecked() ? 0 : 1);
-            }
-            extra->setLoudness(ui->loudnessEntry->text().toStdString());
-            extra->setSpatialization(ui->spatializationEntry->text().toStdString());
-            extra->setReverb(ui->reverbEntry->text().toStdString());
-            extra->setFilter(ui->filterEntry->text().toStdString());
-            extra->setModifierGroup(ui->modifierGroupEntry->text().toStdString());
-
-            if (ui->childTypeSoundRadio->isChecked()) {
-                // modifiers
-                if (m_modifiers) m_modifiers->saveToEvent();
-            }
-        }
+    // Sync the saved name back to the palette
+    QString typeStr;
+    QString savedName;
+    switch (m_curreventtype) {
+        case top:     /* Top name is fixed — never sync to palette */                    break;
+        case high:    typeStr = "High";           savedName = ui->nameEntry->text();      break;
+        case mid:     typeStr = "Mid";            savedName = ui->nameEntry->text();      break;
+        case low:     typeStr = "Low";            savedName = ui->nameEntry->text();      break;
+        case bottom:  typeStr = "Bottom";         savedName = ui->nameEntry->text();      break;
+        case sound:   typeStr = "Spectrum";       savedName = ui->soundNameEntry->text(); break;
+        case env:     typeStr = "Envelope";       savedName = ui->envNameEntry->text();   break;
+        case sieve:   typeStr = "Sieve";          savedName = ui->sieveNameEntry->text(); break;
+        case spa:     typeStr = "Spatialization"; savedName = ui->spaNameEntry->text();   break;
+        case pattern: typeStr = "Pattern";        savedName = ui->patNameEntry->text();   break;
+        case reverb:  typeStr = "Reverb";         savedName = ui->revNameEntry->text();   break;
+        case note:    typeStr = "Note";           savedName = ui->noteNameEntry->text();  break;
+        case filter:  typeStr = "Filter";         savedName = ui->filNameEntry->text();   break;
+        default: break;
     }
-    // Sound event
-    else if (m_currentlyShownEvent->getEventType() == eventSound) {
-        auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-        extra->setDeviation(ui->spectrumDeviationEntry->text().toStdString());
-        extra->setSpectrumGenBuilder(ui->spectrumGenEntry->text().toStdString());
-        // partials
-        if (m_soundPartialHboxes) m_soundPartialHboxes->saveString();
-    }
-    // Envelope, Sieve, Spa, Pat, Rev, Fil, Mea, Note – analogous:
-    else {
-        auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-        if (m_currentlyShownEvent->getEventType() == eventEnv)
-            extra->setEnvelopeBuilder(ui->envBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventSiv)
-            extra->setSieveBuilder(ui->sieveBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventSpa)
-            extra->setSpatializationBuilder(ui->spaBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventPat)
-            extra->setPatternBuilder(ui->patBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventRev)
-            extra->setReverbBuilder(ui->revBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventFil)
-            extra->setFilterBuilder(ui->filBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventMea)
-            extra->setMeasureBuilder(ui->meaBuilderEntry->text().toStdString());
-        else if (m_currentlyShownEvent->getEventType() == eventNote) {
-            extra->clearNoteModifiers();
-            extra->setStaffNum(ui.staffNumberEntry->text().toStdString());
-            for (auto* cb : m_noteModifierCheckBoxes) {
-                if (cb->isChecked())
-                    extra->addNoteModifiers(cb->text().toStdString());
-            }
-        }
-    }*/
+    if (!typeStr.isEmpty())
+        e_projectView->updatePaletteItemName(typeStr, m_curreventindex, savedName);
 }
 
 void EventAttributesViewController::showCurrentEventData() {
-    qDebug() << "In showCurrentEventData:";
-    // clear dynamic widgets
-    // qDeleteAll(m_layerBoxesStorage);
-    // m_layerBoxesStorage.clear();
-    // if (m_modifiers) {
-    //     delete m_modifiers;
-    //     m_modifiers = nullptr;
-    // }
-    // if (m_soundPartialHboxes) {
-    //     m_soundPartialHboxes->clear();
-    //     m_soundPartialHboxes = nullptr;
-    // }
-    for (Partials* par : m_partials) {
-        ui->partialsLayout->removeWidget(par);
-        delete par;
-    }
-    m_partials.clear();
 
+    qDebug() << "showCurrentEventData() called";
+
+    // Clear all existing LayerBox widgets so the panel reflects the new event
+    for (LayerBox* box : m_layerBoxes) {
+        ui->layersLayout->removeWidget(box);
+        box->deleteLater();
+    }
+    m_layerBoxes.clear();
 
     // Choose page based on type of currently shown event
     Eventtype type = m_curreventtype;
-    qDebug() << "In showCurrentEventData saving " << type;
+    //qDebug() << "In showCurrentEventData saving " << type;
     switch(type) {
         case top: 
         case high: 
@@ -666,12 +611,13 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->modifierGroupEntry->setText(extra_info.modifier_group);
 
             // save modifiers for bottom event
+            m_modifiers.clear();
             QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
             for (auto widget : childWidgets) { delete widget; }
 
             for (int i = 0; i < extra_info.modifiers.count(); ++i) {
-                qDebug() << "Saving event.modifiers to scroll window";
-                // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
+                //qDebug() << "Saving event.modifiers to scroll window";
+                // //qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
                 Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
             
@@ -704,9 +650,9 @@ void EventAttributesViewController::showCurrentEventData() {
                 newMod->ui->modifierSpreadEdit->setText(extra_info.modifiers.at(i).detune_spread);
                 newMod->ui->modifierDirEdit->setText(extra_info.modifiers.at(i).detune_direction);
                 newMod->ui->modifierVelEdit->setText(extra_info.modifiers.at(i).detune_velocity);
-                // qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
+                // //qDebug() << "extra_info.modifiers.at(i).group_name: " << extra_info.modifiers.at(i).group_name;
                 newMod->ui->modifierNameEdit->setText(extra_info.modifiers.at(i).group_name);
-                // qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
+                // //qDebug() << "extra_info.modifiers.at(i).partialresult_string: " << extra_info.modifiers.at(i).partialresult_string;
                 newMod->ui->modifierResEdit->setText(extra_info.modifiers.at(i).partialresult_string);
                 connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
                     this, [this, newMod]() {
@@ -728,13 +674,13 @@ void EventAttributesViewController::showCurrentEventData() {
         }else if(type == high){
             event = pm->highevents()[m_curreventindex];
         }else if(type == mid){
-            qDebug() << "getting mid event at index " << m_curreventindex;
             event = pm->midevents()[m_curreventindex];
         }else{
             event = pm->lowevents()[m_curreventindex];
         }
         ui->nameEntry->setText(event.name);
-        
+        ui->nameEntry->setEnabled(type != top);
+
         ui->maxChildDurEntry->setText(event.max_child_duration);
         ui->timeSig1Entry->setText(event.timesig.bar_value);
         ui->timeSig2Entry->setText(event.timesig.note_value);
@@ -775,15 +721,6 @@ void EventAttributesViewController::showCurrentEventData() {
         ui->childCountEntry2->setText(num_children.entry_2);
         ui->childCountEntry3->setText(num_children.entry_3);
 
-        // build layers
-        // for (auto* layer : m_currentlyShownEvent->layers) {
-        //     LayerBox* box = new LayerBox(this, m_sharedPointers->projectView, layer,
-        //                                 (event.numchildren.method_flag == bylayer));
-        //     ui->layersLayout->addWidget(box);
-        //     m_layerBoxesStorage.push_back(box);
-        // }
-        // refreshChildTypeInLayer();
-
         // child‐event‐def
         ChildDef childeventdef = event.child_event_def;
         switch(childeventdef.definition_flag){
@@ -816,12 +753,13 @@ void EventAttributesViewController::showCurrentEventData() {
 
         // save modifiers
         if (type != bottom) {
+            m_modifiers.clear();
             QList<QWidget*> childWidgets = ui->modScrollWindowContent->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
             for (auto widget : childWidgets) { delete widget; }
 
             for (int i = 0; i < event.modifiers.count(); ++i) {
-                qDebug() << "Saving event.modifiers to scroll window";
-                // qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
+                //qDebug() << "Saving event.modifiers to scroll window";
+                // //qDebug() << "Modifier at index" << i << ":" << event.modifiers.at(i);
                 Modifiers* newMod = new Modifiers(ui->modScrollWindow);
 
                 newMod->ui->modifierType->setCurrentIndex(event.modifiers.at(i).type);
@@ -853,9 +791,9 @@ void EventAttributesViewController::showCurrentEventData() {
                 newMod->ui->modifierSpreadEdit->setText(event.modifiers.at(i).detune_spread);
                 newMod->ui->modifierDirEdit->setText(event.modifiers.at(i).detune_direction);
                 newMod->ui->modifierVelEdit->setText(event.modifiers.at(i).detune_velocity);
-                // qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
+                // //qDebug() << "event.modifiers.at(i).group_name: " << event.modifiers.at(i).group_name;
                 newMod->ui->modifierNameEdit->setText(event.modifiers.at(i).group_name);
-                // qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
+                // //qDebug() << "event.modifiers.at(i).probability: " << event.modifiers.at(i).probability;
                 newMod->ui->modifierResEdit->setText(event.modifiers.at(i).partialresult_string);
                 connect(newMod->ui->modifierResFunButton, &QPushButton::clicked,
                     this, [this, newMod]() {
@@ -877,6 +815,11 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->revEntry->setText(event.reverb);
             ui->filEntry->setText(event.filter);
         }
+
+        // Rebuild LayerBoxes for the newly shown event
+        for (int i = 0; i < event.event_layers.size(); ++i) {
+            addLayerBoxUI(i);
+        }
     }else{
         if (type == sound) {
             const SpectrumEvent& event = pm->spectrumevents()[m_curreventindex];
@@ -884,31 +827,19 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->spectrumNumPartialEntry->setText(event.num_partials);
             ui->spectrumDeviationEntry->setText(event.deviation);
             ui->spectrumGenEntry->setText(event.generate_spectrum);
-            
-            // Rebuild Partials for the newly shown sound event
-            for (int i = 0; i < event.spectrum.partials.size(); ++i) {
-                Partials* par = new Partials(m_curreventindex, i, this);
-                connect(par, &Partials::deleteRequested, this, [this](Partials* p) {
-                    ProjectManager* pm2 = Inst::get_project_manager();
-                    SpectrumEvent* se =  &pm2->spectrumevents()[m_curreventindex];
-                 
-                    int idx = m_partials.indexOf(p);
-                    if (idx >= 0 && idx < se->spectrum.partials.size()) {
-                        se->spectrum.partials.removeAt(idx);
-                    }
-                    m_partials.removeOne(p);
-                    ui->partialsLayout->removeWidget(p);
-                    p->deleteLater();
-                    for (int j = 0; j < m_partials.size(); ++j) {
-                        m_partials[j]->setPartialIndex(j);
-                    }
-                    fixStackedWidgetLayout(ui->soundPage);
-                });
-                m_partials.append(par);
-                ui->partialsLayout->addWidget(par);
-            }
-            QTimer::singleShot(0, this, [this]() { fixStackedWidgetLayout(ui->soundPage); });
 
+            // Clear all existing Partials widgets so the panel reflects the new event
+            for (Partials* par : m_partials) {
+                ui->partialsLayout->removeWidget(par);
+                par->deleteLater();
+            }
+            m_partials.clear();
+
+            // Rebuild spectrum partials
+            for (int i = 0; i < event.spectrum.partials.size(); ++i) {
+                addPartialsUI(i);
+                m_partials[i]->setPartialText(event.spectrum.partials[i]);
+            }
         }else if(type == env){
             const EnvelopeEvent& event = pm->envelopeevents()[m_curreventindex];
             ui->envNameEntry->setText(event.name);
@@ -940,48 +871,6 @@ void EventAttributesViewController::showCurrentEventData() {
         }else{
             qDebug() << "Cannot show event data: type of event not valid";
         }
-        // Sound event
-        // if (type == eventSound) {
-            
-        // }
-
-        // // envelope, sieve, spa, pat, rev, fil, mea, note
-        // else {
-        //     auto* extra = m_currentlyShownEvent->getEventExtraInfo();
-        //     if (type == eventEnv) {
-        //         ui->envNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->envBuilderEntry->setText(QString::fromStdString(extra->getEnvelopeBuilder()));
-        //     }
-        //     else if (type == eventSiv) {
-        //         ui->sieveNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->sieveBuilderEntry->setText(QString::fromStdString(extra->getSieveBuilder()));
-        //     }
-        //     else if (type == eventSpa) {
-        //         ui->spaNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->spaBuilderEntry->setText(QString::fromStdString(extra->getSpatializationBuilder()));
-        //     }
-        //     else if (type == eventPat) {
-        //         ui->patNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->patBuilderEntry->setText(QString::fromStdString(extra->getPatternBuilder()));
-        //     }
-        //     else if (type == eventRev) {
-        //         ui->revNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->revBuilderEntry->setText(QString::fromStdString(extra->getReverbBuilder()));
-        //     }
-        //     else if (type == eventFil) {
-        //         ui->filNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->filBuilderEntry->setText(QString::fromStdString(extra->getFilterBuilder()));
-        //     }
-        //     else if (type == eventMea) {
-        //         ui->meaNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->meaBuilderEntry->setText(QString::fromStdString(extra->getMeasureBuilder()));
-        //     }
-        //     else if (type == eventNote) {
-        //         ui->noteNameEntry->setText(QString::fromStdString(m_currentlyShownEvent->getEventName()));
-        //         ui->staffNumberEntry->setText(QString::fromStdString(extra->getStaffNum()));
-        //         buildNoteModifiersList();
-        //     }
-        // }
     } /* not hevent nor bottom event */
 }
 
@@ -992,7 +881,7 @@ void EventAttributesViewController::fixedButtonClicked() {
     ui->numOfChildLabel3->setText("");
     ui->childCountEntry2->setEnabled(false);
     ui->childCountEntry3->setEnabled(false);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::densityButtonClicked() {
@@ -1002,7 +891,7 @@ void EventAttributesViewController::densityButtonClicked() {
     ui->childCountEntry1->setEnabled(true);
     ui->childCountEntry2->setEnabled(true);
     ui->childCountEntry3->setEnabled(true);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(false);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(false);
 }
 
 void EventAttributesViewController::byLayerButtonClicked() {
@@ -1012,7 +901,7 @@ void EventAttributesViewController::byLayerButtonClicked() {
     ui->childCountEntry1->setEnabled(false);
     ui->childCountEntry2->setEnabled(false);
     ui->childCountEntry3->setEnabled(false);
-    // for (auto* box : m_layerBoxesStorage) box->setWeightEnabled(true);
+    for (auto* box : m_layerBoxes) box->setWeightEnabled(true);
 }
 
 void EventAttributesViewController::continuumButtonClicked() {
@@ -1022,6 +911,7 @@ void EventAttributesViewController::continuumButtonClicked() {
     ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->childEventDefContSweepPage->adjustSize();
     ui->childEventDefStack->adjustSize();
+    for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(false);
     // ui->childDefEntry1->setEnabled(true);
     // ui->childDefEntry2->setEnabled(true);
     // ui->childDefEntry3->setEnabled(true);
@@ -1057,6 +947,7 @@ void EventAttributesViewController::discreteButtonClicked() {
     // ui->durationTypePercentRadio->setEnabled(false);
     // ui->durationTypeUnitsRadio->setEnabled(false);
     // ui->durationTypeSecondsRadio->setEnabled(false);
+    for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(true);
 }
 
 void EventAttributesViewController::wellTemperedRadioButtonClicked() {
@@ -1154,9 +1045,6 @@ void EventAttributesViewController::attributesStandardSpaButtonClicked() {
 
 void EventAttributesViewController::BSLoudnessButtonClicked() {
     insertFunctionString(BSLoudnessFunButton);
-}
-void modFunctionButtonClicked(Modifiers* mod, ModButtonType type) {
-
 }
 /*
 void EventAttributesViewController::BSSpatializationButtonClicked() {
@@ -1330,38 +1218,55 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
         delete gen;
     }
 }
-/*
-void EventAttributesViewController::addNewLayerButtonClicked() {
-    if (!m_currentlyShownEvent || m_currentlyShownEvent->getEventType() >= eventSound)
-        return;
 
-    auto* newLayer = m_currentlyShownEvent->addLayer();
-    LayerBox* box = new LayerBox(this,
-                                 m_sharedPointers->projectView,
-                                 newLayer,
-                                 ui->discreteButton->isChecked());
+void EventAttributesViewController::addLayerBoxUI(int layerIndex) {
+    LayerBox* box = new LayerBox(m_curreventtype, m_curreventindex, layerIndex, this);
+    connect(box, &LayerBox::deleteRequested, this, [this](LayerBox* b) {
+        ProjectManager* pm2 = Inst::get_project_manager();
+        HEvent* he = nullptr;
+        if (m_curreventtype == top)        he = &pm2->topevent();
+        else if (m_curreventtype == high)  he = &pm2->highevents()[m_curreventindex];
+        else if (m_curreventtype == mid)   he = &pm2->midevents()[m_curreventindex];
+        else if (m_curreventtype == low)   he = &pm2->lowevents()[m_curreventindex];
+        else                               he = &pm2->bottomevents()[m_curreventindex].event;
+
+        int idx = m_layerBoxes.indexOf(b);
+        if (idx >= 0 && idx < he->event_layers.size()) {
+            he->event_layers.removeAt(idx);
+        }
+        m_layerBoxes.removeOne(b);
+        ui->layersLayout->removeWidget(b);
+        b->deleteLater();
+        for (int i = 0; i < m_layerBoxes.size(); ++i) {
+            m_layerBoxes[i]->setLayerIndex(i);
+        }
+        fixStackedWidgetLayout(ui->standardPage);
+    });
+    box->setWeightEnabled(ui->byLayerButton->isChecked());
+    box->setPackageFieldsVisible(ui->discreteButton->isChecked());
+    m_layerBoxes.append(box);
     ui->layersLayout->addWidget(box);
-    m_layerBoxesStorage.push_back(box);
 }
-*/
 
-void EventAttributesViewController::addPartialButtonClicked(int) {
-
-    qDebug("add new partial button clicked");
+void EventAttributesViewController::addNewLayerButtonClicked() {
+    qDebug("add new layer button clicked");
 
     ProjectManager *pm = Inst::get_project_manager();
 
-    // Get a REFERENCE to the actual backend Spectrum so the append is not lost
-    QList<QString>& partials = pm->spectrumevents()[m_curreventindex].spectrum.partials;
+    HEvent* hevent = nullptr;
+    if (m_curreventtype == top)         hevent = &pm->topevent();
+    else if (m_curreventtype == high)   hevent = &pm->highevents()[m_curreventindex];
+    else if (m_curreventtype == mid)    hevent = &pm->midevents()[m_curreventindex];
+    else if (m_curreventtype == low)    hevent = &pm->lowevents()[m_curreventindex];
+    else                                hevent = &pm->bottomevents()[m_curreventindex].event;
 
-    // Append a new partial to the backend and record its index
-    partials.append("");
-    int partialIndex = partials.size() - 1;
+    hevent->event_layers.append(Layer());
+    addLayerBoxUI(hevent->event_layers.size() - 1);
+}
 
-    // Create the UI widget using indices so it can always find the backend Layer
+void EventAttributesViewController::addPartialsUI(int partialIndex) {
     Partials* par = new Partials(m_curreventindex, partialIndex, this);
     connect(par, &Partials::deleteRequested, this, [this](Partials* p) {
-        // Remove from backend
         ProjectManager* pm2 = Inst::get_project_manager();
         QList<QString>& partials2 =  pm2->spectrumevents()[m_curreventindex].spectrum.partials;
 
@@ -1376,13 +1281,32 @@ void EventAttributesViewController::addPartialButtonClicked(int) {
             m_partials[i]->setPartialIndex(i);
         }
         fixStackedWidgetLayout(ui->soundPage);
+        ui->spectrumNumPartialEntry->setText(QString::number(partials2.size()));
     });
-
+    // par->setWeightEnabled(ui->byLayerButton->isChecked());
+    // box->setPackageFieldsVisible(ui->discreteButton->isChecked());
     m_partials.append(par);
     ui->partialsLayout->addWidget(par);
-    QTimer::singleShot(0, this, [this]() { fixStackedWidgetLayout(ui->soundPage); });
+    fixStackedWidgetLayout(ui->soundPage);
 
+    ProjectManager *pm = Inst::get_project_manager();
+    Spectrum* sevent = &pm->spectrumevents()[m_curreventindex].spectrum;
+    ui->spectrumNumPartialEntry->setText(QString::number(sevent->partials.size()));
 }
+
+
+void EventAttributesViewController::addPartialButtonClicked() {
+    qDebug("add new partial button clicked");
+
+    ProjectManager *pm = Inst::get_project_manager();
+
+    Spectrum* sevent = &pm->spectrumevents()[m_curreventindex].spectrum;
+    sevent->partials.append("");
+
+    addPartialsUI(sevent->partials.size()-1);
+}
+
+
 
 void EventAttributesViewController::addModifierButtonClicked() {
     // TO DO: connect add modifier to data structure
@@ -1430,8 +1354,8 @@ void EventAttributesViewController::addModifierButtonClicked() {
 }
 
 void EventAttributesViewController::modRemoveButtonClicked(Modifiers* mod) {
-    // qDebug() << "mod remove button clicked on " << mod->ui->modifierNameEdit->text();
-    // qDebug() << "mod remove button for index " << index-1;
+    // //qDebug() << "mod remove button clicked on " << mod->ui->modifierNameEdit->text();
+    // //qDebug() << "mod remove button for index " << index-1;
     ui->modScrollWindowContent->layout()->removeWidget(mod);
     delete mod;
     m_modifiers.removeOne(mod);
