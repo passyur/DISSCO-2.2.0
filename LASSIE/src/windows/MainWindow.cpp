@@ -281,28 +281,40 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, &QAction::triggered, this, &QWidget::close);
 
+    /* These seem to take precedence over widget-specific copy/paste/undo/redo associations, which is generally bad. 
+     * Initializing these (ESPECIALLY initializing these to QKeySequences shared with other widget-specific shortcuts)
+     * will cause those widget-specific shortcuts to not work.
+     * \todo Rectify the copy/paste in the menubar to refer to the scope of whatever is being selected/viewed.
+     * - Jacob, 2/26/26
+     */
     // Edit actions
-    undoAct = new QAction(QIcon::fromTheme("edit-undo"), tr("&Undo"), this);
-    undoAct->setShortcuts(QKeySequence::Undo);
-    undoAct->setStatusTip(tr("Undo the last operation"));
-    connect(undoAct, &QAction::triggered, this, &MainWindow::undo);
+    // undoAct = new QAction(QIcon::fromTheme("edit-undo"), tr("&Undo"), this);
+    // undoAct->setShortcuts(QKeySequence::Undo);
+    // undoAct->setStatusTip(tr("Undo the last operation"));
+    // connect(undoAct, &QAction::triggered, this, &MainWindow::undo);
+
+    // redoAct = new QAction(QIcon::fromTheme("edit-redo"), tr("&Redo"), this);
+    // redoAct->setShortcuts(QKeySequence::Redo);
+    // redoAct->setStatusTip(tr("Redo the last operation"));
+    // connect(redoAct, &QAction::triggered, this, &MainWindow::redo);
     
-    redoAct = new QAction(QIcon::fromTheme("edit-redo"), tr("&Redo"), this);
-    redoAct->setShortcuts(QKeySequence::Redo);
-    redoAct->setStatusTip(tr("Redo the last operation"));
-    connect(redoAct, &QAction::triggered, this, &MainWindow::redo);
+    // cutAct = new QAction(QIcon::fromTheme("edit-cut"), tr("Cu&t"), this);
+    // cutAct->setShortcuts(QKeySequence::Cut);
+    // cutAct->setStatusTip(tr("Cut the current selection's contents to the clipboard"));
     
-    cutAct = new QAction(QIcon::fromTheme("edit-cut"), tr("Cu&t"), this);
-    cutAct->setShortcuts(QKeySequence::Cut);
-    cutAct->setStatusTip(tr("Cut the current selection's contents to the clipboard"));
-    
-    copyAct = new QAction(QIcon::fromTheme("edit-copy"), tr("&Copy"), this);
-    copyAct->setShortcuts(QKeySequence::Copy);
-    copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
-    
-    pasteAct = new QAction(QIcon::fromTheme("edit-paste"), tr("&Paste"), this);
-    pasteAct->setShortcuts(QKeySequence::Paste);
-    pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
+    // copyAct = new QAction(QIcon::fromTheme("edit-copy"), tr("&Copy"), this);
+    // copyAct->setShortcuts(QKeySequence::Copy);
+    // copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
+    // connect(copyAct, &QAction::triggered, this, [](){
+    //     qDebug() << "[DEBUG] MainWindow window-scope copyAct triggered (Ctrl/Cmd+C eaten here)";
+    // });
+
+    // pasteAct = new QAction(QIcon::fromTheme("edit-paste"), tr("&Paste"), this);
+    // pasteAct->setShortcuts(QKeySequence::Paste);
+    // pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
+    // connect(pasteAct, &QAction::triggered, this, [](){
+    //     qDebug() << "[DEBUG] MainWindow window-scope pasteAct triggered (Ctrl/Cmd+V eaten here)";
+    // });
 
     // Project actions
     newObjAct = new QAction(QIcon::fromTheme("list-add"), tr("New Object"), this);
@@ -365,12 +377,12 @@ void MainWindow::createMenus()
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(undoAct);
-    editMenu->addAction(redoAct);
+    // editMenu->addAction(undoAct);
+    // editMenu->addAction(redoAct);
     //editMenu->addSeparator();
-    editMenu->addAction(cutAct);
-    editMenu->addAction(copyAct);
-    editMenu->addAction(pasteAct);
+    // editMenu->addAction(cutAct);
+    // editMenu->addAction(copyAct);
+    // editMenu->addAction(pasteAct);
 
     projectMenu = menuBar()->addMenu(tr("&Project"));
     projectMenu->addAction(newObjAct);

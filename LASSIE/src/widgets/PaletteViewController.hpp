@@ -7,6 +7,9 @@
 #include <vector>
 #include <QTreeView>
 #include <QStandardItemModel>
+#include <QMenu>
+#include <QAction>
+#include <QPoint>
 
 class ProjectView;
 class IEvent;
@@ -27,6 +30,21 @@ public:
     // Opens Object Window
     void objectActivated(const QModelIndex &index);
 
+    // Handle name changes in palette items
+    void onItemChanged(QStandardItem* item);
+
+    // Update a specific palette item's name (signals blocked to avoid re-entry)
+    void updateItemName(const QString& typeStr, int index, const QString& name);
+
+    // Return the folder item for the given type string, or nullptr if unknown
+    QStandardItem* folderForType(const QString& typeStr) const;
+
+    // Handle row removals from palette
+    void onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
+
+    // Handle row insertions to palette
+    void onRowsInserted(const QModelIndex &parent, int first, int last);
+
     // Object Folders under tree view
     QStandardItem* folderTop;
     QStandardItem* folderHigh;
@@ -43,18 +61,18 @@ public:
     QStandardItem* folderFil;
     QStandardItem* folderMea;
 
+private slots:
+    void onContextMenuRequested(const QPoint& pos);
+
 private:
     ProjectView* projectView;
-    
+
     // Store events by type
     QMap<QString, std::vector<IEvent*>> eventsByType;
-    
+
     // Tree View
     QTreeView* treeView;
     QStandardItemModel* model;
-    // void slotCustomMenuRequested(QPoint pos);
-    // QAction *delAct;
-    // void deleteObject();
 
 };
 

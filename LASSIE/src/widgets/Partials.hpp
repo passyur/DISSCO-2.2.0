@@ -25,15 +25,29 @@ public:
     ~Partials() override;
 
     // Called by EventAttributesViewController when partials above this one are deleted
-    void setPartialIndex(int partialIndex) { m_partialIndex = partialIndex; }
+    void setPartialIndex(int partialIndex) {
+        m_partialIndex = partialIndex;
+        m_partialLabel->setText("Partial " + QString::number(m_partialIndex+1) + ":");
+    }
 
-    QLineEdit*          m_partialEntry;
+    // Flush the partial entry text to the backend Layer::by_layer.
+    // \todo this is tremendously chud and should be somehow delegated to ProjectManager, but for now is fine
+    void saveWeightToBackend() {
+        qDebug() << "in saveWeightToBackend partials at " << m_partialIndex ;
+        qDebug() << "partials size: " << getBackendLayer().partials.size();
+        getBackendLayer().partials[m_partialIndex] = m_partialEntry->text();
+    }
+    void setPartialText(const QString& text) {
+        if (m_partialEntry) {
+            m_partialEntry->setText(text);
+        }
+    }
 
 signals:
     void deleteRequested(Partials* self);
 
 private slots:
-    void onInsertFunctionClicked() {};
+    void onInsertFunctionClicked();
     void onRemovePartialClicked();
     void onPartialChanged(const QString& text);
 
@@ -46,9 +60,11 @@ private:
     int       m_partialIndex;
 
     // UI elements
-    QVBoxLayout*        m_mainLayout;
-    QPushButton*        m_insertFuncButton;
-    QPushButton*        m_removePartialButton;
+    QVBoxLayout*        m_mainLayout = nullptr;
+    QPushButton*        m_insertFuncButton = nullptr;
+    QLabel*             m_partialLabel = nullptr;
+    QLineEdit*          m_partialEntry = nullptr;
+    QPushButton*        m_removePartialButton = nullptr;
 };
 
 #endif

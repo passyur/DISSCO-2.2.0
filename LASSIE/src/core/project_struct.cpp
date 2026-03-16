@@ -318,6 +318,9 @@ namespace XercesParser {
             spectrum.partials.append(getFunctionString(partial_el));
             partial_el = partial_el->getNextElementSibling();
         }
+        if (spectrum.partials.size() > 1 && spectrum.partials[0] == "") {
+            spectrum.partials.removeFirst();
+        }
         return spectrum;
     }
 

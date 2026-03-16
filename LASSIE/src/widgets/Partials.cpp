@@ -1,5 +1,6 @@
 #include "Partials.hpp"
 #include "../inst.hpp"
+#include "../dialogs/FunctionGenerator.hpp"
 
 Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
     : QFrame(parent),
@@ -14,7 +15,7 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
 
     // Header
     auto* partialHBox = new QHBoxLayout;
-    auto* partialLabel = new QLabel("Partial " + QString::number(partialIndex) + ":");
+    m_partialLabel = new QLabel("Partial " + QString::number(partialIndex+1) + ":");
     m_partialEntry = new QLineEdit;
     m_insertFuncButton = new QPushButton("Insert Function");
     m_removePartialButton = new QPushButton("Remove Partial");
@@ -26,23 +27,23 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
     connect(m_partialEntry, &QLineEdit::textChanged,
             this, &Partials::onPartialChanged);
 
-    partialHBox->addWidget(partialLabel);
+    partialHBox->addWidget(m_partialLabel);
     partialHBox->addWidget(m_partialEntry);
     partialHBox->addWidget(m_insertFuncButton);
     partialHBox->addWidget(m_removePartialButton);
 
     m_mainLayout->addLayout(partialHBox);
 
-    this->setMinimumHeight(50);
-
     // Populate UI from backend (handles reload when switching events)
-    if (m_partialIndex > 0) {
-        QString partial = getBackendLayer().partials[m_partialIndex];
-        // Block signals so onPartialChanged doesn't write back during initialisation
-        m_partialEntry->blockSignals(true);
-        m_partialEntry->setText(partial);
-        m_partialEntry->blockSignals(false);
-    }
+    QString partial = getBackendLayer().partials[m_partialIndex];
+    // Block signals so onPartialChanged doesn't write back during initialisation
+    m_partialEntry->blockSignals(true);
+    m_partialEntry->setText(partial);
+    m_partialEntry->blockSignals(false);
+
+    this->m_partialEntry->setFixedHeight(20);
+    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    this->setFixedHeight(50);
 }
 
 
@@ -59,6 +60,15 @@ void Partials::onPartialChanged(const QString& text) {
 
 void Partials::onRemovePartialClicked() {
     emit deleteRequested(this);
+}
+
+void Partials::onInsertFunctionClicked() {
+   FunctionGenerator* gen = new FunctionGenerator(nullptr, functionReturnENV, m_partialEntry->text());
+    if (gen) {
+        if (gen->exec() == QDialog::Accepted && !gen->getResultString().isEmpty())
+            m_partialEntry->setText(gen->getResultString());
+        delete gen;
+    }
 }
 
 Partials::~Partials() {}

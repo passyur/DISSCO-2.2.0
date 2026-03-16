@@ -16,6 +16,7 @@ class SpectrumPartial;
 class EventLayer;
 class QKeyEvent;
 class Modifiers;
+class LayerBox;
 class Partials;
 
 namespace Ui {
@@ -44,7 +45,7 @@ typedef enum {
     BSWellTemperedFunButton,
     BSFunFreq1FunButton,
     BSFunFreq2FunButton,
-    BSContinuumFunButton,
+    BSContinuumFunButton
 } FunctionButton;
 
 typedef enum {
@@ -68,7 +69,7 @@ public:
     // explicit EventAttributesViewController(SharedPointers* sharedPointers,
     //                                        QWidget* parent = nullptr);                                       
     ~EventAttributesViewController() override;
-    ProjectView* e_projectView;
+    ProjectView* e_projectView = nullptr;
 
     // /*! \brief shows the attributes of the event
     //  *  @param event The event to be shown
@@ -76,6 +77,16 @@ public:
     void showAttributesOfEvent(Eventtype type, int index); //IEvent* event
 
     void saveCurrentShownEventData();
+
+    // Update the displayed name entry if typeStr/index matches the currently shown event
+    void updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name);
+
+    // Blank the panel (e.g. when the viewed event is deleted)
+    void clearView();
+
+    // Called by ProjectView after an event is removed from the backend; adjusts
+    // the tracked index or clears the view if the deleted event was being shown.
+    void onEventDeleted(Eventtype type, int deletedIndex);
 
     // /*! \brief get the currently shown event */
     // IEvent* getCurrentEvent() const;
@@ -133,9 +144,9 @@ private slots:
     void BSContinuumButtonClicked();
 
     // // main actions
-    // void addNewLayerButtonClicked();
+    void addNewLayerButtonClicked();
     void addModifierButtonClicked();
-    void addPartialButtonClicked(int partialIndex);
+    void addPartialButtonClicked();
 
     // modifier buttons
     void modFunctionButtonClicked(Modifiers* mod, ModButtonType type);
@@ -158,22 +169,23 @@ private:
     Eventtype m_curreventtype;
     // index of event in QList in ProjectManager
     int m_curreventindex = -1;
+    bool m_hasCurrentEvent = false;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
     QList<Modifiers*>               m_modifiers;  
     QList<Partials*>                m_partials;   
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
-    // QList<class LayerBox*>           m_layerBoxesStorage;
+    QList<LayerBox*>                 m_layerBoxes;
     // QList<class QCheckBox*>          m_noteModifierCheckBoxes;
 
     // // internal helpers
     void showCurrentEventData();
+    // Creates a LayerBox UI for the given layerIndex and attaches it to the panel.
+    // Does NOT touch the backend — callers are responsible for ensuring the backend
+    // layer already exists at that index before calling this.
+    void addLayerBoxUI(int layerIndex);
+    void addPartialsUI(int partialIndex);
     void insertFunctionString(FunctionButton fn);
-    // void refreshChildTypeInLayer();
-    // bool deleteLayer(class LayerBox* box);
-    // void buildNoteModifiersList();
-    // QString generateTempoStringByNoteValue() const;
-    // QString generateTempoStringByFraction() const;
     void fixStackedWidgetLayout(QWidget* currPage);
 };
 
