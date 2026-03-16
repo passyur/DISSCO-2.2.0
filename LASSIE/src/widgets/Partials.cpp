@@ -59,6 +59,7 @@ void Partials::onPartialChanged(const QString& text) {
 }
 
 void Partials::onRemovePartialClicked() {
+    qDebug() << "\nonRemovePartialClicked()";
     emit deleteRequested(this);
 }
 

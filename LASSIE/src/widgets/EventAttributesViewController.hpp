@@ -48,14 +48,6 @@ typedef enum {
     BSContinuumFunButton
 } FunctionButton;
 
-typedef enum {
-    modProbabilityButton,
-    modMagnitudeButton,
-    modRateButton,
-    modWidthButton,
-    modPartialButton
-} ModButtonType;
-
 // forward enums from original GTK version - now defined in LASSIE.h
 // enum TempoPrefix;
 // enum TempoNoteValue;
@@ -148,10 +140,6 @@ private slots:
     void addModifierButtonClicked();
     void addPartialButtonClicked();
 
-    // modifier buttons
-    void modFunctionButtonClicked(Modifiers* mod, ModButtonType type);
-    void modRemoveButtonClicked(Modifiers* mod);
-
     // // tempo controls
     void tempoAsNoteValueButtonClicked();
     void tempoAsFractionButtonClicked();
@@ -185,6 +173,7 @@ private:
     // layer already exists at that index before calling this.
     void addLayerBoxUI(int layerIndex);
     void addPartialsUI(int partialIndex);
+    void addModifiersUI(int modifierIndex);
     void insertFunctionString(FunctionButton fn);
     void fixStackedWidgetLayout(QWidget* currPage);
 };

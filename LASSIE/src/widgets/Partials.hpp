@@ -6,9 +6,6 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QPushButton>
-// #include <QTreeView>
-// #include <QStandardItemModel>
-// #include <QAbstractItemView>
 #include <QLabel>
 #include <QString>
 
@@ -33,8 +30,8 @@ public:
     // Flush the partial entry text to the backend Layer::by_layer.
     // \todo this is tremendously chud and should be somehow delegated to ProjectManager, but for now is fine
     void saveWeightToBackend() {
-        qDebug() << "in saveWeightToBackend partials at " << m_partialIndex ;
-        qDebug() << "partials size: " << getBackendLayer().partials.size();
+        // qDebug() << "in saveWeightToBackend partials at " << m_partialIndex ;
+        // qDebug() << "partials size: " << getBackendLayer().partials.size();
         getBackendLayer().partials[m_partialIndex] = m_partialEntry->text();
     }
     void setPartialText(const QString& text) {

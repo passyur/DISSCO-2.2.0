@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Modifiers</class>
- <widget class="QWidget" name="Modifier">
+ <widget class="QFrame" name="Modifier">
     <layout class="QVBoxLayout" name="modifierGroupLayout">
     <item>
     <widget class="QGroupBox" name="modifierGroup">
@@ -83,30 +83,54 @@
                     <property name="text">
                     <string>Detune Spread:</string>
                     </property>
+                    <property name="wordWrap"><bool>true</bool></property>
                 </widget>
             </item>
             <item>
                 <widget class="QLineEdit" name="modifierSpreadEdit"/>
             </item>
             <item>
+                <widget class="QPushButton" name="modifierSpreadFunButton">
+                    <property name="text">
+                    <string>Fn.</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
                 <widget class="QLabel" name="modifierDirLabel">
                     <property name="text">
                     <string>Detune Direction:</string>
                     </property>
+                    <property name="wordWrap"><bool>true</bool></property>
                 </widget>
             </item>
             <item>
                 <widget class="QLineEdit" name="modifierDirEdit"/>
             </item>
             <item>
-                <widget class="QLabel" name="modifierVelLabel">
+                <widget class="QPushButton" name="modifierDirFunButton">
                     <property name="text">
-                    <string>Detune Velocity:</string>
+                    <string>Fn.</string>
                     </property>
                 </widget>
             </item>
             <item>
+                <widget class="QLabel" name="modifierVelLabel">
+                    <property name="text">
+                    <string>Detune Velocity:</string>
+                    </property>
+                    <property name="wordWrap"><bool>true</bool></property>
+                </widget>
+            </item>
+            <item>
                 <widget class="QLineEdit" name="modifierVelEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierVelFunButton">
+                    <property name="text">
+                    <string>Fn.</string>
+                    </property>
+                </widget>
             </item>
         </layout>
         </item>

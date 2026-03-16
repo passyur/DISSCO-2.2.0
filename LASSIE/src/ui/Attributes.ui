@@ -903,26 +903,24 @@
                         </widget>
                         </item>
                         <item>
-                        <layout class="QVBoxLayout" name="modifiersLayout">
+                        <layout class="QVBoxLayout" name="modifierLabelLayout">
                             <item>
                                 <widget class="QLabel" name="modifiersLabel">
                                 <property name="text"><string>Modifiers:</string></property>
                                 <property name="alignment"><set>Qt::AlignCenter</set></property>
                                 </widget>
                             </item>
-                            <item>
-                            <widget class="QScrollArea" name="modScrollWindow">
-                            <property name="fixedHeight"><number>450</number></property>
-                                <property name="minimumHeight"><number>450</number></property>
-                                <!-- <property name="maximumHeight"><number>450</number></property> -->
-                                <property name="widgetResizable"><bool>true</bool></property>
-                                <widget class="QWidget" name="modScrollWindowContent">     
-                                    <layout class="QVBoxLayout" name="modScrollWindowLayout">    
-                                        <!-- Modifiers.ui -->
-                                    </layout>    
-                                </widget>
-                            </widget>
-                            </item>      
+                        </layout>
+                        </item>
+
+                        <item>
+                        <layout class="QVBoxLayout" name="modifiersLayout">
+                           <!-- Modifiers.ui -->
+                        </layout>
+                        </item>
+
+                        <item>
+                        <layout class="QVBoxLayout" name="addModifierLayout">
                             <item>
                                 <widget class="QPushButton" name="addModifierButton">
                                 <property name="text">
