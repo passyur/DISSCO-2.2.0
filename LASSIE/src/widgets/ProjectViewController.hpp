@@ -41,8 +41,7 @@ class ProjectView : public QObject {
         // void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
         // ObjectWindow and Palette methods
-        PaletteViewController* getPalette() { return paletteView; }
-        void updatePaletteView();
+        void updatePaletteView() const;
         void showAttributes(QString eventType, int index);
 
         // Remove the event at index from the backend and the palette.
