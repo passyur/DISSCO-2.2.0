@@ -1007,7 +1007,7 @@ static Eventtype eventtypeFromString(const QString& s) {
     return top; // fallback (should not happen for deletable types)
 }
 
-void ProjectView::updatePaletteView() {
+void ProjectView::updatePaletteView() const {
     ProjectManager *pm = Inst::get_project_manager();
 
     auto makeItems = [](const QString& typeStr, const QString& nameStr,
