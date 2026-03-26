@@ -427,6 +427,21 @@ void FunctionGenerator::setupUi()
         functionName = string(functionNameChars);
         XMLString::release(&functionNameChars);
     }
+    if (functionName == "Random") {
+        int index = -1;
+        for (int i = 0; i < ui->functionOptions->count(); ++i) {
+            QString itemText = ui->functionOptions->itemText(i);
+            if (itemText.toStdString() == functionName) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) { ui->functionOptions->setCurrentIndex(index); }
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->randomIntLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        thisElement = thisElement->getNextElementSibling();
+        ui->randomIntUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    }
     if (functionName == "RandomInt") {
         int index = -1;
         for (int i = 0; i < ui->functionOptions->count(); ++i) {
@@ -445,13 +460,11 @@ void FunctionGenerator::setupUi()
 }
 
 std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElement){
-
   char* charBuffer;
   DOMCharacterData* textData;
   string returnString;
   DOMElement* child = _thisFunctionElement->getFirstElementChild();
   if (child ==NULL){ //not containing any child, return string
-
     textData = ( DOMCharacterData*) _thisFunctionElement->getFirstChild();
     if (textData){
       charBuffer = XMLString::transcode(textData->getData());
