@@ -9,7 +9,23 @@
 #include <QTreeView>
 #include <QStandardItem>
 #include <QHeaderView>
+#include <QSortFilterProxyModel>
 #include <algorithm>
+
+// Sorts children within folders alphabetically, but keeps folders in insertion order.
+class PaletteSortProxy : public QSortFilterProxyModel {
+public:
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+
+protected:
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override {
+        // Root-level items (folders): preserve insertion order
+        if (!left.parent().isValid())
+            return left.row() < right.row();
+        // Children: sort alphabetically by display text
+        return QSortFilterProxyModel::lessThan(left, right);
+    }
+};
 
 PaletteViewController::PaletteViewController(ProjectView* projectView)
     : QWidget(nullptr), projectView(projectView)
@@ -24,7 +40,15 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     treeView = new QTreeView(this);
     model = new QStandardItemModel(this);
     model->setHorizontalHeaderLabels({"Type", "Name"});
-    treeView->setModel(model);
+
+    proxyModel = new PaletteSortProxy(this);
+    proxyModel->setSourceModel(model);
+    proxyModel->setSortRole(Qt::DisplayRole);
+    proxyModel->setDynamicSortFilter(true);
+
+    treeView->setModel(proxyModel);
+    treeView->setSortingEnabled(true);
+    treeView->sortByColumn(1, Qt::AscendingOrder);
     treeView->header()->setSectionResizeMode(QHeaderView::Fixed);
     layout->addWidget(treeView, 1);
     treeView->setDragEnabled(true);
@@ -160,8 +184,8 @@ PaletteViewController::~PaletteViewController() = default;
 void PaletteViewController::objectActivated(const QModelIndex &index){
     if (!index.isValid()) { return; }
 
-    QModelIndex selectedIndex = index;
-    QStandardItem* item = model->itemFromIndex(selectedIndex);
+    QModelIndex sourceIndex = proxyModel->mapToSource(index);
+    QStandardItem* item = model->itemFromIndex(sourceIndex);
     QStandardItem* parent = item->parent();
 
     QString eventType;
@@ -169,12 +193,12 @@ void PaletteViewController::objectActivated(const QModelIndex &index){
 
     /* if it is a Folder, it will have no parent */
     if (!parent) {
-        eventType = model->itemFromIndex(index.sibling(index.row(), 1))->text();
+        eventType = model->itemFromIndex(sourceIndex.sibling(sourceIndex.row(), 1))->text();
         eventName = NULL;
     } else {
-        eventType = model->itemFromIndex(index.sibling(index.row(), 0))->text();
-        eventName = model->itemFromIndex(index.sibling(index.row(), 1))->text();
-        projectView->showAttributes(eventType, index.row());
+        eventType = model->itemFromIndex(sourceIndex.sibling(sourceIndex.row(), 0))->text();
+        eventName = model->itemFromIndex(sourceIndex.sibling(sourceIndex.row(), 1))->text();
+        projectView->showAttributes(eventType, sourceIndex.row());
     }
 }
 
@@ -230,9 +254,10 @@ void PaletteViewController::updateItemName(const QString& typeStr, int index, co
 
 void PaletteViewController::onContextMenuRequested(const QPoint& pos)
 {
-    QModelIndex index = treeView->indexAt(pos);
-    if (!index.isValid()) return;
+    QModelIndex proxyIndex = treeView->indexAt(pos);
+    if (!proxyIndex.isValid()) return;
 
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     QStandardItem* item = model->itemFromIndex(index);
     if (!item || !item->parent()) return; // folder row — ignore
 
