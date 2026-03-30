@@ -66,9 +66,9 @@ PostWindow::PostWindow(QProcess *process, QWidget *parent)
     connect(proc, &QProcess::finished, this, [=]{
         runProc->setEnabled(true);
         if(proc->exitStatus() == QProcess::NormalExit)
-            appendColored("*** Process exited normally (exit code" + QString::number(proc->exitCode()) + ") ***", Qt::black);
+            appendColored("*** Process exited normally (exit code " + QString::number(proc->exitCode()) + ") ***", Qt::black);
         else
-            appendColored("*** Process crashed (abnormal exit; exit code" + QString::number(proc->exitCode()) + ") *** ", Qt::red);
+            appendColored("*** Process crashed (abnormal exit; exit code " + QString::number(proc->exitCode()) + ") *** ", Qt::red);
     });
     
     QVBoxLayout *layout = new QVBoxLayout(this);
