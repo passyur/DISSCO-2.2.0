@@ -2,7 +2,7 @@
 #include "../inst.hpp"
 #include <algorithm>
 
-LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent)
+LayerBox::LayerBox(Eventtype eventType, int eventIndex, int layerIndex, QWidget* parent)
     : QFrame(parent),
       m_eventType(eventType),
       m_eventIndex(eventIndex),

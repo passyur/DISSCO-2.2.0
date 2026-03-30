@@ -37,7 +37,7 @@ class LayerBox : public QFrame {
 public:
     // eventType / eventIndex identify the parent HEvent in the ProjectManager.
     // layerIndex is the position of this layer within HEvent::event_layers.
-    LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWidget* parent);
+    LayerBox(Eventtype eventType, int eventIndex, int layerIndex, QWidget* parent);
     ~LayerBox() override;
 
     QStandardItem* extractItemFromDrop(QDropEvent* event);
@@ -46,7 +46,7 @@ public:
     // Called by EventAttributesViewController when layers above this one are deleted
     void setLayerIndex(int layerIndex) { m_layerIndex = layerIndex; }
     // Called when a preceding sibling event is deleted (index shifts down by 1)
-    void setEventIndex(unsigned eventIndex) { m_eventIndex = eventIndex; }
+    void setEventIndex(int eventIndex) { m_eventIndex = eventIndex; }
 
     // Flush the weight entry text to the backend Layer::by_layer.
     // \todo this is tremendously chud and should be somehow delegated to ProjectManager, but for now is fine
@@ -93,7 +93,7 @@ private:
 
     // Identity of the layer in the backend
     Eventtype m_eventType;
-    unsigned  m_eventIndex;
+    int       m_eventIndex;
     int       m_layerIndex;
 
     QList<Package> m_clipboard;
