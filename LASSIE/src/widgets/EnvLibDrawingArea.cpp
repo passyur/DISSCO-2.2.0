@@ -130,8 +130,8 @@ void EnvLibDrawingArea::setActiveNodeCoordinate(const QString& _x, const QString
         newX = activeNode->x; // Keep X unchanged for head/tail
     }
     
-    // Constrain Y to be non-negative (positive values only)
-    newY = qMax(0.0, newY);
+    // Constrain Y to [0, 4]
+    newY = qBound(0.0, newY, 4.0);
     
     activeNode->x = newX;
     activeNode->y = newY;
@@ -159,9 +159,9 @@ void EnvLibDrawingArea::adjustBoundary(EnvelopeLibraryEntry* _envelope)
         segment = nd->rightSeg;
     }
 
-    // Always show at least 0-1 range, or extend to actual maximum
-    upperY = qMax(1.0, maxVal);
-    lowerY = 0.0; // Always start from 0 for positive values
+    // Fixed 0-4 range (Y is capped at 4)
+    upperY = 4.0;
+    lowerY = 0.0;
 
     // Update boundary display
     QString txt = QString("%1\n\n\n\n\n\n\n\n\n\n\n\n%2")
@@ -181,28 +181,39 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
 
     int w = width(), h = height();
 
-    // Draw grid lines (10% intervals)
+    // Draw grid lines
     painter.save();
     QPen gridPen(QColor(220,220,220));
     gridPen.setStyle(Qt::DashLine);
     painter.setPen(gridPen);
-    for (int i = 1; i < 10; ++i) {
-        int y = h - i * h / 10;
+    // Y-axis: 4 lines at 1.0, 2.0, 3.0 (each = 25% of height)
+    for (int i = 1; i < 4; ++i) {
+        int y = h - i * h / 4;
         painter.drawLine(0, y, w, y);
     }
-    for (int i = 1; i < 10; ++i) {
-        int x = i * w / 10;
+    // X-axis: lines every 0.2 (5 intervals)
+    for (int i = 1; i < 5; ++i) {
+        int x = i * w / 5;
         painter.drawLine(x, 0, x, h);
     }
     painter.restore();
 
-    // Draw Y-axis labels only (removed X-axis labels)
+    // Draw axis labels
     QFont font = painter.font();
-    font.setPointSize(12);
+    font.setPointSize(10);
     painter.setFont(font);
     painter.setPen(Qt::black);
-    painter.drawText(5, h-5, QString::number(lowerY, 'f', 3)); // bottom left
-    painter.drawText(5, 20, QString::number(upperY, 'f', 3)); // top left
+    // Y-axis labels along left edge at each grid line
+    for (int i = 0; i <= 4; ++i) {
+        int y = h - i * h / 4;
+        painter.drawText(3, y - 3, QString::number(i));
+    }
+    // X-axis labels along bottom at each grid line
+    for (int i = 0; i <= 5; ++i) {
+        int x = i * w / 5;
+        QString label = QString::number(i * 0.2, 'f', 1);
+        painter.drawText(x + 2, h - 3, label);
+    }
 
     EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
     if (!env) {
@@ -311,8 +322,8 @@ void EnvLibDrawingArea::mouseMoveEvent(QMouseEvent* event)
     x = qRound(x*1000)/1000.0;
     y = qRound(y*1000)/1000.0;
     x = qBound(0.0, x, 1.0);
-    // Constrain Y to be non-negative (positive values only)
-    y = qMax(0.0, y);
+    // Constrain Y to [0, 4]
+    y = qBound(0.0, y, 4.0);
 
     if (mouseLeftButtonPressedDown) {
         mouseX = x;
@@ -569,10 +580,10 @@ void EnvLibDrawingArea::moveNode()
     double rb = activeNode->rightSeg ? activeNode->rightSeg->rightNode->x - 0.001 : 1.0;
 
     if (!activeNode->leftSeg || !activeNode->rightSeg) {
-        activeNode->y = qMax(0.0, mouseY);
+        activeNode->y = qBound(0.0, mouseY, 4.0);
     } else {
         activeNode->x = qBound(lb, mouseX, rb);
-        activeNode->y = qMax(0.0, mouseY); // Constrain to positive values only
+        activeNode->y = qBound(0.0, mouseY, 4.0);
     }
 
     envelopeLibraryWindow->setEntries(
