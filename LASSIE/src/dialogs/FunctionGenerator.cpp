@@ -3,8 +3,11 @@
 
 #include <QDialog>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QComboBox>
 #include <QTextEdit>
 #include <QDialogButtonBox>
@@ -30,7 +33,7 @@ FunctionGenerator::FunctionGenerator(QWidget *parent, FunctionReturnType _return
     originalString = _originalString;
     ui->setupUi(this);
     ui->functionStackedWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Ignored);
-    ui->functionStackedWidget->setFixedSize(ui->functionStackedWidget->widget(0)->sizeHint());
+    // ui->functionStackedWidget->setFixedSize(ui->functionStackedWidget->widget(0)->sizeHint());
     this->adjustSize();
     setupUi();
     qDebug() << "returnType in FuncGen:" << returnType;
@@ -236,8 +239,8 @@ void FunctionGenerator::setupUi()
     // Select Signals
     connect(ui->selectIndexInsertFn, &QPushButton::clicked, this, &FunctionGenerator::selectIndexFunButtonClicked);
     connect(ui->selectIndexEdit, &QLineEdit::textChanged, this, &FunctionGenerator::selectEntryChanged);
-    // connect(ui->selectAddNode, &QPushButton::clicked, this, &FunctionGenerator::selectAddNodeButtonClicked);
-    // connect(ui->selectInsertFn, &QPushButton::clicked, this, &FunctionGenerator::selectFunButtonClicked);
+    connect(ui->selectAddNode, &QPushButton::clicked, this, &FunctionGenerator::selectAddNodeButtonClicked);
+    /* signal/slot connections for the rows of select will be created dynamically */
 
     // Stochos Signals
     connect(ui->stochosOffsetEdit, &QLineEdit::textChanged, this, &FunctionGenerator::stochosTextChanged);
@@ -441,6 +444,80 @@ void FunctionGenerator::setupUi()
         ui->randomIntLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
         thisElement = thisElement->getNextElementSibling();
         ui->randomIntUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Select") {
+        // Set combo box — triggers handleFunctionChanged which adds 1 default empty row
+        int cbIdx = -1;
+        for (int i = 0; i < ui->functionOptions->count(); ++i) {
+            if (ui->functionOptions->itemText(i) == "Select") { cbIdx = i; break; }
+        }
+        if (cbIdx != -1) { ui->functionOptions->setCurrentIndex(cbIdx); }
+
+        // Clear the default row that handleFunctionChanged auto-added
+        while (!selectValueRows.isEmpty())
+            selectRemoveRow(selectValueRows.last(), selectValueEdits.last());
+
+        // Parse <List>val1,val2,…</List>
+        DOMElement* listElement  = functionNameElement->getNextElementSibling(); // <List>
+        DOMElement* indexElement = listElement->getNextElementSibling();          // <Index>
+
+        // Serialize <List> to a string then strip the outer tags,
+        // mirroring the logic in CMOD's Utilities::XMLTranscode.
+        std::string listContent;
+        if (listElement != nullptr && listElement->getFirstChild() != nullptr) {
+            XMLCh lsStr[3] = {chLatin_L, chLatin_S, chNull};
+            DOMImplementation* lsImpl = DOMImplementationRegistry::getDOMImplementation(lsStr);
+            DOMLSSerializer* lsSer = ((DOMImplementationLS*)lsImpl)->createLSSerializer();
+            XMLCh* lsBla = lsSer->writeToString(listElement);
+            char* lsRaw = XMLString::transcode(lsBla);
+            std::string full(lsRaw);
+            XMLString::release(&lsRaw);
+            XMLString::release(&lsBla);
+            delete lsSer;
+            // full = "<List>content</List>"; extract "content"
+            size_t s0 = full.find('>') + 1;
+            size_t s1 = full.rfind('<');
+            if (s0 < s1) listContent = full.substr(s0, s1 - s0);
+        }
+
+        // Split listContent by top-level commas (skip commas inside <Fun>…</Fun>)
+        std::vector<std::string> selectItems;
+        if (!listContent.empty()) {
+            std::string rem = listContent;
+            while (!rem.empty()) {
+                size_t cp = rem.find(',');
+                size_t fp = rem.find("<Fun>");
+                // Advance cp past any <Fun>…</Fun> block that precedes it
+                while (fp != std::string::npos && cp != std::string::npos && fp < cp) {
+                    int depth = 1;
+                    size_t pos = fp + 5;
+                    while (depth > 0 && pos < rem.size()) {
+                        size_t nf = rem.find("<Fun>", pos);
+                        size_t ne = rem.find("</Fun>", pos);
+                        if (nf != std::string::npos && (ne == std::string::npos || nf < ne)) {
+                            depth++; pos = nf + 5;
+                        } else if (ne != std::string::npos) {
+                            depth--; pos = ne + 6;
+                        } else break;
+                    }
+                    cp = rem.find(',', pos);
+                    fp = rem.find("<Fun>", pos);
+                }
+                if (cp == std::string::npos) { selectItems.push_back(rem); break; }
+                selectItems.push_back(rem.substr(0, cp));
+                rem = rem.substr(cp + 1);
+            }
+        }
+
+        for (const std::string& itemStr : selectItems) {
+            if (!itemStr.empty()) {
+                selectAddRow();
+                selectValueEdits.last()->setText(QString::fromStdString(itemStr));
+            }
+        }
+
+        // Restore index field
+        ui->selectIndexEdit->setText(
+            QString::fromStdString(getFunctionString(indexElement)));
     }
 }
 
@@ -574,6 +651,11 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionSelect:
             currPageIndex = 12;
+            // this->setMinimumSize(420, 480);
+            this->resize(420, 500);
+            ui->selectScrollWindow->setWidgetResizable(true);
+            ui->selectScrollLayout->setAlignment(Qt::AlignTop);
+            if (selectValueRows.isEmpty()) { selectAddRow(); }
             selectEntryChanged();
             break;
         case functionValuePick:
@@ -684,9 +766,6 @@ void FunctionGenerator::handleFunctionChanged(int index)
     }
     // Udate stacked widget page added
     ui->functionStackedWidget->setCurrentIndex(currPageIndex);
-    // Resizes to fit new page
-    ui->functionStackedWidget->setFixedSize(ui->functionStackedWidget->widget(currPageIndex)->sizeHint());
-    this->adjustSize();
 }
 
 QString FunctionGenerator::getResultString(){
@@ -942,11 +1021,73 @@ void FunctionGenerator::selectIndexFunButtonClicked(){
   delete generator;
 }
 void FunctionGenerator::selectEntryChanged(){
-    QString stringbuffer;
-    stringbuffer =  "<Fun><Name>Select</Name><List>";
-    // TO DO: SelectSubAlignments
-    stringbuffer =  stringbuffer + "</List><Index>" + ui->selectIndexEdit->text() + "</Index></Fun>";
-    ui->resultTextEdit->setText(stringbuffer);
+    QString s = "<Fun><Name>Select</Name><List>";
+    for (QLineEdit* edit : selectValueEdits)
+        s += edit->text() + ",";
+    if(!selectValueEdits.isEmpty())
+        s.removeLast(); // removes that last ',' so that the list makes sense
+    s += "</List><Index>" + ui->selectIndexEdit->text() + "</Index></Fun>";
+    ui->resultTextEdit->setText(s);
+}
+
+void FunctionGenerator::selectAddNodeButtonClicked() { selectAddRow(); }
+
+QWidget* FunctionGenerator::selectAddRow() {
+    QVBoxLayout* scrollLayout = qobject_cast<QVBoxLayout*>(
+        ui->selectScrollWindowNodes->layout());
+    scrollLayout->setSpacing(1);
+    scrollLayout->setContentsMargins(0, 0, 0, 0);
+
+    QWidget* row = new QWidget(ui->selectScrollWindowNodes);
+    QHBoxLayout* rowLayout = new QHBoxLayout(row);
+    rowLayout->setContentsMargins(0, 0, 0, 0);
+    rowLayout->setSpacing(4);
+
+    QLabel*      label = new QLabel("Value " + QString::number(selectValueRows.size()) + ":", row);
+    QLineEdit*   edit  = new QLineEdit(row);
+    QPushButton* fnBtn = new QPushButton("fn", row);
+    QPushButton* rmBtn = new QPushButton("rm.", row);
+
+    rowLayout->addWidget(label);
+    rowLayout->addWidget(edit);
+    rowLayout->addWidget(fnBtn);
+    rowLayout->addWidget(rmBtn);
+
+    scrollLayout->addWidget(row);
+    selectValueEdits.append(edit);
+    selectValueRows.append(row);
+    selectValueLabels.append(label);
+
+    connect(edit, &QLineEdit::textChanged, this, &FunctionGenerator::selectEntryChanged);
+
+    connect(fnBtn, &QPushButton::clicked, this, [this, edit]() {
+        FunctionGenerator* gen = new FunctionGenerator(this, returnType, edit->text());
+        if (gen->exec() == QDialog::Accepted) {
+            QString res = gen->getResultString();
+            if (!res.isEmpty()) edit->setText(res);
+        }
+        delete gen;
+    });
+
+    connect(rmBtn, &QPushButton::clicked, this, [this, row, edit]() {
+        selectRemoveRow(row, edit);
+    });
+
+    selectEntryChanged();
+    return row;
+}
+
+void FunctionGenerator::selectRemoveRow(QWidget* row, QLineEdit* edit) {
+    int idx = selectValueRows.indexOf(row);
+    selectValueRows.removeAt(idx);
+    selectValueEdits.removeAt(idx);
+    selectValueLabels.removeAt(idx);
+    ui->selectScrollWindowNodes->layout()->removeWidget(row);
+    delete row;
+    // Renumber remaining labels
+    for (int i = 0; i < selectValueLabels.size(); ++i)
+        selectValueLabels[i]->setText("Value " + QString::number(i) + ":");
+    selectEntryChanged();
 }
 
 /* Stochos Signal Functions */

@@ -6,8 +6,11 @@
 #include "../../../CMOD/src/Utilities.h"
 
 #include <QDialog>
-#include <QWidget>
+#include <QLabel>
+#include <QLineEdit>
+#include <QList>
 #include <QString>
+#include <QWidget>
 
 class SPAPartialAlignment;
 class REVPartialAlignment;
@@ -89,6 +92,13 @@ public:
     // Select
     void selectIndexFunButtonClicked();
     void selectEntryChanged();
+    void selectAddNodeButtonClicked();
+    QWidget* selectAddRow();
+    void selectRemoveRow(QWidget* row, QLineEdit* edit);
+
+    QList<QLineEdit*> selectValueEdits;
+    QList<QWidget*>   selectValueRows;
+    QList<QLabel*>    selectValueLabels;
 
     // Stochos
     void stochosTextChanged();
