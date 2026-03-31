@@ -46,13 +46,6 @@
             <item>
                 <widget class="QLineEdit" name="modifierNameEdit"/>
             </item>
-            <!-- <item>
-                <widget class="QPushButton" name="modifierNameFunButton">
-                    <property name="text">
-                    <string>Fn</string>
-                    </property>
-                </widget>
-            </item> -->
         </layout>
         </item>
         <item>
@@ -69,6 +62,69 @@
             </item>
             <item>
                 <widget class="QPushButton" name="modifierProbFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierMagLayout">
+            <item>
+                <widget class="QLabel" name="modifierMagLabel">
+                    <property name="text">
+                    <string>Magnitude Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierMagEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierMagFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierRateLayout">
+            <item>
+                <widget class="QLabel" name="modifierRateLabel">
+                    <property name="text">
+                    <string>Rate Value Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierRateEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierRateFunButton">
+                    <property name="text">
+                    <string>Insert Function</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+        </item>
+        <item>
+        <layout class="QHBoxLayout" name="modifierWidthLayout">
+            <item>
+                <widget class="QLabel" name="modifierWidthLabel">
+                    <property name="text">
+                    <string>Width Envelope:</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLineEdit" name="modifierWidthEdit"/>
+            </item>
+            <item>
+                <widget class="QPushButton" name="modifierWidthFunButton">
                     <property name="text">
                     <string>Insert Function</string>
                     </property>
@@ -135,48 +191,6 @@
         </layout>
         </item>
         <item>
-        <layout class="QHBoxLayout" name="modifierMagLayout">
-            <item>
-                <widget class="QLabel" name="modifierMagLabel">
-                    <property name="text">
-                    <string>Magnitude Envelope:</string>
-                    </property>
-                </widget>
-            </item>
-            <item>
-                <widget class="QLineEdit" name="modifierMagEdit"/>
-            </item>
-            <item>
-                <widget class="QPushButton" name="modifierMagFunButton">
-                    <property name="text">
-                    <string>Insert Function</string>
-                    </property>
-                </widget>
-            </item>
-        </layout>
-        </item>
-        <item>
-        <layout class="QHBoxLayout" name="modifierWidthLayout">
-            <item>
-                <widget class="QLabel" name="modifierWidthLabel">
-                    <property name="text">
-                    <string>Width Envelope:</string>
-                    </property>
-                </widget>
-            </item>
-            <item>
-                <widget class="QLineEdit" name="modifierWidthEdit"/>
-            </item>
-            <item>
-                <widget class="QPushButton" name="modifierWidthFunButton">
-                    <property name="text">
-                    <string>Insert Function</string>
-                    </property>
-                </widget>
-            </item>
-        </layout>
-        </item>
-        <item>
         <layout class="QHBoxLayout" name="modifierResLayout">
             <item>
                 <widget class="QLabel" name="modifierResLabel">
@@ -197,32 +211,9 @@
             </item>
         </layout>
         </item>
-        <item>
-        <layout class="QHBoxLayout" name="modifierRateLayout">
-            <item>
-                <widget class="QLabel" name="modifierRateLabel">
-                    <property name="text">
-                    <string>Rate Value Envelope:</string>
-                    </property>
-                </widget>
-            </item>
-            <item>
-                <widget class="QLineEdit" name="modifierRateEdit"/>
-            </item>
-            <item>
-                <widget class="QPushButton" name="modifierRateFunButton">
-                    <property name="text">
-                    <string>Insert Function</string>
-                    </property>
-                </widget>
-            </item>
-        </layout>
-        </item>
     </layout>
     </widget>
     </item>
     </layout>
  </widget>
 </ui>
-
-
