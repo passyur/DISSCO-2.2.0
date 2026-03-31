@@ -210,10 +210,18 @@ void EnvelopeLibraryWindow::deleteEnvelope()
     auto ptr = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
     if (!ptr || !activeProject) return;
 
+    bool wasCurrent = (ptr == activeEnvelope);
+
     EnvelopeUtilities::deleteEnvelope(Inst::get_project_manager()->envlibentries(), ptr);
     MUtilities::modified();
 
     refModel->removeRow(idx.row());
+
+    if (wasCurrent) {
+        activeEnvelope = nullptr;
+        drawingArea->resetFields();
+        drawingArea->clearGraph();
+    }
 }
 
 /**
