@@ -179,6 +179,9 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     painter.fillRect(rect(), Qt::white);
 
+    EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
+    if (!env) return;
+
     int w = width(), h = height();
 
     // Draw grid lines
@@ -203,8 +206,8 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
     font.setPointSize(10);
     painter.setFont(font);
     painter.setPen(Qt::black);
-    // Y-axis labels along left edge at each grid line
-    for (int i = 0; i <= 4; ++i) {
+    // Y-axis labels along left edge at each grid line (skip 0, shown by X-axis)
+    for (int i = 1; i <= 4; ++i) {
         int y = h - i * h / 4;
         painter.drawText(3, y - 3, QString::number(i));
     }
@@ -213,11 +216,6 @@ void EnvLibDrawingArea::paintEvent(QPaintEvent* event)
         int x = i * w / 5;
         QString label = QString::number(i * 0.2, 'f', 1);
         painter.drawText(x + 2, h - 3, label);
-    }
-
-    EnvelopeLibraryEntry* env = envelopeLibraryWindow->getActiveEnvelope();
-    if (!env) {
-        return;
     }
 
     adjustBoundary(env);
