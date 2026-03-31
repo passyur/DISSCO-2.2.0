@@ -164,67 +164,43 @@ void Modifiers::updateModState() {
         ui->modifierApply->setEnabled(true);
     }
 
-    int applyIndex = ui->modifierApply->currentIndex();
-    bool isPartial = (applyIndex == 1);
+    bool isPartial = (ui->modifierApply->currentIndex() == 1);
 
-    // Helper: enable or disable an entire field row (label + edit + button).
-    // When disabling, clears the edit text.
-    auto setRowEnabled = [](QLabel* label, QLineEdit* edit, QPushButton* btn, bool enabled) {
-        label->setEnabled(enabled);
-        edit->setEnabled(enabled);
-        btn->setEnabled(enabled);
-        if (!enabled)
-            edit->setText("");
+    // Enabled flags per type: { prob, mag, rate, width, spread, dir, vel, res }
+    // res (partial result string) depends on apply mode, not type — set below
+    //                             prob   mag    rate   width  spread dir    vel
+    static const bool table[7][7] = {
+        /* TREMOLO  */ { true,  true,  true,  false, false, false, false },
+        /* VIBRATO  */ { true,  true,  true,  false, false, false, false },
+        /* GLISSANDO*/ { true,  true,  false, false, false, false, false },
+        /* DETUNE   */ { true,  false, false, false, true,  true,  true  },
+        /* AMPTRANS */ { true,  false, false, true,  false, false, false },
+        /* FREQTRANS*/ { true,  false, true,  true,  false, false, false },
+        /* WAVE_TYPE*/ { true,  true,  true,  false, false, false, false },
     };
 
-    // Partial Result String: enabled only when PARTIAL is selected
-    setRowEnabled(ui->modifierResLabel, ui->modifierResEdit, ui->modifierResFunButton, isPartial);
+    struct Row { QLabel* label; QLineEdit* edit; QPushButton* btn; };
+    const Row rows[8] = {
+        { ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton   },
+        { ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton    },
+        { ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton   },
+        { ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton  },
+        { ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton },
+        { ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton    },
+        { ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton    },
+        { ui->modifierResLabel,    ui->modifierResEdit,    ui->modifierResFunButton    },
+    };
 
-    // Type-specific rules (same for both SOUND and PARTIAL)
-    if (typeIndex == 0 || typeIndex == 1 || typeIndex == 6) { // Tremolo, Vibrato, Wave
-        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
-        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    true);
-        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   true);
-        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  false);
-        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
-        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
-        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
-    }
-    else if (typeIndex == 2) { // Glissando (always SOUND, apply combo locked)
-        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
-        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    true);
-        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   false);
-        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  false);
-        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
-        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
-        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
-    }
-    else if (typeIndex == 3) { // Detune (always SOUND, apply combo locked)
-        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
-        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    false);
-        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   false);
-        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  false);
-        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, true);
-        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    true);
-        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    true);
-    }
-    else if (typeIndex == 4) { // Amptrans
-        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
-        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    false);
-        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   false);
-        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  true);
-        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
-        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
-        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
-    }
-    else if (typeIndex == 5) { // Freqtrans
-        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
-        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    false);
-        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   true);
-        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  true);
-        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
-        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
-        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
+    bool enabled[8];
+    for (int i = 0; i < 7; i++) enabled[i] = table[typeIndex][i];
+    enabled[7] = isPartial;
+
+    for (int i = 0; i < 8; i++) {
+        rows[i].label->setEnabled(enabled[i]);
+        rows[i].edit->setEnabled(enabled[i]);
+        rows[i].btn->setEnabled(enabled[i]);
+        if (!enabled[i])
+            rows[i].edit->setText("");
     }
 }
 
