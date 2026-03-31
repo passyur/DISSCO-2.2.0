@@ -4,6 +4,8 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QComboBox>
 #include <QTextEdit>
 #include <QDialogButtonBox>
@@ -22,7 +24,7 @@ Modifiers::Modifiers(Eventtype eventType, unsigned eventIndex, int modifierIndex
       m_eventIndex(eventIndex),
       m_modifierIndex(modifierIndex)
 {
-    ui->setupUi(this); 
+    ui->setupUi(this);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     this->setMinimumHeight(480);
 
@@ -30,12 +32,10 @@ Modifiers::Modifiers(Eventtype eventType, unsigned eventIndex, int modifierIndex
     ui->modifierSpreadLabel->adjustSize();
     ui->modifierDirLabel->adjustSize();
     ui->modifierVelLabel->adjustSize();
-    updateModState();
     connect(ui->modifierRemoveButton, &QPushButton::clicked,
             this, &Modifiers::modRemoveButtonClicked);
-    
 
-    // Populate UI from backend (handles reload when switching events)
+    // Populate UI from backend; setModifierData calls updateModState at the end
     Modifier& modData = getBackendLayer();
     setModifierData(modData);
 }
@@ -153,87 +153,78 @@ void Modifiers::setupUi() {
 
 void Modifiers::updateModState() {
     int typeIndex = ui->modifierType->currentIndex();
+
+    // GLISSANDO (2) is always SOUND — disable the apply combo
+    if (typeIndex == 2) {
+        ui->modifierApply->blockSignals(true);
+        ui->modifierApply->setCurrentIndex(0);
+        ui->modifierApply->blockSignals(false);
+        ui->modifierApply->setEnabled(false);
+    } else {
+        ui->modifierApply->setEnabled(true);
+    }
+
     int applyIndex = ui->modifierApply->currentIndex();
+    bool isPartial = (applyIndex == 1);
 
-    if (applyIndex == 0) { // Sound
-        if (typeIndex == 0 || typeIndex == 1 || typeIndex == 6) { // Tremolo, Vibrato, Wave
-            ui->modifierProbEdit->setEnabled(true);
-            ui->modifierSpreadEdit->setText("");
-            ui->modifierSpreadEdit->setEnabled(false);
-            ui->modifierDirEdit->setText("");
-            ui->modifierDirEdit->setEnabled(false);
-            ui->modifierVelEdit->setText("");
-            ui->modifierVelEdit->setEnabled(false);
-            ui->modifierMagEdit->setEnabled(true);
-            ui->modifierWidthEdit->setText("");
-            ui->modifierWidthEdit->setEnabled(false);
-            ui->modifierResEdit->setText("");
-            ui->modifierResEdit->setEnabled(false);
-            ui->modifierRateEdit->setEnabled(true);
-        }
-        else if (typeIndex == 2) { // Glissando
-            ui->modifierProbEdit->setEnabled(true);
-            ui->modifierSpreadEdit->setText("");
-            ui->modifierSpreadEdit->setEnabled(false);
-            ui->modifierDirEdit->setText("");
-            ui->modifierDirEdit->setEnabled(false);
-            ui->modifierVelEdit->setText("");
-            ui->modifierVelEdit->setEnabled(false);
-            ui->modifierMagEdit->setEnabled(true);
-            ui->modifierWidthEdit->setText("");
-            ui->modifierWidthEdit->setEnabled(false);
-            ui->modifierResEdit->setText("");
-            ui->modifierResEdit->setEnabled(false);
-            ui->modifierRateEdit->setText("");
-            ui->modifierRateEdit->setEnabled(false);
-        }
-        else if (typeIndex == 3) { // Detune
-            ui->modifierProbEdit->setEnabled(true);
-            ui->modifierSpreadEdit->setEnabled(true);
-            ui->modifierDirEdit->setEnabled(true);
-            ui->modifierVelEdit->setEnabled(true);
-            ui->modifierMagEdit->setText("");
-            ui->modifierMagEdit->setEnabled(false);
-            ui->modifierWidthEdit->setText("");
-            ui->modifierWidthEdit->setEnabled(false);
-            ui->modifierResEdit->setText("");
-            ui->modifierResEdit->setEnabled(false);
-            ui->modifierRateEdit->setText("");
-            ui->modifierRateEdit->setEnabled(false);
-        }
-        else if (typeIndex == 4 || typeIndex == 5) { // Amptrans, Freqtrans
-            ui->modifierProbEdit->setEnabled(true);
-            ui->modifierSpreadEdit->setText("");
-            ui->modifierSpreadEdit->setEnabled(false);
-            ui->modifierDirEdit->setText("");
-            ui->modifierDirEdit->setEnabled(false);
-            ui->modifierVelEdit->setText("");
-            ui->modifierVelEdit->setEnabled(false);
-            ui->modifierMagEdit->setEnabled(true);
-            ui->modifierWidthEdit->setEnabled(true);
-            ui->modifierResEdit->setText("");
-            ui->modifierResEdit->setEnabled(false);
-            ui->modifierRateEdit->setEnabled(true);
-        }
-    } else if (applyIndex == 1) { // Partial
-        ui->modifierSpreadEdit->setText("");
-        ui->modifierSpreadEdit->setEnabled(false);
-        ui->modifierDirEdit->setText("");
-        ui->modifierDirEdit->setEnabled(false);
-        ui->modifierVelEdit->setText("");
-        ui->modifierVelEdit->setEnabled(false);
+    // Helper: enable or disable an entire field row (label + edit + button).
+    // When disabling, clears the edit text.
+    auto setRowEnabled = [](QLabel* label, QLineEdit* edit, QPushButton* btn, bool enabled) {
+        label->setEnabled(enabled);
+        edit->setEnabled(enabled);
+        btn->setEnabled(enabled);
+        if (!enabled)
+            edit->setText("");
+    };
 
-        ui->modifierWidthEdit->setText("");
-        ui->modifierWidthEdit->setEnabled(false);
-        ui->modifierResEdit->setText("");
-        ui->modifierResEdit->setEnabled(false);
-        ui->modifierRateEdit->setText("");
-        ui->modifierRateEdit->setEnabled(false);
+    // Partial Result String: enabled only when PARTIAL is selected
+    setRowEnabled(ui->modifierResLabel, ui->modifierResEdit, ui->modifierResFunButton, isPartial);
 
-        ui->modifierMagEdit->setText("");
-        ui->modifierMagEdit->setEnabled(false);
-        ui->modifierProbEdit->setText("");
-        ui->modifierProbEdit->setEnabled(false);
+    // Type-specific rules (same for both SOUND and PARTIAL)
+    if (typeIndex == 0 || typeIndex == 1 || typeIndex == 6) { // Tremolo, Vibrato, Wave
+        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
+        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    true);
+        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   true);
+        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  false);
+        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
+        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
+        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
+    }
+    else if (typeIndex == 2) { // Glissando (always SOUND, apply combo locked)
+        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
+        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    true);
+        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   false);
+        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  false);
+        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
+        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
+        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
+    }
+    else if (typeIndex == 3) { // Detune (always SOUND, apply combo locked)
+        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
+        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    false);
+        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   false);
+        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  false);
+        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, true);
+        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    true);
+        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    true);
+    }
+    else if (typeIndex == 4) { // Amptrans
+        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
+        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    false);
+        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   false);
+        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  true);
+        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
+        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
+        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
+    }
+    else if (typeIndex == 5) { // Freqtrans
+        setRowEnabled(ui->modifierProbLabel,   ui->modifierProbEdit,   ui->modifierProbFunButton,   true);
+        setRowEnabled(ui->modifierMagLabel,    ui->modifierMagEdit,    ui->modifierMagFunButton,    false);
+        setRowEnabled(ui->modifierRateLabel,   ui->modifierRateEdit,   ui->modifierRateFunButton,   true);
+        setRowEnabled(ui->modifierWidthLabel,  ui->modifierWidthEdit,  ui->modifierWidthFunButton,  true);
+        setRowEnabled(ui->modifierSpreadLabel, ui->modifierSpreadEdit, ui->modifierSpreadFunButton, false);
+        setRowEnabled(ui->modifierDirLabel,    ui->modifierDirEdit,    ui->modifierDirFunButton,    false);
+        setRowEnabled(ui->modifierVelLabel,    ui->modifierVelEdit,    ui->modifierVelFunButton,    false);
     }
 }
 
@@ -377,7 +368,9 @@ void Modifiers::setModifierData(Modifier& modData) {
 
     ui->modifierResEdit->blockSignals(true);
     ui->modifierResEdit->setText(modData.partialresult_string);
-    ui->modifierResEdit->blockSignals(false); 
+    ui->modifierResEdit->blockSignals(false);
+
+    updateModState();
 }
 
 Modifiers::~Modifiers()
