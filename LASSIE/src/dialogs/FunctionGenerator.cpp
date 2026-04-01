@@ -503,6 +503,55 @@ void FunctionGenerator::setupUi()
         thisElement = thisElement->getNextElementSibling();
         ui->makeFilterDBEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
+    else if (functionName == "ValuePick") {
+        int index = -1;
+        for (int i = 0; i < ui->functionOptions->count(); ++i) {
+            if (ui->functionOptions->itemText(i).toStdString() == functionName) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) { ui->functionOptions->setCurrentIndex(index); }
+
+        DOMElement* thisElement = functionNameElement->getNextElementSibling(); // <Range>
+        ui->valuePickAbsRangeEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+
+        thisElement = thisElement->getNextElementSibling(); // <Low>
+        ui->valuePickLowEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+
+        thisElement = thisElement->getNextElementSibling(); // <High>
+        ui->valuePickHighEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+
+        thisElement = thisElement->getNextElementSibling(); // <Dist>
+        ui->valuePickDistEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+
+        thisElement = thisElement->getNextElementSibling(); // <Method>
+        std::string method = getFunctionString(thisElement);
+        if (method == "MEANINGFUL") { ui->valuePickElementsMeaningful->setChecked(true); }
+        else if (method == "MODS") { ui->valuePickElementsMods->setChecked(true); }
+        else if (method == "FAKE") { ui->valuePickElementsFake->setChecked(true); }
+        else if (method == "FIBONACCI") { ui->valuePickElementsFib->setChecked(true); }
+
+        thisElement = thisElement->getNextElementSibling(); // <Elements>
+        ui->valuePickValuesElementsEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+
+        thisElement = thisElement->getNextElementSibling(); // <WeightMethod>
+        std::string weightMethod = getFunctionString(thisElement);
+        if (weightMethod == "PERIODIC") { ui->valuePickWeightsPeriodic->setChecked(true); }
+        else if (weightMethod == "HIERARCHIC") { ui->valuePickWeightsHierarchic->setChecked(true); }
+        else if (weightMethod == "INCLUDE") { ui->valuePickWeightsInclude->setChecked(true); }
+
+        thisElement = thisElement->getNextElementSibling(); // <Weight>
+        ui->valuePickValuesWeightsEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+
+        thisElement = thisElement->getNextElementSibling(); // <Type>
+        std::string type = getFunctionString(thisElement);
+        if (type == "VARIABLE") { ui->valuePickTypeVariable->setChecked(true); }
+        else if (type == "CONSTANT") { ui->valuePickTypeConstant->setChecked(true); }
+
+        thisElement = thisElement->getNextElementSibling(); // <Offsets>
+        ui->valuePickOffsetEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    }
 }
 
 std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElement){
@@ -639,10 +688,15 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionValuePick:
             currPageIndex = 13;
+            ui->valuePickAbsRangeEdit->setText("1");
             ui->valuePickLowEdit->setText("ENV");
             ui->valuePickHighEdit->setText("ENV");
             ui->valuePickDistEdit->setText("ENV");
+            ui->valuePickElementsMeaningful->setChecked(true);
             ui->valuePickValuesElementsEdit->setText("INT1, INT2, INT3 ...");
+            ui->valuePickWeightsPeriodic->setChecked(true);
+            ui->valuePickValuesWeightsEdit->setText("INT1, INT2, INT3 ...");
+            ui->valuePickTypeVariable->setChecked(true);
             ui->valuePickOffsetEdit->setText("INT1, INT2, INT3 ...");
             valuePickTextChanged();
             break;
