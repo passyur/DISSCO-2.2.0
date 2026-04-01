@@ -93,7 +93,7 @@ LayerBox::LayerBox(Eventtype eventType, unsigned eventIndex, int layerIndex, QWi
     for (const Package& pkg : layer.discrete_packages) {
         int row = m_model->rowCount();
         auto* rowItem  = new QStandardItem(QString::number(row));
-        auto* typeItem = new QStandardItem(pkg.event_type);
+        auto* typeItem = new QStandardItem(eventtypeToDisplayString(pkg.event_type.toInt()));
         auto* nameItem = new QStandardItem(pkg.event_name);
         rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
         typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
@@ -246,7 +246,7 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
 
             int index = m_model->rowCount();
             auto* rowItem  = new QStandardItem(QString::number(index));
-            auto* typeItem = new QStandardItem(droppedType);
+            auto* typeItem = new QStandardItem(droppedType);  // display string for UI
             auto* nameItem = new QStandardItem(droppedName);
             rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
             typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
@@ -262,7 +262,7 @@ bool LayerBox::eventFilter(QObject* obj, QEvent* event) {
             // Write the new package directly into the backend layer
             Package pkg;
             pkg.event_name = droppedName;
-            pkg.event_type = droppedType;
+            pkg.event_type = displayStringToEventtypeString(droppedType);
             getBackendLayer().discrete_packages.append(pkg);
 
             qDebug() << "Added package" << droppedName
@@ -309,7 +309,7 @@ void LayerBox::onPasteClipboard() {
     for (const Package& pkg : m_clipboard) {
         int index = m_model->rowCount();
         auto* rowItem  = new QStandardItem(QString::number(index));
-        auto* typeItem = new QStandardItem(pkg.event_type);
+        auto* typeItem = new QStandardItem(eventtypeToDisplayString(pkg.event_type.toInt()));
         auto* nameItem = new QStandardItem(pkg.event_name);
         rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
         typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);

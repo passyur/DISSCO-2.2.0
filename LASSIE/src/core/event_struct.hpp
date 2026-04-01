@@ -109,6 +109,48 @@ struct ChildDef {
     unsigned durationtype_flag = 0; /* from Childdeftimeflag */
 };
 
+/// Convert an Eventtype enum value to a human-readable display string.
+inline QString eventtypeToDisplayString(int type) {
+    switch (type) {
+        case top:     return "Top";
+        case high:    return "High";
+        case mid:     return "Mid";
+        case low:     return "Low";
+        case bottom:  return "Bottom";
+        case sound:   return "Spectrum";
+        case env:     return "Envelope";
+        case sieve:   return "Sieve";
+        case spa:     return "Spatialization";
+        case pattern: return "Pattern";
+        case reverb:  return "Reverb";
+        case folder:  return "Folder";
+        case note:    return "Note";
+        case filter:  return "Filter";
+        case mea:     return "Measurement";
+        default:      return QString::number(type);
+    }
+}
+
+/// Convert a display string (e.g. "Top", "High") to the integer enum value as a string.
+inline QString displayStringToEventtypeString(const QString& s) {
+    if (s == "Top")             return "0";
+    if (s == "High")            return "1";
+    if (s == "Mid")             return "2";
+    if (s == "Low")             return "3";
+    if (s == "Bottom")          return "4";
+    if (s == "Spectrum")        return "5";
+    if (s == "Envelope")        return "6";
+    if (s == "Sieve")           return "7";
+    if (s == "Spatialization")  return "8";
+    if (s == "Pattern")         return "9";
+    if (s == "Reverb")          return "10";
+    if (s == "Folder")          return "11";
+    if (s == "Note")            return "12";
+    if (s == "Filter")          return "13";
+    if (s == "Measurement")     return "14";
+    return s; // already an integer string or unknown — pass through
+}
+
 typedef struct Package Package;
 struct Package {
     QString event_name;
