@@ -441,6 +441,43 @@ void FunctionGenerator::setupUi()
         ui->randomIntLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
         thisElement = thisElement->getNextElementSibling();
         ui->randomIntUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "MakeSieve") {
+        int index = -1;
+        for (int i = 0; i < ui->functionOptions->count(); ++i) {
+            if (ui->functionOptions->itemText(i).toStdString() == functionName) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) { ui->functionOptions->setCurrentIndex(index); }
+        // <Low>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->makeSieveLowBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <High>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveHighBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Method>
+        thisElement = thisElement->getNextElementSibling();
+        std::string methodStr = getFunctionString(thisElement);
+        if (methodStr == "MEANINGFUL") { ui->makeSieveElementsMeaningful->setChecked(true); }
+        else if (methodStr == "MODS") { ui->makeSieveElementsMods->setChecked(true); }
+        else if (methodStr == "FAKE") { ui->makeSieveElementsFake->setChecked(true); }
+        else if (methodStr == "FIBONACCI") { ui->makeSieveElementsFib->setChecked(true); }
+        // <Elements>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveElementsValuesEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <WeightMethod>
+        thisElement = thisElement->getNextElementSibling();
+        std::string weightMethodStr = getFunctionString(thisElement);
+        if (weightMethodStr == "PERIODIC") { ui->makeSieveWeightsPeriodic->setChecked(true); }
+        else if (weightMethodStr == "HIERARCHIC") { ui->makeSieveWeightsHierarchic->setChecked(true); }
+        else if (weightMethodStr == "INCLUDE") { ui->makeSieveWeightsInclude->setChecked(true); }
+        // <Weight>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveWeightsValuesEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Offset>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveOffsetEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
 }
 
