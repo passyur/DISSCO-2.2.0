@@ -32,50 +32,51 @@
     </property>
 
     <item>
-        <widget class="QWidget" name="paletteWidget">
-            <property name="minimumWidth"><number>250</number></property>
-            <property name="maximumWidth"><number>250</number></property>
-            <layout class="QVBoxLayout" name="paletteLayout">
-
-                <item alignment="Qt::AlignHCenter">
-                <widget class="QPushButton" name="envButton">
-                    <property name="minimumWidth"><number>200</number></property>
-                    <property name="maximumWidth"><number>200</number></property>
-                    <property name="text">
-                        <string>Envelope Library</string>
-                    </property>
-                </widget>
-                </item>
-                <item alignment="Qt::AlignHCenter">
-                <widget class="QPushButton" name="markovButton">
-                    <property name="minimumWidth"><number>200</number></property>
-                    <property name="maximumWidth"><number>200</number></property>
-                    <property name="text">
-                        <string>Markov Model Library</string>
-                    </property>
-                </widget>
-                </item>
-            </layout>
-        </widget>
-    </item>
-
-    <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-       <property name="minimumWidth"><number>680</number></property>
-        <property name="maximumWidth"><number>680</number></property>
-      <widget class="QWidget" name="attributesTab">
-       <attribute name="title">
-        <string>Event Attributes</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="eventTablayout">
-            <item>
-                <widget class="QScrollArea" name="eventsScrollArea">
-                </widget>
-            </item>
+      <widget class="QWidget" name="paletteWidget">
+       <property name="minimumWidth"><number>250</number></property>
+       <attribute name="Splitter.stretchFactor" stdset="0"><number>0</number></attribute>
+       <layout class="QVBoxLayout" name="paletteLayout">
+        <item alignment="Qt::AlignHCenter">
+         <widget class="QPushButton" name="envButton">
+          <property name="minimumWidth"><number>200</number></property>
+          <property name="maximumWidth"><number>200</number></property>
+          <property name="text">
+           <string>Envelope Library</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignHCenter">
+         <widget class="QPushButton" name="markovButton">
+          <property name="minimumWidth"><number>200</number></property>
+          <property name="maximumWidth"><number>200</number></property>
+          <property name="text">
+           <string>Markov Model Library</string>
+          </property>
+         </widget>
+        </item>
        </layout>
+      </widget>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <property name="minimumWidth"><number>680</number></property>
+       <attribute name="Splitter.stretchFactor" stdset="0"><number>1</number></attribute>
+       <widget class="QWidget" name="attributesTab">
+        <attribute name="title">
+         <string>Event Attributes</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="eventTablayout">
+         <item>
+          <widget class="QScrollArea" name="eventsScrollArea">
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>

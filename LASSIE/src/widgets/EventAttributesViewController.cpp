@@ -28,7 +28,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui(new Ui::EventAttributesViewController)
 {
     ui->setupUi(this);
-    ui->stackedWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    ui->stackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     e_projectView = projectView;
 
     // --- connect child‐count mode buttons ---
@@ -165,7 +165,7 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     }
 
     if (currPage) {
-        ui->stackedWidget->setFixedWidth(600);
+        ui->stackedWidget->setMinimumWidth(600);
         ui->modScrollWindow->setWidget(ui->modScrollWindowContent);
         ui->modScrollWindow->setWidgetResizable(true);
         auto* layout = qobject_cast<QVBoxLayout*>(ui->modScrollWindowContent->layout());
