@@ -34,7 +34,7 @@ Installing requirements and recommendations on:
 ### Debian-likes
 Install the following:
 
-    sudo apt install build-essential premake4 libsndfile1 libsndfile1-dev libxerces-c3.2 libxerces-c-dev libmuparser2v5 libmuparser-dev xterm
+    sudo apt install build-essential libsndfile1 libsndfile1-dev libxerces-c3.2 libxerces-c-dev qt6-base-dev
 
 `build-essential` includes `g++` and `gcc`. If you prefer another C/C++ compiler, you can install separately.
 
