@@ -151,7 +151,7 @@ namespace EnvelopeUtilities {
     }
 
     // nhi: delete envelope
-    inline void deleteEnvelope(EnvelopeLibraryEntry *entries, EnvelopeLibraryEntry* toDelete) {
+    inline void deleteEnvelope(EnvelopeLibraryEntry *&entries, EnvelopeLibraryEntry* toDelete) {
         // ProjectManager *pm = Inst::get_project_manager();
         // EnvelopeLibraryEntry *entries = pm->envlibentries();
         if (!entries || !toDelete) return;
