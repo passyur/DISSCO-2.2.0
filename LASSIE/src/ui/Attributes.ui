@@ -16,10 +16,9 @@
 
             <widget class="QWidget" name="standardPage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="standardPageLayout">
@@ -936,10 +935,9 @@
 
             <widget class="QWidget" name="soundPage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="soundPageLayout">
@@ -1111,10 +1109,9 @@
             </widget>
             <widget class="QWidget" name="sievePage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="sievePageLayout">
@@ -1175,10 +1172,9 @@
             </widget>
             <widget class="QWidget" name="spaPage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="spaPageLayout">
@@ -1239,10 +1235,9 @@
             </widget>
             <widget class="QWidget" name="patPage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="patPageLayout">
@@ -1303,10 +1298,9 @@
             </widget>
             <widget class="QWidget" name="revPage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="revPageLayout">
@@ -1367,10 +1361,9 @@
             </widget>
             <widget class="QWidget" name="filPage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="filPageLayout">
@@ -1432,10 +1425,9 @@
             <widget class="QWidget" name="meaPage"/>
             <widget class="QWidget" name="notePage">
                 <property name="minimumWidth"><number>600</number></property>
-                <property name="maximumWidth"><number>600</number></property>
                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch><verstretch>0</verstretch>
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch><verstretch>0</verstretch>
                   </sizepolicy>
                 </property>
                 <layout class="QVBoxLayout" name="notePageLayout">

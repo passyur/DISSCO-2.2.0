@@ -26,7 +26,7 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui(new Ui::EventAttributesViewController)
 {
     ui->setupUi(this);
-    ui->stackedWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    ui->stackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     e_projectView = projectView;
 
     // --- connect child‐count mode buttons ---
@@ -245,9 +245,9 @@ void EventAttributesViewController::clearView() {
 void EventAttributesViewController::onEventDeleted(Eventtype type, int deletedIndex) {
     if (!m_hasCurrentEvent || m_curreventtype != type) return;
 
-    if (m_curreventindex == static_cast<unsigned>(deletedIndex)) {
+    if (m_curreventindex == deletedIndex) {
         clearView();
-    } else if (m_curreventindex > static_cast<unsigned>(deletedIndex)) {
+    } else if (m_curreventindex > deletedIndex) {
         --m_curreventindex;
         // Keep the LayerBox widgets pointing at the right (now-shifted) event
         for (LayerBox* box : m_layerBoxes) {

@@ -10,6 +10,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QPoint>
+#include <QSortFilterProxyModel>
 
 class ProjectView;
 class IEvent;
@@ -73,6 +74,7 @@ private:
     // Tree View
     QTreeView* treeView;
     QStandardItemModel* model;
+    QSortFilterProxyModel* proxyModel;
 
 };
 

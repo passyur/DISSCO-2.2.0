@@ -20,10 +20,9 @@ class ProjectView : public QObject {
     Q_OBJECT
     
     public:
-        /* init/constructor to spawn a project_view inside of mainwin corresponding to an empty, new project */
-        // ProjectView();
         /* init/constructor to spawn a project_view inside of mainwin corresponding to a particular filepath and project_title; i.e., open project */
         ProjectView(MainWindow* _mainWindow, QString _pathAndName);
+        ~ProjectView() override;
 
         /* function to write to the xml .dissco file */
         void save();
@@ -42,8 +41,7 @@ class ProjectView : public QObject {
         // void deleteEnvelope(EnvelopeLibraryEntry* toDelete);
 
         // ObjectWindow and Palette methods
-        PaletteViewController* getPalette() { return paletteView; }
-        void updatePaletteView();
+        void updatePaletteView() const;
         void showAttributes(QString eventType, int index);
 
         // Remove the event at index from the backend and the palette.
