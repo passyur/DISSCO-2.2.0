@@ -29,6 +29,7 @@ qt_add_executable(LASSIE
     src/widgets/EventAttributesViewController.cpp src/widgets/EventAttributesViewController.hpp src/ui/Attributes.ui
     src/dialogs/FileNewObject.cpp src/dialogs/FileNewObject.hpp src/ui/FileNewObject.ui
     src/widgets/LayerBox.cpp src/widgets/LayerBox.hpp
+    src/widgets/Partials.cpp src/widgets/Partials.hpp
     src/widgets/Modifiers.cpp src/widgets/Modifiers.hpp src/ui/Modifiers.ui
 )
 

@@ -234,11 +234,11 @@ namespace XercesParser {
 
         DOMElement *group_name_el = detune_velocity_el->getNextElementSibling();
         modifier.group_name = getFunctionString(group_name_el);
-        qDebug() << "SHOWING modifier.group_name: " << modifier.group_name;
+        // qDebug() << "SHOWING modifier.group_name: " << modifier.group_name;
 
         DOMElement *partialresultstring_el = group_name_el->getNextElementSibling();
         modifier.partialresult_string = getFunctionString(partialresultstring_el);
-        qDebug() << "SHOWING modifier.partialresult_string: " << modifier.partialresult_string;
+        // qDebug() << "SHOWING modifier.partialresult_string: " << modifier.partialresult_string;
 
         return modifier;
     }
@@ -317,6 +317,9 @@ namespace XercesParser {
         while (partial_el) {
             spectrum.partials.append(getFunctionString(partial_el));
             partial_el = partial_el->getNextElementSibling();
+        }
+        if (spectrum.partials.size() > 1 && spectrum.partials[0] == "") {
+            spectrum.partials.removeFirst();
         }
         return spectrum;
     }

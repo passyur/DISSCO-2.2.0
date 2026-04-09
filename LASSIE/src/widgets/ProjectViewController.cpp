@@ -693,13 +693,13 @@ void ProjectView::save(){
                     xmlWriter.writeCharacters(item.name);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("NumberOfPartials");
-                    xmlWriter.writeCharacters(item.num_partials);	
+                    writeInlineXml(xmlWriter, item.num_partials);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Deviation");
-                    xmlWriter.writeCharacters(item.deviation);	
+                    writeInlineXml(xmlWriter, item.deviation);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("GenerateSpectrum");
-                    xmlWriter.writeCharacters(item.generate_spectrum);	
+                    writeInlineXml(xmlWriter, item.generate_spectrum);	
                 xmlWriter.writeEndElement();
                 xmlWriter.writeStartElement("Spectrum");
                     for (QString partial : item.spectrum.partials) {

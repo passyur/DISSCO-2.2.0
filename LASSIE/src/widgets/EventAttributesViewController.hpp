@@ -17,6 +17,7 @@ class EventLayer;
 class QKeyEvent;
 class Modifiers;
 class LayerBox;
+class Partials;
 
 namespace Ui {
     class EventAttributesViewController;
@@ -46,14 +47,6 @@ typedef enum {
     BSFunFreq2FunButton,
     BSContinuumFunButton
 } FunctionButton;
-
-typedef enum {
-    modProbabilityButton,
-    modMagnitudeButton,
-    modRateButton,
-    modWidthButton,
-    modPartialButton
-} ModButtonType;
 
 // forward enums from original GTK version - now defined in LASSIE.h
 // enum TempoPrefix;
@@ -145,11 +138,7 @@ private slots:
     // // main actions
     void addNewLayerButtonClicked();
     void addModifierButtonClicked();
-    // void addPartialButtonClicked();
-
-    // modifier buttons
-    void modFunctionButtonClicked(Modifiers* mod, ModButtonType type);
-    void modRemoveButtonClicked(Modifiers* mod);
+    void addPartialButtonClicked();
 
     // // tempo controls
     void tempoAsNoteValueButtonClicked();
@@ -170,7 +159,8 @@ private:
     int m_curreventindex = -1;
     bool m_hasCurrentEvent = false;
     // class LayerBox*              m_modifiers;             // head of doubly-linked modifiers
-    QList<Modifiers*>               m_modifiers;     
+    QList<Modifiers*>               m_modifiers;  
+    QList<Partials*>                m_partials;   
     // class SoundPartialHBox*      m_soundPartialHboxes;    // head of doubly-linked partials
 
     QList<LayerBox*>                 m_layerBoxes;
@@ -182,6 +172,8 @@ private:
     // Does NOT touch the backend — callers are responsible for ensuring the backend
     // layer already exists at that index before calling this.
     void addLayerBoxUI(int layerIndex);
+    void addPartialsUI(int partialIndex);
+    void addModifiersUI(int modifierIndex);
     void insertFunctionString(FunctionButton fn);
     void fixStackedWidgetLayout(QWidget* currPage);
 };

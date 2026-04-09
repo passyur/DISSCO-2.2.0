@@ -203,7 +203,7 @@ struct BottomEvent {
 
 typedef struct Spectrum Spectrum;
 struct Spectrum {
-    QList<QString> partials;
+    QList<QString> partials = {""};
 };
 
 typedef struct SpectrumEvent SpectrumEvent;
@@ -211,7 +211,7 @@ struct SpectrumEvent {
     /* implicitly, if we did have an Eventtype variable, it would == 5. */
     QString orderinpalette;
     QString name;
-    QString num_partials;
+    QString num_partials = "1";
     QString deviation;
     QString generate_spectrum;
     Spectrum spectrum;
