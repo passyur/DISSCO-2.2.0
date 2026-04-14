@@ -449,13 +449,13 @@ void FunctionGenerator::setupUi()
         // Parse <Type>
         DOMElement* thisElement = functionNameElement->getNextElementSibling();
         std::string filterType = getFunctionString(thisElement);
-        if (filterType == "LPF") ui->makeFilterLPF->setChecked(true);
-        else if (filterType == "HPF") ui->makeFilterHPF->setChecked(true);
+        if (filterType == "HPF") ui->makeFilterHPF->setChecked(true);
         else if (filterType == "BPF") ui->makeFilterBPF->setChecked(true);
         else if (filterType == "NF") ui->makeFilterNF->setChecked(true);
         else if (filterType == "PBEQF") ui->makeFilterPBEQ->setChecked(true);
         else if (filterType == "LSF") ui->makeFilterLSF->setChecked(true);
         else if (filterType == "HSF") ui->makeFilterHSF->setChecked(true);
+        else ui->makeFilterLPF->setChecked(true); // default case, also if == "LPF"
         // Parse <Frequency>
         thisElement = thisElement->getNextElementSibling();
         ui->makeFilterFrequencyEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
@@ -1289,7 +1289,7 @@ void FunctionGenerator::expandPatternTextChanged(){
 /* MakeFilter Signal Functions */
 void FunctionGenerator::makeFilterFrequencyFunButtonClicked(){
   QString initialText = ui->makeFilterFrequencyEdit->text();
-  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnPAT, initialText);
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnFloat, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
@@ -1300,7 +1300,7 @@ void FunctionGenerator::makeFilterFrequencyFunButtonClicked(){
 }
 void FunctionGenerator::makeFilterBandWidthFunButtonClicked(){
   QString initialText = ui->makeFilterBWEdit->text();
-  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnPAT, initialText);
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnFloat, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
@@ -1311,7 +1311,7 @@ void FunctionGenerator::makeFilterBandWidthFunButtonClicked(){
 }
 void FunctionGenerator::makeFilterDBGainFunButtonClicked(){
   QString initialText = ui->makeFilterDBEdit->text();
-  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnPAT, initialText);
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnFloat, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
