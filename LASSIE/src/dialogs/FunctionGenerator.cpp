@@ -443,6 +443,43 @@ void FunctionGenerator::setupUi()
         ui->randomIntLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
         thisElement = thisElement->getNextElementSibling();
         ui->randomIntUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "MakeSieve") {
+        int index = -1;
+        for (int i = 0; i < ui->functionOptions->count(); ++i) {
+            if (ui->functionOptions->itemText(i).toStdString() == functionName) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) { ui->functionOptions->setCurrentIndex(index); }
+        // <Low>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->makeSieveLowBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <High>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveHighBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Method>
+        thisElement = thisElement->getNextElementSibling();
+        std::string methodStr = getFunctionString(thisElement);
+        if (methodStr == "MODS") { ui->makeSieveElementsMods->setChecked(true); }
+        else if (methodStr == "FAKE") { ui->makeSieveElementsFake->setChecked(true); }
+        else if (methodStr == "FIBONACCI") { ui->makeSieveElementsFib->setChecked(true); }
+        else ui->makeSieveElementsMeaningful->setChecked(true); // default, also if == "MEANINGFUL"
+        // <Elements>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveElementsValuesEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <WeightMethod>
+        thisElement = thisElement->getNextElementSibling();
+        std::string weightMethodStr = getFunctionString(thisElement);
+        if (weightMethodStr == "HIERARCHIC") { ui->makeSieveWeightsHierarchic->setChecked(true); }
+        else if (weightMethodStr == "INCLUDE") { ui->makeSieveWeightsInclude->setChecked(true); }
+        else ui->makeSieveWeightsPeriodic->setChecked(true); // default, also if == "PERIODIC"
+        // <Weight>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveWeightsValuesEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Offset>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeSieveOffsetEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
     else if (functionName == "MakeFilter") {
         selectComboItem(functionName);
@@ -695,9 +732,11 @@ void FunctionGenerator::handleFunctionChanged(int index)
             currPageIndex = 30;
             ui->makeSieveLowBoundEdit->setText("ENV");
             ui->makeSieveHighBoundEdit->setText("ENV");
+            ui->makeSieveElementsMeaningful->setChecked(true);
             ui->makeSieveElementsValuesEdit->setText("INT1, INT2, INT3 ...");
-            ui->makeSieveWeightsValuesEdit->setText("INT1, INT2, INT3 ...");
             ui->makeSieveOffsetEdit->setText("INT1, INT2, INT3 ...");
+            ui->makeSieveWeightsPeriodic->setChecked(true);
+            ui->makeSieveWeightsValuesEdit->setText("INT1, INT2, INT3 ...");
             makeSieveTextChanged();
             break;
         case functionReadSIVFile:

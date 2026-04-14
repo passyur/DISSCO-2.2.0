@@ -46,7 +46,8 @@ typedef enum {
     BSWellTemperedFunButton,
     BSFunFreq1FunButton,
     BSFunFreq2FunButton,
-    BSContinuumFunButton
+    BSContinuumFunButton,
+    sieveBuilderFunButton
 } FunctionButton;
 
 // forward enums from original GTK version - now defined in LASSIE.h
@@ -115,6 +116,7 @@ private slots:
     void childEventDefDurationFunButtonClicked();
     void childEventAttackSieveButtonClicked();
     void childEventDurationSieveButtonClicked();
+    void sieveBuilderButtonClicked();
     // void deviationFunButtonClicked();
     // void generatespectrumFunButtonClicked();
 
