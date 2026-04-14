@@ -427,20 +427,44 @@ void FunctionGenerator::setupUi()
         functionName = string(functionNameChars);
         XMLString::release(&functionNameChars);
     }
-    if (functionName == "RandomInt") {
-        int index = -1;
+    // Helper to find and select the combo box item matching the function name
+    auto selectComboItem = [&](const std::string& name) {
         for (int i = 0; i < ui->functionOptions->count(); ++i) {
-            QString itemText = ui->functionOptions->itemText(i);
-            if (itemText.toStdString() == functionName) {
-                index = i;
-                break;
+            if (ui->functionOptions->itemText(i).toStdString() == name) {
+                ui->functionOptions->setCurrentIndex(i);
+                return;
             }
         }
-        if (index != -1) { ui->functionOptions->setCurrentIndex(index); }
+    };
+
+    if (functionName == "RandomInt") {
+        selectComboItem(functionName);
         DOMElement* thisElement = functionNameElement->getNextElementSibling();
         ui->randomIntLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
         thisElement = thisElement->getNextElementSibling();
         ui->randomIntUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    }
+    else if (functionName == "MakeFilter") {
+        selectComboItem(functionName);
+        // Parse <Type>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        std::string filterType = getFunctionString(thisElement);
+        if (filterType == "HPF") ui->makeFilterHPF->setChecked(true);
+        else if (filterType == "BPF") ui->makeFilterBPF->setChecked(true);
+        else if (filterType == "NF") ui->makeFilterNF->setChecked(true);
+        else if (filterType == "PBEQF") ui->makeFilterPBEQ->setChecked(true);
+        else if (filterType == "LSF") ui->makeFilterLSF->setChecked(true);
+        else if (filterType == "HSF") ui->makeFilterHSF->setChecked(true);
+        else ui->makeFilterLPF->setChecked(true); // default case, also if == "LPF"
+        // Parse <Frequency>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeFilterFrequencyEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // Parse <BandWidth>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeFilterBWEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // Parse <dBGain>
+        thisElement = thisElement->getNextElementSibling();
+        ui->makeFilterDBEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
 }
 
@@ -1265,7 +1289,7 @@ void FunctionGenerator::expandPatternTextChanged(){
 /* MakeFilter Signal Functions */
 void FunctionGenerator::makeFilterFrequencyFunButtonClicked(){
   QString initialText = ui->makeFilterFrequencyEdit->text();
-  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnPAT, initialText);
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnFloat, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
@@ -1276,7 +1300,7 @@ void FunctionGenerator::makeFilterFrequencyFunButtonClicked(){
 }
 void FunctionGenerator::makeFilterBandWidthFunButtonClicked(){
   QString initialText = ui->makeFilterBWEdit->text();
-  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnPAT, initialText);
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnFloat, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
@@ -1287,7 +1311,7 @@ void FunctionGenerator::makeFilterBandWidthFunButtonClicked(){
 }
 void FunctionGenerator::makeFilterDBGainFunButtonClicked(){
   QString initialText = ui->makeFilterDBEdit->text();
-  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnPAT, initialText);
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnFloat, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
@@ -1302,30 +1326,37 @@ void FunctionGenerator::makeFilterTextChanged(){
     if (ui->makeFilterLPF->isChecked()) {
         stringbuffer = stringbuffer + "LPF";
         ui->makeFilterDBEdit->setEnabled(false);
+        ui->makeFilterDBInsertFn->setEnabled(false);
     }
     if (ui->makeFilterHPF->isChecked()) {
         stringbuffer = stringbuffer + "HPF";
         ui->makeFilterDBEdit->setEnabled(false);
+        ui->makeFilterDBInsertFn->setEnabled(false);
     }
     if (ui->makeFilterBPF->isChecked()) {
         stringbuffer = stringbuffer + "BPF";
         ui->makeFilterDBEdit->setEnabled(false);
+        ui->makeFilterDBInsertFn->setEnabled(false);
     }
     if (ui->makeFilterHSF->isChecked()) {
         stringbuffer = stringbuffer + "HSF";
         ui->makeFilterDBEdit->setEnabled(true);
+        ui->makeFilterDBInsertFn->setEnabled(true);
     }
     if (ui->makeFilterLSF->isChecked()) {
         stringbuffer = stringbuffer + "LSF";
         ui->makeFilterDBEdit->setEnabled(true);
+        ui->makeFilterDBInsertFn->setEnabled(true);
     }
     if (ui->makeFilterNF->isChecked()) {
         stringbuffer = stringbuffer + "NF";
         ui->makeFilterDBEdit->setEnabled(false);
+        ui->makeFilterDBInsertFn->setEnabled(false);
     }
     if (ui->makeFilterPBEQ->isChecked()) {
         stringbuffer = stringbuffer + "PBEQF";
         ui->makeFilterDBEdit->setEnabled(true);
+        ui->makeFilterDBInsertFn->setEnabled(true);
     }
     stringbuffer = stringbuffer +"</Type><Frequency>" + ui->makeFilterFrequencyEdit->text()+ "</Frequency>";
     stringbuffer = stringbuffer +"<BandWidth>" + ui->makeFilterBWEdit->text()+ "</BandWidth>";

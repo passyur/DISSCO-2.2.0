@@ -40,6 +40,7 @@ typedef enum {
     attributesSpaFunButton,
     attributesRevFunButton,
     attributesFilFunButton,
+    attributesFilBuilderFunButton,
     BSLoudnessFunButton,
     BSModGroupFunButton,
     BSWellTemperedFunButton,
@@ -120,6 +121,7 @@ private slots:
     // // bottom-sub attribute function buttons
     void attributesStandardRevButtonClicked();
     void attributesStandardFilButtonClicked();
+    void attributesFilBuilderButtonClicked();
     void attributesStandardSpaButtonClicked();
     void BSLoudnessButtonClicked();
     // void BSSpatializationButtonClicked();

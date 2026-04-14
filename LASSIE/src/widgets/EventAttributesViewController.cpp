@@ -80,6 +80,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::attributesStandardRevButtonClicked);
     connect(ui->attributesStandardFilButton, &QPushButton::clicked,
             this, &EventAttributesViewController::attributesStandardFilButtonClicked);
+    connect(ui->filBuilderFunButton, &QPushButton::clicked,
+            this, &EventAttributesViewController::attributesFilBuilderButtonClicked);
     connect(ui->attributesStandardSpaButton, &QPushButton::clicked,
             this, &EventAttributesViewController::attributesStandardSpaButtonClicked);
     connect(ui->BSLoudnessButton, &QPushButton::clicked,
@@ -891,6 +893,10 @@ void EventAttributesViewController::attributesStandardFilButtonClicked() {
     insertFunctionString(attributesFilFunButton);
 }
 
+void EventAttributesViewController::attributesFilBuilderButtonClicked() {
+    insertFunctionString(attributesFilBuilderFunButton);
+}
+
 void EventAttributesViewController::attributesStandardSpaButtonClicked() {
     insertFunctionString(attributesSpaFunButton);
 }
@@ -994,6 +1000,10 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
         break;
     case attributesFilFunButton:
         target = ui->filEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnFIL, target->text());
+        break;
+    case attributesFilBuilderFunButton:
+        target = ui->filBuilderEntry;
         gen = new FunctionGenerator(nullptr, functionReturnFIL, target->text());
         break;
     case BSLoudnessFunButton:
