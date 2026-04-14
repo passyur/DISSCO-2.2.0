@@ -708,9 +708,11 @@ void FunctionGenerator::handleFunctionChanged(int index)
             currPageIndex = 30;
             ui->makeSieveLowBoundEdit->setText("ENV");
             ui->makeSieveHighBoundEdit->setText("ENV");
+            ui->makeSieveElementsMeaningful->setChecked(true);
             ui->makeSieveElementsValuesEdit->setText("INT1, INT2, INT3 ...");
-            ui->makeSieveWeightsValuesEdit->setText("INT1, INT2, INT3 ...");
             ui->makeSieveOffsetEdit->setText("INT1, INT2, INT3 ...");
+            ui->makeSieveWeightsPeriodic->setChecked(true);
+            ui->makeSieveWeightsValuesEdit->setText("INT1, INT2, INT3 ...");
             makeSieveTextChanged();
             break;
         case functionReadSIVFile:
