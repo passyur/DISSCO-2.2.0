@@ -75,6 +75,11 @@ namespace XercesParser {
 
         DOMElement *type_el = name_el->getNextElementSibling();
         transcodeToQString(type_el, package.event_type);
+        // convert (bad) non-numeric values to their enum value equivalent
+        bool ok;
+        int type_val = package.event_type.toInt(&ok); 
+        if(!ok)
+            package.event_type = displayStringToEventtypeString(package.event_type);
 
         DOMElement *weight_el = type_el->getNextElementSibling();
         transcodeToQString(weight_el, package.weight);
