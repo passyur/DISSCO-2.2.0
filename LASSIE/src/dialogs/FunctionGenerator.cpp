@@ -748,6 +748,7 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionGetPattern:
             currPageIndex = 15;
+            ui->getPatternMethodInOrder->setChecked(true);
             ui->getPatternChooseEdit->setText("PAT");
             getPatternEntryChanged();
             break;
@@ -792,6 +793,7 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;  
         case functionExpandPattern:
             currPageIndex = 25;
+            ui->expandPatternMethodEquivalence->setChecked(true);
             expandPatternTextChanged();
             break; 
         case functionReadPATFile:
