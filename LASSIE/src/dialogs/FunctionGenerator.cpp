@@ -459,19 +459,19 @@ void FunctionGenerator::setupUi()
         // <Method>
         thisElement = thisElement->getNextElementSibling();
         std::string methodStr = getFunctionString(thisElement);
-        if (methodStr == "MEANINGFUL") { ui->makeSieveElementsMeaningful->setChecked(true); }
-        else if (methodStr == "MODS") { ui->makeSieveElementsMods->setChecked(true); }
+        if (methodStr == "MODS") { ui->makeSieveElementsMods->setChecked(true); }
         else if (methodStr == "FAKE") { ui->makeSieveElementsFake->setChecked(true); }
         else if (methodStr == "FIBONACCI") { ui->makeSieveElementsFib->setChecked(true); }
+        else ui->makeSieveElementsMeaningful->setChecked(true); // default, also if == "MEANINGFUL"
         // <Elements>
         thisElement = thisElement->getNextElementSibling();
         ui->makeSieveElementsValuesEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
         // <WeightMethod>
         thisElement = thisElement->getNextElementSibling();
         std::string weightMethodStr = getFunctionString(thisElement);
-        if (weightMethodStr == "PERIODIC") { ui->makeSieveWeightsPeriodic->setChecked(true); }
-        else if (weightMethodStr == "HIERARCHIC") { ui->makeSieveWeightsHierarchic->setChecked(true); }
+        if (weightMethodStr == "HIERARCHIC") { ui->makeSieveWeightsHierarchic->setChecked(true); }
         else if (weightMethodStr == "INCLUDE") { ui->makeSieveWeightsInclude->setChecked(true); }
+        else ui->makeSieveWeightsPeriodic->setChecked(true); // default, also if == "PERIODIC"
         // <Weight>
         thisElement = thisElement->getNextElementSibling();
         ui->makeSieveWeightsValuesEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
