@@ -551,6 +551,47 @@ void FunctionGenerator::setupUi()
 
         thisElement = thisElement->getNextElementSibling(); // <Offsets>
         ui->valuePickOffsetEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "GetPattern") {
+        selectComboItem(functionName);
+        // <Method>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        std::string method = getFunctionString(thisElement);
+        if (method == "OTHER") { ui->getPatternMethodOther->setChecked(true); }
+        else if (method == "TYPE_CLUSTERS") { ui->getPatternMethodTypeClusters->setChecked(true); }
+        else if (method == "TIME_DEPEND") { ui->getPatternMethodTimeDepend->setChecked(true); }
+        else if (method == "PROBABILITY") { ui->getPatternMethodProbability->setChecked(true); }
+        else { ui->getPatternMethodInOrder->setChecked(true); } // default / "IN_ORDER"
+        // <Offset>
+        thisElement = thisElement->getNextElementSibling();
+        ui->getPatternOriginEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Pattern>
+        thisElement = thisElement->getNextElementSibling();
+        ui->getPatternChooseEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "MakePattern") {
+        selectComboItem(functionName);
+        // <List>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->makePatternIntervalsEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "ExpandPattern") {
+        selectComboItem(functionName);
+        // <Method>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        std::string method = getFunctionString(thisElement);
+        if (method == "SYMMETRIES") { ui->expandPatternMethodSymmetries->setChecked(true); }
+        else if (method == "DISTORT") { ui->expandPatternMethodDistort->setChecked(true); }
+        else { ui->expandPatternMethodEquivalence->setChecked(true); } // default / "EQUIVALENCE"
+        // <Modulo>
+        thisElement = thisElement->getNextElementSibling();
+        ui->expandPatternModuloEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Low>
+        thisElement = thisElement->getNextElementSibling();
+        ui->expandPatternLowEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <High>
+        thisElement = thisElement->getNextElementSibling();
+        ui->expandPatternHighEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Pattern>
+        thisElement = thisElement->getNextElementSibling();
+        ui->expandPatternPatternEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
 }
 
