@@ -597,6 +597,34 @@ void FunctionGenerator::setupUi()
         // <File>
         DOMElement* thisElement = functionNameElement->getNextElementSibling();
         ui->readPatFileEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "ReadSIVFile") {
+        selectComboItem(functionName);
+        // <File>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->readSivFileEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "ReadENVFile") {
+        selectComboItem(functionName);
+        // <File>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->readEnvFileEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "ReadFILFile") {
+        selectComboItem(functionName);
+        // <File>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->readFilFileEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "ChooseL") {
+        selectComboItem(functionName);
+        // <Entry>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->chooseLEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "EnvLib") {
+        selectComboItem(functionName);
+        // <Env>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->envLibNumEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        // <Scale>
+        thisElement = thisElement->getNextElementSibling();
+        ui->envLibScalingEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
 }
 
