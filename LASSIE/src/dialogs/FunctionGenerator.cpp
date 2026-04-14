@@ -592,6 +592,11 @@ void FunctionGenerator::setupUi()
         // <Pattern>
         thisElement = thisElement->getNextElementSibling();
         ui->expandPatternPatternEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "ReadPATFile") {
+        selectComboItem(functionName);
+        // <File>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->readPatFileEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
 }
 
