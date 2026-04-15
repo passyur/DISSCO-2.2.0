@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QTextEdit>
+#include <QLineEdit>
 #include <QDialogButtonBox>
 // #include <QOverload>
 #include <QDateTime>
@@ -18,6 +19,7 @@
 #include "../ui/ui_FunGenSPAPartialAlignment.h"
 #include "../widgets/REVPartialAlignment.hpp"
 #include "../ui/ui_FunGenREVPartialAlignment.h"
+#include "../widgets/Stochos.hpp"
 
 
 FunctionGenerator::FunctionGenerator(QWidget *parent, FunctionReturnType _returnType, QString _originalString)
@@ -29,10 +31,13 @@ FunctionGenerator::FunctionGenerator(QWidget *parent, FunctionReturnType _return
     returnType = _returnType;
     originalString = _originalString;
     ui->setupUi(this);
-    ui->functionStackedWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Ignored);
-    ui->functionStackedWidget->setFixedSize(ui->functionStackedWidget->widget(0)->sizeHint());
-    this->adjustSize();
+    for (int i = 0; i < ui->functionStackedWidget->count(); ++i) {
+      ui->functionStackedWidget->widget(i)->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
+    ui->functionStackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    this->layout()->setSizeConstraint(QLayout::SetDefaultConstraint);
     setupUi();
+    this->adjustSize();
     qDebug() << "returnType in FuncGen:" << returnType;
 }
 
@@ -129,6 +134,7 @@ void FunctionGenerator::setupUi()
         ui->functionOptions->addItem("ReadENVFile", functionReadENVFile); // index 18
         ui->functionOptions->addItem("EnvLib", functionEnvLib); // index 16
         ui->functionOptions->addItem("Select", functionSelect); // index 12
+        ui->functionOptions->addItem("Stochos", functionStochos); // index 11
     } else if (returnType == functionReturnSPA){
         ui->functionOptions->addItem("", NOT_A_FUNCTION); // index 0
         ui->functionOptions->addItem("SPA", functionSPA); // index 20
@@ -170,11 +176,13 @@ void FunctionGenerator::setupUi()
     connect(ui->functionOptions, QOverload<int>::of(&QComboBox::currentIndexChanged),
         this, &FunctionGenerator::handleFunctionChanged);
     ui->functionOptions->setCurrentIndex(0);
+    this->adjustSize();
 
     // Centers result label
     ui->resultLabel->setAlignment(Qt::AlignCenter);
     // Sets height of result box
-    ui->resultTextEdit->setFixedHeight(100);
+    ui->resultTextEdit->setMinimumHeight(60);
+    ui->resultTextEdit->setMaximumHeight(100);
     // Connects the ui OK and CANCEL buttons to their corresponding actions
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -243,8 +251,11 @@ void FunctionGenerator::setupUi()
     connect(ui->stochosOffsetEdit, &QLineEdit::textChanged, this, &FunctionGenerator::stochosTextChanged);
     connect(ui->stochosMethodRange, &QRadioButton::toggled, this, &FunctionGenerator::stochosTextChanged);
     connect(ui->stochosMethodFunction, &QRadioButton::toggled, this, &FunctionGenerator::stochosTextChanged);
-    // connect(ui->stochosAddNode, &QPushButton::clicked, this, &FunctionGenerator::stochosAddNodeButtonClicked);
-    // connect(ui->stochosInsertFn, &QPushButton::clicked, this, &FunctionGenerator::stochosFunButtonClicked);
+    connect(ui->stochosAddNode, &QPushButton::clicked, this, &FunctionGenerator::addStochosNodeButtonClicked);
+    connect(ui->stochosMethodRange, &QRadioButton::toggled, this, &FunctionGenerator::clearStochosNodes);
+    connect(ui->stochosMethodFunction, &QRadioButton::toggled, this, &FunctionGenerator::clearStochosNodes);
+    connect(ui->stochosOffsetEdit, &QLineEdit::cursorPositionChanged, this, [this](){ this->m_lastFocusedStochosEdit = ui->stochosOffsetEdit; });
+    connect(ui->stochosInsertFn, &QPushButton::clicked, this, &FunctionGenerator::stochosFunButtonClicked);
 
     // ValuePick Signals
     connect(ui->valuePickElementsMeaningful, &QRadioButton::toggled, this, &FunctionGenerator::valuePickTextChanged);
@@ -400,7 +411,6 @@ void FunctionGenerator::setupUi()
     connect(ui->spectrumGenDistanceInsertFn, &QPushButton::clicked, this, &FunctionGenerator::Spectrum_GenDistanceFunButtonClicked);
     connect(ui->spectrumGenEnvelopeEdit, &QLineEdit::textChanged, this, &FunctionGenerator::Spectrum_GenTextChanged);
     connect(ui->spectrumGenDistanceEdit, &QLineEdit::textChanged, this, &FunctionGenerator::Spectrum_GenTextChanged);
-
 
     // TO DO: Parsing to set result string value for all input fields
     XMLPlatformUtils::Initialize();
@@ -569,6 +579,8 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionStochos:
             currPageIndex = 11;
+            ui->stochosScrollLayout->setSpacing(0);
+            ui->stochosScrollLayout->setContentsMargins(0, 0, 0, 0);
             ui->stochosMethodRange->setChecked(true);
             stochosTextChanged();
             break;
@@ -685,8 +697,22 @@ void FunctionGenerator::handleFunctionChanged(int index)
     // Udate stacked widget page added
     ui->functionStackedWidget->setCurrentIndex(currPageIndex);
     // Resizes to fit new page
-    ui->functionStackedWidget->setFixedSize(ui->functionStackedWidget->widget(currPageIndex)->sizeHint());
-    this->adjustSize();
+    this->setMinimumSize(0, 0);
+
+    for (int i = 0; i < ui->functionStackedWidget->count(); ++i) {
+        QWidget* page = ui->functionStackedWidget->widget(i);
+        if (i == currPageIndex) {
+            page->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        } else {
+            page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        }
+    }
+    ui->functionStackedWidget->layout()->activate();
+    this->layout()->activate();
+
+    QSize idealSize = this->sizeHint();
+    this->resize(idealSize);
+    this->setMinimumSize(idealSize);
 }
 
 QString FunctionGenerator::getResultString(){
@@ -956,9 +982,83 @@ void FunctionGenerator::stochosTextChanged(){
     if (ui->stochosMethodRange->isChecked()) { stringbuffer = stringbuffer + "RANGE_DISTRIB"; }
     else if (ui->stochosMethodFunction->isChecked()) { stringbuffer = stringbuffer + "FUNCTIONS"; }
     stringbuffer = stringbuffer + "</Method><Envelopes>";
-    // TO DO: StochosSubAlignments
+    
+    QString nodesText = "";
+    for (int i = 0; i < ui->stochosScrollLayout->count() - 1; ++i) {
+        QLayoutItem* item = ui->stochosScrollLayout->itemAt(i);
+        if (item && item->widget()) {
+            Stochos* node = qobject_cast<Stochos*>(item->widget());
+            if (node) { nodesText += node->getNodeText(); }
+        }
+    }
+    stringbuffer = stringbuffer + nodesText;
+
     stringbuffer = stringbuffer + "</Envelopes><Offset>" + ui->stochosOffsetEdit->text() + "</Offset></Fun>";
     ui->resultTextEdit->setText(stringbuffer);
+}
+void FunctionGenerator::addStochosNodeButtonClicked() {
+  int method = ui->stochosMethodRange->isChecked() ? 0 : 1;
+  int index = ui->stochosScrollLayout->count() - 1;
+  qDebug() << "Add Stochos Node Button At Index: " << index;
+  Stochos* node = new Stochos(method, index, ui->stochosScrollWindowNodes, ui->resultTextEdit);
+
+  connect(node, &Stochos::deleteRequested, this, &FunctionGenerator::removeStochosNodeButtonClicked);
+  connect(node, &Stochos::nodeTextChanged, this, &FunctionGenerator::stochosTextChanged);
+  connect(node, &Stochos::editFocused, this, [this](QLineEdit* edit){ this->m_lastFocusedStochosEdit = edit; });
+
+  ui->stochosScrollLayout->insertWidget(index, node);
+  ui->stochosScrollWindowNodes->adjustSize();
+  stochosTextChanged();
+}
+void FunctionGenerator::removeStochosNodeButtonClicked(Stochos* node) {
+    if (!node) return;
+    int deletedIndex = node->getStochosIndex(); 
+    qDebug() << "Deleting Stochos Node at index: " << deletedIndex;
+
+    if (m_lastFocusedStochosEdit && node->isAncestorOf(m_lastFocusedStochosEdit)) {
+        m_lastFocusedStochosEdit = nullptr;
+    }
+
+    ui->stochosScrollLayout->removeWidget(node);
+    node->deleteLater();
+
+    for (int i = deletedIndex; i < ui->stochosScrollLayout->count() - 1; ++i) {
+        QLayoutItem* item = ui->stochosScrollLayout->itemAt(i);
+        if (item && item->widget()) {
+            Stochos* remainingNode = qobject_cast<Stochos*>(item->widget());
+            if (remainingNode) {
+                remainingNode->setStochosIndex(i); 
+            }
+        }
+    }
+    ui->stochosScrollWindowNodes->adjustSize();
+    stochosTextChanged(); 
+}
+void FunctionGenerator::clearStochosNodes() {
+  qDebug() << "Clearing Stochos Nodes";
+  if (!ui->stochosScrollLayout) return;
+  while (ui->stochosScrollLayout->count() > 1) {
+    QLayoutItem* item = ui->stochosScrollLayout->takeAt(0);
+    if (item) {
+      if (QWidget* widget = item->widget()) { widget->deleteLater(); }
+      delete item;
+    }
+  }
+  stochosTextChanged();
+}
+void FunctionGenerator::stochosFunButtonClicked() {
+  if (!m_lastFocusedStochosEdit) { return; }
+  QString initialText = m_lastFocusedStochosEdit->text();
+  FunctionReturnType type = functionReturnENV;
+  if (m_lastFocusedStochosEdit == ui->stochosOffsetEdit) { type = functionReturnInt; }
+  FunctionGenerator* generator = new FunctionGenerator(this, type, initialText);
+  if (generator->exec() == QDialog::Accepted) {
+    QString result = generator->getResultString();
+    if (!result.isEmpty()) {
+        m_lastFocusedStochosEdit->setText(result);
+    }
+  }
+  delete generator;
 }
 
 /* ValuePick Signal Functions */

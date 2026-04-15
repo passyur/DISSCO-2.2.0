@@ -31,6 +31,7 @@ qt_add_executable(LASSIE
     src/widgets/LayerBox.cpp src/widgets/LayerBox.hpp
     src/widgets/Partials.cpp src/widgets/Partials.hpp
     src/widgets/Modifiers.cpp src/widgets/Modifiers.hpp src/ui/Modifiers.ui
+    src/widgets/Stochos.cpp src/widgets/Stochos.hpp
 )
 
 target_link_libraries(LASSIE PRIVATE 
