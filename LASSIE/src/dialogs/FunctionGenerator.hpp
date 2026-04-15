@@ -8,9 +8,11 @@
 #include <QDialog>
 #include <QWidget>
 #include <QString>
+#include <QLineEdit>
 
 class SPAPartialAlignment;
 class REVPartialAlignment;
+class Stochos;
 
 namespace Ui {
 class FunctionGenerator;
@@ -92,6 +94,11 @@ public:
 
     // Stochos
     void stochosTextChanged();
+    void addStochosNodeButtonClicked();
+    void removeStochosNodeButtonClicked(Stochos* node);
+    void clearStochosNodes();
+    QLineEdit* m_lastFocusedStochosEdit = nullptr;
+    void stochosFunButtonClicked();
 
     // ValuePick
     void valuePickAbsRangeFunButtonClicked();

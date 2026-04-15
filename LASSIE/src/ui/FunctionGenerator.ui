@@ -521,7 +521,11 @@
             </property>
             <widget class="QWidget" name="stochosScrollWindowNodes">
                 <layout class="QVBoxLayout" name="stochosScrollLayout">
-                    <!-- FunGenStochosSubAlignment.ui -->
+                    <!-- Stochos.cpp -->
+                    <item><spacer name="verticalSpacerStochos">
+                    <property name="orientation"><enum>Qt::Vertical</enum></property>
+                    <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+                    </spacer></item>
                 </layout>
             </widget>
             </widget>
@@ -833,6 +837,10 @@
                 </property>
                 </widget>
             </item>
+            <item><spacer name="verticalSpacerValPick">
+            <property name="orientation"><enum>Qt::Vertical</enum></property>
+            <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+            </spacer></item>
         </layout>
         </widget>
         </item>
