@@ -771,6 +771,8 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionSelect:
             currPageIndex = 12;
+            ui->selectScrollLayout->setSpacing(0);
+            ui->selectScrollLayout->setContentsMargins(0, 0, 0, 0);
             selectTextChanged();
             break;
         case functionValuePick:
