@@ -32,7 +32,8 @@ FunctionGenerator::FunctionGenerator(QWidget *parent, FunctionReturnType _return
     returnType = _returnType;
     originalString = _originalString;
     ui->setupUi(this);
-    ui->functionStackedWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Ignored);
+    ui->functionStackedWidget->setMinimumSize(100, 200);
+    ui->functionStackedWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     // ui->functionStackedWidget->setFixedSize(ui->functionStackedWidget->widget(0)->sizeHint());
     this->adjustSize();
     setupUi();
@@ -651,8 +652,6 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionSelect:
             currPageIndex = 12;
-            // this->setMinimumSize(420, 480);
-            this->resize(420, 500);
             ui->selectScrollWindow->setWidgetResizable(true);
             ui->selectScrollLayout->setAlignment(Qt::AlignTop);
             if (selectValueRows.isEmpty()) { selectAddRow(); }
