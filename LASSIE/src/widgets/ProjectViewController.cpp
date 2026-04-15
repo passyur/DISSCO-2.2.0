@@ -286,17 +286,12 @@ void ProjectView::save(){
             xmlWriter.writeCharacters(stringBuffer);
         xmlWriter.writeEndElement();
 
-        xmlWriter.writeStartElement("MarkovModelLibrary");	
-            /* STILL IN PROGRESS  */
-            //nhi: proper Markov model handling with attributes
-            xmlWriter.writeCharacters("");
+        xmlWriter.writeStartElement("MarkovModelLibrary");
+            QString markovBuffer = "\n" + QString::number(pm->markovmodels().size()) + "\n";
             for (int i = 0; i < pm->markovmodels().size(); ++i) {
-                xmlWriter.writeStartElement("MarkovModel");
-                xmlWriter.writeAttribute("id", QString::number(i));
-                xmlWriter.writeAttribute("name", QString("Markov Model %1").arg(i));
-                // Add Markov model data here when available
-                xmlWriter.writeEndElement();
+                markovBuffer += QString::fromStdString(pm->markovmodels()[i].to_str()) + "\n";
             }
+            xmlWriter.writeCharacters(markovBuffer);
         xmlWriter.writeEndElement();
 
         xmlWriter.writeStartElement("Events");	

@@ -2,95 +2,72 @@
 #define MARKOVMODELLIBRARYWINDOW_HPP
 
 #include <QMainWindow>
-#include <QSplitter>
-#include <QVBoxLayout>
-#include <QScrollArea>
-#include <QTreeView>
-#include <QStandardItemModel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLabel>
-#include <QMenu>
 #include <QVector>
 #include <QString>
-#include "../widgets/ProjectViewController.hpp"
-#include "../../CMOD/src/Markov.h"
 
-// Define missing constant for minimal build
-#define ENTRY_HEIGHT 25
+class QAction;
+class QCloseEvent;
+class QHideEvent;
+class QLineEdit;
+class QMenu;
+class QPushButton;
+class QStandardItemModel;
+class QTreeView;
+class QWidget;
+class ProjectView;
 
 class MarkovModelLibraryWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    // Constructor: set up UI
     explicit MarkovModelLibraryWindow(QWidget* parent = nullptr);
-    // Destructor
     ~MarkovModelLibraryWindow() override;
 
-    // Set which project this window is editing
     void setActiveProject(ProjectView* project);
-    // Create a brand-new Markov model
-    void createNewModel();
-    // Duplicate the currently selected model
-    void duplicateModel();
-    // Remove the currently selected model
-    void removeModel();
-    // Refresh the view for a given model index
-    void update(int selection);
 
 protected:
-    // Save state back to model when hidden
-    // void hideEvent(QHideEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
 
 private slots:
-    // Called when the tree selection changes
-    void onSelectionChanged(const QModelIndex& index);
-    // (Re)build all the entry widgets based on current size
-    void buildTable();
-    // Handle editing of any entry cell
-    void onEntryChange();
-    // Show context menu on right-click
+    void onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
     void onRightClick(const QPoint& pos);
-    // Apply new chain size from sizeEntry
     void onSetSize();
+    void onEntryEdited();
+    void createNewModel();
+    void duplicateModel();
+    void removeModel();
 
 private:
-    // Serialize current entries to a string
-    QString toString() const;
+    void rebuildModelList();
+    void rebuildEditorGrid(int size);
+    void loadModelIntoEditor(int modelIdx);
+    void saveEditorIntoModel(int modelIdx);
+    void updateContextMenuEnablement();
+    QString serializeEditor() const;
 
     ProjectView* activeProject = nullptr;
+    int currentSelection = -1;
+    int currentSize = 0;
 
-    QSplitter* m_paned;
-    QWidget* m_leftWidget;
-    QWidget* m_rightWidget;
+    QTreeView* m_treeView = nullptr;
+    QStandardItemModel* m_listModel = nullptr;
 
-    // Left pane: list of models
-    QVBoxLayout* m_listLayout;
-    QScrollArea* m_listScroll;
-    QTreeView* m_treeView;
-    QStandardItemModel* m_listModel;
+    QLineEdit* m_sizeEntry = nullptr;
+    QPushButton* m_sizeButton = nullptr;
 
-    // Right pane: details
-    QVBoxLayout* m_detailLayout;
-    QWidget* m_detailBox1;
-    QVBoxLayout* m_detailBox1Layout;
-    QLineEdit* m_sizeEntry;
-    QPushButton* m_sizeButton;
-    QScrollArea* m_distScroll;
-    QScrollArea* m_valueScroll;
-    QScrollArea* m_matrixScroll;
+    QWidget* m_distGridHost = nullptr;
+    QWidget* m_valueGridHost = nullptr;
+    QWidget* m_matrixGridHost = nullptr;
 
-    // Context menu
-    QMenu* m_contextMenu;
-
-    // Dynamic entry widgets
     QVector<QLineEdit*> m_distEntries;
     QVector<QLineEdit*> m_valueEntries;
     QVector<QLineEdit*> m_matrixEntries;
 
-    int size = 0;
-    int currentSelection = -1;
+    QMenu* m_contextMenu = nullptr;
+    QAction* m_createAction = nullptr;
+    QAction* m_duplicateAction = nullptr;
+    QAction* m_deleteAction = nullptr;
 };
 
 #endif // MARKOVMODELLIBRARYWINDOW_HPP

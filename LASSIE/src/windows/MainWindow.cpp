@@ -214,6 +214,9 @@ void MainWindow::showEnvelopeLibraryWindow() const {
 void MainWindow::showMarkovWindow() const {
     //nhi: use show() instead of showMarkovLibrary()
     markovWindow->show();
+    if (projectView) {
+        markovWindow->setActiveProject(projectView);
+    }
 }
 
 void MainWindow::showPropertiesDialog() const {

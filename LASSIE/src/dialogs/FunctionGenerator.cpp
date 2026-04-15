@@ -636,6 +636,11 @@ void FunctionGenerator::setupUi()
         // <Scale>
         thisElement = thisElement->getNextElementSibling();
         ui->envLibScalingEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Markov") {
+        selectComboItem("GetFromMarkovChain");
+        // <Entry>
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->markovEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     }
 }
 
