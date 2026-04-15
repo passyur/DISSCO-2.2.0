@@ -13,6 +13,7 @@
 class SPAPartialAlignment;
 class REVPartialAlignment;
 class Stochos;
+class Select;
 
 namespace Ui {
 class FunctionGenerator;
@@ -90,7 +91,11 @@ public:
 
     // Select
     void selectIndexFunButtonClicked();
-    void selectEntryChanged();
+    void selectTextChanged();
+    void addSelectNodeButtonClicked();
+    void removeSelectNodeButtonClicked(Select* node);
+    QLineEdit* m_lastFocusedSelectEdit = nullptr;
+    void selectFunButtonClicked();
 
     // Stochos
     void stochosTextChanged();

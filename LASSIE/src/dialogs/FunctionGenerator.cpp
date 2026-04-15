@@ -20,6 +20,7 @@
 #include "../widgets/REVPartialAlignment.hpp"
 #include "../ui/ui_FunGenREVPartialAlignment.h"
 #include "../widgets/Stochos.hpp"
+#include "../widgets/Select.hpp"
 
 
 FunctionGenerator::FunctionGenerator(QWidget *parent, FunctionReturnType _returnType, QString _originalString)
@@ -243,9 +244,9 @@ void FunctionGenerator::setupUi()
 
     // Select Signals
     connect(ui->selectIndexInsertFn, &QPushButton::clicked, this, &FunctionGenerator::selectIndexFunButtonClicked);
-    connect(ui->selectIndexEdit, &QLineEdit::textChanged, this, &FunctionGenerator::selectEntryChanged);
-    // connect(ui->selectAddNode, &QPushButton::clicked, this, &FunctionGenerator::selectAddNodeButtonClicked);
-    // connect(ui->selectInsertFn, &QPushButton::clicked, this, &FunctionGenerator::selectFunButtonClicked);
+    connect(ui->selectIndexEdit, &QLineEdit::textChanged, this, &FunctionGenerator::selectTextChanged);
+    connect(ui->selectAddNode, &QPushButton::clicked, this, &FunctionGenerator::addSelectNodeButtonClicked);
+    connect(ui->selectInsertFn, &QPushButton::clicked, this, &FunctionGenerator::selectFunButtonClicked);
 
     // Stochos Signals
     connect(ui->stochosOffsetEdit, &QLineEdit::textChanged, this, &FunctionGenerator::stochosTextChanged);
@@ -770,7 +771,7 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionSelect:
             currPageIndex = 12;
-            selectEntryChanged();
+            selectTextChanged();
             break;
         case functionValuePick:
             currPageIndex = 13;
@@ -1160,12 +1161,70 @@ void FunctionGenerator::selectIndexFunButtonClicked(){
   }
   delete generator;
 }
-void FunctionGenerator::selectEntryChanged(){
+void FunctionGenerator::selectTextChanged(){
     QString stringbuffer;
     stringbuffer =  "<Fun><Name>Select</Name><List>";
-    // TO DO: SelectSubAlignments
+    
+    QString nodesText = "";
+    for (int i = 0; i < ui->selectScrollLayout->count() - 1; ++i) {
+        QLayoutItem* item = ui->selectScrollLayout->itemAt(i);
+        if (item && item->widget()) {
+            Select* node = qobject_cast<Select*>(item->widget());
+            if (node) { nodesText += node->getNodeText(); }
+            if (i < ui->selectScrollLayout->count() - 2) { nodesText += ", "; }
+        }
+    }
+    stringbuffer = stringbuffer + nodesText;
+
     stringbuffer =  stringbuffer + "</List><Index>" + ui->selectIndexEdit->text() + "</Index></Fun>";
     ui->resultTextEdit->setText(stringbuffer);
+}
+void FunctionGenerator::addSelectNodeButtonClicked() {
+  int index = ui->selectScrollLayout->count() - 1;
+  Select* node = new Select(index, ui->selectScrollWindowNodes, ui->resultTextEdit);
+
+  connect(node, &Select::deleteRequested, this, &FunctionGenerator::removeSelectNodeButtonClicked);
+  connect(node, &Select::nodeTextChanged, this, &FunctionGenerator::selectTextChanged);
+  connect(node, &Select::editFocused, this, [this](QLineEdit* edit){ this->m_lastFocusedSelectEdit = edit; });
+
+  ui->selectScrollLayout->insertWidget(index, node);
+  ui->selectScrollWindowNodes->adjustSize();
+  selectTextChanged();
+}
+void FunctionGenerator::removeSelectNodeButtonClicked(Select* node) {
+    if (!node) return;
+    int deletedIndex = node->getSelectIndex(); 
+
+    if (m_lastFocusedSelectEdit && node->isAncestorOf(m_lastFocusedSelectEdit)) {
+        m_lastFocusedSelectEdit = nullptr;
+    }
+
+    ui->selectScrollLayout->removeWidget(node);
+    node->deleteLater();
+
+    for (int i = deletedIndex; i < ui->selectScrollLayout->count() - 1; ++i) {
+        QLayoutItem* item = ui->selectScrollLayout->itemAt(i);
+        if (item && item->widget()) {
+            Select* remainingNode = qobject_cast<Select*>(item->widget());
+            if (remainingNode) {
+                remainingNode->setSelectIndex(i); 
+            }
+        }
+    }
+    ui->selectScrollWindowNodes->adjustSize();
+    selectTextChanged(); 
+}
+void FunctionGenerator::selectFunButtonClicked() {
+  if (!m_lastFocusedSelectEdit) { return; }
+  QString initialText = m_lastFocusedSelectEdit->text();
+  FunctionGenerator* generator = new FunctionGenerator(this, functionReturnMakeListFun, initialText);
+  if (generator->exec() == QDialog::Accepted) {
+    QString result = generator->getResultString();
+    if (!result.isEmpty()) {
+        m_lastFocusedSelectEdit->setText(result);
+    }
+  }
+  delete generator;
 }
 
 /* Stochos Signal Functions */
@@ -1192,7 +1251,6 @@ void FunctionGenerator::stochosTextChanged(){
 void FunctionGenerator::addStochosNodeButtonClicked() {
   int method = ui->stochosMethodRange->isChecked() ? 0 : 1;
   int index = ui->stochosScrollLayout->count() - 1;
-  qDebug() << "Add Stochos Node Button At Index: " << index;
   Stochos* node = new Stochos(method, index, ui->stochosScrollWindowNodes, ui->resultTextEdit);
 
   connect(node, &Stochos::deleteRequested, this, &FunctionGenerator::removeStochosNodeButtonClicked);
@@ -1206,7 +1264,6 @@ void FunctionGenerator::addStochosNodeButtonClicked() {
 void FunctionGenerator::removeStochosNodeButtonClicked(Stochos* node) {
     if (!node) return;
     int deletedIndex = node->getStochosIndex(); 
-    qDebug() << "Deleting Stochos Node at index: " << deletedIndex;
 
     if (m_lastFocusedStochosEdit && node->isAncestorOf(m_lastFocusedStochosEdit)) {
         m_lastFocusedStochosEdit = nullptr;
@@ -1228,7 +1285,6 @@ void FunctionGenerator::removeStochosNodeButtonClicked(Stochos* node) {
     stochosTextChanged(); 
 }
 void FunctionGenerator::clearStochosNodes() {
-  qDebug() << "Clearing Stochos Nodes";
   if (!ui->stochosScrollLayout) return;
   while (ui->stochosScrollLayout->count() > 1) {
     QLayoutItem* item = ui->stochosScrollLayout->takeAt(0);
