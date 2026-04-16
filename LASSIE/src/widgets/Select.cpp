@@ -1,41 +1,29 @@
 #include "Select.hpp"
 #include "../inst.hpp"
-#include "../dialogs/FunctionGenerator.hpp"
 
-Select::Select(int selectIndex, QWidget *parent, QTextEdit* resultEntry)
+Select::Select(int selectIndex, QWidget *parent)
     : QFrame(parent),
       m_selectIndex(selectIndex)
 {
-    // Main Layout
     m_mainLayout = new QVBoxLayout(this);
-    this->setFrameShape(QFrame::NoFrame);
-    QHBoxLayout* selectHBox = new QHBoxLayout();
+    m_mainLayout->setContentsMargins(0, 0, 0, 0);
+    m_mainLayout->setSpacing(0);
+    setFrameShape(QFrame::NoFrame);
 
-    auto* valLabel = new QLabel("Value:");
-    m_valEntry = new QLineEdit;
-    m_removeSelectButton = new QPushButton("Remove Node");
+    m_row = new FunctionEntryRow("Value:", selectIndex, functionReturnMakeListFun, this);
 
-    connect(m_removeSelectButton, &QPushButton::clicked, this, &Select::onRemoveNodeClicked);
-    connect(m_valEntry, &QLineEdit::textChanged, this, &Select::onNodeTextChanged);
-    connect(m_valEntry, &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_valEntry); });
+    connect(m_row, &FunctionEntryRow::deleteRequested, this,
+            [this](FunctionEntryRow*){ emit deleteRequested(this); });
+    connect(m_row, &FunctionEntryRow::textChanged, this,
+            [this](FunctionEntryRow*){ emit nodeTextChanged(this); });
+    connect(m_row, &FunctionEntryRow::editFocused, this, &Select::editFocused);
 
-    selectHBox->addWidget(valLabel);
-    selectHBox->addWidget(m_valEntry);
-    selectHBox->addWidget(m_removeSelectButton);
-
-    this->m_valEntry->setFixedHeight(20);
-    m_mainLayout->addLayout(selectHBox);
-    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    this->setFixedHeight(50);
+    m_mainLayout->addWidget(m_row);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
 QString Select::getNodeText() {
-    return m_valEntry->text();
+    return m_row->getText();
 }
-
-
-void Select::onNodeTextChanged() { emit nodeTextChanged(this); }
-
-void Select::onRemoveNodeClicked() { emit deleteRequested(this); }
 
 Select::~Select() {}

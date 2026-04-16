@@ -1,15 +1,16 @@
 #include "Stochos.hpp"
 #include "../inst.hpp"
-#include "../dialogs/FunctionGenerator.hpp"
 
-Stochos::Stochos(int methodType, int stochosIndex, QWidget *parent, QTextEdit* resultEntry)
+Stochos::Stochos(int methodType, int stochosIndex, QWidget *parent)
     : QFrame(parent),
       m_stochosIndex(stochosIndex),
       m_methodType(methodType)
 {
-    // Main Layout
     m_mainLayout = new QVBoxLayout(this);
-    this->setFrameShape(QFrame::NoFrame);
+    m_mainLayout->setContentsMargins(0, 0, 0, 0);
+    m_mainLayout->setSpacing(0);
+    setFrameShape(QFrame::NoFrame);
+
     QHBoxLayout* stochosHBox = new QHBoxLayout();
 
     if (methodType == 0) {
@@ -22,11 +23,11 @@ Stochos::Stochos(int methodType, int stochosIndex, QWidget *parent, QTextEdit* r
         m_removeStochosButton = new QPushButton("Remove Node");
 
         connect(m_removeStochosButton, &QPushButton::clicked, this, &Stochos::onRemoveNodeClicked);
-        connect(m_minEntry, &QLineEdit::textChanged, this, &Stochos::onNodeTextChanged);
-        connect(m_maxEntry, &QLineEdit::textChanged, this, &Stochos::onNodeTextChanged);
-        connect(m_distEntry, &QLineEdit::textChanged, this, &Stochos::onNodeTextChanged);
-        connect(m_minEntry, &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_minEntry); });
-        connect(m_maxEntry, &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_maxEntry); });
+        connect(m_minEntry,  &QLineEdit::textChanged,           this, &Stochos::onNodeTextChanged);
+        connect(m_maxEntry,  &QLineEdit::textChanged,           this, &Stochos::onNodeTextChanged);
+        connect(m_distEntry, &QLineEdit::textChanged,           this, &Stochos::onNodeTextChanged);
+        connect(m_minEntry,  &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_minEntry); });
+        connect(m_maxEntry,  &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_maxEntry); });
         connect(m_distEntry, &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_distEntry); });
 
         stochosHBox->addWidget(minLabel);
@@ -37,38 +38,36 @@ Stochos::Stochos(int methodType, int stochosIndex, QWidget *parent, QTextEdit* r
         stochosHBox->addWidget(m_distEntry);
         stochosHBox->addWidget(m_removeStochosButton);
 
-        this->m_minEntry->setFixedHeight(20);
-        this->m_maxEntry->setFixedHeight(20);
-        this->m_distEntry->setFixedHeight(20);
+        m_minEntry->setFixedHeight(20);
+        m_maxEntry->setFixedHeight(20);
+        m_distEntry->setFixedHeight(20);
+
+        m_mainLayout->addLayout(stochosHBox);
     }
     else if (methodType == 1) {
-        auto* valLabel = new QLabel("Value:");
-        m_valEntry = new QLineEdit;
-        m_removeStochosButton = new QPushButton("Remove Node");
+        m_row = new FunctionEntryRow("Value:", stochosIndex, functionReturnENV, this);
 
-        connect(m_removeStochosButton, &QPushButton::clicked, this, &Stochos::onRemoveNodeClicked);
-        connect(m_valEntry, &QLineEdit::textChanged, this, &Stochos::onNodeTextChanged);
-        connect(m_valEntry, &QLineEdit::cursorPositionChanged, this, [this](){ emit editFocused(m_valEntry); });
+        connect(m_row, &FunctionEntryRow::deleteRequested, this,
+                [this](FunctionEntryRow*){ emit deleteRequested(this); });
+        connect(m_row, &FunctionEntryRow::textChanged, this,
+                [this](FunctionEntryRow*){ emit nodeTextChanged(this); });
+        connect(m_row, &FunctionEntryRow::editFocused, this, &Stochos::editFocused);
 
-        stochosHBox->addWidget(valLabel);
-        stochosHBox->addWidget(m_valEntry);
-        stochosHBox->addWidget(m_removeStochosButton);
-
-        this->m_valEntry->setFixedHeight(20);
+        m_mainLayout->addWidget(m_row);
     }
-    m_mainLayout->addLayout(stochosHBox);
-    this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    this->setFixedHeight(50);
+
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    setFixedHeight(50);
 }
 
 QString Stochos::getNodeText() {
     QString nodeText = "";
     if (m_methodType == 0) { // Range
-        nodeText += "<Envelope>" + m_minEntry->text() + "</Envelope>";
-        nodeText += "<Envelope>" + m_maxEntry->text() + "</Envelope>";
+        nodeText += "<Envelope>" + m_minEntry->text()  + "</Envelope>";
+        nodeText += "<Envelope>" + m_maxEntry->text()  + "</Envelope>";
         nodeText += "<Envelope>" + m_distEntry->text() + "</Envelope>";
     } else { // Function/Value
-        nodeText += "<Envelope>" + m_valEntry->text() + "</Envelope>";
+        nodeText += "<Envelope>" + m_row->getText() + "</Envelope>";
     }
     return nodeText;
 }
