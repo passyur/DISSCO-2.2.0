@@ -4,14 +4,14 @@
  <widget class="QWidget" name="SpaPartialAlignment">
   <layout class="QHBoxLayout" name="spaPartialAlignmentLayout">
     <item>
-        <widget class="QLabel" name="spaPartialEnvelopeLabel">
+        <widget class="QLabel" name="spaPartialEditLabel">
             <property name="text">
-            <string>Envelope:</string>
+            <string></string>
             </property>
         </widget>
     </item>
     <item>
-         <widget class="QLineEdit" name="spaPartialEnvelopeEdit"/>
+         <widget class="QLineEdit" name="spaPartialEdit"/>
     </item>
     <item>
         <widget class="QPushButton" name="spaPartialFunButton">

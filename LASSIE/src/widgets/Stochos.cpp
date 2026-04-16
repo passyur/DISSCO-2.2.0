@@ -58,7 +58,6 @@ Stochos::Stochos(int methodType, int stochosIndex, QWidget *parent, QTextEdit* r
     }
     m_mainLayout->addLayout(stochosHBox);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    this->setFixedHeight(50);
 }
 
 QString Stochos::getNodeText() {

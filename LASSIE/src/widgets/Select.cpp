@@ -26,7 +26,6 @@ Select::Select(int selectIndex, QWidget *parent, QTextEdit* resultEntry)
     this->m_valEntry->setFixedHeight(20);
     m_mainLayout->addLayout(selectHBox);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    this->setFixedHeight(50);
 }
 
 QString Select::getNodeText() {

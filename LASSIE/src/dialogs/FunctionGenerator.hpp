@@ -11,6 +11,7 @@
 #include <QLineEdit>
 
 class SPAPartialAlignment;
+class SPAChannelAlignment;
 class REVPartialAlignment;
 class Stochos;
 class Select;
@@ -170,12 +171,24 @@ public:
     void makeSieveTextChanged();
 
     // SPA
-    int SPANumOfPartials;
     // void SPAMethodRadioButtonClicked();
     // void SPAApplyByRadioButtonClicked();
     void SPATextChanged();
-    SPAPartialAlignment* SPAInsertPartial();
+    void handleSpaApplyMethodChanged();
+    
+    int SPANumOfPartials;
     SPAPartialAlignment* SPAPartialAlignments = nullptr;
+    SPAPartialAlignment* SPAInsertPartial(SPAPartialAlignment* prevSpa);
+    void SPARemovePartial(SPAPartialAlignment* currSpa);
+    void updateSpaLabels();
+    void clearSpaPartials();
+    
+    int SPANumOfChannels;
+    SPAChannelAlignment* SPAChannelAlignments = nullptr;
+    SPAChannelAlignment* SPAInsertChannel(SPAChannelAlignment* prevCha);
+    void SPARemoveChannel(SPAChannelAlignment* currCha);
+    void updateChaLabels();
+    void clearSpaChannels();
 
     // Spectrum Gen
     void Spectrum_GenEnvelopeFunButtonClicked();

@@ -43,7 +43,6 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
 
     this->m_partialEntry->setFixedHeight(20);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    this->setFixedHeight(50);
 }
 
 

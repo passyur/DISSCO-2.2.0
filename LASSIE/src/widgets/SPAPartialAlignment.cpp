@@ -22,8 +22,8 @@ SPAPartialAlignment::SPAPartialAlignment(QWidget *parent)
 {
     ui->setupUi(this); 
     setupUi(); 
-    prev = NULL;
-    next = NULL;
+    prev = nullptr;
+    next = nullptr;
 }
 
 SPAPartialAlignment::~SPAPartialAlignment()
@@ -33,32 +33,29 @@ SPAPartialAlignment::~SPAPartialAlignment()
 
 void SPAPartialAlignment::setupUi() {
     connect(ui->spaPartialFunButton, &QPushButton::clicked, this, &SPAPartialAlignment::funButtonClicked);
-    //connect(ui->spaPartialRemoveButton, &QPushButton::clicked, this, &SPAPartialAlignment::removePartialButtonClicked);
-    //connect(ui->spaPartialInsertButton, &QPushButton::clicked, this, &SPAPartialAlignment::insertPartialButtonClicked);
-    //connect(ui->spaPartialEnvelopeEdit, &QLineEdit::textChanged, this, &SPAPartialAlignment::textChanged);
+    connect(ui->spaPartialRemoveButton, &QPushButton::clicked, this, [this](){ emit removeRequested(this); });
+    connect(ui->spaPartialInsertButton, &QPushButton::clicked, this, [this](){ emit insertRequested(this); });
+    connect(ui->spaPartialEdit, &QLineEdit::textChanged, this, &SPAPartialAlignment::textChangedSignal);
+    ui->spaPartialEdit->setFixedHeight(20);
 }
 
 void SPAPartialAlignment::funButtonClicked(){
-  QString initialText = ui->spaPartialEnvelopeEdit->text();
+  QString initialText = ui->spaPartialEdit->text();
   FunctionGenerator* generator = new FunctionGenerator(this, functionReturnENV, initialText);
   if (generator->exec() == QDialog::Accepted) {
     QString result = generator->getResultString();
     if (!result.isEmpty()) {
-        ui->spaPartialEnvelopeEdit->setText(result);
+        ui->spaPartialEdit->setText(result);
     }
   }
   delete generator;
 }
 
-// void SPAPartialAlignment::removePartialButtonClicked(){
-//     parent->SPARemovePartial(this);
-// }
-
-// void SPAPartialAlignment::insertPartialButtonClicked(){
-//     parent->SPAInsertPartial(this);
-// }
-
 QString SPAPartialAlignment::textChanged() {
-    return ui->spaPartialEnvelopeEdit->text();
+    return ui->spaPartialEdit->text();
+}
+
+void SPAPartialAlignment::setLabelText(const QString& text) {
+    ui->spaPartialEditLabel->setText(text);
 }
 

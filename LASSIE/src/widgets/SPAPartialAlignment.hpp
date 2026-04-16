@@ -29,6 +29,12 @@ public:
     SPAPartialAlignment* prev;
 
     QString textChanged();
+    void setLabelText(const QString& text);
+
+signals:
+    void removeRequested(SPAPartialAlignment* node);
+    void insertRequested(SPAPartialAlignment* node);
+    void textChangedSignal();
 
 private:
     /* storing function generator */
