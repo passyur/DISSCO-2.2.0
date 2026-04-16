@@ -8,7 +8,7 @@
 #include <QPushButton>
 #include <QString>
 
-#include "../lassie.hpp"
+#include "../../lassie.hpp"
 
 // A generic row widget: [Label | QLineEdit | fn button | rm button]
 // The fn button opens a FunctionGenerator dialog of the configured return type.

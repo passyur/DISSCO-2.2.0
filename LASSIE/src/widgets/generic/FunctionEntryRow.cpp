@@ -1,5 +1,5 @@
 #include "FunctionEntryRow.hpp"
-#include "../dialogs/FunctionGenerator.hpp"
+#include "../../dialogs/FunctionGenerator.hpp"
 
 FunctionEntryRow::FunctionEntryRow(const QString& labelText,
                                    int index,
