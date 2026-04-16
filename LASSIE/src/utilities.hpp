@@ -14,30 +14,4 @@ namespace MUtilities {
 
 }
 
-namespace MarkovUtilities {
-    // nhi: Markov model methods
-    inline int createNewMarkovModel() { 
-        ProjectManager *pm = Inst::get_project_manager();
-        pm->markovmodels().append(MarkovModel<float>()); 
-        return pm->markovmodels().size() - 1; 
-    }
-
-    inline int duplicateMarkovModel(int idx) { 
-        ProjectManager *pm = Inst::get_project_manager();
-        // QList<MarkovModel<float>*> markov_models = ;
-        if (idx >= 0 && idx < pm->markovmodels().size()) {
-            pm->markovmodels().append(pm->markovmodels()[idx]); 
-            return pm->markovmodels().size() - 1;
-        }
-        return -1;
-    }
-
-    inline void removeMarkovModel(int idx) { 
-        ProjectManager *pm = Inst::get_project_manager();
-        if (idx >= 0 && idx < pm->markovmodels().size()) {
-            pm->markovmodels().erase(pm->markovmodels().begin() + idx);
-        }
-    }
-}
-
 #endif /* UTILITIES_HPP */
