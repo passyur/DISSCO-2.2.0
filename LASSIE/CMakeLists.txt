@@ -33,7 +33,7 @@ qt_add_executable(LASSIE
     src/widgets/Modifiers.cpp src/widgets/Modifiers.hpp src/ui/Modifiers.ui
     src/widgets/Stochos.cpp src/widgets/Stochos.hpp
     src/widgets/Select.cpp src/widgets/Select.hpp
-    src/widgets/FunctionEntryRow.cpp src/widgets/FunctionEntryRow.hpp
+    src/widgets/generic/FunctionEntryRow.cpp src/widgets/generic/FunctionEntryRow.hpp
 )
 
 target_link_libraries(LASSIE PRIVATE 

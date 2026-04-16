@@ -6,7 +6,7 @@
 #include <QString>
 
 #include "../core/event_struct.hpp"
-#include "FunctionEntryRow.hpp"
+#include "generic/FunctionEntryRow.hpp"
 
 class EventAttributesViewController;
 class ProjectView;
