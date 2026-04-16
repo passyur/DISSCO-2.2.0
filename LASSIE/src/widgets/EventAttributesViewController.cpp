@@ -2,6 +2,7 @@
 #include "../ui/ui_Attributes.h"
 
 #include "../inst.hpp"
+#include "../utilities.hpp"
 #include "../core/event_struct.hpp"
 #include "../dialogs/FunctionGenerator.hpp"
 #include "ProjectViewController.hpp"
@@ -453,6 +454,8 @@ void EventAttributesViewController::saveCurrentShownEventData() {
     }
     if (!typeStr.isEmpty())
         e_projectView->updatePaletteItemName(typeStr, m_curreventindex, savedName);
+
+    MUtilities::modified();
 }
 
 void EventAttributesViewController::showCurrentEventData() {
