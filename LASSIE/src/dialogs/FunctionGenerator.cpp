@@ -1188,7 +1188,7 @@ void FunctionGenerator::selectTextChanged(){
 }
 void FunctionGenerator::addSelectNodeButtonClicked() {
   int index = ui->selectScrollLayout->count() - 1;
-  Select* node = new Select(index, ui->selectScrollWindowNodes, ui->resultTextEdit);
+  Select* node = new Select(index, ui->selectScrollWindowNodes);
 
   connect(node, &Select::deleteRequested, this, &FunctionGenerator::removeSelectNodeButtonClicked);
   connect(node, &Select::nodeTextChanged, this, &FunctionGenerator::selectTextChanged);
@@ -1258,7 +1258,7 @@ void FunctionGenerator::stochosTextChanged(){
 void FunctionGenerator::addStochosNodeButtonClicked() {
   int method = ui->stochosMethodRange->isChecked() ? 0 : 1;
   int index = ui->stochosScrollLayout->count() - 1;
-  Stochos* node = new Stochos(method, index, ui->stochosScrollWindowNodes, ui->resultTextEdit);
+  Stochos* node = new Stochos(method, index, ui->stochosScrollWindowNodes);
 
   connect(node, &Stochos::deleteRequested, this, &FunctionGenerator::removeStochosNodeButtonClicked);
   connect(node, &Stochos::nodeTextChanged, this, &FunctionGenerator::stochosTextChanged);
