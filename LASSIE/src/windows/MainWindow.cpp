@@ -56,6 +56,8 @@ MainWindow::MainWindow(Inst* m)
 
     connect(ui->envButton, &QPushButton::clicked, this, &MainWindow::showEnvelopeLibraryWindow);
     connect(ui->markovButton, &QPushButton::clicked, this, &MainWindow::showMarkovWindow);
+    connect(Inst::get_project_manager(), &ProjectManager::dataModified,
+            this, [this]{ setWindowModified(true); });
 }
 
 //MainWindow::~MainWindow() = default;
@@ -182,8 +184,9 @@ void MainWindow::saveFile()
     }
     
     projectView->save();
-    
+
     //nhi: update window title and status after successful save
+    Inst::get_project_manager()->modified() = false;
     setWindowModified(false);
     statusBar()->showMessage(tr("File saved"), 2000);
 }

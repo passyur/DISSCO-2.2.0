@@ -982,3 +982,9 @@ void ProjectManager::writeSeedEntry(const QString& seed) const {
     out << doc.toString();
     file.close();
 }
+
+void ProjectManager::markModified() {
+    if (curr_project_)
+        curr_project_->modifiedButNotSaved = true;
+    emit dataModified();
+}

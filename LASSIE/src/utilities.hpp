@@ -1,7 +1,7 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
-#include "windows/MainWindow.hpp"
+#include "inst.hpp"
 
 /* many of these are temporarily here until someone wants to go through and break up these functions according to the roles of each Class
    e.g., Nhi's MarkovModel methods should go into ProjectManager in place of direct reference access to the QList<MarkovModel<float>> */
@@ -9,7 +9,7 @@ namespace MUtilities {
 
     /* Function called when project modified to mark the window as having unsaved changes */
     inline void modified(){
-        MainWindow::instance()->setWindowModified(true);
+        Inst::get_project_manager()->markModified();
     }
 
 }
