@@ -113,8 +113,7 @@ void MainWindow::closeCurrentProject()
     openAct->setEnabled(true);
     newAct->setEnabled(true);
 
-    currentFile = QString();
-    setWindowTitle(tr("LASSIE"));
+    setCurrentFile(QString(), false);
 }
 
 void MainWindow::newFile()
@@ -136,7 +135,7 @@ void MainWindow::newFile()
     const QString fullFilePath = projectFolder + "/" + projectName + ".dissco";
     currentFile = fullFilePath;
 
-    setUnsavedTitle(currentFile);
+    setCurrentFile(currentFile, true);
     Inst::get_project_manager()->build(currentFile, nullptr);
     showFile();
 }
@@ -185,7 +184,7 @@ void MainWindow::saveFile()
     projectView->save();
     
     //nhi: update window title and status after successful save
-    setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
+    setWindowModified(false);
     statusBar()->showMessage(tr("File saved"), 2000);
 }
 
@@ -474,7 +473,7 @@ void MainWindow::showFile()
         if(projectView == nullptr){
             projectView = new ProjectView(this, currentFile);
 
-            setWindowTitle(tr("%1 - %2").arg(currentFile, tr("LASSIE")));
+            setCurrentFile(currentFile, false);
             statusBar()->showMessage(tr("Project loaded"), 2000);
             projectView->setProperties();
 
@@ -492,8 +491,11 @@ void MainWindow::showFile()
     }
 }
 
-void MainWindow::setUnsavedTitle(const QString &unsavedFile){
-    currentFile = unsavedFile;
-    setWindowTitle(tr("%1 - %2").arg("*" + currentFile, tr("LASSIE")));
-    qDebug() << "*currentFile: " << currentFile;
+void MainWindow::setCurrentFile(const QString &file, bool modified){
+    currentFile = file;
+    if (currentFile.isEmpty())
+        setWindowTitle(tr("LASSIE"));
+    else
+        setWindowTitle(tr("%1[*] - %2").arg(currentFile, tr("LASSIE")));
+    setWindowModified(modified);
 }

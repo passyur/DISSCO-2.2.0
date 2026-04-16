@@ -7,11 +7,9 @@
    e.g., Nhi's MarkovModel methods should go into ProjectManager in place of direct reference access to the QList<MarkovModel<float>> */
 namespace MUtilities {
 
-    /* Function called when project modified to change the MainWindow title to unsaved version
-    which alerts the user to save the project */
+    /* Function called when project modified to mark the window as having unsaved changes */
     inline void modified(){
-        ProjectManager *pm = Inst::get_project_manager();
-        MainWindow::instance()->setUnsavedTitle(pm->fileinfo().absoluteFilePath());
+        MainWindow::instance()->setWindowModified(true);
     }
 
 }

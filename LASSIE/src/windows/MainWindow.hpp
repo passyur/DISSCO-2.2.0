@@ -23,7 +23,7 @@ class MainWindow : public QMainWindow
         explicit MainWindow(Inst*);
         static MainWindow* instance() { return instance_; }
         ~MainWindow() override;
-        void setUnsavedTitle(const QString &unsavedFile);
+        void setCurrentFile(const QString &file, bool modified = false);
 
         std::unique_ptr<Ui::MainWindow> ui;
         std::unique_ptr<EnvelopeLibraryWindow> envelopeLibraryWindow;
