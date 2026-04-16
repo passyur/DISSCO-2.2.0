@@ -25,6 +25,8 @@ SPAChannelAlignment::SPAChannelAlignment(int channelNum, bool isPartialMode, QWi
     , m_isPartialMode(isPartialMode)
 {
     ui->setupUi(this); 
+    ui->spaChannelAlignmentLayout->setContentsMargins(10, 10, 10, 10);
+    ui->spaChannelAlignmentLayout->setSpacing(10);
 
     prev = nullptr;
     next = nullptr;
@@ -41,16 +43,20 @@ SPAChannelAlignment::~SPAChannelAlignment() {
     delete ui;
 }
 
-SPAPartialAlignment* SPAChannelAlignment::SPAInsertPartial(SPAPartialAlignment* prevSpa){
+SPAPartialAlignment* SPAChannelAlignment::SPAInsertPartial(SPAPartialAlignment* prevSpa, bool silent){
     if (SPAPartialAlignments != nullptr && !m_isPartialMode) { return nullptr; }
-
+    if (!silent && SPAPartialAlignments != nullptr) {
+        int idx = getPartialIndex(prevSpa);
+        emit partialSyncInsert(idx);
+        return nullptr;
+    }
     SPANumOfPartials ++;
 
     SPAPartialAlignment* newSpa = new SPAPartialAlignment(this);
     newSpa->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     connect(newSpa, &SPAPartialAlignment::textChangedSignal, this, &SPAChannelAlignment::textChanged);
-    connect(newSpa, &SPAPartialAlignment::removeRequested, this, &SPAChannelAlignment::SPARemovePartial);
-    connect(newSpa, &SPAPartialAlignment::insertRequested, this, &SPAChannelAlignment::SPAInsertPartial);
+    connect(newSpa, &SPAPartialAlignment::removeRequested, this, [this](SPAPartialAlignment* target) { this->SPARemovePartial(target, false); });
+    connect(newSpa, &SPAPartialAlignment::insertRequested, this, [this](SPAPartialAlignment* target) { this->SPAInsertPartial(target, false); });
 
     if (SPAPartialAlignments == nullptr) {
         SPAPartialAlignments = newSpa;
@@ -68,8 +74,13 @@ SPAPartialAlignment* SPAChannelAlignment::SPAInsertPartial(SPAPartialAlignment* 
     emit textChanged();
     return newSpa;
 }
-void SPAChannelAlignment::SPARemovePartial(SPAPartialAlignment* currSpa) {
+void SPAChannelAlignment::SPARemovePartial(SPAPartialAlignment* currSpa, bool silent) {
     if (!currSpa || (currSpa == SPAPartialAlignments && currSpa->next == nullptr)) return;
+    if (!silent && SPAPartialAlignments != nullptr) {
+        int idx = getPartialIndex(currSpa);
+        emit partialSyncRemove(idx);
+        return;
+    }
 
     if (currSpa->prev) currSpa->prev->next = currSpa->next;
     if (currSpa->next) currSpa->next->prev = currSpa->prev;
@@ -111,4 +122,31 @@ QString SPAChannelAlignment::getPartialsText() {
 }
 void SPAChannelAlignment::setChannelText(const QString& text) {
     ui->spaChannelEditLabel->setText(text);
+}
+SPAPartialAlignment* SPAChannelAlignment::getTailPartial() {
+    if (SPAPartialAlignments == nullptr) { return nullptr; }
+
+    SPAPartialAlignment* temp = SPAPartialAlignments;
+    while (temp->next != nullptr) { temp = temp->next; }
+    return temp;
+}
+int SPAChannelAlignment::getPartialIndex(SPAPartialAlignment* target) {
+    int index = 0;
+    SPAPartialAlignment* curr = SPAPartialAlignments;
+    while (curr) {
+        if (curr == target) return index;
+        curr = curr->next;
+        index++;
+    }
+    return -1;
+}
+SPAPartialAlignment* SPAChannelAlignment::getPartialAtIndex(int index) {
+    int currIdx = 0;
+    SPAPartialAlignment* curr = SPAPartialAlignments;
+    while (curr) {
+        if (currIdx == index) return curr;
+        curr = curr->next;
+        currIdx++;
+    }
+    return nullptr;
 }

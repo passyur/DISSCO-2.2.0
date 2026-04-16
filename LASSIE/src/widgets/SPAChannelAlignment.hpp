@@ -33,18 +33,24 @@ public:
 
     int SPANumOfPartials;
 
-    SPAPartialAlignment* SPAInsertPartial(SPAPartialAlignment* prevSpa);
-    void SPARemovePartial(SPAPartialAlignment* currSpa);
+    SPAPartialAlignment* SPAInsertPartial(SPAPartialAlignment* prevSpa, bool silent = false);
+    void SPARemovePartial(SPAPartialAlignment* currSpa, bool silent = false);
     void updateSpaLabels();
     void clearSpaPartials();
+    SPAPartialAlignment* getTailPartial();
     
     QString getPartialsText();
     void setChannelText(const QString& text);
+
+    int getPartialIndex(SPAPartialAlignment* target);
+    SPAPartialAlignment* getPartialAtIndex(int index);
 
 signals:
     void removeChannelRequested(SPAChannelAlignment* node);
     void insertChannelRequested(SPAChannelAlignment* node);
     void textChanged();
+    void partialSyncInsert(int index);
+    void partialSyncRemove(int index);
 
 private:
     /* storing function generator */

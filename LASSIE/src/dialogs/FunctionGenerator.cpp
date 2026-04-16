@@ -1200,7 +1200,7 @@ void FunctionGenerator::selectTextChanged(){
 }
 void FunctionGenerator::addSelectNodeButtonClicked() {
   int index = ui->selectScrollLayout->count() - 1;
-  Select* node = new Select(index, ui->selectScrollWindowNodes, ui->resultTextEdit);
+  Select* node = new Select(index, ui->selectScrollWindowNodes);
 
   connect(node, &Select::deleteRequested, this, &FunctionGenerator::removeSelectNodeButtonClicked);
   connect(node, &Select::nodeTextChanged, this, &FunctionGenerator::selectTextChanged);
@@ -1270,7 +1270,7 @@ void FunctionGenerator::stochosTextChanged(){
 void FunctionGenerator::addStochosNodeButtonClicked() {
   int method = ui->stochosMethodRange->isChecked() ? 0 : 1;
   int index = ui->stochosScrollLayout->count() - 1;
-  Stochos* node = new Stochos(method, index, ui->stochosScrollWindowNodes, ui->resultTextEdit);
+  Stochos* node = new Stochos(method, index, ui->stochosScrollWindowNodes);
 
   connect(node, &Stochos::deleteRequested, this, &FunctionGenerator::removeStochosNodeButtonClicked);
   connect(node, &Stochos::nodeTextChanged, this, &FunctionGenerator::stochosTextChanged);
@@ -1981,6 +1981,24 @@ void FunctionGenerator::handleSpaApplyMethodChanged() {
         radCha->ui->spaChannelEditLabel->setText("Radius");
     }
 }
+void FunctionGenerator::handleSpaPartialSyncInsert(int index) {
+    SPAChannelAlignment* curr = SPAChannelAlignments;
+    while (curr) {
+        SPAPartialAlignment* prevSpa = curr->getPartialAtIndex(index);
+        curr->SPAInsertPartial(prevSpa, true);
+        curr = curr->next;
+    }
+    SPATextChanged();
+}
+void FunctionGenerator::handleSpaPartialSyncRemove(int index) {
+    SPAChannelAlignment* curr = SPAChannelAlignments;
+    while (curr) {
+        SPAPartialAlignment* currSpa = curr->getPartialAtIndex(index);
+        curr->SPARemovePartial(currSpa, true);
+        curr = curr->next;
+    }
+    SPATextChanged();
+}
 SPAChannelAlignment* FunctionGenerator::SPAInsertChannel(SPAChannelAlignment* prevCha){
     SPANumOfChannels ++;
     bool isPartialMode = ui->spaApplyPartial->isChecked();
@@ -1990,6 +2008,8 @@ SPAChannelAlignment* FunctionGenerator::SPAInsertChannel(SPAChannelAlignment* pr
     connect(newCha, &SPAChannelAlignment::textChanged, this, &FunctionGenerator::SPATextChanged);
     connect(newCha, &SPAChannelAlignment::insertChannelRequested, this, &FunctionGenerator::SPAInsertChannel);
     connect(newCha, &SPAChannelAlignment::removeChannelRequested, this, &FunctionGenerator::SPARemoveChannel);
+    connect(newCha, &SPAChannelAlignment::partialSyncInsert, this, &FunctionGenerator::handleSpaPartialSyncInsert);
+    connect(newCha, &SPAChannelAlignment::partialSyncRemove, this, &FunctionGenerator::handleSpaPartialSyncRemove);
 
     if (SPAChannelAlignments == nullptr) {
         SPAChannelAlignments = newCha;
@@ -2006,6 +2026,14 @@ SPAChannelAlignment* FunctionGenerator::SPAInsertChannel(SPAChannelAlignment* pr
     ui->spaScrollWindowContent->adjustSize();
     if (!ui->spaPolar->isChecked()) { updateChaLabels(); }
     SPATextChanged();
+
+    if (SPAChannelAlignments != nullptr) {
+        int currChaParCount = SPAChannelAlignments->SPANumOfPartials;
+        for (int i = 1; i < currChaParCount; ++i) {
+            newCha->SPAInsertPartial(newCha->getTailPartial(), true);
+        }
+    }
+
     return newCha;
 }
 void FunctionGenerator::SPARemoveChannel(SPAChannelAlignment* currCha) {

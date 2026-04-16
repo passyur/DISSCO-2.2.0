@@ -2,6 +2,7 @@
 #include "../ui/ui_Attributes.h"
 
 #include "../inst.hpp"
+#include "../utilities.hpp"
 #include "../core/event_struct.hpp"
 #include "../dialogs/FunctionGenerator.hpp"
 #include "ProjectViewController.hpp"
@@ -26,7 +27,6 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
     ui(new Ui::EventAttributesViewController)
 {
     ui->setupUi(this);
-    ui->stackedWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     e_projectView = projectView;
 
     // --- connect child‐count mode buttons ---
@@ -169,7 +169,6 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
         if (page == currPage) {
             // Allow the current page to dictate its own size
             page->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
-            page->setMaximumHeight(16777215); // QWIDGETSIZE_MA
         } else {
             // Keep inactive pages from inflating the container
             page->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -182,8 +181,7 @@ void EventAttributesViewController::fixStackedWidgetLayout(QWidget* currPage) {
     }
 
     currPage->adjustSize();
-    ui->stackedWidget->setFixedWidth(600);
-    
+
     if (currPage == ui->soundPage && ui->soundPage->layout()) {
         ui->soundPage->layout()->setSpacing(10);
         ui->partialsLayout->setSpacing(0);
@@ -453,6 +451,8 @@ void EventAttributesViewController::saveCurrentShownEventData() {
     }
     if (!typeStr.isEmpty())
         e_projectView->updatePaletteItemName(typeStr, m_curreventindex, savedName);
+
+    MUtilities::modified();
 }
 
 void EventAttributesViewController::showCurrentEventData() {
@@ -1116,7 +1116,7 @@ void EventAttributesViewController::addPartialsUI(int partialIndex) {
         if (idx >= 0 && idx < partials2.size()) {
             partials2.removeAt(idx);
         }
-        m_partials.removeOne(p);
+        m_partials.removeAt(idx);
         ui->partialsLayout->removeWidget(p);
         p->deleteLater();
         for (int i = 0; i < m_partials.size(); ++i) {

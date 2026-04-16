@@ -399,11 +399,11 @@ void MarkovModelLibraryWindow::createNewModel() {
         saveEditorIntoModel(currentSelection);
     }
 
-    const int newIdx = MarkovUtilities::createNewMarkovModel();
+    pm->markovmodels().append(MarkovModel<float>()); 
     MUtilities::modified();
 
     rebuildModelList();
-    const QModelIndex idx = m_listModel->index(newIdx, 0);
+    const QModelIndex idx = m_listModel->index(pm->markovmodels().size() - 1, 0);
     m_treeView->setCurrentIndex(idx);
 }
 
@@ -414,12 +414,12 @@ void MarkovModelLibraryWindow::duplicateModel() {
 
     saveEditorIntoModel(currentSelection);
 
-    const int newIdx = MarkovUtilities::duplicateMarkovModel(currentSelection);
-    if (newIdx < 0) return;
+    if (currentSelection < pm->markovmodels().size())
+        pm->markovmodels().append(pm->markovmodels()[currentSelection]); 
     MUtilities::modified();
 
     rebuildModelList();
-    const QModelIndex idx = m_listModel->index(newIdx, 0);
+    const QModelIndex idx = m_listModel->index(pm->markovmodels().size() - 1, 0);
     m_treeView->setCurrentIndex(idx);
 }
 
@@ -428,10 +428,11 @@ void MarkovModelLibraryWindow::removeModel() {
     ProjectManager* pm = Inst::get_project_manager();
     if (!pm || !pm->get_curr_project()) return;
 
-    const int removed = currentSelection;
-    MarkovUtilities::removeMarkovModel(removed);
+    if (currentSelection < pm->markovmodels().size())
+        pm->markovmodels().erase(pm->markovmodels().begin() + currentSelection);
     MUtilities::modified();
 
+    const int removed = currentSelection;
     currentSelection = -1;
     rebuildModelList();
 

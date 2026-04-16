@@ -5,12 +5,12 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLineEdit>
-#include <QTextEdit>
 #include <QPushButton>
 #include <QLabel>
 #include <QString>
 
 #include "../core/event_struct.hpp"
+#include "generic/FunctionEntryRow.hpp"
 
 class FunctionGenerator;
 class EventAttributesViewController;
@@ -21,11 +21,14 @@ class Stochos : public QFrame {
 
 public:
     // methodType 0 = range dist, 1 = functions
-    Stochos(int methodType, int stochosIndex,  QWidget *parent = nullptr, QTextEdit* resultEntry = nullptr);
+    Stochos(int methodType, int stochosIndex, QWidget *parent = nullptr);
     ~Stochos() override;
 
     int getStochosIndex() const { return m_stochosIndex; }
-    void setStochosIndex(int newIndex) { m_stochosIndex = newIndex; }
+    void setStochosIndex(int newIndex) {
+        m_stochosIndex = newIndex;
+        if (m_row) m_row->setIndex(newIndex);
+    }
     QString getNodeText();
 
     void setMinText(const QString& text) {
@@ -41,7 +44,7 @@ public:
     }
 
     void setValText(const QString& text) {
-        if (m_valEntry) { m_valEntry->setText(text); }
+        if (m_row) { m_row->setText(text); }
     }
 
 signals:
@@ -59,11 +62,13 @@ private:
 
     // UI elements
     QVBoxLayout*        m_mainLayout = nullptr;
-    QLineEdit*          m_minEntry = nullptr;
-    QLineEdit*          m_maxEntry = nullptr;
-    QLineEdit*          m_distEntry = nullptr;
-    QLineEdit*          m_valEntry = nullptr;
+    // methodType 0 entries
+    QLineEdit*          m_minEntry   = nullptr;
+    QLineEdit*          m_maxEntry   = nullptr;
+    QLineEdit*          m_distEntry  = nullptr;
     QPushButton*        m_removeStochosButton = nullptr;
+    // methodType 1 entry
+    FunctionEntryRow*   m_row        = nullptr;
 };
 
 #endif

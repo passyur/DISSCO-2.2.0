@@ -175,6 +175,8 @@ public:
     // void SPAApplyByRadioButtonClicked();
     void SPATextChanged();
     void handleSpaApplyMethodChanged();
+    void handleSpaPartialSyncInsert(int index);
+    void handleSpaPartialSyncRemove(int index);
     
     int SPANumOfPartials;
     SPAPartialAlignment* SPAPartialAlignments = nullptr;

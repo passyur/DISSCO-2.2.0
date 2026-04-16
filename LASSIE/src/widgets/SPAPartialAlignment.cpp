@@ -22,6 +22,8 @@ SPAPartialAlignment::SPAPartialAlignment(QWidget *parent)
 {
     ui->setupUi(this); 
     setupUi(); 
+    ui->spaPartialAlignmentLayout->setContentsMargins(10, 10, 10, 10);
+    ui->spaPartialAlignmentLayout->setSpacing(10);
     prev = nullptr;
     next = nullptr;
 }
