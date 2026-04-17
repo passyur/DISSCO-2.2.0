@@ -15,6 +15,7 @@ Partials::Partials(unsigned eventIndex, int partialIndex, QWidget* parent)
         "Partial " + QString::number(partialIndex+1) + ":",
         partialIndex,
         functionReturnENV,
+        false,
         this);
 
     // Populate UI from backend before connecting signals (avoids spurious backend write on init)

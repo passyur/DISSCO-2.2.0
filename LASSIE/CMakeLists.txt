@@ -20,8 +20,7 @@ qt_add_executable(LASSIE
     src/core/EnvelopeLibraryEntry.cpp src/core/EnvelopeLibraryEntry.hpp
     src/dialogs/FunctionGenerator.cpp src/dialogs/FunctionGenerator.hpp src/ui/FunctionGenerator.ui
     src/widgets/REVPartialAlignment.cpp src/widgets/REVPartialAlignment.hpp src/ui/FunGenREVPartialAlignment.ui
-    src/widgets/SPAPartialAlignment.cpp src/widgets/SPAPartialAlignment.hpp src/ui/FunGenSPAPartialAlignment.ui
-    src/widgets/SPAChannelAlignment.cpp src/widgets/SPAChannelAlignment.hpp src/ui/FunGenSPAChannelAlignment.ui
+    src/widgets/SPAChannel.cpp src/widgets/SPAChannel.hpp
     src/dialogs/ProjectPropertiesDialog.cpp src/dialogs/ProjectPropertiesDialog.hpp src/ui/ProjectPropertiesDialog.ui
     src/inst.hpp
     src/widgets/ProjectViewController.cpp src/widgets/ProjectViewController.hpp

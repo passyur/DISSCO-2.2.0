@@ -10,7 +10,7 @@
 
 #include "../../lassie.hpp"
 
-// A generic row widget: [Label | QLineEdit | fn button | rm button]
+// A generic row widget: [Label | QLineEdit | fn button | rm button | ins button]
 // The fn button opens a FunctionGenerator dialog of the configured return type.
 // Consumers connect to deleteRequested, textChanged, and/or editFocused.
 class FunctionEntryRow : public QFrame {
@@ -20,6 +20,7 @@ public:
     FunctionEntryRow(const QString& labelText,
                      int index,
                      FunctionReturnType fnReturnType,
+                     bool insVisible,
                      QWidget* parent = nullptr);
     ~FunctionEntryRow() override;
 
@@ -35,6 +36,7 @@ public:
 signals:
     void deleteRequested(FunctionEntryRow* self);
     void textChanged(FunctionEntryRow* self);
+    void insertRequested(FunctionEntryRow* self);
     // Emitted whenever the cursor moves into the entry — useful if a parent
     // wants to track which entry is "active" for an external fn button.
     void editFocused(QLineEdit* edit);
@@ -42,6 +44,7 @@ signals:
 private slots:
     void onFnClicked();
     void onRmClicked();
+    void onInsClicked();
     void onTextChanged();
 
 private:
@@ -53,6 +56,7 @@ private:
     QLineEdit*      m_entry     = nullptr;
     QPushButton*    m_fnButton  = nullptr;
     QPushButton*    m_rmButton  = nullptr;
+    QPushButton*    m_insButton  = nullptr;
 };
 
 #endif

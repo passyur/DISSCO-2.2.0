@@ -15,10 +15,7 @@
 
 #include <string>
 
-#include "../widgets/SPAPartialAlignment.hpp"
-#include "../widgets/SPAChannelAlignment.hpp"
-#include "../ui/ui_FunGenSPAPartialAlignment.h"
-#include "../ui/ui_FunGenSPAChannelAlignment.h"
+#include "../widgets/SPAChannel.hpp"
 
 #include "../widgets/REVPartialAlignment.hpp"
 #include "../ui/ui_FunGenREVPartialAlignment.h"
@@ -403,8 +400,6 @@ void FunctionGenerator::setupUi()
     connect(ui->readSpaFileEdit, &QLineEdit::textChanged, this, &FunctionGenerator::readSPAFileTextChanged);
 
     // SPA Signals
-    SPANumOfPartials = 0;
-    SPANumOfChannels = 0;
     connect(ui->spaStereo, &QRadioButton::toggled, this, &FunctionGenerator::handleSpaApplyMethodChanged);
     connect(ui->spaMultiPan, &QRadioButton::toggled, this, &FunctionGenerator::handleSpaApplyMethodChanged);
     connect(ui->spaPolar, &QRadioButton::toggled, this, &FunctionGenerator::handleSpaApplyMethodChanged);
@@ -828,11 +823,9 @@ void FunctionGenerator::handleFunctionChanged(int index)
             break;
         case functionSPA:
             currPageIndex = 20;
-            ui->spaScrollLayout->setSpacing(0);
-            ui->spaScrollLayout->setContentsMargins(0, 0, 0, 0);
-            ui->spaScrollWindowLayout->setSpacing(0);
-            ui->spaScrollWindowLayout->setContentsMargins(0, 0, 0, 0);
-            if (!SPANumOfPartials) {
+            ui->spaScrollWindowLayout->setSpacing(5);
+            ui->spaScrollWindowLayout->setContentsMargins(5, 5, 5, 5);
+            if (m_spaChannels.isEmpty()) {
                 ui->spaStereo->setChecked(true);
                 ui->spaApplySound->setChecked(true);
                 handleSpaApplyMethodChanged();
@@ -1871,202 +1864,98 @@ void FunctionGenerator::SPATextChanged() {
         apply = 1;
     }
     stringbuffer = stringbuffer + "</Apply><Channels>";
-    if (SPAChannelAlignments == nullptr) {
-        SPAPartialAlignment* temp = SPAPartialAlignments;
-        stringbuffer = stringbuffer + "<Partials>";
-        while (temp != nullptr){
-            stringbuffer = stringbuffer + "<P>" + temp->textChanged() + "</P>";
-            temp = temp->next;
-        }
-        stringbuffer = stringbuffer + "</Partials>";
-    } else {
-        SPAChannelAlignment* chan = SPAChannelAlignments;
-        while (chan != nullptr) {
-            stringbuffer += "<Partials>";
-            stringbuffer += chan->getPartialsText(); 
-            stringbuffer += "</Partials>";
-            chan = chan->next;
-        }
+
+    for (SPAChannel* chan : m_spaChannels) {
+        stringbuffer += "<Partials>";
+        stringbuffer += chan->getXml();
+        stringbuffer += "</Partials>";
     }
+
     stringbuffer = stringbuffer + "</Channels></Fun>";
     ui->resultTextEdit->setText(stringbuffer);
 }
-SPAPartialAlignment* FunctionGenerator::SPAInsertPartial(SPAPartialAlignment* prevSpa){
-    if (SPAPartialAlignments != nullptr && ui->spaApplySound->isChecked()) {
-        return nullptr;
-    }
-
-    SPANumOfPartials ++;
-    ui->spaScrollWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->spaScrollWindowContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    SPAPartialAlignment* newSpa = new SPAPartialAlignment(ui->spaScrollWindowContent);
-    newSpa->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    connect(newSpa, &SPAPartialAlignment::textChangedSignal, this, &FunctionGenerator::SPATextChanged);
-    connect(newSpa, &SPAPartialAlignment::removeRequested, this, &FunctionGenerator::SPARemovePartial);
-    connect(newSpa, &SPAPartialAlignment::insertRequested, this, &FunctionGenerator::SPAInsertPartial);
-
-    if (SPAPartialAlignments == nullptr) {
-        SPAPartialAlignments = newSpa;
-        ui->spaScrollLayout->insertWidget(0, newSpa);
-    } else if (prevSpa != nullptr) {
-        newSpa->next = prevSpa->next;
-        newSpa->prev = prevSpa;
-        if (prevSpa->next) prevSpa->next->prev = newSpa;
-        prevSpa->next = newSpa;
-
-        int index = ui->spaScrollLayout->indexOf(prevSpa);
-        ui->spaScrollLayout->insertWidget(index+1, newSpa);
-    }
-    ui->spaScrollWindowContent->adjustSize();
-    updateSpaLabels();
-    SPATextChanged();
-    return newSpa;
-}
-void FunctionGenerator::SPARemovePartial(SPAPartialAlignment* currSpa) {
-    if (!currSpa || (currSpa == SPAPartialAlignments && currSpa->next == nullptr)) return;
-
-    if (currSpa->prev) currSpa->prev->next = currSpa->next;
-    if (currSpa->next) currSpa->next->prev = currSpa->prev;
-    if (currSpa == SPAPartialAlignments) SPAPartialAlignments = currSpa->next;
-
-    currSpa->deleteLater();
-    SPANumOfPartials--;
-    updateSpaLabels();
-    SPATextChanged();
-}
-void FunctionGenerator::updateSpaLabels() {
-    SPAPartialAlignment* temp = SPAPartialAlignments;
-    int count = 1;
-    while (temp != nullptr) {
-        if (ui->spaApplyPartial->isChecked()) { temp->setLabelText(QString("Partial %1:").arg(count++));
-        } else { temp->setLabelText("Envelope:"); }
-        temp = temp->next;
-    }
-}
-void FunctionGenerator::clearSpaPartials() {
-    SPAPartialAlignment* currSpa = SPAPartialAlignments;
-    while (currSpa != nullptr) {
-        SPAPartialAlignment* nextSpa = currSpa->next;
-        ui->spaScrollWindowContent->layout()->removeWidget(currSpa);
-        currSpa->deleteLater();
-        currSpa = nextSpa;
-    }
-    SPAPartialAlignments = nullptr;
-    SPANumOfPartials = 0;
-    SPATextChanged();
-}
-void FunctionGenerator::handleSpaApplyMethodChanged() {
-    clearSpaPartials(); 
-    clearSpaChannels(); 
-    if (ui->spaStereo->isChecked()) {
-        if (ui->spaApplySound->isChecked()) {
-            SPAInsertPartial(nullptr); 
-            SPAPartialAlignments->setLabelText("Envelope:");
-        } else {
-            SPAInsertPartial(nullptr);
-            updateSpaLabels();
-        }
-    } else if (ui->spaMultiPan->isChecked()) {
-        SPAInsertChannel(nullptr);
-        updateChaLabels();
-    } else if (ui->spaPolar->isChecked()) {
-        SPAChannelAlignment* thetaCha = SPAInsertChannel(nullptr);
-        thetaCha->ui->spaChannelInsertButton->hide();
-        thetaCha->ui->spaChannelRemoveButton->hide();
-        thetaCha->ui->spaChannelEditLabel->setText("Theta");
-        SPAChannelAlignment* radCha = SPAInsertChannel(thetaCha);
-        radCha->ui->spaChannelInsertButton->hide();
-        radCha->ui->spaChannelRemoveButton->hide();
-        radCha->ui->spaChannelEditLabel->setText("Radius");
-    }
-}
 void FunctionGenerator::handleSpaPartialSyncInsert(int index) {
-    SPAChannelAlignment* curr = SPAChannelAlignments;
-    while (curr) {
-        SPAPartialAlignment* prevSpa = curr->getPartialAtIndex(index);
-        curr->SPAInsertPartial(prevSpa, true);
-        curr = curr->next;
+    for (auto* chan : m_spaChannels) {
+        chan->addRow(index + 1, true);
     }
     SPATextChanged();
 }
 void FunctionGenerator::handleSpaPartialSyncRemove(int index) {
-    SPAChannelAlignment* curr = SPAChannelAlignments;
-    while (curr) {
-        SPAPartialAlignment* currSpa = curr->getPartialAtIndex(index);
-        curr->SPARemovePartial(currSpa, true);
-        curr = curr->next;
+    for (auto* chan : m_spaChannels) {
+        chan->removeRow(index);
     }
     SPATextChanged();
 }
-SPAChannelAlignment* FunctionGenerator::SPAInsertChannel(SPAChannelAlignment* prevCha){
-    SPANumOfChannels ++;
+SPAChannel* FunctionGenerator::SPAInsertChannel(SPAChannel* prevCha) {
+    int insertIdx = prevCha ? m_spaChannels.indexOf(prevCha) + 1 : 0;
     bool isPartialMode = ui->spaApplyPartial->isChecked();
 
-    SPAChannelAlignment* newCha = new SPAChannelAlignment(SPANumOfChannels, isPartialMode, ui->spaScrollWindowContent);
-    newCha->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    connect(newCha, &SPAChannelAlignment::textChanged, this, &FunctionGenerator::SPATextChanged);
-    connect(newCha, &SPAChannelAlignment::insertChannelRequested, this, &FunctionGenerator::SPAInsertChannel);
-    connect(newCha, &SPAChannelAlignment::removeChannelRequested, this, &FunctionGenerator::SPARemoveChannel);
-    connect(newCha, &SPAChannelAlignment::partialSyncInsert, this, &FunctionGenerator::handleSpaPartialSyncInsert);
-    connect(newCha, &SPAChannelAlignment::partialSyncRemove, this, &FunctionGenerator::handleSpaPartialSyncRemove);
+    SPAChannel* newCha = new SPAChannel(m_spaChannels.size() + 1, isPartialMode, ui->spaScrollWindowContent);
+    
+    m_spaChannels.insert(insertIdx, newCha);
+    ui->spaScrollWindowLayout->insertWidget(insertIdx, newCha);
 
-    if (SPAChannelAlignments == nullptr) {
-        SPAChannelAlignments = newCha;
-        ui->spaScrollWindowLayout->insertWidget(0, newCha);
-    } else if (prevCha != nullptr) {
-        newCha->next = prevCha->next;
-        newCha->prev = prevCha;
-        if (prevCha->next) prevCha->next->prev = newCha;
-        prevCha->next = newCha;
-
-        int index = ui->spaScrollWindowLayout->indexOf(prevCha);
-        ui->spaScrollWindowLayout->insertWidget(index+1, newCha);
+    int targetRowCount = m_spaChannels.isEmpty() ? 1 : m_spaChannels.first()->rowCount();
+    for (int i = 0; i < targetRowCount; ++i) {
+        newCha->addRow(i, true); // Silent add to match others
     }
-    ui->spaScrollWindowContent->adjustSize();
-    if (!ui->spaPolar->isChecked()) { updateChaLabels(); }
+    if (newCha->rowCount() == 0) { newCha->addRow(0, true); }
+
+    connect(newCha, &SPAChannel::textChanged, this, &FunctionGenerator::SPATextChanged);
+    connect(newCha, &SPAChannel::insertChannelRequested, this, &FunctionGenerator::SPAInsertChannel);
+    connect(newCha, &SPAChannel::removeChannelRequested, this, &FunctionGenerator::SPARemoveChannel);
+    connect(newCha, &SPAChannel::rowInsertRequested, this, &FunctionGenerator::handleSpaPartialSyncInsert);
+    connect(newCha, &SPAChannel::rowRemoveRequested, this, &FunctionGenerator::handleSpaPartialSyncRemove);
+
+    updateChaLabels();
     SPATextChanged();
-
-    if (SPAChannelAlignments != nullptr) {
-        int currChaParCount = SPAChannelAlignments->SPANumOfPartials;
-        for (int i = 1; i < currChaParCount; ++i) {
-            newCha->SPAInsertPartial(newCha->getTailPartial(), true);
-        }
-    }
-
     return newCha;
 }
-void FunctionGenerator::SPARemoveChannel(SPAChannelAlignment* currCha) {
-    if (!currCha || (currCha == SPAChannelAlignments && currCha->next == nullptr)) return;
+void FunctionGenerator::SPARemoveChannel(SPAChannel* currCha) {
+    if (m_spaChannels.size() <= 1) return;
 
-    if (currCha->prev) currCha->prev->next = currCha->next;
-    if (currCha->next) currCha->next->prev = currCha->prev;
-    if (currCha == SPAChannelAlignments) SPAChannelAlignments = currCha->next;
+    int idx = m_spaChannels.indexOf(currCha);
+    if (idx != -1) {
+        m_spaChannels.takeAt(idx);
+        currCha->deleteLater();
+    }
 
-    currCha->deleteLater();
-    SPANumOfChannels--;
     updateChaLabels();
     SPATextChanged();
 }
+void FunctionGenerator::handleSpaApplyMethodChanged() {
+    clearSpaChannels();
+    
+    if (ui->spaStereo->isChecked()) {
+        SPAChannel* stereo = SPAInsertChannel(nullptr);
+        stereo->hideTitle();
+        stereo->hideButtons();
+    } 
+    else if (ui->spaMultiPan->isChecked()) {
+        SPAInsertChannel(nullptr);
+    } 
+    else if (ui->spaPolar->isChecked()) {
+        SPAChannel* theta = SPAInsertChannel(nullptr);
+        theta->setTitle("Theta");
+        theta->hideButtons();
+        
+        SPAChannel* rad = SPAInsertChannel(theta);
+        rad->setTitle("Radius");
+        rad->hideButtons();
+    }
+}
 void FunctionGenerator::updateChaLabels() {
-    SPAChannelAlignment* temp = SPAChannelAlignments;
-    int count = 1;
-    while (temp != nullptr) {
-        temp->setChannelText(QString("Channel %1:").arg(count++));
-        temp = temp->next;
+    for (int i = 0; i < m_spaChannels.size(); ++i) {
+        if (!ui->spaPolar->isChecked()) {
+            m_spaChannels[i]->setTitle(QString("Channel %1:").arg(i + 1));
+        }
     }
 }
 void FunctionGenerator::clearSpaChannels() {
-    SPAChannelAlignment* currCha = SPAChannelAlignments;
-    while (currCha != nullptr) {
-        SPAChannelAlignment* nextCha = currCha->next;
-        currCha->clearSpaPartials();
-        ui->spaScrollWindowContent->layout()->removeWidget(currCha);
-        currCha->deleteLater();
-        currCha = nextCha;
+    for (SPAChannel* chan : m_spaChannels) {
+        chan->deleteLater();
     }
-    SPAChannelAlignments = nullptr;
-    SPANumOfChannels = 0;
+    m_spaChannels.clear();
     SPATextChanged();
 }
 

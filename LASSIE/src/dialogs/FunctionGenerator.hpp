@@ -10,8 +10,7 @@
 #include <QString>
 #include <QLineEdit>
 
-class SPAPartialAlignment;
-class SPAChannelAlignment;
+class SPAChannel;
 class REVPartialAlignment;
 class Stochos;
 class Select;
@@ -171,24 +170,13 @@ public:
     void makeSieveTextChanged();
 
     // SPA
-    // void SPAMethodRadioButtonClicked();
-    // void SPAApplyByRadioButtonClicked();
+    QList<SPAChannel*> m_spaChannels;
     void SPATextChanged();
     void handleSpaApplyMethodChanged();
     void handleSpaPartialSyncInsert(int index);
     void handleSpaPartialSyncRemove(int index);
-    
-    int SPANumOfPartials;
-    SPAPartialAlignment* SPAPartialAlignments = nullptr;
-    SPAPartialAlignment* SPAInsertPartial(SPAPartialAlignment* prevSpa);
-    void SPARemovePartial(SPAPartialAlignment* currSpa);
-    void updateSpaLabels();
-    void clearSpaPartials();
-    
-    int SPANumOfChannels;
-    SPAChannelAlignment* SPAChannelAlignments = nullptr;
-    SPAChannelAlignment* SPAInsertChannel(SPAChannelAlignment* prevCha);
-    void SPARemoveChannel(SPAChannelAlignment* currCha);
+    SPAChannel* SPAInsertChannel(SPAChannel* prevCha);
+    void SPARemoveChannel(SPAChannel* currCha);
     void updateChaLabels();
     void clearSpaChannels();
 
