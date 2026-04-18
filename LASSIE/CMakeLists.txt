@@ -67,6 +67,18 @@ endif()
 
 target_compile_definitions(LASSIE PUBLIC "CMOD_BINARY=${CMOD_BINARY}")
 
+execute_process(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(NOT GIT_BRANCH)
+    set(GIT_BRANCH "unknown")
+endif()
+target_compile_definitions(LASSIE PRIVATE "GIT_BRANCH=\"${GIT_BRANCH}\"")
+
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(LASSIE PRIVATE QT_NO_DEBUG_OUTPUT)
 endif()

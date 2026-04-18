@@ -393,7 +393,8 @@ void MainWindow::createActions()
     connect(aboutAct, &QAction::triggered, this, [this]() {
         QMessageBox::about(this, tr("About LASSIE"),
             tr("LASSIE (Library for Algorithmic Sound Synthesis and Interactive Exploration) "
-               "is a tool for creating and manipulating sound synthesis algorithms."));
+               "is a tool for creating and manipulating sound synthesis algorithms.\n\n"
+               "Branch: ") + GIT_BRANCH);
     });
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
