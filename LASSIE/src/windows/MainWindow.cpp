@@ -260,11 +260,6 @@ void MainWindow::runProject()
 
     using namespace Qt::StringLiterals;
 
-#define STR_VALUE(arg)      #arg
-#define FUNCTION_NAME(name) STR_VALUE(name)
-
-#define LASSIE_CMOD_BINARY__ FUNCTION_NAME(CMOD_BINARY)
-
     const auto cmod = new QProcess(this);
     connect(cmod, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), 
             [=](const int exit_code)
@@ -272,13 +267,13 @@ void MainWindow::runProject()
                 statusBar()->showMessage(tr("CMOD exited with code %1").arg(exit_code)); 
             }
         );
-    qDebug() << "Project run with string:" << QString(LASSIE_CMOD_BINARY__) + " " + pm->fileinfo().canonicalFilePath();
+    qDebug() << "Project run with string:" << QString(CMOD_BINARY) + " " + pm->fileinfo().canonicalFilePath();
 
     const auto pw = new PostWindow(cmod);
     pw->resize(600,400);
     pw->show();
 
-    cmod->start(QString(LASSIE_CMOD_BINARY__), QStringList() << pm->fileinfo().canonicalFilePath());
+    cmod->start(QString(CMOD_BINARY), QStringList() << pm->fileinfo().canonicalFilePath());
 }
 
 void MainWindow::readSettings()

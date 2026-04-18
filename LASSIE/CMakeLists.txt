@@ -65,7 +65,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(LASSIE)
 endif()
 
-target_compile_definitions(LASSIE PUBLIC "CMOD_BINARY=${CMOD_BINARY}")
+target_compile_definitions(LASSIE PUBLIC "CMOD_BINARY=\"${CMOD_BINARY}\"")
 
 execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD
