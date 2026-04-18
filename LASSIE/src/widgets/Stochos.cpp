@@ -46,7 +46,7 @@ Stochos::Stochos(int methodType, int stochosIndex, QWidget *parent)
     else if (methodType == 1) {
         m_mainLayout->setContentsMargins(0, 0, 0, 0);
         m_mainLayout->setSpacing(0);
-        m_row = new FunctionEntryRow("Value:", stochosIndex, functionReturnENV, false, this);
+        m_row = new FunctionEntryRow("Value:", stochosIndex, functionReturnENV, true, false, this);
         connect(m_row, &FunctionEntryRow::deleteRequested, this,
                 [this](FunctionEntryRow*){ emit deleteRequested(this); });
         connect(m_row, &FunctionEntryRow::textChanged, this,

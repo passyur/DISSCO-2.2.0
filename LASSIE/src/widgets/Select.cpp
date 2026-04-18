@@ -10,7 +10,7 @@ Select::Select(int selectIndex, QWidget *parent)
     m_mainLayout->setSpacing(0);
     setFrameShape(QFrame::NoFrame);
 
-    m_row = new FunctionEntryRow("Value:", selectIndex, functionReturnMakeListFun, false, this);
+    m_row = new FunctionEntryRow("Value:", selectIndex, functionReturnMakeListFun, true, false, this);
 
     connect(m_row, &FunctionEntryRow::deleteRequested, this,
             [this](FunctionEntryRow*){ emit deleteRequested(this); });

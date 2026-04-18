@@ -1750,9 +1750,14 @@
         <item>
         <widget class="QScrollArea" name="revScrollWindow">
             <property name="widgetResizable"><bool>true</bool></property>
+            <property name="minimumSize"> <size><width>400</width><height>200</height></size></property>
             <widget class="QWidget" name="revScrollWindowContent">     
-                <layout class="QHBoxLayout" name="revScrollWindowLayout">    
-                    <!-- FunGenREVPartialAlignment.ui -->
+                <layout class="QVBoxLayout" name="revScrollWindowLayout">    
+                    <!-- REVChannel.hpp -->
+                    <item><spacer name="verticalSpacerRev">
+                        <property name="orientation"><enum>Qt::Vertical</enum></property>
+                        <property name="sizeHint" stdset="0"><size><width>5</width><height>5</height></size></property>
+                    </spacer></item>   
                 </layout>    
             </widget>
         </widget>

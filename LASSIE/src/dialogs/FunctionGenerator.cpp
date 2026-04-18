@@ -16,9 +16,8 @@
 #include <string>
 
 #include "../widgets/SPAChannel.hpp"
+#include "../widgets/REVChannel.hpp"
 
-#include "../widgets/REVPartialAlignment.hpp"
-#include "../ui/ui_FunGenREVPartialAlignment.h"
 #include "../widgets/Stochos.hpp"
 #include "../widgets/Select.hpp"
 
@@ -369,11 +368,9 @@ void FunctionGenerator::setupUi()
     connect(ui->readRevFileEdit, &QLineEdit::textChanged, this, &FunctionGenerator::readREVFileTextChanged);
     
     // REV signals
-    REVApplyFlag = 0; // default apply by sound
     REVMethodFlag = 0; // default to REV_Simple
-    REVNumOfPartials = 0; // default no partials
-    connect(ui->revApplySound, &QRadioButton::toggled, this, &FunctionGenerator::REVApplyByRadioButtonClicked);
-    connect(ui->revApplyPartial, &QRadioButton::toggled, this, &FunctionGenerator::REVApplyByRadioButtonClicked);
+    connect(ui->revApplySound, &QRadioButton::toggled, this, &FunctionGenerator::handleRevApplyMethodChanged);
+    connect(ui->revApplyPartial, &QRadioButton::toggled, this, &FunctionGenerator::handleRevApplyMethodChanged);
 
     // ReadSIVFile Signals
     connect(ui->readSivFileEdit, &QLineEdit::textChanged, this, &FunctionGenerator::readSIVFileTextChanged);
@@ -861,18 +858,38 @@ void FunctionGenerator::handleFunctionChanged(int index)
         case functionREV_Simple:
             REVMethodFlag = 0;
             currPageIndex = 27;
-            if (!REVNumOfPartials) { REVInsertPartial(); }
-            REVApplyByRadioButtonClicked();
+            ui->revScrollWindowLayout->setSpacing(5);
+            ui->revScrollWindowLayout->setContentsMargins(5, 5, 5, 5);
+            clearRevChannels();
+            if (m_revChannels.isEmpty()) {
+                ui->revApplySound->setChecked(true);
+                handleRevApplyMethodChanged();
+            }
+            REVTextChanged();
             break;
         case functionREV_Medium:
             REVMethodFlag = 1;
             currPageIndex = 27;
-            REVApplyByRadioButtonClicked();
+            ui->revScrollWindowLayout->setSpacing(5);
+            ui->revScrollWindowLayout->setContentsMargins(5, 5, 5, 5);
+            clearRevChannels();
+            if (m_revChannels.isEmpty()) {
+                ui->revApplySound->setChecked(true);
+                handleRevApplyMethodChanged();
+            }
+            REVTextChanged();
             break;
         case functionREV_Advanced:
             REVMethodFlag = 2;
             currPageIndex = 27;
-            REVApplyByRadioButtonClicked();
+            ui->revScrollWindowLayout->setSpacing(5);
+            ui->revScrollWindowLayout->setContentsMargins(5, 5, 5, 5);
+            clearRevChannels();
+            if (m_revChannels.isEmpty()) {
+                ui->revApplySound->setChecked(true);
+                handleRevApplyMethodChanged();
+            }
+            REVTextChanged();
             break;
         case functionReadREVFile:
             currPageIndex = 28;
@@ -1734,16 +1751,6 @@ void FunctionGenerator::readREVFileTextChanged(){
 }
 
 /* REV Signal Functions */
-void FunctionGenerator::REVApplyByRadioButtonClicked() {
-    // REVPartialAlignment* curr = REVPartialAlignments;
-    if (ui->revApplySound->isChecked()) { 
-        REVApplyFlag = 0;
-    }
-    else if (ui->revApplyPartial->isChecked()) {
-        REVApplyFlag = 1;
-    }
-    REVTextChanged();
-}
 void FunctionGenerator::REVTextChanged(){
     QString stringbuffer;
     int method;
@@ -1753,51 +1760,101 @@ void FunctionGenerator::REVTextChanged(){
         case 1: stringbuffer = "<Fun><Name>REV_Medium</Name><Apply>"; break;
         case 2: stringbuffer = "<Fun><Name>REV_Advanced</Name><Apply>"; break;
     }
-    if (REVApplyFlag == 0) { stringbuffer = stringbuffer +"SOUND"; }
-    else if (REVApplyFlag == 1) { stringbuffer = stringbuffer +"PARTIAL"; }
-    // TO DO: REVPartialAlignments
-    REVPartialAlignment* curr;
+    if (ui->revApplySound->isChecked() == 0) { stringbuffer = stringbuffer +"SOUND"; }
+    else if (ui->revApplyPartial->isChecked() == 1) { stringbuffer = stringbuffer +"PARTIAL"; }
+    stringbuffer += "</Apply>";
+
     switch (REVMethodFlag) {
         case 0:
-            stringbuffer = stringbuffer + "</Apply><Sizes>";
-            curr = REVPartialAlignments;
-            connect(curr->ui->revRoomSizeEdit, &QLineEdit::textChanged, this, &FunctionGenerator::REVTextChanged);
-            while (curr != NULL){
-                stringbuffer = stringbuffer + "<Size>" + curr->roomSizeTextChanged() + "</Size>";
-                if (REVApplyFlag == 0) break;
-                curr = curr->next;
-            }
-            stringbuffer = stringbuffer + "</Sizes></Fun>";
+            stringbuffer += "<Sizes>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlRoom(); }
+            stringbuffer += "</Sizes>";
             break;
         case 1:
+            stringbuffer += "<Percents>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlReverb(); }
+            stringbuffer += "</Percents>";
+            stringbuffer += "<Spreads>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlHillow(); }
+            stringbuffer += "</Spreads>";
+            stringbuffer += "<AllPasses>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlAllGain(); }
+            stringbuffer += "</AllPasses>";
+            stringbuffer += "<Delays>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlDelay(); }
+            stringbuffer += "</Delays>";
             break;
         case 2:
+            stringbuffer += "<Percents>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlReverb(); }
+            stringbuffer += "</Percents>";
+            stringbuffer += "<CombGainLists>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlCombGain(); }
+            stringbuffer += "</CombGainLists>";
+            stringbuffer += "<LPGainLists>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlLPGain(); }
+            stringbuffer += "</LPGainLists>";
+            stringbuffer += "<AllPasses>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlAllGain(); }
+            stringbuffer += "</AllPasses>";
+            stringbuffer += "<Delays>";
+            for (REVChannel* chan : m_revChannels) { stringbuffer += chan->getXmlDelay(); }
+            stringbuffer += "</Delays>";
             break;
     }   
+    stringbuffer += "</Fun>";
     ui->resultTextEdit->setText(stringbuffer);
 }
-REVPartialAlignment* FunctionGenerator::REVInsertPartial(){
-    REVNumOfPartials ++;
-    ui->revScrollWindow->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    ui->revScrollWindowContent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+REVChannel* FunctionGenerator::REVInsertChannel(REVChannel* prevCha) {
+    int insertIdx = prevCha ? m_revChannels.indexOf(prevCha) + 1 : 0;
 
-    REVPartialAlignment* newSubAlignment = new REVPartialAlignment(ui->revScrollWindow);
-    ui->revScrollWindowContent->layout()->addWidget(newSubAlignment);
+    REVChannel* newCha = new REVChannel(m_revChannels.size() + 1, REVMethodFlag, ui->revScrollWindowContent);
+    m_revChannels.insert(insertIdx, newCha);
+    ui->revScrollWindowLayout->insertWidget(insertIdx, newCha);
+    connect(newCha, &REVChannel::textChanged, this, &FunctionGenerator::REVTextChanged);
+    connect(newCha, &REVChannel::insertChannelRequested, this, &FunctionGenerator::REVInsertChannel);
+    connect(newCha, &REVChannel::removeChannelRequested, this, &FunctionGenerator::REVRemoveChannel);
 
-    int widgetHeight = newSubAlignment->sizeHint().height();
-    int widgetWidth = newSubAlignment->sizeHint().width();
-    int scrollBarHeight = ui->revScrollWindow->horizontalScrollBar()->sizeHint().height();
-    int scrollBarWidth = ui->revScrollWindow->verticalScrollBar()->sizeHint().width();
-    ui->revScrollWindow->setMinimumHeight(widgetHeight + scrollBarHeight);  
-    ui->revScrollWindow->setMaximumHeight(widgetHeight + scrollBarHeight);
-    ui->revScrollWindow->setMinimumWidth(widgetWidth + scrollBarWidth);  
-    ui->revScrollWindow->setMaximumWidth(widgetWidth + scrollBarWidth);
-
-    if (REVPartialAlignments == NULL) { REVPartialAlignments = newSubAlignment; }
-    else { REVPartialAlignments->appendNewNode(newSubAlignment); }
+    updateRevChaLabels();
     REVTextChanged();
-    return newSubAlignment;
+    return newCha;
 }
+void FunctionGenerator::REVRemoveChannel(REVChannel* currCha) {
+    if (m_revChannels.size() <= 1) return;
+
+    int idx = m_revChannels.indexOf(currCha);
+    if (idx != -1) {
+        m_revChannels.takeAt(idx);
+        currCha->deleteLater();
+    }
+
+    updateRevChaLabels();
+    REVTextChanged();
+}
+void FunctionGenerator::handleRevApplyMethodChanged() {
+    if (!m_revChannels.isEmpty()) clearRevChannels();
+    REVChannel* first = REVInsertChannel(nullptr);
+
+    if (ui->revApplySound->isChecked()) {
+        first->setTitle("Sound");
+        first->hideButtons();
+    } 
+}
+void FunctionGenerator::updateRevChaLabels() {
+    for (int i = 0; i < m_revChannels.size(); ++i) {
+        if (!ui->revApplySound->isChecked()) {
+            m_revChannels[i]->setTitle(QString("Partial %1:").arg(i + 1));
+        }
+    }
+}
+void FunctionGenerator::clearRevChannels() {
+    for (REVChannel* chan : m_revChannels) {
+        chan->deleteLater();
+    }
+    m_revChannels.clear();
+    REVTextChanged();
+}
+
 
 /* MakeSieve Signal Functions */
 void FunctionGenerator::makeSieveLowFunButtonClicked(){

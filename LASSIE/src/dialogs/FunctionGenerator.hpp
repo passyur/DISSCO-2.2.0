@@ -11,7 +11,7 @@
 #include <QLineEdit>
 
 class SPAChannel;
-class REVPartialAlignment;
+class REVChannel;
 class Stochos;
 class Select;
 
@@ -155,14 +155,15 @@ public:
     void makeFilterTextChanged();
 
     // REV
-    int REVApplyFlag; // 0 = sound, 1 = partial
-    int REVMethodFlag; // 0 = simple, 1 = medium, 2 = advanced
-    int REVNumOfPartials;
-    void REVApplyByRadioButtonClicked();
+    int REVMethodFlag;
+    QList<REVChannel*> m_revChannels;
     void REVTextChanged();
-    void appendNewNode(REVPartialAlignment* _newNode);
-    REVPartialAlignment* REVInsertPartial();
-    REVPartialAlignment* REVPartialAlignments = nullptr;
+    void handleRevApplyMethodChanged();
+    REVChannel* REVInsertChannel(REVChannel* prevCha);
+    void REVRemoveChannel(REVChannel* currCha);
+    void updateRevChaLabels();
+    void clearRevChannels();
+
     
     // MakeSieve
     void makeSieveLowFunButtonClicked();

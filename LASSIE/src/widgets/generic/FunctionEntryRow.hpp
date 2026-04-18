@@ -20,6 +20,7 @@ public:
     FunctionEntryRow(const QString& labelText,
                      int index,
                      FunctionReturnType fnReturnType,
+                     bool rmVisible,
                      bool insVisible,
                      QWidget* parent = nullptr);
     ~FunctionEntryRow() override;
