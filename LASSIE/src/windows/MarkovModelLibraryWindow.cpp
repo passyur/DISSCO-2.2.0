@@ -2,7 +2,7 @@
 
 #include <QAction>
 #include <QCloseEvent>
-#include <QGridLayout>
+#include <QDoubleValidator>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -10,14 +10,20 @@
 #include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
+#include <QLocale>
 #include <QMenu>
 #include <QPushButton>
-#include <QScrollArea>
 #include <QSplitter>
+#include <QStandardItem>
 #include <QStandardItemModel>
+#include <QStringList>
+#include <QStyledItemDelegate>
+#include <QTableView>
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QWidget>
+
+#include <limits>
 
 #include <algorithm>
 
@@ -27,36 +33,69 @@
 
 namespace {
 
-QWidget* makeGridHost() {
-    auto* host = new QWidget;
-    auto* layout = new QGridLayout(host);
-    layout->setContentsMargins(4, 4, 4, 4);
-    layout->setHorizontalSpacing(6);
-    layout->setVerticalSpacing(4);
-    return host;
-}
+// Item delegate restricting input to nonnegative real numbers (ints/doubles).
+class NonNegativeRealDelegate : public QStyledItemDelegate {
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
 
-void clearGrid(QWidget* host) {
-    if (auto* old = host->layout()) {
-        QLayoutItem* item;
-        while ((item = old->takeAt(0)) != nullptr) {
-            if (QWidget* w = item->widget()) {
-                w->deleteLater();
-            }
-            delete item;
-        }
-        delete old;
+    QWidget* createEditor(QWidget* parent,
+                          const QStyleOptionViewItem& /*option*/,
+                          const QModelIndex& /*index*/) const override {
+        auto* editor = new QLineEdit(parent);
+        auto* validator = new QDoubleValidator(
+            0.0, std::numeric_limits<double>::max(), 12, editor);
+        validator->setNotation(QDoubleValidator::StandardNotation);
+        // Use C locale so '.' is always the decimal separator.
+        QLocale c(QLocale::C);
+        c.setNumberOptions(QLocale::RejectGroupSeparator);
+        validator->setLocale(c);
+        editor->setValidator(validator);
+
+        // Commit on every keystroke (not just focus-out / Enter) so that a
+        // partially-typed value like ".1" is pushed into the model — and
+        // therefore into the underlying MarkovModel — even if the user
+        // triggers a project save without leaving the cell.
+        connect(editor, &QLineEdit::textEdited, this,
+                [this, editor](const QString&) {
+                    const_cast<NonNegativeRealDelegate*>(this)
+                        ->emitCommitData(editor);
+                });
+        return editor;
     }
-    auto* layout = new QGridLayout(host);
-    layout->setContentsMargins(4, 4, 4, 4);
-    layout->setHorizontalSpacing(6);
-    layout->setVerticalSpacing(4);
+
+    void emitCommitData(QWidget* editor) { emit commitData(editor); }
+
+    void setModelData(QWidget* editor,
+                      QAbstractItemModel* model,
+                      const QModelIndex& index) const override {
+        auto* le = qobject_cast<QLineEdit*>(editor);
+        if (!le) return;
+        const QString text = le->text().trimmed();
+        if (text.isEmpty()) {
+            model->setData(index, QStringLiteral("0"), Qt::EditRole);
+            return;
+        }
+        bool ok = false;
+        const double v = QLocale::c().toDouble(text, &ok);
+        if (!ok || v < 0.0) {
+            // Reject: leave existing model value unchanged.
+            return;
+        }
+        model->setData(index, text, Qt::EditRole);
+    }
+};
+
+QStringList numberedHeaders(int n) {
+    QStringList out;
+    out.reserve(n);
+    for (int i = 0; i < n; ++i) out << QString::number(i + 1);
+    return out;
 }
 
-QLabel* headerLabel(int n) {
-    auto* l = new QLabel(QString::number(n));
-    l->setAlignment(Qt::AlignCenter);
-    return l;
+int rowHeightFor(const QTableView* v) {
+    return v->verticalHeader()->defaultSectionSize()
+         + v->horizontalHeader()->height()
+         + 2 * v->frameWidth();
 }
 
 }  // namespace
@@ -103,45 +142,53 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     sizeRow->addStretch(1);
     rightLayout->addLayout(sizeRow);
 
-    // Initial distribution group
+    auto* delegate = new NonNegativeRealDelegate(this);
+
+    // Initial distribution
+    m_distModel = new QStandardItemModel(this);
+    m_distView = new QTableView;
+    m_distView->setModel(m_distModel);
+    m_distView->setItemDelegate(delegate);
+    m_distView->verticalHeader()->setVisible(false);
+    m_distView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    m_distView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_distView->setFixedHeight(rowHeightFor(m_distView) + m_distView->verticalHeader()->defaultSectionSize());
+
     auto* distGroup = new QGroupBox(tr("Initial Distribution"));
     auto* distGroupLayout = new QVBoxLayout(distGroup);
     distGroupLayout->setContentsMargins(6, 6, 6, 6);
-    auto* distScroll = new QScrollArea;
-    distScroll->setWidgetResizable(true);
-    distScroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    distScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    distScroll->setFixedHeight(90);
-    m_distGridHost = makeGridHost();
-    distScroll->setWidget(m_distGridHost);
-    distGroupLayout->addWidget(distScroll);
+    distGroupLayout->addWidget(m_distView);
     rightLayout->addWidget(distGroup);
 
-    // Values-for-states group
+    // Values for states
+    m_valueModel = new QStandardItemModel(this);
+    m_valueView = new QTableView;
+    m_valueView->setModel(m_valueModel);
+    m_valueView->setItemDelegate(delegate);
+    m_valueView->verticalHeader()->setVisible(false);
+    m_valueView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    m_valueView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_valueView->setFixedHeight(rowHeightFor(m_valueView) + m_valueView->verticalHeader()->defaultSectionSize());
+
     auto* valueGroup = new QGroupBox(tr("Values for states"));
     auto* valueGroupLayout = new QVBoxLayout(valueGroup);
     valueGroupLayout->setContentsMargins(6, 6, 6, 6);
-    auto* valueScroll = new QScrollArea;
-    valueScroll->setWidgetResizable(true);
-    valueScroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    valueScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    valueScroll->setFixedHeight(90);
-    m_valueGridHost = makeGridHost();
-    valueScroll->setWidget(m_valueGridHost);
-    valueGroupLayout->addWidget(valueScroll);
+    valueGroupLayout->addWidget(m_valueView);
     rightLayout->addWidget(valueGroup);
 
-    // Transition matrix group
+    // Transition matrix
+    m_matrixModel = new QStandardItemModel(this);
+    m_matrixView = new QTableView;
+    m_matrixView->setModel(m_matrixModel);
+    m_matrixView->setItemDelegate(delegate);
+    m_matrixView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    m_matrixView->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    m_matrixView->setSelectionMode(QAbstractItemView::SingleSelection);
+
     auto* matrixGroup = new QGroupBox(tr("Transition Matrix"));
     auto* matrixGroupLayout = new QVBoxLayout(matrixGroup);
     matrixGroupLayout->setContentsMargins(6, 6, 6, 6);
-    auto* matrixScroll = new QScrollArea;
-    matrixScroll->setWidgetResizable(true);
-    matrixScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    matrixScroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    m_matrixGridHost = makeGridHost();
-    matrixScroll->setWidget(m_matrixGridHost);
-    matrixGroupLayout->addWidget(matrixScroll);
+    matrixGroupLayout->addWidget(m_matrixView);
     rightLayout->addWidget(matrixGroup, /*stretch=*/1);
 
     splitter->addWidget(rightPanel);
@@ -168,6 +215,12 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
             this, &MarkovModelLibraryWindow::onSetSize);
     connect(m_sizeEntry, &QLineEdit::returnPressed,
             this, &MarkovModelLibraryWindow::onSetSize);
+    connect(m_distModel, &QStandardItemModel::itemChanged,
+            this, &MarkovModelLibraryWindow::onItemChanged);
+    connect(m_valueModel, &QStandardItemModel::itemChanged,
+            this, &MarkovModelLibraryWindow::onItemChanged);
+    connect(m_matrixModel, &QStandardItemModel::itemChanged,
+            this, &MarkovModelLibraryWindow::onItemChanged);
 }
 
 MarkovModelLibraryWindow::~MarkovModelLibraryWindow() = default;
@@ -177,7 +230,7 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
     currentSelection = -1;
     currentSize = 0;
     m_sizeEntry->clear();
-    rebuildEditorGrid(0);
+    resizeTables(0);
     rebuildModelList();
     updateContextMenuEnablement();
 }
@@ -209,61 +262,29 @@ void MarkovModelLibraryWindow::rebuildModelList() {
     }
 }
 
-void MarkovModelLibraryWindow::rebuildEditorGrid(int size) {
-    m_distEntries.clear();
-    m_valueEntries.clear();
-    m_matrixEntries.clear();
+void MarkovModelLibraryWindow::resizeTables(int size) {
+    suppressItemChanged = true;
 
-    clearGrid(m_distGridHost);
-    clearGrid(m_valueGridHost);
-    clearGrid(m_matrixGridHost);
+    const QStringList headers = numberedHeaders(size);
+
+    m_distModel->clear();
+    m_distModel->setRowCount(size > 0 ? 1 : 0);
+    m_distModel->setColumnCount(size);
+    m_distModel->setHorizontalHeaderLabels(headers);
+
+    m_valueModel->clear();
+    m_valueModel->setRowCount(size > 0 ? 1 : 0);
+    m_valueModel->setColumnCount(size);
+    m_valueModel->setHorizontalHeaderLabels(headers);
+
+    m_matrixModel->clear();
+    m_matrixModel->setRowCount(size);
+    m_matrixModel->setColumnCount(size);
+    m_matrixModel->setHorizontalHeaderLabels(headers);
+    m_matrixModel->setVerticalHeaderLabels(headers);
 
     currentSize = size;
-    if (size <= 0) return;
-
-    auto* distLayout = static_cast<QGridLayout*>(m_distGridHost->layout());
-    for (int j = 0; j < size; ++j) {
-        distLayout->addWidget(headerLabel(j + 1), 0, j);
-    }
-    for (int j = 0; j < size; ++j) {
-        auto* le = new QLineEdit;
-        le->setMinimumWidth(60);
-        connect(le, &QLineEdit::editingFinished,
-                this, &MarkovModelLibraryWindow::onEntryEdited);
-        distLayout->addWidget(le, 1, j);
-        m_distEntries.push_back(le);
-    }
-
-    auto* valueLayout = static_cast<QGridLayout*>(m_valueGridHost->layout());
-    for (int j = 0; j < size; ++j) {
-        valueLayout->addWidget(headerLabel(j + 1), 0, j);
-    }
-    for (int j = 0; j < size; ++j) {
-        auto* le = new QLineEdit;
-        le->setMinimumWidth(60);
-        connect(le, &QLineEdit::editingFinished,
-                this, &MarkovModelLibraryWindow::onEntryEdited);
-        valueLayout->addWidget(le, 1, j);
-        m_valueEntries.push_back(le);
-    }
-
-    auto* matrixLayout = static_cast<QGridLayout*>(m_matrixGridHost->layout());
-    for (int j = 0; j < size; ++j) {
-        matrixLayout->addWidget(headerLabel(j + 1), 0, j + 1);
-    }
-    for (int i = 0; i < size; ++i) {
-        matrixLayout->addWidget(headerLabel(i + 1), i + 1, 0);
-    }
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            auto* le = new QLineEdit;
-            le->setMinimumWidth(60);
-            connect(le, &QLineEdit::editingFinished,
-                    this, &MarkovModelLibraryWindow::onEntryEdited);
-            matrixLayout->addWidget(le, i + 1, j + 1);
-            m_matrixEntries.push_back(le);
-        }
-    }
+    suppressItemChanged = false;
 }
 
 void MarkovModelLibraryWindow::loadModelIntoEditor(int modelIdx) {
@@ -276,35 +297,45 @@ void MarkovModelLibraryWindow::loadModelIntoEditor(int modelIdx) {
     auto& model = models[modelIdx];
     const int size = model.getStateSize();
 
-    if (size != currentSize) {
-        rebuildEditorGrid(size);
-    }
+    resizeTables(size);
     m_sizeEntry->setText(QString::number(size));
 
-    for (int i = 0; i < size; ++i) {
-        m_distEntries[i]->setText(QString::number(model.getInitialProbability(i)));
-        m_valueEntries[i]->setText(QString::number(model.getStateValue(i)));
+    suppressItemChanged = true;
+    for (int j = 0; j < size; ++j) {
+        m_distModel->setItem(0, j,
+            new QStandardItem(QString::number(model.getInitialProbability(j))));
+        m_valueModel->setItem(0, j,
+            new QStandardItem(QString::number(model.getStateValue(j))));
     }
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
-            m_matrixEntries[i * size + j]
-                ->setText(QString::number(model.getTransitionProbability(i, j)));
+            m_matrixModel->setItem(i, j,
+                new QStandardItem(QString::number(model.getTransitionProbability(i, j))));
         }
     }
+    suppressItemChanged = false;
 }
 
 QString MarkovModelLibraryWindow::serializeEditor() const {
+
+    auto cell = [](QStandardItem* it) -> QString {
+        if (!it || it->text().isEmpty()) return QStringLiteral("0");
+        return it->text();
+    };
+
     QString s = QString::number(currentSize) + "\n";
-    for (auto* e : m_valueEntries) {
-        s += (e->text().isEmpty() ? QStringLiteral("0") : e->text()) + " ";
+    for (int j = 0; j < currentSize; ++j) {
+        s += cell(m_valueModel->item(0, j)) + " ";
     }
     s += "\n";
-    for (auto* e : m_distEntries) {
-        s += (e->text().isEmpty() ? QStringLiteral("0") : e->text()) + " ";
+    for (int j = 0; j < currentSize; ++j) {
+        s += cell(m_distModel->item(0, j)) + " ";
     }
     s += "\n";
-    for (auto* e : m_matrixEntries) {
-        s += (e->text().isEmpty() ? QStringLiteral("0") : e->text()) + " ";
+    for (int i = 0; i < currentSize; ++i) {
+        for (int j = 0; j < currentSize; ++j) {
+            s += cell(m_matrixModel->item(i, j)) + " ";
+        }
     }
     return s;
 }
@@ -331,7 +362,7 @@ void MarkovModelLibraryWindow::onSelectionChanged(const QModelIndex& current,
         loadModelIntoEditor(currentSelection);
     } else {
         currentSelection = -1;
-        rebuildEditorGrid(0);
+        resizeTables(0);
         m_sizeEntry->clear();
     }
     updateContextMenuEnablement();
@@ -348,43 +379,42 @@ void MarkovModelLibraryWindow::onSetSize() {
     if (!ok || newSize <= 0) return;
     if (newSize == currentSize) return;
 
-    QVector<QString> oldVals = [this]{
-        QVector<QString> v;
-        for (auto* e : m_valueEntries) v.push_back(e->text());
-        return v;
-    }();
-    QVector<QString> oldDists = [this]{
-        QVector<QString> v;
-        for (auto* e : m_distEntries) v.push_back(e->text());
-        return v;
-    }();
     const int oldSize = currentSize;
+    QVector<QString> oldVals(oldSize);
+    QVector<QString> oldDists(oldSize);
     QVector<QVector<QString>> oldMat(oldSize, QVector<QString>(oldSize));
+    for (int j = 0; j < oldSize; ++j) {
+        if (auto* it = m_valueModel->item(0, j)) oldVals[j] = it->text();
+        if (auto* it = m_distModel->item(0, j)) oldDists[j] = it->text();
+    }
     for (int i = 0; i < oldSize; ++i) {
         for (int j = 0; j < oldSize; ++j) {
-            oldMat[i][j] = m_matrixEntries[i * oldSize + j]->text();
+            if (auto* it = m_matrixModel->item(i, j)) oldMat[i][j] = it->text();
         }
     }
 
-    rebuildEditorGrid(newSize);
+    resizeTables(newSize);
 
+    suppressItemChanged = true;
     const int overlap = std::min(oldSize, newSize);
-    for (int i = 0; i < overlap; ++i) {
-        m_valueEntries[i]->setText(oldVals[i]);
-        m_distEntries[i]->setText(oldDists[i]);
+    for (int j = 0; j < overlap; ++j) {
+        m_valueModel->setItem(0, j, new QStandardItem(oldVals[j]));
+        m_distModel->setItem(0, j, new QStandardItem(oldDists[j]));
     }
     for (int i = 0; i < overlap; ++i) {
         for (int j = 0; j < overlap; ++j) {
-            m_matrixEntries[i * newSize + j]->setText(oldMat[i][j]);
+            m_matrixModel->setItem(i, j, new QStandardItem(oldMat[i][j]));
         }
     }
+    suppressItemChanged = false;
 
     if (currentSelection >= 0) {
         saveEditorIntoModel(currentSelection);
     }
 }
 
-void MarkovModelLibraryWindow::onEntryEdited() {
+void MarkovModelLibraryWindow::onItemChanged(QStandardItem* /*item*/) {
+    if (suppressItemChanged) return;
     if (currentSelection >= 0) {
         saveEditorIntoModel(currentSelection);
     }
@@ -399,7 +429,7 @@ void MarkovModelLibraryWindow::createNewModel() {
         saveEditorIntoModel(currentSelection);
     }
 
-    pm->markovmodels().append(MarkovModel<float>()); 
+    pm->markovmodels().append(MarkovModel<float>());
     MUtilities::modified();
 
     rebuildModelList();
@@ -415,7 +445,7 @@ void MarkovModelLibraryWindow::duplicateModel() {
     saveEditorIntoModel(currentSelection);
 
     if (currentSelection < pm->markovmodels().size())
-        pm->markovmodels().append(pm->markovmodels()[currentSelection]); 
+        pm->markovmodels().append(pm->markovmodels()[currentSelection]);
     MUtilities::modified();
 
     rebuildModelList();
@@ -441,7 +471,7 @@ void MarkovModelLibraryWindow::removeModel() {
         const int nextRow = std::min(removed, remaining - 1);
         m_treeView->setCurrentIndex(m_listModel->index(nextRow, 0));
     } else {
-        rebuildEditorGrid(0);
+        resizeTables(0);
         m_sizeEntry->clear();
         updateContextMenuEnablement();
     }

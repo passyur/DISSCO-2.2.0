@@ -2,7 +2,6 @@
 #define MARKOVMODELLIBRARYWINDOW_HPP
 
 #include <QMainWindow>
-#include <QVector>
 #include <QString>
 
 class QAction;
@@ -11,9 +10,10 @@ class QHideEvent;
 class QLineEdit;
 class QMenu;
 class QPushButton;
+class QStandardItem;
 class QStandardItemModel;
+class QTableView;
 class QTreeView;
-class QWidget;
 class ProjectView;
 
 class MarkovModelLibraryWindow : public QMainWindow {
@@ -33,14 +33,14 @@ private slots:
     void onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
     void onRightClick(const QPoint& pos);
     void onSetSize();
-    void onEntryEdited();
+    void onItemChanged(QStandardItem* item);
     void createNewModel();
     void duplicateModel();
     void removeModel();
 
 private:
     void rebuildModelList();
-    void rebuildEditorGrid(int size);
+    void resizeTables(int size);
     void loadModelIntoEditor(int modelIdx);
     void saveEditorIntoModel(int modelIdx);
     void updateContextMenuEnablement();
@@ -49,6 +49,7 @@ private:
     ProjectView* activeProject = nullptr;
     int currentSelection = -1;
     int currentSize = 0;
+    bool suppressItemChanged = false;
 
     QTreeView* m_treeView = nullptr;
     QStandardItemModel* m_listModel = nullptr;
@@ -56,13 +57,13 @@ private:
     QLineEdit* m_sizeEntry = nullptr;
     QPushButton* m_sizeButton = nullptr;
 
-    QWidget* m_distGridHost = nullptr;
-    QWidget* m_valueGridHost = nullptr;
-    QWidget* m_matrixGridHost = nullptr;
+    QTableView* m_distView = nullptr;
+    QTableView* m_valueView = nullptr;
+    QTableView* m_matrixView = nullptr;
 
-    QVector<QLineEdit*> m_distEntries;
-    QVector<QLineEdit*> m_valueEntries;
-    QVector<QLineEdit*> m_matrixEntries;
+    QStandardItemModel* m_distModel = nullptr;
+    QStandardItemModel* m_valueModel = nullptr;
+    QStandardItemModel* m_matrixModel = nullptr;
 
     QMenu* m_contextMenu = nullptr;
     QAction* m_createAction = nullptr;
