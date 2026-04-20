@@ -44,6 +44,9 @@ private:
     void loadModelIntoEditor(int modelIdx);
     void saveEditorIntoModel(int modelIdx);
     void updateContextMenuEnablement();
+    void installCopyPasteShortcuts(QTableView* view);
+    void copySelection(QTableView* view) const;
+    void pasteSelection(QTableView* view);
     QString serializeEditor() const;
 
     ProjectView* activeProject = nullptr;

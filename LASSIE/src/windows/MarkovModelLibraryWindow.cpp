@@ -1,8 +1,14 @@
 #include "MarkovModelLibraryWindow.hpp"
 
 #include <QAction>
+#include <QApplication>
+#include <QClipboard>
 #include <QCloseEvent>
 #include <QDoubleValidator>
+#include <QItemSelectionModel>
+#include <QKeySequence>
+#include <QModelIndexList>
+#include <QShortcut>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -13,6 +19,7 @@
 #include <QLocale>
 #include <QMenu>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSplitter>
 #include <QStandardItem>
 #include <QStandardItemModel>
@@ -151,7 +158,7 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     m_distView->setItemDelegate(delegate);
     m_distView->verticalHeader()->setVisible(false);
     m_distView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    m_distView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_distView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_distView->setFixedHeight(rowHeightFor(m_distView) + m_distView->verticalHeader()->defaultSectionSize());
 
     auto* distGroup = new QGroupBox(tr("Initial Distribution"));
@@ -167,7 +174,7 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     m_valueView->setItemDelegate(delegate);
     m_valueView->verticalHeader()->setVisible(false);
     m_valueView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    m_valueView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_valueView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_valueView->setFixedHeight(rowHeightFor(m_valueView) + m_valueView->verticalHeader()->defaultSectionSize());
 
     auto* valueGroup = new QGroupBox(tr("Values for states"));
@@ -183,7 +190,7 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     m_matrixView->setItemDelegate(delegate);
     m_matrixView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     m_matrixView->verticalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    m_matrixView->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_matrixView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     auto* matrixGroup = new QGroupBox(tr("Transition Matrix"));
     auto* matrixGroupLayout = new QVBoxLayout(matrixGroup);
@@ -221,6 +228,10 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
             this, &MarkovModelLibraryWindow::onItemChanged);
     connect(m_matrixModel, &QStandardItemModel::itemChanged,
             this, &MarkovModelLibraryWindow::onItemChanged);
+
+    installCopyPasteShortcuts(m_distView);
+    installCopyPasteShortcuts(m_valueView);
+    installCopyPasteShortcuts(m_matrixView);
 }
 
 MarkovModelLibraryWindow::~MarkovModelLibraryWindow() = default;
@@ -481,4 +492,115 @@ void MarkovModelLibraryWindow::updateContextMenuEnablement() {
     const bool hasSelection = currentSelection >= 0;
     if (m_duplicateAction) m_duplicateAction->setEnabled(hasSelection);
     if (m_deleteAction)    m_deleteAction->setEnabled(hasSelection);
+}
+
+// ---------------------------------------------------------------------------
+// Copy / paste
+// ---------------------------------------------------------------------------
+
+void MarkovModelLibraryWindow::installCopyPasteShortcuts(QTableView* view) {
+    // Scoped to the view so that typing Ctrl+C/V inside an open cell editor
+    // goes to the QLineEdit's normal clipboard handling, not here.
+    auto* copy = new QShortcut(QKeySequence::Copy, view);
+    copy->setContext(Qt::WidgetShortcut);
+    connect(copy, &QShortcut::activated, this,
+            [this, view]{ copySelection(view); });
+
+    auto* paste = new QShortcut(QKeySequence::Paste, view);
+    paste->setContext(Qt::WidgetShortcut);
+    connect(paste, &QShortcut::activated, this,
+            [this, view]{ pasteSelection(view); });
+}
+
+void MarkovModelLibraryWindow::copySelection(QTableView* view) const {
+    auto* model = qobject_cast<QStandardItemModel*>(view->model());
+    if (!model) return;
+    const QModelIndexList sel = view->selectionModel()->selectedIndexes();
+    if (sel.isEmpty()) return;
+
+    // Bounding rect of the selection.
+    int minRow = sel.first().row(), maxRow = minRow;
+    int minCol = sel.first().column(), maxCol = minCol;
+    for (const QModelIndex& idx : sel) {
+        minRow = std::min(minRow, idx.row());
+        maxRow = std::max(maxRow, idx.row());
+        minCol = std::min(minCol, idx.column());
+        maxCol = std::max(maxCol, idx.column());
+    }
+
+    // Fill a dense grid; unselected cells in the bounding rect become empty
+    // so downstream paste sees a regular shape.
+    const int rows = maxRow - minRow + 1;
+    const int cols = maxCol - minCol + 1;
+    QVector<QVector<QString>> grid(rows, QVector<QString>(cols));
+    for (const QModelIndex& idx : sel) {
+        if (auto* it = model->item(idx.row(), idx.column())) {
+            grid[idx.row() - minRow][idx.column() - minCol] = it->text();
+        }
+    }
+
+    QString out;
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            if (j > 0) out += QLatin1Char('\t');
+            out += grid[i][j];
+        }
+        if (i + 1 < rows) out += QLatin1Char('\n');
+    }
+    QApplication::clipboard()->setText(out);
+}
+
+void MarkovModelLibraryWindow::pasteSelection(QTableView* view) {
+    auto* model = qobject_cast<QStandardItemModel*>(view->model());
+    if (!model) return;
+    const QModelIndex anchor = view->selectionModel()->currentIndex();
+    if (!anchor.isValid()) return;
+
+    const QString text = QApplication::clipboard()->text();
+    if (text.isEmpty()) return;
+
+    // Strip a single trailing newline (common from Excel / our own copy), but
+    // leave internal blank rows alone.
+    QString body = text;
+    if (body.endsWith(QLatin1Char('\n'))) body.chop(1);
+    if (body.endsWith(QLatin1Char('\r'))) body.chop(1);
+
+    // Row split accepts \r\n, \n, \r (tolerant of platform differences).
+    const QStringList rows = body.split(QRegularExpression(QStringLiteral("\r\n|\n|\r")));
+
+    const int r0 = anchor.row();
+    const int c0 = anchor.column();
+    const int rowCount = model->rowCount();
+    const int colCount = model->columnCount();
+
+    suppressItemChanged = true;
+    bool anyChange = false;
+    for (int i = 0; i < rows.size(); ++i) {
+        const int targetRow = r0 + i;
+        if (targetRow >= rowCount) break;  // overflow: drop remaining rows
+        const QStringList cells = rows[i].split(QLatin1Char('\t'));
+        for (int j = 0; j < cells.size(); ++j) {
+            const int targetCol = c0 + j;
+            if (targetCol >= colCount) break;  // overflow: drop remaining cols
+            const QString raw = cells[j].trimmed();
+            if (raw.isEmpty()) continue;  // leave empty cells alone
+            bool ok = false;
+            const double v = QLocale::c().toDouble(raw, &ok);
+            if (!ok || v < 0.0) continue;  // same validation as the delegate
+            auto* it = model->item(targetRow, targetCol);
+            if (!it) {
+                it = new QStandardItem(raw);
+                model->setItem(targetRow, targetCol, it);
+            } else {
+                it->setText(raw);
+            }
+            anyChange = true;
+        }
+    }
+    suppressItemChanged = false;
+
+    // Single save for the whole paste, not one per cell.
+    if (anyChange && currentSelection >= 0) {
+        saveEditorIntoModel(currentSelection);
+    }
 }
