@@ -23,6 +23,8 @@
 #include <QSplitter>
 #include <QStandardItem>
 #include <QStandardItemModel>
+#include <QUndoCommand>
+#include <QUndoStack>
 #include <QStringList>
 #include <QStyledItemDelegate>
 #include <QTableView>
@@ -30,9 +32,9 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <limits>
-
 #include <algorithm>
+#include <functional>
+#include <limits>
 
 #include "Markov.h"
 #include "../utilities.hpp"
@@ -43,11 +45,16 @@ namespace {
 // Item delegate restricting input to nonnegative real numbers (ints/doubles).
 class NonNegativeRealDelegate : public QStyledItemDelegate {
 public:
-    using QStyledItemDelegate::QStyledItemDelegate;
+    using OnEditStart = std::function<void()>;
+
+    explicit NonNegativeRealDelegate(OnEditStart onEditStart,
+                                     QObject* parent = nullptr)
+        : QStyledItemDelegate(parent), m_onEditStart(std::move(onEditStart)) {}
 
     QWidget* createEditor(QWidget* parent,
                           const QStyleOptionViewItem& /*option*/,
                           const QModelIndex& /*index*/) const override {
+        if (m_onEditStart) m_onEditStart();
         auto* editor = new QLineEdit(parent);
         auto* validator = new QDoubleValidator(
             0.0, std::numeric_limits<double>::max(), 12, editor);
@@ -90,6 +97,31 @@ public:
         }
         model->setData(index, text, Qt::EditRole);
     }
+
+private:
+    OnEditStart m_onEditStart;
+};
+
+// Undo command that captures two editor snapshots and swaps them.
+// applySnapshot is idempotent, so the initial redo() after push is harmless.
+class SnapshotCommand : public QUndoCommand {
+public:
+    SnapshotCommand(MarkovModelLibraryWindow* win,
+                    MarkovModelLibraryWindow::EditorSnapshot before,
+                    MarkovModelLibraryWindow::EditorSnapshot after,
+                    const QString& text)
+        : QUndoCommand(text),
+          m_win(win),
+          m_before(std::move(before)),
+          m_after(std::move(after)) {}
+
+    void undo() override { m_win->applySnapshot(m_before); }
+    void redo() override { m_win->applySnapshot(m_after); }
+
+private:
+    MarkovModelLibraryWindow* m_win;
+    MarkovModelLibraryWindow::EditorSnapshot m_before;
+    MarkovModelLibraryWindow::EditorSnapshot m_after;
 };
 
 QStringList numberedHeaders(int n) {
@@ -149,7 +181,12 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     sizeRow->addStretch(1);
     rightLayout->addLayout(sizeRow);
 
-    auto* delegate = new NonNegativeRealDelegate(this);
+    m_undoStack = new QUndoStack(this);
+
+    auto* delegate = new NonNegativeRealDelegate(
+        [this]{ beginEditCapture(); }, this);
+    connect(delegate, &QAbstractItemDelegate::closeEditor, this,
+            &MarkovModelLibraryWindow::onEditorClosed);
 
     // Initial distribution
     m_distModel = new QStandardItemModel(this);
@@ -242,6 +279,7 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
     currentSize = 0;
     m_sizeEntry->clear();
     resizeTables(0);
+    m_undoStack->clear();
     rebuildModelList();
     updateContextMenuEnablement();
 }
@@ -368,6 +406,8 @@ void MarkovModelLibraryWindow::onSelectionChanged(const QModelIndex& current,
     if (previous.isValid()) {
         saveEditorIntoModel(previous.row());
     }
+    // Undo history is specific to one model's editor session. Discard it.
+    m_undoStack->clear();
     if (current.isValid()) {
         currentSelection = current.row();
         loadModelIntoEditor(currentSelection);
@@ -389,6 +429,8 @@ void MarkovModelLibraryWindow::onSetSize() {
     const int newSize = m_sizeEntry->text().toInt(&ok);
     if (!ok || newSize <= 0) return;
     if (newSize == currentSize) return;
+
+    const EditorSnapshot before = snapshotEditor();
 
     const int oldSize = currentSize;
     QVector<QString> oldVals(oldSize);
@@ -422,6 +464,8 @@ void MarkovModelLibraryWindow::onSetSize() {
     if (currentSelection >= 0) {
         saveEditorIntoModel(currentSelection);
     }
+
+    pushSnapshotCommand(before, snapshotEditor(), tr("Change size"));
 }
 
 void MarkovModelLibraryWindow::onItemChanged(QStandardItem* /*item*/) {
@@ -499,8 +543,10 @@ void MarkovModelLibraryWindow::updateContextMenuEnablement() {
 // ---------------------------------------------------------------------------
 
 void MarkovModelLibraryWindow::installCopyPasteShortcuts(QTableView* view) {
-    // Scoped to the view so that typing Ctrl+C/V inside an open cell editor
-    // goes to the QLineEdit's normal clipboard handling, not here.
+    // Scoped to the view so that typing Ctrl+C/V/Z inside an open cell editor
+    // goes to the QLineEdit's normal handling, not here. (I.e. while a cell
+    // is being edited, Ctrl+Z does character-level undo within that QLineEdit;
+    // once the editor is dismissed, Ctrl+Z undoes the whole edit.)
     auto* copy = new QShortcut(QKeySequence::Copy, view);
     copy->setContext(Qt::WidgetShortcut);
     connect(copy, &QShortcut::activated, this,
@@ -510,6 +556,16 @@ void MarkovModelLibraryWindow::installCopyPasteShortcuts(QTableView* view) {
     paste->setContext(Qt::WidgetShortcut);
     connect(paste, &QShortcut::activated, this,
             [this, view]{ pasteSelection(view); });
+
+    auto* undo = new QShortcut(QKeySequence::Undo, view);
+    undo->setContext(Qt::WidgetShortcut);
+    connect(undo, &QShortcut::activated,
+            m_undoStack, &QUndoStack::undo);
+
+    auto* redo = new QShortcut(QKeySequence::Redo, view);
+    redo->setContext(Qt::WidgetShortcut);
+    connect(redo, &QShortcut::activated,
+            m_undoStack, &QUndoStack::redo);
 }
 
 void MarkovModelLibraryWindow::copySelection(QTableView* view) const {
@@ -573,6 +629,8 @@ void MarkovModelLibraryWindow::pasteSelection(QTableView* view) {
     const int rowCount = model->rowCount();
     const int colCount = model->columnCount();
 
+    const EditorSnapshot before = snapshotEditor();
+
     suppressItemChanged = true;
     bool anyChange = false;
     for (int i = 0; i < rows.size(); ++i) {
@@ -600,7 +658,90 @@ void MarkovModelLibraryWindow::pasteSelection(QTableView* view) {
     suppressItemChanged = false;
 
     // Single save for the whole paste, not one per cell.
-    if (anyChange && currentSelection >= 0) {
+    if (anyChange) {
+        if (currentSelection >= 0) saveEditorIntoModel(currentSelection);
+        pushSnapshotCommand(before, snapshotEditor(), tr("Paste"));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Undo / redo
+// ---------------------------------------------------------------------------
+
+MarkovModelLibraryWindow::EditorSnapshot
+MarkovModelLibraryWindow::snapshotEditor() const {
+    EditorSnapshot s;
+    s.size = currentSize;
+    s.dist.resize(currentSize);
+    s.values.resize(currentSize);
+    s.matrix.resize(currentSize * currentSize);
+    for (int j = 0; j < currentSize; ++j) {
+        if (auto* it = m_distModel->item(0, j))  s.dist[j] = it->text();
+        if (auto* it = m_valueModel->item(0, j)) s.values[j] = it->text();
+    }
+    for (int i = 0; i < currentSize; ++i) {
+        for (int j = 0; j < currentSize; ++j) {
+            if (auto* it = m_matrixModel->item(i, j))
+                s.matrix[i * currentSize + j] = it->text();
+        }
+    }
+    return s;
+}
+
+void MarkovModelLibraryWindow::applySnapshot(const EditorSnapshot& s) {
+    applyingSnapshot = true;
+    suppressItemChanged = true;
+
+    if (s.size != currentSize) {
+        resizeTables(s.size);
+        m_sizeEntry->setText(QString::number(s.size));
+    }
+
+    for (int j = 0; j < s.size; ++j) {
+        m_distModel->setItem(0, j, new QStandardItem(s.dist.value(j)));
+        m_valueModel->setItem(0, j, new QStandardItem(s.values.value(j)));
+    }
+    for (int i = 0; i < s.size; ++i) {
+        for (int j = 0; j < s.size; ++j) {
+            m_matrixModel->setItem(i, j,
+                new QStandardItem(s.matrix.value(i * s.size + j)));
+        }
+    }
+
+    suppressItemChanged = false;
+    applyingSnapshot = false;
+
+    // Propagate the restored state into the backing MarkovModel so a save
+    // right after an undo persists the undone state.
+    if (currentSelection >= 0 && currentSize > 0) {
         saveEditorIntoModel(currentSelection);
     }
+}
+
+void MarkovModelLibraryWindow::beginEditCapture() {
+    if (m_editInProgress) return;  // nested / already captured
+    m_editStartSnapshot = snapshotEditor();
+    m_editInProgress = true;
+}
+
+void MarkovModelLibraryWindow::onEditorClosed() {
+    if (!m_editInProgress) return;
+    m_editInProgress = false;
+    const EditorSnapshot after = snapshotEditor();
+    pushSnapshotCommand(m_editStartSnapshot, after, tr("Edit cell"));
+}
+
+void MarkovModelLibraryWindow::pushSnapshotCommand(const EditorSnapshot& before,
+                                                   const EditorSnapshot& after,
+                                                   const QString& label) {
+    // No-op if nothing actually changed.
+    if (before.size == after.size &&
+        before.dist == after.dist &&
+        before.values == after.values &&
+        before.matrix == after.matrix) {
+        return;
+    }
+    // push() calls redo() once; state is already `after`, and applySnapshot
+    // is idempotent, so the extra call is cheap and correct.
+    m_undoStack->push(new SnapshotCommand(this, before, after, label));
 }
