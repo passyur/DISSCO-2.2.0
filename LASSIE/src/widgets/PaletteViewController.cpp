@@ -47,8 +47,7 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     proxyModel->setDynamicSortFilter(true);
 
     treeView->setModel(proxyModel);
-    treeView->setSortingEnabled(true);
-    treeView->sortByColumn(1, Qt::AscendingOrder);
+    proxyModel->sort(1, Qt::AscendingOrder);
     treeView->header()->setSectionResizeMode(QHeaderView::Fixed);
     layout->addWidget(treeView, 1);
     treeView->setDragEnabled(true);
