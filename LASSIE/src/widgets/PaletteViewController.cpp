@@ -222,6 +222,25 @@ void PaletteViewController::removeEvent(IEvent* event, const QString& type)
     }
 }
 
+QString PaletteViewController::selectedType() const {
+    QModelIndex proxyIndex = treeView->currentIndex();
+    if (!proxyIndex.isValid())
+        return {};
+
+    QModelIndex sourceIndex = proxyModel->mapToSource(proxyIndex);
+    QStandardItem* item = model->itemFromIndex(sourceIndex);
+    if (!item)
+        return {};
+
+    if (item->parent()) {
+        // Child item: column 0 holds the type string
+        return model->itemFromIndex(sourceIndex.sibling(sourceIndex.row(), 0))->text();
+    } else {
+        // Folder item: column 1 holds the folder name, which is the type
+        return model->itemFromIndex(sourceIndex.sibling(sourceIndex.row(), 1))->text();
+    }
+}
+
 QStandardItem* PaletteViewController::folderForType(const QString& typeStr) const {
     if (typeStr == "Top")            return folderTop;
     if (typeStr == "High")           return folderHigh;

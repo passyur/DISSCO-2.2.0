@@ -19,6 +19,10 @@ public:
     
     Ui::FileNewObject *ui;
     
+    // Pre-select the radio button matching typeStr and clear the name field
+    // assumes that it is passed a non-empty string (if so, does nothing)
+    void setDefaultType(const QString& typeStr);
+
 public slots:
     void accept() override;
 };
