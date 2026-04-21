@@ -767,8 +767,7 @@ void EventAttributesViewController::continuumButtonClicked() {
     ui->emptyChildEventDefPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->childEventDefDiscretePage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->childEventDefContSweepPage->adjustSize();
-    ui->childEventDefStack->adjustSize();
+    ui->childEventDefStack->updateGeometry();
     for (LayerBox* box : m_layerBoxes) box->setPackageFieldsVisible(false);
     // ui->childDefEntry1->setEnabled(true);
     // ui->childDefEntry2->setEnabled(true);
@@ -792,8 +791,7 @@ void EventAttributesViewController::discreteButtonClicked() {
     ui->emptyChildEventDefPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->childEventDefContSweepPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     ui->childEventDefDiscretePage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->childEventDefDiscretePage->adjustSize();
-    ui->childEventDefStack->adjustSize();
+    ui->childEventDefStack->updateGeometry();
     // ui->childDefEntry1->setEnabled(false);
     // ui->childDefEntry2->setEnabled(false);
     // ui->childDefEntry3->setEnabled(false);
@@ -815,8 +813,7 @@ void EventAttributesViewController::wellTemperedRadioButtonClicked() {
     ui->BSContinuumPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     ui->BSWellTemperedPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->BSWellTemperedPage->adjustSize();
-    ui->frequencyStack->adjustSize();
+    ui->frequencyStack->updateGeometry();
 }
 
 void EventAttributesViewController::fundamentalRadioButtonClicked() {
@@ -826,8 +823,7 @@ void EventAttributesViewController::fundamentalRadioButtonClicked() {
     ui->BSContinuumPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     ui->BSFundamentalPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->BSFundamentalPage->adjustSize();
-    ui->frequencyStack->adjustSize();
+    ui->frequencyStack->updateGeometry();
 }
 
 void EventAttributesViewController::continuumRadioButtonClicked() {
@@ -837,8 +833,7 @@ void EventAttributesViewController::continuumRadioButtonClicked() {
     ui->BSFundamentalPage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     ui->BSContinuumPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->BSContinuumPage->adjustSize();
-    ui->frequencyStack->adjustSize();
+    ui->frequencyStack->updateGeometry();
 }
 
 void EventAttributesViewController::maxChildDurFunButtonClicked() {
