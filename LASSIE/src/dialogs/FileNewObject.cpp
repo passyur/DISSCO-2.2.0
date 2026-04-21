@@ -27,6 +27,22 @@ void FileNewObject::setDefaultType(const QString& typeStr)
 {
     ui->objNameEntry->clear();
 
+    if (typeStr == "Top") {
+        // Top events cannot be created via New Object; clear any prior selection
+        QList<QRadioButton*> buttons = {
+            ui->buttonHigh, ui->buttonMid, ui->buttonLow, ui->buttonBottom,
+            ui->buttonSpectrum, ui->buttonNote, ui->buttonEnv, ui->buttonSiv,
+            ui->buttonSpa, ui->buttonPat, ui->buttonRev, ui->buttonFil, ui->buttonMea
+        };
+        for (QRadioButton* btn : buttons)
+            btn->setAutoExclusive(false);
+        for (QRadioButton* btn : buttons) {
+            btn->setChecked(false);
+            btn->setAutoExclusive(true);
+        }
+        return;
+    }
+
     if      (typeStr == "High")           ui->buttonHigh->setChecked(true);
     else if (typeStr == "Mid")            ui->buttonMid->setChecked(true);
     else if (typeStr == "Low")            ui->buttonLow->setChecked(true);
