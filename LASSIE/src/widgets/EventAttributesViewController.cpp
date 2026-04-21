@@ -72,6 +72,8 @@ EventAttributesViewController::EventAttributesViewController(ProjectView* projec
             this, &EventAttributesViewController::childEventDurationSieveButtonClicked);
     connect(ui->sieveBuilderFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::sieveBuilderButtonClicked);
+    connect(ui->envBuilderFunButton, &QPushButton::clicked,
+            this, &EventAttributesViewController::envBuilderFunButtonClicked);
 /*    connect(ui->spectrumDeviationFunButton, &QPushButton::clicked,
             this, &EventAttributesViewController::deviationFunButtonClicked);
     connect(ui->spectrumGenerateFunButton, &QPushButton::clicked,
@@ -882,6 +884,10 @@ void EventAttributesViewController::childEventDurationSieveButtonClicked() {
 void EventAttributesViewController::sieveBuilderButtonClicked() {
     insertFunctionString(sieveBuilderFunButton);
 }
+
+void EventAttributesViewController::envBuilderFunButtonClicked() {
+    insertFunctionString(envBuilderFunButton);
+}
 /*
 void EventAttributesViewController::deviationFunButtonClicked() {
     insertFunctionString(spectrumDeviationFunButton);
@@ -999,6 +1005,10 @@ void EventAttributesViewController::insertFunctionString(FunctionButton button) 
     case sieveBuilderFunButton:
         target = ui->sieveBuilderEntry;
         gen = new FunctionGenerator(nullptr, functionReturnSIV, target->text());
+        break;
+    case envBuilderFunButton:
+        target = ui->envBuilderEntry;
+        gen = new FunctionGenerator(nullptr, functionReturnENV, target->text());
         break;
     case attributesSpaFunButton:
         target = ui->spaEntry;
