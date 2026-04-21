@@ -40,6 +40,9 @@ public:
     // Return the folder item for the given type string, or nullptr if unknown
     QStandardItem* folderForType(const QString& typeStr) const;
 
+    // Return the type string of the currently selected palette item, or empty string if none
+    QString selectedType() const;
+
     // Handle row removals from palette
     void onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 

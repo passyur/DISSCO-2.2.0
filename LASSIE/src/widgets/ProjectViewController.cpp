@@ -903,6 +903,10 @@ void ProjectView::insertObject() {
     if (!newObject)
         newObject = new FileNewObject(mainWindow);
 
+    const QString selectedType = paletteView->selectedType();
+    if (!selectedType.isEmpty())
+        newObject->setDefaultType(selectedType);
+
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
         QString nameStr = newObject->ui->objNameEntry->text();
