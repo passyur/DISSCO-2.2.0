@@ -327,6 +327,13 @@ void EventAttributesViewController::saveCurrentShownEventData() {
                     .arg(newName));
             return;
         }
+
+	if (type == bottom && !newName.isEmpty() &&
+            newName[0] != QLatin1Char('s') && newName[0] != QLatin1Char('n')) {
+            QMessageBox::warning(this, "Invalid Name",
+                "Bottom Event names must start with 's' or 'n'.");
+            return;
+        }
     }
 
     if (type == bottom) {
