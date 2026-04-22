@@ -18,6 +18,7 @@ public:
     void updateLabels();
     int rowCount() const { return m_rows.size(); }
     void setTitle(const QString& text);
+    void setRowText(int index, const QString& text);
     void hideButtons();
     void hideTitle();
 

@@ -66,8 +66,13 @@ void SPAChannel::updateLabels() {
     }
 }
 
-void SPAChannel::setTitle(const QString& text) { 
-    if (m_titleLabel) m_titleLabel->setText(text); 
+void SPAChannel::setTitle(const QString& text) {
+    if (m_titleLabel) m_titleLabel->setText(text);
+}
+
+void SPAChannel::setRowText(int index, const QString& text) {
+    if (index >= 0 && index < m_rows.size())
+        m_rows[index]->setText(text);
 }
 
 void SPAChannel::hideButtons() {
