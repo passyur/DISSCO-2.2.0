@@ -151,7 +151,7 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
 
     // --- Left panel: model list ---------------------------------------------
     m_listModel = new QStandardItemModel(this);
-    m_listModel->setHorizontalHeaderLabels({tr("Id")});
+    m_listModel->setHorizontalHeaderLabels({tr("id")});
 
     m_treeView = new QTreeView;
     m_treeView->setModel(m_listModel);
@@ -255,6 +255,7 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     m_rightStack->setCurrentIndex(m_emptyPageIndex);
 
     splitter->addWidget(m_rightStack);
+    splitter->setCollapsible(1, false); // prevent collapsing the markov window view
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
     splitter->setSizes({160, 740});
