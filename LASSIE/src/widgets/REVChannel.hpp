@@ -22,6 +22,14 @@ public:
     void hideButtons();
     void setTitle(const QString& text);
 
+    void setRoomSizeText(const QString& text);
+    void setReverbText(const QString& text);
+    void setHillowText(const QString& text);
+    void setAllGainText(const QString& text);
+    void setDelayText(const QString& text);
+    void setCombGainText(const QString& text);
+    void setLPGainText(const QString& text);
+
 signals:
     void textChanged();
     void insertChannelRequested(REVChannel* self);

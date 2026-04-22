@@ -123,3 +123,11 @@ void REVChannel::hideButtons() {
     m_insBtn->hide();
     m_rmBtn->hide();
 }
+
+void REVChannel::setRoomSizeText(const QString& text) { if (room_size) room_size->setText(text); }
+void REVChannel::setReverbText(const QString& text)   { if (reverb)    reverb->setText(text); }
+void REVChannel::setHillowText(const QString& text)   { if (hillow)    hillow->setText(text); }
+void REVChannel::setAllGainText(const QString& text)  { if (all_gain)  all_gain->setText(text); }
+void REVChannel::setDelayText(const QString& text)    { if (delay)     delay->setText(text); }
+void REVChannel::setCombGainText(const QString& text) { if (comb_gain) comb_gain->setText(text); }
+void REVChannel::setLPGainText(const QString& text)   { if (lp_gain)   lp_gain->setText(text); }
