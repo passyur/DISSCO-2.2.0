@@ -34,6 +34,7 @@ void SPAChannel::addRow(int index, bool silent) {
 
     m_rows.insert(index, row);
     m_rowsLayout->insertWidget(index, row);
+    if (m_isPartialMode) updateLabels();
 
     connect(row, &FunctionEntryRow::textChanged, this, &SPAChannel::textChanged);
     if (m_isPartialMode) {
