@@ -132,12 +132,6 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     nameFil->setFlags(nameFil->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
     model->appendRow({folderFil, nameFil});
 
-    folderMea = new QStandardItem("Folder");
-    folderMea->setFlags(folderMea->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
-    QStandardItem* nameMea = new QStandardItem("Measurement");
-    nameMea->setFlags(nameMea->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsEditable);
-    model->appendRow({folderMea, nameMea});
-
     // Calls objectActivated
     connect(treeView, &QTreeView::doubleClicked, this, &PaletteViewController::objectActivated);
 
@@ -176,7 +170,6 @@ PaletteViewController::PaletteViewController(ProjectView* projectView)
     eventsByType["Reverb"] = std::vector<IEvent*>();
     eventsByType["Note"] = std::vector<IEvent*>();
     eventsByType["Filter"] = std::vector<IEvent*>();
-    eventsByType["Measurement"] = std::vector<IEvent*>();
 }
 
 PaletteViewController::~PaletteViewController() = default;
@@ -255,7 +248,6 @@ QStandardItem* PaletteViewController::folderForType(const QString& typeStr) cons
     if (typeStr == "Pattern")        return folderPat;
     if (typeStr == "Reverb")         return folderRev;
     if (typeStr == "Filter")         return folderFil;
-    if (typeStr == "Measurement")    return folderMea;
     return nullptr;
 }
 
@@ -617,9 +609,6 @@ void PaletteViewController::onRowsInserted(const QModelIndex &parent, int first,
     }
     else if (folderName == "Filter") {
         eventType = Eventtype::filter;
-    }
-    else if (folderName == "Measurement") {
-        eventType = Eventtype::mea;
     }
     else {
         return; // Unknown folder type

@@ -38,7 +38,7 @@ void FileNewObject::setDefaultType(const QString& typeStr)
         QList<QRadioButton*> buttons = {
             ui->buttonHigh, ui->buttonMid, ui->buttonLow, ui->buttonBottom,
             ui->buttonSpectrum, ui->buttonNote, ui->buttonEnv, ui->buttonSiv,
-            ui->buttonSpa, ui->buttonPat, ui->buttonRev, ui->buttonFil, ui->buttonMea
+            ui->buttonSpa, ui->buttonPat, ui->buttonRev, ui->buttonFil
         };
         for (QRadioButton* btn : buttons)
             btn->setAutoExclusive(false);
@@ -61,7 +61,6 @@ void FileNewObject::setDefaultType(const QString& typeStr)
     else if (typeStr == "Pattern")        ui->buttonPat->setChecked(true);
     else if (typeStr == "Reverb")         ui->buttonRev->setChecked(true);
     else if (typeStr == "Filter")         ui->buttonFil->setChecked(true);
-    else if (typeStr == "Measurement")    ui->buttonMea->setChecked(true);
 }
 
 void FileNewObject::validateInput()
@@ -70,8 +69,7 @@ void FileNewObject::validateInput()
         ui->buttonHigh->isChecked() || ui->buttonMid->isChecked() || ui->buttonLow->isChecked()
         || ui->buttonBottom->isChecked() || ui->buttonSpectrum->isChecked() || ui->buttonNote->isChecked()
         || ui->buttonEnv->isChecked() || ui->buttonSiv->isChecked() || ui->buttonSpa->isChecked()
-        || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked()
-        || ui->buttonMea->isChecked();
+        || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked();
 
     bool bottomSelected = ui->buttonBottom->isChecked();
     QString text = ui->objNameEntry->text();
@@ -97,8 +95,7 @@ void FileNewObject::accept()
         ui->buttonHigh->isChecked() || ui->buttonMid->isChecked() || ui->buttonLow->isChecked()
         || ui->buttonBottom->isChecked() || ui->buttonSpectrum->isChecked() || ui->buttonNote->isChecked()
         || ui->buttonEnv->isChecked() || ui->buttonSiv->isChecked() || ui->buttonSpa->isChecked()
-        || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked()
-        || ui->buttonMea->isChecked();
+        || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked();
 
     if (!typeSelected || ui->objNameEntry->text().simplified().isEmpty())
         return;
@@ -116,7 +113,6 @@ void FileNewObject::accept()
     else if (ui->buttonPat->isChecked())      typeStr = "Pattern";
     else if (ui->buttonRev->isChecked())      typeStr = "Reverb";
     else if (ui->buttonFil->isChecked())      typeStr = "Filter";
-    else if (ui->buttonMea->isChecked())      typeStr = "Measurement";
 
     QString name = ui->objNameEntry->text().simplified();
 

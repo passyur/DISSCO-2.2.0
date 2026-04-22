@@ -63,7 +63,6 @@ public:
     QStandardItem* folderPat;
     QStandardItem* folderRev;
     QStandardItem* folderFil;
-    QStandardItem* folderMea;
 
 private slots:
     void onContextMenuRequested(const QPoint& pos);

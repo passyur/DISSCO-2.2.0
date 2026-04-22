@@ -126,7 +126,6 @@ inline QString eventtypeToDisplayString(int type) {
         case folder:  return "Folder";
         case note:    return "Note";
         case filter:  return "Filter";
-        case mea:     return "Measurement";
         default:      return QString::number(type);
     }
 }
@@ -147,7 +146,6 @@ inline QString displayStringToEventtypeString(const QString& s) {
     if (s == "Folder")          return "11";
     if (s == "Note")            return "12";
     if (s == "Filter")          return "13";
-    if (s == "Measurement")     return "14";
     return s; // already an integer string or unknown — pass through
 }
 

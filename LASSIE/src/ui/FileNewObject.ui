@@ -127,17 +127,6 @@
         </item>
        </layout>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="objectGroup14Layout">
-        <item>
-         <widget class="QRadioButton" name="buttonMea">
-          <property name="text">
-           <string>Measurement</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
     </widget>
    </item>

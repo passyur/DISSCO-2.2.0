@@ -1007,13 +1007,6 @@ void ProjectView::insertObject() {
         // Create QStandardItems with proper user roles
         folder->appendRow(PVCHelper::make_child_palette_tuple(typeStr, nameStr));
 
-        // Commented out because no structs for mea event yet
-        /* else if (newObject->ui->buttonMea->isChecked()) {
-            QStandardItem* newObjectType = new QStandardItem("Measurement");
-            QStandardItem* newObjectName = new QStandardItem(newObject->ui->objNameEntry->text());
-            paletteView->folderMea->appendRow({newObjectType, newObjectName});
-        } */
-        
         modifiedButNotSaved = true;
         MUtilities::modified();
         delete newObject;
@@ -1034,7 +1027,6 @@ static Eventtype eventtypeFromString(const QString& s) {
     if (s == "Pattern")       return pattern;
     if (s == "Reverb")        return reverb;
     if (s == "Filter")        return filter;
-    if (s == "Measurement")   return mea;
     return top; // fallback (should not happen for deletable types)
 }
 
