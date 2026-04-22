@@ -757,6 +757,89 @@ void FunctionGenerator::setupUi()
         // <Entry>
         DOMElement* thisElement = functionNameElement->getNextElementSibling();
         ui->markovEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "REV_Simple" || functionName == "REV_Medium" || functionName == "REV_Advanced") {
+        selectComboItem(functionName);
+        // selectComboItem → handleFunctionChanged → sets REVMethodFlag, creates 1 default SOUND channel
+
+        DOMElement* applyElement = functionNameElement->getNextElementSibling(); // <Apply>
+        std::string applyMethod = getFunctionString(applyElement);
+
+        // Block signals to prevent handleRevApplyMethodChanged from firing twice
+        // (once per radio button toggling) and creating orphaned layout widgets.
+        {
+            QSignalBlocker sb1(ui->revApplySound);
+            QSignalBlocker sb2(ui->revApplyPartial);
+            if (applyMethod == "PARTIAL") {
+                ui->revApplyPartial->setChecked(true);
+                ui->revApplySound->setChecked(false);
+            }
+        }
+
+        // Discard the default SOUND channel; we'll build fresh from the XML data.
+        clearRevChannels();
+
+        DOMElement* firstContainer = applyElement->getNextElementSibling(); // <Sizes> or <Percents>
+
+        if (functionName == "REV_Simple") {
+            // <Sizes><Size>...</Size>...</Sizes>
+            DOMElement* sizeEl = firstContainer->getFirstElementChild();
+            while (sizeEl != nullptr) {
+                REVChannel* chan = REVInsertChannel(m_revChannels.isEmpty() ? nullptr : m_revChannels.last());
+                chan->setRoomSizeText(QString::fromStdString(getFunctionString(sizeEl)));
+                sizeEl = sizeEl->getNextElementSibling();
+            }
+        } else if (functionName == "REV_Medium") {
+            // <Percents>, <Spreads>, <AllPasses>, <Delays>
+            DOMElement* spreadsEl   = firstContainer->getNextElementSibling();
+            DOMElement* allpassesEl = spreadsEl   ? spreadsEl->getNextElementSibling()   : nullptr;
+            DOMElement* delaysEl    = allpassesEl ? allpassesEl->getNextElementSibling() : nullptr;
+
+            DOMElement* pEl = firstContainer->getFirstElementChild();
+            DOMElement* sEl = spreadsEl   ? spreadsEl->getFirstElementChild()   : nullptr;
+            DOMElement* aEl = allpassesEl ? allpassesEl->getFirstElementChild() : nullptr;
+            DOMElement* dEl = delaysEl    ? delaysEl->getFirstElementChild()    : nullptr;
+
+            while (pEl != nullptr) {
+                REVChannel* chan = REVInsertChannel(m_revChannels.isEmpty() ? nullptr : m_revChannels.last());
+                chan->setReverbText(QString::fromStdString(getFunctionString(pEl)));
+                if (sEl) { chan->setHillowText(QString::fromStdString(getFunctionString(sEl)));  sEl = sEl->getNextElementSibling(); }
+                if (aEl) { chan->setAllGainText(QString::fromStdString(getFunctionString(aEl)));  aEl = aEl->getNextElementSibling(); }
+                if (dEl) { chan->setDelayText(QString::fromStdString(getFunctionString(dEl)));    dEl = dEl->getNextElementSibling(); }
+                pEl = pEl->getNextElementSibling();
+            }
+        } else { // REV_Advanced
+            // <Percents>, <CombGainLists>, <LPGainLists>, <AllPasses>, <Delays>
+            DOMElement* combEl      = firstContainer->getNextElementSibling();
+            DOMElement* lpEl        = combEl      ? combEl->getNextElementSibling()      : nullptr;
+            DOMElement* allpassesEl = lpEl        ? lpEl->getNextElementSibling()        : nullptr;
+            DOMElement* delaysEl    = allpassesEl ? allpassesEl->getNextElementSibling() : nullptr;
+
+            DOMElement* pEl = firstContainer->getFirstElementChild();
+            DOMElement* cEl = combEl      ? combEl->getFirstElementChild()      : nullptr;
+            DOMElement* lEl = lpEl        ? lpEl->getFirstElementChild()        : nullptr;
+            DOMElement* aEl = allpassesEl ? allpassesEl->getFirstElementChild() : nullptr;
+            DOMElement* dEl = delaysEl    ? delaysEl->getFirstElementChild()    : nullptr;
+
+            while (pEl != nullptr) {
+                REVChannel* chan = REVInsertChannel(m_revChannels.isEmpty() ? nullptr : m_revChannels.last());
+                chan->setReverbText(QString::fromStdString(getFunctionString(pEl)));
+                if (cEl) { chan->setCombGainText(QString::fromStdString(getFunctionString(cEl))); cEl = cEl->getNextElementSibling(); }
+                if (lEl) { chan->setLPGainText(QString::fromStdString(getFunctionString(lEl)));   lEl = lEl->getNextElementSibling(); }
+                if (aEl) { chan->setAllGainText(QString::fromStdString(getFunctionString(aEl)));  aEl = aEl->getNextElementSibling(); }
+                if (dEl) { chan->setDelayText(QString::fromStdString(getFunctionString(dEl)));    dEl = dEl->getNextElementSibling(); }
+                pEl = pEl->getNextElementSibling();
+            }
+        }
+
+        // Restore SOUND-mode presentation (title + hidden buttons) if applicable.
+        if (applyMethod != "PARTIAL" && !m_revChannels.isEmpty()) {
+            m_revChannels.first()->setTitle("Sound");
+            m_revChannels.first()->hideButtons();
+        }
+    } else if (functionName == "ReadREVFile") {
+        selectComboItem(functionName);
+        DOMElement* fileElement = functionNameElement->getNextElementSibling(); // <File>
+        ui->readRevFileEdit->setText(QString::fromStdString(getFunctionString(fileElement)));
     } else if (functionName == "SPA") {
         DOMElement* methodEl   = functionNameElement->getNextElementSibling(); // <Method>
         DOMElement* applyEl    = methodEl->getNextElementSibling();            // <Apply>
@@ -1953,8 +2036,8 @@ void FunctionGenerator::REVTextChanged(){
         case 1: stringbuffer = "<Fun><Name>REV_Medium</Name><Apply>"; break;
         case 2: stringbuffer = "<Fun><Name>REV_Advanced</Name><Apply>"; break;
     }
-    if (ui->revApplySound->isChecked() == 0) { stringbuffer = stringbuffer +"SOUND"; }
-    else if (ui->revApplyPartial->isChecked() == 1) { stringbuffer = stringbuffer +"PARTIAL"; }
+    if (ui->revApplySound->isChecked()) { stringbuffer += "SOUND"; }
+    else { stringbuffer += "PARTIAL"; }
     stringbuffer += "</Apply>";
 
     switch (REVMethodFlag) {
@@ -2042,7 +2125,8 @@ void FunctionGenerator::updateRevChaLabels() {
 }
 void FunctionGenerator::clearRevChannels() {
     for (REVChannel* chan : m_revChannels) {
-        chan->deleteLater();
+        ui->revScrollWindowLayout->removeWidget(chan);
+        delete chan;
     }
     m_revChannels.clear();
     REVTextChanged();
