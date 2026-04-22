@@ -632,6 +632,85 @@ void FunctionGenerator::setupUi()
         // <Scale>
         thisElement = thisElement->getNextElementSibling();
         ui->envLibScalingEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Select") {
+        selectComboItem("Select");
+
+        // Clear any default nodes added by handleFunctionChanged
+        while (ui->selectScrollLayout->count() > 1) {
+            QLayoutItem* item = ui->selectScrollLayout->itemAt(0);
+            if (item && item->widget()) {
+                Select* node = qobject_cast<Select*>(item->widget());
+                if (node) { removeSelectNodeButtonClicked(node); }
+                else break;
+            } else break;
+        }
+
+        // Serialize <List> inner content
+        DOMElement* listElement  = functionNameElement->getNextElementSibling(); // <List>
+        DOMElement* indexElement = listElement->getNextElementSibling();          // <Index>
+
+        std::string listContent;
+        if (listElement != nullptr && listElement->getFirstChild() != nullptr) {
+            XMLCh lsStr[3] = {chLatin_L, chLatin_S, chNull};
+            DOMImplementation* lsImpl = DOMImplementationRegistry::getDOMImplementation(lsStr);
+            DOMLSSerializer* lsSer = ((DOMImplementationLS*)lsImpl)->createLSSerializer();
+            XMLCh* lsBla = lsSer->writeToString(listElement);
+            char* lsRaw = XMLString::transcode(lsBla);
+            std::string full(lsRaw);
+            XMLString::release(&lsRaw);
+            XMLString::release(&lsBla);
+            delete lsSer;
+            size_t s0 = full.find('>') + 1;
+            size_t s1 = full.rfind('<');
+            if (s0 < s1) listContent = full.substr(s0, s1 - s0);
+        }
+
+        // Split by top-level commas (skip commas inside <Fun>…</Fun>)
+        std::vector<std::string> selectItems;
+        if (!listContent.empty()) {
+            std::string rem = listContent;
+            while (!rem.empty()) {
+                size_t cp = rem.find(',');
+                size_t fp = rem.find("<Fun>");
+                while (fp != std::string::npos && cp != std::string::npos && fp < cp) {
+                    int depth = 1;
+                    size_t pos = fp + 5;
+                    while (depth > 0 && pos < rem.size()) {
+                        size_t nf = rem.find("<Fun>", pos);
+                        size_t ne = rem.find("</Fun>", pos);
+                        if (nf != std::string::npos && (ne == std::string::npos || nf < ne)) {
+                            depth++; pos = nf + 5;
+                        } else if (ne != std::string::npos) {
+                            depth--; pos = ne + 6;
+                        } else break;
+                    }
+                    cp = rem.find(',', pos);
+                    fp = rem.find("<Fun>", pos);
+                }
+                if (cp == std::string::npos) { selectItems.push_back(rem); break; }
+                selectItems.push_back(rem.substr(0, cp));
+                rem = rem.substr(cp + 1);
+            }
+        }
+
+        for (const std::string& itemStr : selectItems) {
+            // Trim leading space that may follow a comma separator
+            std::string trimmed = itemStr;
+            if (!trimmed.empty() && trimmed.front() == ' ') trimmed = trimmed.substr(1);
+            if (!trimmed.empty()) {
+                addSelectNodeButtonClicked();
+                // The newly added node is the last widget before the spacer
+                int last = ui->selectScrollLayout->count() - 2;
+                QLayoutItem* item = ui->selectScrollLayout->itemAt(last);
+                if (item && item->widget()) {
+                    Select* node = qobject_cast<Select*>(item->widget());
+                    if (node) node->setValText(QString::fromStdString(trimmed));
+                }
+            }
+        }
+
+        ui->selectIndexEdit->setText(
+            QString::fromStdString(getFunctionString(indexElement)));
     } else if (functionName == "Markov") {
         selectComboItem("GetFromMarkovChain");
         // <Entry>
