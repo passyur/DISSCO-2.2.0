@@ -2,6 +2,7 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QCoreApplication>
 #include <QClipboard>
 #include <QCloseEvent>
 #include <QDoubleValidator>
@@ -18,7 +19,9 @@
 #include <QLineEdit>
 #include <QLocale>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
+#include <QToolButton>
 #include <QRegularExpression>
 #include <QSplitter>
 #include <QStackedWidget>
@@ -108,21 +111,83 @@ private:
 class SnapshotCommand : public QUndoCommand {
 public:
     SnapshotCommand(MarkovModelLibraryWindow* win,
+                    int modelIdx,
                     MarkovModelLibraryWindow::EditorSnapshot before,
                     MarkovModelLibraryWindow::EditorSnapshot after,
                     const QString& text)
         : QUndoCommand(text),
           m_win(win),
+          m_modelIdx(modelIdx),
           m_before(std::move(before)),
           m_after(std::move(after)) {}
 
-    void undo() override { m_win->applySnapshot(m_before); }
-    void redo() override { m_win->applySnapshot(m_after); }
+    void undo() override {
+        m_win->applySnapshotToWithDiff(m_modelIdx, m_after, m_before);
+    }
+    void redo() override {
+        m_win->applySnapshotToWithDiff(m_modelIdx, m_before, m_after);
+    }
 
 private:
     MarkovModelLibraryWindow* m_win;
+    int m_modelIdx;
     MarkovModelLibraryWindow::EditorSnapshot m_before;
     MarkovModelLibraryWindow::EditorSnapshot m_after;
+};
+
+// Create: first redo() appends a default model; subsequent redoes restore
+// whatever serialized content the model had when the user last undid it.
+class CreateModelCommand : public QUndoCommand {
+public:
+    // If initialSerialized is empty, the first redo() inserts a default model
+    // (plain "Create New"); otherwise the first redo() inserts that content
+    // (used for "Duplicate"). Subsequent redoes reuse whatever serialized
+    // state the model had when the user last undid the creation.
+    CreateModelCommand(MarkovModelLibraryWindow* win, int idx,
+                       QString label,
+                       QString initialSerialized = {})
+        : QUndoCommand(std::move(label)),
+          m_win(win),
+          m_idx(idx),
+          m_serialized(std::move(initialSerialized)),
+          m_hasSerialized(!m_serialized.isEmpty()) {}
+
+    void redo() override {
+        if (m_hasSerialized) m_win->insertModelAt(m_idx, m_serialized);
+        else                 m_win->insertDefaultModelAt(m_idx);
+    }
+    void undo() override {
+        m_serialized = m_win->serializeModelAt(m_idx);
+        m_hasSerialized = true;
+        m_win->removeModelAt(m_idx);
+    }
+
+private:
+    MarkovModelLibraryWindow* m_win;
+    int m_idx;
+    QString m_serialized;
+    bool m_hasSerialized = false;
+};
+
+// Delete: push() runs redo() which performs the removal, so the caller must
+// have captured the serialized content *before* pushing.
+class DeleteModelCommand : public QUndoCommand {
+public:
+    DeleteModelCommand(MarkovModelLibraryWindow* win, int idx, QString serialized)
+        : QUndoCommand(
+              QCoreApplication::translate("MarkovModelLibraryWindow",
+                                          "Delete Markov model %1").arg(idx)),
+          m_win(win),
+          m_idx(idx),
+          m_serialized(std::move(serialized)) {}
+
+    void redo() override { m_win->removeModelAt(m_idx); }
+    void undo() override { m_win->insertModelAt(m_idx, m_serialized); }
+
+private:
+    MarkovModelLibraryWindow* m_win;
+    int m_idx;
+    QString m_serialized;
 };
 
 QStringList numberedHeaders(int n) {
@@ -161,7 +226,44 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     m_treeView->setSelectionMode(QAbstractItemView::SingleSelection);
     m_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     m_treeView->header()->setStretchLastSection(true);
-    splitter->addWidget(m_treeView);
+
+    // Left panel: tree view + add/remove bar.
+    auto* leftPanel = new QWidget;
+    auto* leftLayout = new QVBoxLayout(leftPanel);
+    leftLayout->setContentsMargins(0, 0, 0, 0);
+    leftLayout->setSpacing(0);
+    leftLayout->addWidget(m_treeView, /*stretch=*/1);
+
+    auto* buttonBar = new QWidget;
+    auto* buttonBarLayout = new QHBoxLayout(buttonBar);
+    buttonBarLayout->setContentsMargins(2, 2, 2, 2);
+    buttonBarLayout->setSpacing(2);
+
+    auto* addButton = new QToolButton;
+    addButton->setText(QStringLiteral("+"));
+    addButton->setToolTip(tr("Create new Markov model"));
+    addButton->setAutoRaise(true);
+
+    auto* removeButton = new QToolButton;
+    removeButton->setText(QStringLiteral("\u2212"));  // U+2212 MINUS SIGN
+    removeButton->setToolTip(tr("Delete selected Markov model"));
+    removeButton->setAutoRaise(true);
+
+    buttonBarLayout->addWidget(addButton);
+    buttonBarLayout->addWidget(removeButton);
+    buttonBarLayout->addStretch(1);
+    leftLayout->addWidget(buttonBar);
+
+    connect(addButton, &QToolButton::clicked,
+            this, &MarkovModelLibraryWindow::createNewModel);
+    connect(removeButton, &QToolButton::clicked,
+            this, &MarkovModelLibraryWindow::removeModel);
+
+    // Keep the remove button disabled when nothing is selected. Piggyback on
+    // the existing enablement path used by the context menu's Delete action.
+    m_removeButton = removeButton;
+
+    splitter->addWidget(leftPanel);
 
     // --- Right panel: stacked (empty placeholder + editor) -----------------
     m_rightStack = new QStackedWidget;
@@ -293,6 +395,21 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     installCopyPasteShortcuts(m_distView);
     installCopyPasteShortcuts(m_valueView);
     installCopyPasteShortcuts(m_matrixView);
+
+    // Window-scoped undo/redo: works from anywhere in the window (tree view,
+    // size entry, plus/minus buttons, etc.) — not just when a table view has
+    // focus. While a cell editor (QLineEdit) is focused, attemptUndo/Redo
+    // defers to the QLineEdit's native character-level undo so in-progress
+    // typing can be undone character-by-character.
+    auto* winUndo = new QShortcut(QKeySequence::Undo, this);
+    winUndo->setContext(Qt::WindowShortcut);
+    connect(winUndo, &QShortcut::activated,
+            this, &MarkovModelLibraryWindow::attemptUndo);
+
+    auto* winRedo = new QShortcut(QKeySequence::Redo, this);
+    winRedo->setContext(Qt::WindowShortcut);
+    connect(winRedo, &QShortcut::activated,
+            this, &MarkovModelLibraryWindow::attemptRedo);
 }
 
 MarkovModelLibraryWindow::~MarkovModelLibraryWindow() = default;
@@ -433,8 +550,10 @@ void MarkovModelLibraryWindow::onSelectionChanged() {
         saveEditorIntoModel(previousRow);
     }
 
-    // Undo history is specific to one model's editor session. Discard it.
-    m_undoStack->clear();
+    // NOTE: we intentionally do NOT clear the undo stack here. Editor-level
+    // SnapshotCommands remember which model they apply to (and switch the
+    // tree-view selection on undo/redo), and list-level Create/Delete
+    // commands need to persist across selection changes.
 
     const QModelIndexList selected =
         m_treeView->selectionModel()->selectedRows();
@@ -516,12 +635,10 @@ void MarkovModelLibraryWindow::createNewModel() {
         saveEditorIntoModel(currentSelection);
     }
 
-    pm->markovmodels().append(MarkovModel<float>());
-    MUtilities::modified();
-
-    rebuildModelList();
-    const QModelIndex idx = m_listModel->index(pm->markovmodels().size() - 1, 0);
-    m_treeView->setCurrentIndex(idx);
+    // Push as an undoable command; redo() performs the actual append.
+    const int newIdx = pm->markovmodels().size();
+    m_undoStack->push(new CreateModelCommand(
+        this, newIdx, tr("Create Markov model %1").arg(newIdx)));
 }
 
 void MarkovModelLibraryWindow::duplicateModel() {
@@ -531,13 +648,14 @@ void MarkovModelLibraryWindow::duplicateModel() {
 
     saveEditorIntoModel(currentSelection);
 
-    if (currentSelection < pm->markovmodels().size())
-        pm->markovmodels().append(pm->markovmodels()[currentSelection]);
-    MUtilities::modified();
-
-    rebuildModelList();
-    const QModelIndex idx = m_listModel->index(pm->markovmodels().size() - 1, 0);
-    m_treeView->setCurrentIndex(idx);
+    // Duplicate = create a new model at the end, seeded with the current
+    // model's serialized contents. CreateModelCommand handles this directly.
+    const int newIdx = pm->markovmodels().size();
+    const QString serialized = serializeModelAt(currentSelection);
+    m_undoStack->push(new CreateModelCommand(
+        this, newIdx,
+        tr("Duplicate Markov model %1").arg(currentSelection),
+        serialized));
 }
 
 void MarkovModelLibraryWindow::removeModel() {
@@ -545,31 +663,22 @@ void MarkovModelLibraryWindow::removeModel() {
     ProjectManager* pm = Inst::get_project_manager();
     if (!pm || !pm->get_curr_project()) return;
 
-    if (currentSelection < pm->markovmodels().size())
-        pm->markovmodels().erase(pm->markovmodels().begin() + currentSelection);
-    MUtilities::modified();
+    // Flush editor state into the MarkovModel so the snapshot captures the
+    // most recent edits.
+    saveEditorIntoModel(currentSelection);
 
-    const int removed = currentSelection;
-    currentSelection = -1;
-    rebuildModelList();
+    const int idx = currentSelection;
+    if (idx >= pm->markovmodels().size()) return;
 
-    const int remaining = m_listModel->rowCount();
-    if (remaining > 0) {
-        const int nextRow = std::min(removed, remaining - 1);
-        m_treeView->setCurrentIndex(m_listModel->index(nextRow, 0));
-    } else {
-        resizeTables(0);
-        m_sizeEntry->clear();
-        m_rightStack->setCurrentIndex(m_emptyPageIndex);
-        m_undoStack->clear();
-        updateContextMenuEnablement();
-    }
+    const QString serialized = serializeModelAt(idx);
+    m_undoStack->push(new DeleteModelCommand(this, idx, serialized));
 }
 
 void MarkovModelLibraryWindow::updateContextMenuEnablement() {
     const bool hasSelection = currentSelection >= 0;
     if (m_duplicateAction) m_duplicateAction->setEnabled(hasSelection);
     if (m_deleteAction)    m_deleteAction->setEnabled(hasSelection);
+    if (m_removeButton)    m_removeButton->setEnabled(hasSelection);
 }
 
 // ---------------------------------------------------------------------------
@@ -594,12 +703,12 @@ void MarkovModelLibraryWindow::installCopyPasteShortcuts(QTableView* view) {
     auto* undo = new QShortcut(QKeySequence::Undo, view);
     undo->setContext(Qt::WidgetShortcut);
     connect(undo, &QShortcut::activated,
-            m_undoStack, &QUndoStack::undo);
+            this, &MarkovModelLibraryWindow::attemptUndo);
 
     auto* redo = new QShortcut(QKeySequence::Redo, view);
     redo->setContext(Qt::WidgetShortcut);
     connect(redo, &QShortcut::activated,
-            m_undoStack, &QUndoStack::redo);
+            this, &MarkovModelLibraryWindow::attemptRedo);
 }
 
 void MarkovModelLibraryWindow::copySelection(QTableView* view) const {
@@ -775,7 +884,284 @@ void MarkovModelLibraryWindow::pushSnapshotCommand(const EditorSnapshot& before,
         before.matrix == after.matrix) {
         return;
     }
+    if (currentSelection < 0) return;  // nothing to attach the command to
     // push() calls redo() once; state is already `after`, and applySnapshot
     // is idempotent, so the extra call is cheap and correct.
-    m_undoStack->push(new SnapshotCommand(this, before, after, label));
+    m_undoStack->push(new SnapshotCommand(
+        this, currentSelection, before, after, label));
+}
+
+void MarkovModelLibraryWindow::applySnapshotTo(int modelIdx,
+                                               const EditorSnapshot& s) {
+    // Ensure the target model is the one currently loaded in the editor,
+    // so applySnapshot's save path writes into the right MarkovModel.
+    if (modelIdx != currentSelection) {
+        if (modelIdx < 0 || modelIdx >= m_listModel->rowCount()) return;
+        selectTreeRow(modelIdx);
+        // selectionChanged fired synchronously → currentSelection == modelIdx,
+        // and the model was loaded into the editor.
+    } else {
+        // Already the active model, but still scroll it into view so the user
+        // sees which row the undo/redo is affecting.
+        if (modelIdx >= 0 && modelIdx < m_listModel->rowCount())
+            m_treeView->scrollTo(m_listModel->index(modelIdx, 0));
+    }
+    applySnapshot(s);
+}
+
+void MarkovModelLibraryWindow::applySnapshotToWithDiff(
+        int modelIdx,
+        const EditorSnapshot& from,
+        const EditorSnapshot& to) {
+    applySnapshotTo(modelIdx, to);
+
+    // Clear any prior selection before highlighting the changed cells.
+    if (m_distView->selectionModel())
+        m_distView->selectionModel()->clearSelection();
+    if (m_valueView->selectionModel())
+        m_valueView->selectionModel()->clearSelection();
+    if (m_matrixView->selectionModel())
+        m_matrixView->selectionModel()->clearSelection();
+
+    // If the size itself changed, the notion of "which cells differ" is
+    // ill-defined — skip highlighting rather than selecting everything.
+    if (from.size != to.size) return;
+
+    const int sz = to.size;
+    if (sz <= 0) return;
+
+    auto selectCell = [](QTableView* view, QStandardItemModel* model,
+                         int row, int col) {
+        if (!view || !model) return;
+        auto* sm = view->selectionModel();
+        if (!sm) return;
+        sm->select(model->index(row, col),
+                   QItemSelectionModel::Select);
+    };
+
+    QTableView* firstChangedView = nullptr;
+    QModelIndex firstChangedIndex;
+
+    // 1xN initial-distribution row.
+    if (from.dist.size() == sz && to.dist.size() == sz) {
+        for (int i = 0; i < sz; ++i) {
+            if (from.dist[i] != to.dist[i]) {
+                selectCell(m_distView, m_distModel, 0, i);
+                if (!firstChangedView) {
+                    firstChangedView = m_distView;
+                    firstChangedIndex = m_distModel->index(0, i);
+                }
+            }
+        }
+    }
+
+    // 1xN state-values row.
+    if (from.values.size() == sz && to.values.size() == sz) {
+        for (int i = 0; i < sz; ++i) {
+            if (from.values[i] != to.values[i]) {
+                selectCell(m_valueView, m_valueModel, 0, i);
+                if (!firstChangedView) {
+                    firstChangedView = m_valueView;
+                    firstChangedIndex = m_valueModel->index(0, i);
+                }
+            }
+        }
+    }
+
+    // NxN transition matrix.
+    if (from.matrix.size() == sz * sz && to.matrix.size() == sz * sz) {
+        for (int r = 0; r < sz; ++r) {
+            for (int c = 0; c < sz; ++c) {
+                const int k = r * sz + c;
+                if (from.matrix[k] != to.matrix[k]) {
+                    selectCell(m_matrixView, m_matrixModel, r, c);
+                    if (!firstChangedView) {
+                        firstChangedView = m_matrixView;
+                        firstChangedIndex = m_matrixModel->index(r, c);
+                    }
+                }
+            }
+        }
+    }
+
+    // Make one of the changed cells the current index and scroll it into
+    // view so the user sees the highlight.
+    if (firstChangedView && firstChangedIndex.isValid()) {
+        firstChangedView->selectionModel()->setCurrentIndex(
+            firstChangedIndex, QItemSelectionModel::NoUpdate);
+        firstChangedView->scrollTo(firstChangedIndex);
+    }
+}
+
+void MarkovModelLibraryWindow::selectTreeRow(int row) {
+    if (!m_listModel || !m_treeView) return;
+    if (row < 0 || row >= m_listModel->rowCount()) return;
+    const QModelIndex idx = m_listModel->index(row, 0);
+    m_treeView->selectionModel()->setCurrentIndex(
+        idx,
+        QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    m_treeView->scrollTo(idx);
+}
+
+// ---------------------------------------------------------------------------
+// List-level helpers used by CreateModelCommand / DeleteModelCommand.
+// ---------------------------------------------------------------------------
+
+void MarkovModelLibraryWindow::insertDefaultModelAt(int idx) {
+    ProjectManager* pm = Inst::get_project_manager();
+    if (!pm || !pm->get_curr_project()) return;
+    auto& v = pm->markovmodels();
+    idx = std::clamp(idx, 0, static_cast<int>(v.size()));
+    v.insert(v.begin() + idx, MarkovModel<float>());
+    MUtilities::modified();
+
+    rebuildModelList();
+    // Select the newly-inserted row.
+    selectTreeRow(idx);
+}
+
+void MarkovModelLibraryWindow::insertModelAt(int idx, const QString& serialized) {
+    ProjectManager* pm = Inst::get_project_manager();
+    if (!pm || !pm->get_curr_project()) return;
+    auto& v = pm->markovmodels();
+    idx = std::clamp(idx, 0, static_cast<int>(v.size()));
+    MarkovModel<float> m;
+    if (!serialized.isEmpty()) m.from_str(serialized.toStdString());
+    v.insert(v.begin() + idx, std::move(m));
+    MUtilities::modified();
+
+    rebuildModelList();
+    selectTreeRow(idx);
+}
+
+void MarkovModelLibraryWindow::removeModelAt(int idx) {
+    ProjectManager* pm = Inst::get_project_manager();
+    if (!pm || !pm->get_curr_project()) return;
+    auto& v = pm->markovmodels();
+    if (idx < 0 || idx >= static_cast<int>(v.size())) return;
+
+    // If we're deleting the currently-loaded model, clear the selection state
+    // first so the cascading onSelectionChanged doesn't try to save editor
+    // contents into a model that's about to disappear.
+    if (currentSelection == idx) currentSelection = -1;
+    else if (currentSelection > idx) currentSelection -= 1;
+
+    v.erase(v.begin() + idx);
+    MUtilities::modified();
+
+    rebuildModelList();
+
+    const int remaining = m_listModel->rowCount();
+    if (remaining > 0) {
+        const int nextRow = std::min(idx, remaining - 1);
+        m_treeView->selectionModel()->setCurrentIndex(
+            m_listModel->index(nextRow, 0),
+            QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    } else {
+        // selectionChanged may not fire (selection already empty) — force
+        // the empty-page transition explicitly.
+        m_treeView->selectionModel()->clearSelection();
+        currentSelection = -1;
+        resizeTables(0);
+        m_sizeEntry->clear();
+        m_rightStack->setCurrentIndex(m_emptyPageIndex);
+        updateContextMenuEnablement();
+    }
+}
+
+QString MarkovModelLibraryWindow::serializeModelAt(int idx) const {
+    ProjectManager* pm = Inst::get_project_manager();
+    if (!pm || !pm->get_curr_project()) return {};
+    auto& v = pm->markovmodels();
+    if (idx < 0 || idx >= static_cast<int>(v.size())) return {};
+
+    // MarkovModel's getters aren't const-qualified, so take a non-const ref.
+    auto& m = v[idx];
+    const int sz = m.getStateSize();
+    QString s = QString::number(sz) + "\n";
+    for (int j = 0; j < sz; ++j)
+        s += QString::number(m.getStateValue(j)) + " ";
+    s += "\n";
+    for (int j = 0; j < sz; ++j)
+        s += QString::number(m.getInitialProbability(j)) + " ";
+    s += "\n";
+    for (int i = 0; i < sz; ++i)
+        for (int j = 0; j < sz; ++j)
+            s += QString::number(m.getTransitionProbability(i, j)) + " ";
+    return s;
+}
+
+// ---------------------------------------------------------------------------
+// Prompt-wrapped undo/redo.
+// ---------------------------------------------------------------------------
+
+// Returns true if `w` is a descendant (in the QObject parent chain) of `root`.
+static bool isDescendantOf(QWidget* w, QWidget* root) {
+    for (QObject* o = w; o; o = o->parent()) {
+        if (o == root) return true;
+    }
+    return false;
+}
+
+bool MarkovModelLibraryWindow::focusIsInsideEditorTable() const {
+    QWidget* fw = QApplication::focusWidget();
+    if (!fw) return false;
+    return isDescendantOf(fw, m_distView)
+        || isDescendantOf(fw, m_valueView)
+        || isDescendantOf(fw, m_matrixView);
+}
+
+void MarkovModelLibraryWindow::attemptUndo() {
+    // When a QLineEdit has focus *outside* our editor tables (e.g. the size-
+    // entry field), let it handle Ctrl+Z character-by-character. Inside our
+    // table cells, we want Ctrl+Z to hit the editor-level undo stack — so we
+    // first commit whatever's in the open cell editor (by clearing its focus,
+    // which triggers the delegate's commit), then fall through to the stack.
+    if (auto* le = qobject_cast<QLineEdit*>(QApplication::focusWidget())) {
+        if (!focusIsInsideEditorTable()) {
+            if (le->isUndoAvailable()) { le->undo(); return; }
+        } else {
+            // Commit the in-progress cell edit so its pre-edit snapshot is
+            // pushed onto the stack, then undo that command.
+            le->clearFocus();
+        }
+    }
+    if (!m_undoStack->canUndo()) return;
+    const QString label = m_undoStack->undoText();
+    // Destructive: undoing a creation removes the model.
+    if (label.startsWith(QLatin1String("Create")) ||
+        label.startsWith(QLatin1String("Duplicate"))) {
+        const auto answer = QMessageBox::question(
+            this, tr("Undo"),
+            tr("Undo '%1'?").arg(label),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
+        if (answer != QMessageBox::Yes) return;
+    }
+    m_undoStack->undo();
+}
+
+void MarkovModelLibraryWindow::attemptRedo() {
+    // Symmetric guard: let a focused QLineEdit *outside* our editor tables
+    // redo its own character-level typing first; inside a cell editor, commit
+    // and fall through to the stack.
+    if (auto* le = qobject_cast<QLineEdit*>(QApplication::focusWidget())) {
+        if (!focusIsInsideEditorTable()) {
+            if (le->isRedoAvailable()) { le->redo(); return; }
+        } else {
+            le->clearFocus();
+        }
+    }
+    if (!m_undoStack->canRedo()) return;
+    const QString label = m_undoStack->redoText();
+    // Destructive: redoing a deletion removes the model again.
+    if (label.startsWith(QLatin1String("Delete"))) {
+        const auto answer = QMessageBox::question(
+            this, tr("Redo"),
+            tr("Redo '%1'?").arg(label),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No);
+        if (answer != QMessageBox::Yes) return;
+    }
+    m_undoStack->redo();
 }

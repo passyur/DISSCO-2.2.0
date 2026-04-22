@@ -15,6 +15,7 @@ class QStackedWidget;
 class QStandardItem;
 class QStandardItemModel;
 class QTableView;
+class QToolButton;
 class QTreeView;
 class QUndoStack;
 class ProjectView;
@@ -39,6 +40,20 @@ public:
     // Exposed so QUndoCommand subclasses can capture/restore editor state.
     EditorSnapshot snapshotEditor() const;
     void applySnapshot(const EditorSnapshot& s);
+    // Switches tree-view selection to modelIdx (if not already) and applies s.
+    void applySnapshotTo(int modelIdx, const EditorSnapshot& s);
+    // Same as applySnapshotTo(modelIdx, to), but additionally selects the
+    // cells in the editor tables whose content differs between `from` and
+    // `to` — used by undo/redo to highlight the cells that just changed.
+    void applySnapshotToWithDiff(int modelIdx,
+                                 const EditorSnapshot& from,
+                                 const EditorSnapshot& to);
+
+    // Exposed so list-level QUndoCommand subclasses can mutate the model list.
+    void insertDefaultModelAt(int idx);
+    void insertModelAt(int idx, const QString& serialized);
+    void removeModelAt(int idx);
+    QString serializeModelAt(int idx) const;
 
 protected:
     void hideEvent(QHideEvent* event) override;
@@ -64,9 +79,12 @@ private:
     void copySelection(QTableView* view) const;
     void pasteSelection(QTableView* view);
     void beginEditCapture();
+    void selectTreeRow(int row);
     void pushSnapshotCommand(const EditorSnapshot& before,
                              const EditorSnapshot& after,
                              const QString& label);
+    void attemptUndo();
+    void attemptRedo();
     QString serializeEditor() const;
 
     ProjectView* activeProject = nullptr;
@@ -77,6 +95,7 @@ private:
 
     QTreeView* m_treeView = nullptr;
     QStandardItemModel* m_listModel = nullptr;
+    QToolButton* m_removeButton = nullptr;
 
     QStackedWidget* m_rightStack = nullptr;
     int m_emptyPageIndex = 0;
