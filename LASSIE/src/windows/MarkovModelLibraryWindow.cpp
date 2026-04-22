@@ -21,6 +21,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QSplitter>
+#include <QStackedWidget>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QUndoCommand>
@@ -162,7 +163,22 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     m_treeView->header()->setStretchLastSection(true);
     splitter->addWidget(m_treeView);
 
-    // --- Right panel: editor ------------------------------------------------
+    // --- Right panel: stacked (empty placeholder + editor) -----------------
+    m_rightStack = new QStackedWidget;
+
+    // Empty page: a single centered message shown when no model is selected.
+    auto* emptyPage = new QWidget;
+    auto* emptyLayout = new QVBoxLayout(emptyPage);
+    emptyLayout->setContentsMargins(0, 0, 0, 0);
+    auto* emptyLabel = new QLabel(
+        tr("Select (or create) a Markov library from the list on the left"));
+    emptyLabel->setAlignment(Qt::AlignCenter);
+    emptyLabel->setWordWrap(true);
+    emptyLabel->setEnabled(false);  // muted look
+    emptyLayout->addWidget(emptyLabel);
+    m_emptyPageIndex = m_rightStack->addWidget(emptyPage);
+
+    // Editor page
     auto* rightPanel = new QWidget;
     auto* rightLayout = new QVBoxLayout(rightPanel);
     rightLayout->setContentsMargins(8, 8, 8, 8);
@@ -235,7 +251,10 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     matrixGroupLayout->addWidget(m_matrixView);
     rightLayout->addWidget(matrixGroup, /*stretch=*/1);
 
-    splitter->addWidget(rightPanel);
+    m_editorPageIndex = m_rightStack->addWidget(rightPanel);
+    m_rightStack->setCurrentIndex(m_emptyPageIndex);
+
+    splitter->addWidget(m_rightStack);
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
     splitter->setSizes({160, 740});
@@ -251,8 +270,12 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     updateContextMenuEnablement();
 
     // --- Signal wiring ------------------------------------------------------
-    connect(m_treeView->selectionModel(), &QItemSelectionModel::currentChanged,
-            this, &MarkovModelLibraryWindow::onSelectionChanged);
+    // selectionChanged (not currentChanged) — fires *after* Qt applies the
+    // selection, so hasSelection()/selectedRows() reflect the real state.
+    // currentChanged also fires when a focused tree view auto-assigns a
+    // currentIndex with no actual selection, which we don't want to react to.
+    connect(m_treeView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, [this]{ onSelectionChanged(); });
     connect(m_treeView, &QTreeView::customContextMenuRequested,
             this, &MarkovModelLibraryWindow::onRightClick);
     connect(m_sizeButton, &QPushButton::clicked,
@@ -280,6 +303,7 @@ void MarkovModelLibraryWindow::setActiveProject(ProjectView* project) {
     m_sizeEntry->clear();
     resizeTables(0);
     m_undoStack->clear();
+    m_rightStack->setCurrentIndex(m_emptyPageIndex);
     rebuildModelList();
     updateContextMenuEnablement();
 }
@@ -401,20 +425,27 @@ void MarkovModelLibraryWindow::saveEditorIntoModel(int modelIdx) {
     MUtilities::modified();
 }
 
-void MarkovModelLibraryWindow::onSelectionChanged(const QModelIndex& current,
-                                                  const QModelIndex& previous) {
-    if (previous.isValid()) {
-        saveEditorIntoModel(previous.row());
+void MarkovModelLibraryWindow::onSelectionChanged() {
+    // Save whatever model was previously loaded into the editor.
+    const int previousRow = currentSelection;
+    if (previousRow >= 0) {
+        saveEditorIntoModel(previousRow);
     }
+
     // Undo history is specific to one model's editor session. Discard it.
     m_undoStack->clear();
-    if (current.isValid()) {
-        currentSelection = current.row();
+
+    const QModelIndexList selected =
+        m_treeView->selectionModel()->selectedRows();
+    if (!selected.isEmpty()) {
+        currentSelection = selected.first().row();
         loadModelIntoEditor(currentSelection);
+        m_rightStack->setCurrentIndex(m_editorPageIndex);
     } else {
         currentSelection = -1;
         resizeTables(0);
         m_sizeEntry->clear();
+        m_rightStack->setCurrentIndex(m_emptyPageIndex);
     }
     updateContextMenuEnablement();
 }
@@ -528,6 +559,8 @@ void MarkovModelLibraryWindow::removeModel() {
     } else {
         resizeTables(0);
         m_sizeEntry->clear();
+        m_rightStack->setCurrentIndex(m_emptyPageIndex);
+        m_undoStack->clear();
         updateContextMenuEnablement();
     }
 }

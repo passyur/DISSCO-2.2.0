@@ -11,6 +11,7 @@ class QHideEvent;
 class QLineEdit;
 class QMenu;
 class QPushButton;
+class QStackedWidget;
 class QStandardItem;
 class QStandardItemModel;
 class QTableView;
@@ -44,7 +45,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private slots:
-    void onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+    void onSelectionChanged();
     void onRightClick(const QPoint& pos);
     void onSetSize();
     void onItemChanged(QStandardItem* item);
@@ -76,6 +77,10 @@ private:
 
     QTreeView* m_treeView = nullptr;
     QStandardItemModel* m_listModel = nullptr;
+
+    QStackedWidget* m_rightStack = nullptr;
+    int m_emptyPageIndex = 0;
+    int m_editorPageIndex = 1;
 
     QLineEdit* m_sizeEntry = nullptr;
     QPushButton* m_sizeButton = nullptr;
