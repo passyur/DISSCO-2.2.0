@@ -608,6 +608,9 @@ void EventAttributesViewController::showCurrentEventData() {
             ui->wellTemperedRadio->setChecked(freq_info.freq_flag == 0);
             ui->fundamentalRadio->setChecked(freq_info.freq_flag == 1);
             ui->continuumRadio->setChecked(freq_info.freq_flag == 2);
+            if (freq_info.freq_flag == 0) wellTemperedRadioButtonClicked();
+            else if (freq_info.freq_flag == 1) fundamentalRadioButtonClicked();
+            else if (freq_info.freq_flag == 2) continuumRadioButtonClicked();
             ui->wellTemperedEntry->setText(freq_info.entry_1);
             ui->funFreqEntry1->setText(freq_info.entry_1);
             ui->funFreqEntry2->setText(freq_info.entry_2);
