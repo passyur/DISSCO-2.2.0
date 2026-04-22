@@ -757,6 +757,79 @@ void FunctionGenerator::setupUi()
         // <Entry>
         DOMElement* thisElement = functionNameElement->getNextElementSibling();
         ui->markovEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "SPA") {
+        DOMElement* methodEl   = functionNameElement->getNextElementSibling(); // <Method>
+        DOMElement* applyEl    = methodEl->getNextElementSibling();            // <Apply>
+        DOMElement* channelsEl = applyEl->getNextElementSibling();             // <Channels>
+
+        std::string method = getFunctionString(methodEl);
+        std::string apply  = getFunctionString(applyEl);
+
+        // Block signals BEFORE selectComboItem so that handleFunctionChanged's
+        // setChecked(true) calls don't emit toggled and trigger
+        // handleSpaApplyMethodChanged as side effects.
+        ui->spaStereo->blockSignals(true);
+        ui->spaMultiPan->blockSignals(true);
+        ui->spaPolar->blockSignals(true);
+        ui->spaApplySound->blockSignals(true);
+        ui->spaApplyPartial->blockSignals(true);
+
+        selectComboItem("SPA");
+        // handleFunctionChanged still makes one explicit handleSpaApplyMethodChanged()
+        // call, which creates one default channel. Delete it immediately (not via
+        // deleteLater) so no ghost channel lingers in the layout.
+        for (SPAChannel* chan : m_spaChannels) {
+            ui->spaScrollWindowLayout->removeWidget(chan);
+            delete chan;
+        }
+        m_spaChannels.clear();
+
+        if (method == "MULTI_PAN")  ui->spaMultiPan->setChecked(true);
+        else if (method == "POLAR") ui->spaPolar->setChecked(true);
+        else                        ui->spaStereo->setChecked(true);
+
+        if (apply == "PARTIAL") ui->spaApplyPartial->setChecked(true);
+        else                    ui->spaApplySound->setChecked(true);
+
+        ui->spaStereo->blockSignals(false);
+        ui->spaMultiPan->blockSignals(false);
+        ui->spaPolar->blockSignals(false);
+        ui->spaApplySound->blockSignals(false);
+        ui->spaApplyPartial->blockSignals(false);
+
+        // m_spaChannels is empty, so clearSpaChannels inside is a no-op — only
+        // one fresh set of channels is created.
+        handleSpaApplyMethodChanged();
+
+        // Populate each channel from <Channels><Partials>...<P>...</P>...</Partials>...</Channels>
+        DOMElement* partialsEl = channelsEl ? channelsEl->getFirstElementChild() : nullptr;
+        int chanIdx = 0;
+        while (partialsEl != nullptr) {
+            // For MULTI_PAN, add extra channels beyond the initial one as needed
+            while (chanIdx >= m_spaChannels.size()) {
+                SPAInsertChannel(m_spaChannels.isEmpty() ? nullptr : m_spaChannels.last());
+            }
+            SPAChannel* chan = m_spaChannels[chanIdx];
+
+            DOMElement* pEl = partialsEl->getFirstElementChild(); // first <P>
+            int rowIdx = 0;
+            while (pEl != nullptr) {
+                // Add rows silently if the channel has fewer rows than needed
+                while (rowIdx >= chan->rowCount()) {
+                    chan->addRow(chan->rowCount(), true);
+                }
+                chan->setRowText(rowIdx, QString::fromStdString(getFunctionString(pEl)));
+                rowIdx++;
+                pEl = pEl->getNextElementSibling();
+            }
+
+            chanIdx++;
+            partialsEl = partialsEl->getNextElementSibling();
+        }
+    } else if (functionName == "ReadSPAFile") {
+        selectComboItem("ReadSPAFile");
+        DOMElement* fileEl = functionNameElement->getNextElementSibling(); // <File>
+        ui->readSpaFileEdit->setText(QString::fromStdString(getFunctionString(fileEl)));
     }
 }
 
