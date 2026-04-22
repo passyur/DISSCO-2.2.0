@@ -711,6 +711,47 @@ void FunctionGenerator::setupUi()
 
         ui->selectIndexEdit->setText(
             QString::fromStdString(getFunctionString(indexElement)));
+    } else if (functionName == "Stochos") {
+        selectComboItem("Stochos");
+        // selectComboItem triggers handleFunctionChanged which sets RANGE_DISTRIB and clears nodes
+
+        // <Method>
+        DOMElement* methodElement    = functionNameElement->getNextElementSibling();
+        DOMElement* envelopesElement = methodElement->getNextElementSibling();          // <Envelopes>
+        DOMElement* offsetElement    = envelopesElement->getNextElementSibling();       // <Offset>
+
+        std::string method = getFunctionString(methodElement);
+        bool isRange = (method != "FUNCTIONS");
+
+        // Set radio before adding nodes so addStochosNodeButtonClicked picks up the right methodType
+        if (!isRange) {
+            // Switching to FUNCTIONS triggers clearStochosNodes (harmless, no nodes yet)
+            ui->stochosMethodFunction->setChecked(true);
+        }
+
+        // Iterate over <Envelope> children of <Envelopes>
+        DOMElement* env = envelopesElement->getFirstElementChild();
+        while (env != nullptr) {
+            addStochosNodeButtonClicked();
+            int last = ui->stochosScrollLayout->count() - 2;
+            QLayoutItem* item = ui->stochosScrollLayout->itemAt(last);
+            Stochos* node = item ? qobject_cast<Stochos*>(item->widget()) : nullptr;
+            if (!node) break;
+
+            if (isRange) {
+                // Three <Envelope> elements per row: min, max, dist
+                node->setMinText(QString::fromStdString(getFunctionString(env)));
+                env = env->getNextElementSibling();
+                if (env) { node->setMaxText(QString::fromStdString(getFunctionString(env))); env = env->getNextElementSibling(); }
+                if (env) { node->setDistText(QString::fromStdString(getFunctionString(env))); env = env->getNextElementSibling(); }
+            } else {
+                // One <Envelope> per row
+                node->setValText(QString::fromStdString(getFunctionString(env)));
+                env = env->getNextElementSibling();
+            }
+        }
+
+        ui->stochosOffsetEdit->setText(QString::fromStdString(getFunctionString(offsetElement)));
     } else if (functionName == "Markov") {
         selectComboItem("GetFromMarkovChain");
         // <Entry>
