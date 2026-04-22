@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QRadioButton>
+#include <QMessageBox>
 
 
 FileNewObject::FileNewObject(QWidget *parent)
@@ -58,18 +59,45 @@ void FileNewObject::setDefaultType(const QString& typeStr)
     else if (typeStr == "Measurement")    ui->buttonMea->setChecked(true);
 }
 
+void FileNewObject::setExistingNames(const QMap<QString, QStringList>& names)
+{
+    m_existingNames = names;
+}
+
 void FileNewObject::accept()
 {
-    if(
-        (ui->buttonHigh->isChecked() || ui->buttonMid->isChecked() || ui->buttonLow->isChecked()
+    bool typeSelected =
+        ui->buttonHigh->isChecked() || ui->buttonMid->isChecked() || ui->buttonLow->isChecked()
         || ui->buttonBottom->isChecked() || ui->buttonSpectrum->isChecked() || ui->buttonNote->isChecked()
         || ui->buttonEnv->isChecked() || ui->buttonSiv->isChecked() || ui->buttonSpa->isChecked()
         || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked()
-        || ui->buttonMea->isChecked())
-      && 
-        !(ui->objNameEntry->text().simplified().isEmpty())
-    )
-        QDialog::accept();
-    else
+        || ui->buttonMea->isChecked();
+
+    if (!typeSelected || ui->objNameEntry->text().simplified().isEmpty())
         return;
+
+    QString typeStr;
+    if      (ui->buttonHigh->isChecked())     typeStr = "High";
+    else if (ui->buttonMid->isChecked())      typeStr = "Mid";
+    else if (ui->buttonLow->isChecked())      typeStr = "Low";
+    else if (ui->buttonBottom->isChecked())   typeStr = "Bottom";
+    else if (ui->buttonSpectrum->isChecked()) typeStr = "Spectrum";
+    else if (ui->buttonNote->isChecked())     typeStr = "Note";
+    else if (ui->buttonEnv->isChecked())      typeStr = "Envelope";
+    else if (ui->buttonSiv->isChecked())      typeStr = "Sieve";
+    else if (ui->buttonSpa->isChecked())      typeStr = "Spatialization";
+    else if (ui->buttonPat->isChecked())      typeStr = "Pattern";
+    else if (ui->buttonRev->isChecked())      typeStr = "Reverb";
+    else if (ui->buttonFil->isChecked())      typeStr = "Filter";
+    else if (ui->buttonMea->isChecked())      typeStr = "Measurement";
+
+    QString name = ui->objNameEntry->text().simplified();
+    if (m_existingNames.contains(typeStr) && m_existingNames[typeStr].contains(name)) {
+        QMessageBox::warning(this, "Duplicate Name",
+            QString("A %1 event named \"%2\" already exists. Please choose a different name.")
+                .arg(typeStr, name));
+        return;
+    }
+
+    QDialog::accept();
 }

@@ -10,6 +10,7 @@
 #include <QStandardItem>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
+#include <QMessageBox>
 #include <algorithm>
 
 // Sorts children within folders alphabetically, but keeps folders in insertion order.
@@ -330,6 +331,56 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
 
     // Get project manager
     ProjectManager* pm = Inst::get_project_manager();
+
+    // Retrieve old name from backend and reject the rename if newName is a duplicate.
+    {
+        QString oldName;
+        bool isDuplicate = false;
+
+        auto checkHList = [&](QList<HEvent>& list) {
+            if (index >= list.size()) return;
+            oldName = list[index].name;
+            for (int i = 0; i < list.size(); ++i)
+                if (i != index && list[i].name == newName) isDuplicate = true;
+        };
+        auto checkSList = [&](const auto& list) {
+            if (index >= list.size()) return;
+            oldName = list[index].name;
+            for (int i = 0; i < list.size(); ++i)
+                if (i != index && list[i].name == newName) isDuplicate = true;
+        };
+
+        if      (eventType == "High")           checkHList(pm->highevents());
+        else if (eventType == "Mid")            checkHList(pm->midevents());
+        else if (eventType == "Low")            checkHList(pm->lowevents());
+        else if (eventType == "Bottom") {
+            const auto& list = pm->bottomevents();
+            if (index < list.size()) {
+                oldName = list[index].event.name;
+                for (int i = 0; i < list.size(); ++i)
+                    if (i != index && list[i].event.name == newName) isDuplicate = true;
+            }
+        }
+        else if (eventType == "Spectrum")       checkSList(pm->spectrumevents());
+        else if (eventType == "Note")           checkSList(pm->noteevents());
+        else if (eventType == "Envelope")       checkSList(pm->envelopeevents());
+        else if (eventType == "Sieve")          checkSList(pm->sieveevents());
+        else if (eventType == "Spatialization") checkSList(pm->spaevents());
+        else if (eventType == "Pattern")        checkSList(pm->patternevents());
+        else if (eventType == "Reverb")         checkSList(pm->reverbevents());
+        else if (eventType == "Filter")         checkSList(pm->filterevents());
+
+        if (isDuplicate) {
+            // Revert the item text without re-triggering this slot.
+            model->blockSignals(true);
+            item->setText(oldName);
+            model->blockSignals(false);
+            QMessageBox::warning(nullptr, "Duplicate Name",
+                QString("A %1 event named \"%2\" already exists. Please choose a different name.")
+                    .arg(eventType, newName));
+            return;
+        }
+    }
 
     // Update the corresponding event name in the backend
     if (eventType == "High") {

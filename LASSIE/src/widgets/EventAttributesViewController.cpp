@@ -270,6 +270,65 @@ void EventAttributesViewController::saveCurrentShownEventData() {
 
     Eventtype type = m_curreventtype;
     ProjectManager *pm = Inst::get_project_manager();
+
+    // Reject if the new name collides with an existing event of the same type.
+    {
+        QString newName;
+        bool isDuplicate = false;
+
+        auto checkList = [&](const auto& list, const QString& name) {
+            for (int i = 0; i < list.size(); ++i) {
+                if (i != m_curreventindex && list[i].name == name) return true;
+            }
+            return false;
+        };
+
+        if (type == high || type == mid || type == low) {
+            newName = ui->nameEntry->text();
+            QList<HEvent>& list = (type == high) ? pm->highevents()
+                                : (type == mid)  ? pm->midevents()
+                                                 : pm->lowevents();
+            isDuplicate = checkList(list, newName);
+        } else if (type == bottom) {
+            newName = ui->nameEntry->text();
+            const auto& list = pm->bottomevents();
+            for (int i = 0; i < list.size(); ++i) {
+                if (i != m_curreventindex && list[i].event.name == newName) { isDuplicate = true; break; }
+            }
+        } else if (type == sound) {
+            newName = ui->soundNameEntry->text();
+            isDuplicate = checkList(pm->spectrumevents(), newName);
+        } else if (type == env) {
+            newName = ui->envNameEntry->text();
+            isDuplicate = checkList(pm->envelopeevents(), newName);
+        } else if (type == sieve) {
+            newName = ui->sieveNameEntry->text();
+            isDuplicate = checkList(pm->sieveevents(), newName);
+        } else if (type == spa) {
+            newName = ui->spaNameEntry->text();
+            isDuplicate = checkList(pm->spaevents(), newName);
+        } else if (type == pattern) {
+            newName = ui->patNameEntry->text();
+            isDuplicate = checkList(pm->patternevents(), newName);
+        } else if (type == reverb) {
+            newName = ui->revNameEntry->text();
+            isDuplicate = checkList(pm->reverbevents(), newName);
+        } else if (type == note) {
+            newName = ui->noteNameEntry->text();
+            isDuplicate = checkList(pm->noteevents(), newName);
+        } else if (type == filter) {
+            newName = ui->filNameEntry->text();
+            isDuplicate = checkList(pm->filterevents(), newName);
+        }
+
+        if (isDuplicate) {
+            QMessageBox::warning(this, "Duplicate Name",
+                QString("An event named \"%1\" already exists for this type. Please choose a different name.")
+                    .arg(newName));
+            return;
+        }
+    }
+
     if (type == bottom) {
         BottomEvent& bottom_event = pm->bottomevents()[m_curreventindex];
         ExtraInfo& extra_info = bottom_event.extra_info;

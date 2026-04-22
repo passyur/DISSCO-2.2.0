@@ -907,6 +907,38 @@ void ProjectView::insertObject() {
     if (!selectedType.isEmpty())
         newObject->setDefaultType(selectedType);
 
+    {
+        ProjectManager *pm = Inst::get_project_manager();
+        QMap<QString, QStringList> existingNames;
+        auto hnames = [&](QList<HEvent>& list) {
+            QStringList names;
+            for (const HEvent& e : list) names << e.name;
+            return names;
+        };
+        auto snames = [&](const auto& list) {
+            QStringList names;
+            for (const auto& e : list) names << e.name;
+            return names;
+        };
+        existingNames["High"]           = hnames(pm->highevents());
+        existingNames["Mid"]            = hnames(pm->midevents());
+        existingNames["Low"]            = hnames(pm->lowevents());
+        {
+            QStringList names;
+            for (const BottomEvent& e : pm->bottomevents()) names << e.event.name;
+            existingNames["Bottom"] = names;
+        }
+        existingNames["Spectrum"]       = snames(pm->spectrumevents());
+        existingNames["Note"]           = snames(pm->noteevents());
+        existingNames["Envelope"]       = snames(pm->envelopeevents());
+        existingNames["Sieve"]          = snames(pm->sieveevents());
+        existingNames["Spatialization"] = snames(pm->spaevents());
+        existingNames["Pattern"]        = snames(pm->patternevents());
+        existingNames["Reverb"]         = snames(pm->reverbevents());
+        existingNames["Filter"]         = snames(pm->filterevents());
+        newObject->setExistingNames(existingNames);
+    }
+
     if (newObject->exec() == QDialog::Accepted) {
         ProjectManager *pm = Inst::get_project_manager();
         QString nameStr = newObject->ui->objNameEntry->text();
