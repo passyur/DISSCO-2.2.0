@@ -2,8 +2,8 @@
 #define MARKOVMODELLIBRARYWINDOW_HPP
 
 #include <QMainWindow>
-#include <QVector>
 #include <QString>
+#include <QVector>
 
 class QAction;
 class QCloseEvent;
@@ -11,63 +11,115 @@ class QHideEvent;
 class QLineEdit;
 class QMenu;
 class QPushButton;
+class QStackedWidget;
+class QStandardItem;
 class QStandardItemModel;
+class QTableView;
+class QToolButton;
 class QTreeView;
-class QWidget;
+class QUndoStack;
 class ProjectView;
 
 class MarkovModelLibraryWindow : public QMainWindow {
     Q_OBJECT
 
 public:
+    // Full state of the three tables; used as the undo/redo unit.
+    struct EditorSnapshot {
+        int size = 0;
+        QVector<QString> dist;    // length `size`
+        QVector<QString> values;  // length `size`
+        QVector<QString> matrix;  // row-major, length `size * size`
+    };
+
     explicit MarkovModelLibraryWindow(QWidget* parent = nullptr);
     ~MarkovModelLibraryWindow() override;
 
     void setActiveProject(ProjectView* project);
+
+    // Exposed so QUndoCommand subclasses can capture/restore editor state.
+    EditorSnapshot snapshotEditor() const;
+    void applySnapshot(const EditorSnapshot& s);
+    // Switches tree-view selection to modelIdx (if not already) and applies s.
+    void applySnapshotTo(int modelIdx, const EditorSnapshot& s);
+    // Same as applySnapshotTo(modelIdx, to), but additionally selects the
+    // cells in the editor tables whose content differs between `from` and
+    // `to` — used by undo/redo to highlight the cells that just changed.
+    void applySnapshotToWithDiff(int modelIdx,
+                                 const EditorSnapshot& from,
+                                 const EditorSnapshot& to);
+
+    // Exposed so list-level QUndoCommand subclasses can mutate the model list.
+    void insertDefaultModelAt(int idx);
+    void insertModelAt(int idx, const QString& serialized);
+    void removeModelAt(int idx);
+    QString serializeModelAt(int idx) const;
 
 protected:
     void hideEvent(QHideEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
 
 private slots:
-    void onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+    void onSelectionChanged();
     void onRightClick(const QPoint& pos);
     void onSetSize();
-    void onEntryEdited();
+    void onItemChanged(QStandardItem* item);
     void createNewModel();
     void duplicateModel();
     void removeModel();
+    void onEditorClosed();
 
 private:
     void rebuildModelList();
-    void rebuildEditorGrid(int size);
+    void resizeTables(int size);
     void loadModelIntoEditor(int modelIdx);
     void saveEditorIntoModel(int modelIdx);
     void updateContextMenuEnablement();
+    void installCopyPasteShortcuts(QTableView* view);
+    void copySelection(QTableView* view) const;
+    void pasteSelection(QTableView* view);
+    void beginEditCapture();
+    void selectTreeRow(int row);
+    void pushSnapshotCommand(const EditorSnapshot& before,
+                             const EditorSnapshot& after,
+                             const QString& label);
+    void attemptUndo();
+    void attemptRedo();
     QString serializeEditor() const;
 
     ProjectView* activeProject = nullptr;
     int currentSelection = -1;
     int currentSize = 0;
+    bool suppressItemChanged = false;
+    bool applyingSnapshot = false;
 
     QTreeView* m_treeView = nullptr;
     QStandardItemModel* m_listModel = nullptr;
+    QToolButton* m_removeButton = nullptr;
+
+    QStackedWidget* m_rightStack = nullptr;
+    int m_emptyPageIndex = 0;
+    int m_editorPageIndex = 1;
 
     QLineEdit* m_sizeEntry = nullptr;
     QPushButton* m_sizeButton = nullptr;
 
-    QWidget* m_distGridHost = nullptr;
-    QWidget* m_valueGridHost = nullptr;
-    QWidget* m_matrixGridHost = nullptr;
+    QTableView* m_distView = nullptr;
+    QTableView* m_valueView = nullptr;
+    QTableView* m_matrixView = nullptr;
 
-    QVector<QLineEdit*> m_distEntries;
-    QVector<QLineEdit*> m_valueEntries;
-    QVector<QLineEdit*> m_matrixEntries;
+    QStandardItemModel* m_distModel = nullptr;
+    QStandardItemModel* m_valueModel = nullptr;
+    QStandardItemModel* m_matrixModel = nullptr;
 
     QMenu* m_contextMenu = nullptr;
     QAction* m_createAction = nullptr;
     QAction* m_duplicateAction = nullptr;
     QAction* m_deleteAction = nullptr;
+
+    QUndoStack* m_undoStack = nullptr;
+    EditorSnapshot m_editStartSnapshot;
+    bool m_editInProgress = false;
 };
 
 #endif // MARKOVMODELLIBRARYWINDOW_HPP

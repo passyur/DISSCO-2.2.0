@@ -214,7 +214,15 @@ void MainWindow::showEnvelopeLibraryWindow() const {
 }
 
 void MainWindow::showMarkovWindow() const {
-    //nhi: use show() instead of showMarkovLibrary()
+    // If the window is already open, just bring it to the front / refocus it
+    // instead of re-running setActiveProject (which would discard the current
+    // editor state, undo history, and selection).
+    if (markovWindow->isVisible()) {
+        markovWindow->raise();
+        markovWindow->activateWindow();
+        return;
+    }
+
     markovWindow->show();
     if (projectView) {
         markovWindow->setActiveProject(projectView);
