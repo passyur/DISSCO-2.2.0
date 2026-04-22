@@ -371,13 +371,22 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
         else if (eventType == "Filter")         checkSList(pm->filterevents());
 
         if (isDuplicate) {
-            // Revert the item text without re-triggering this slot.
             model->blockSignals(true);
             item->setText(oldName);
             model->blockSignals(false);
             QMessageBox::warning(nullptr, "Duplicate Name",
                 QString("A %1 event named \"%2\" already exists. Please choose a different name.")
                     .arg(eventType, newName));
+            return;
+        }
+
+        if (eventType == "Bottom" && !newName.isEmpty() &&
+            newName[0] != QLatin1Char('s') && newName[0] != QLatin1Char('n')) {
+            model->blockSignals(true);
+            item->setText(oldName);
+            model->blockSignals(false);
+            QMessageBox::warning(nullptr, "Invalid Name",
+                "Bottom Event names must start with 's' or 'n'.");
             return;
         }
     }
