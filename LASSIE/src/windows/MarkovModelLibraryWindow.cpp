@@ -1095,36 +1095,14 @@ QString MarkovModelLibraryWindow::serializeModelAt(int idx) const {
 // Prompt-wrapped undo/redo.
 // ---------------------------------------------------------------------------
 
-// Returns true if `w` is a descendant (in the QObject parent chain) of `root`.
-static bool isDescendantOf(QWidget* w, QWidget* root) {
-    for (QObject* o = w; o; o = o->parent()) {
-        if (o == root) return true;
-    }
-    return false;
-}
-
-bool MarkovModelLibraryWindow::focusIsInsideEditorTable() const {
-    QWidget* fw = QApplication::focusWidget();
-    if (!fw) return false;
-    return isDescendantOf(fw, m_distView)
-        || isDescendantOf(fw, m_valueView)
-        || isDescendantOf(fw, m_matrixView);
-}
 
 void MarkovModelLibraryWindow::attemptUndo() {
-    // When a QLineEdit has focus *outside* our editor tables (e.g. the size-
-    // entry field), let it handle Ctrl+Z character-by-character. Inside our
-    // table cells, we want Ctrl+Z to hit the editor-level undo stack — so we
-    // first commit whatever's in the open cell editor (by clearing its focus,
-    // which triggers the delegate's commit), then fall through to the stack.
+    // If a QLineEdit (e.g. an open cell editor, or the size-entry field) has
+    // focus and can undo its own typing, let it handle Ctrl+Z character-by-
+    // character. Only when it's got nothing left to undo do we fall through
+    // to the editor-level undo stack.
     if (auto* le = qobject_cast<QLineEdit*>(QApplication::focusWidget())) {
-        if (!focusIsInsideEditorTable()) {
-            if (le->isUndoAvailable()) { le->undo(); return; }
-        } else {
-            // Commit the in-progress cell edit so its pre-edit snapshot is
-            // pushed onto the stack, then undo that command.
-            le->clearFocus();
-        }
+        if (le->isUndoAvailable()) { le->undo(); return; }
     }
     if (!m_undoStack->canUndo()) return;
     const QString label = m_undoStack->undoText();
@@ -1142,15 +1120,10 @@ void MarkovModelLibraryWindow::attemptUndo() {
 }
 
 void MarkovModelLibraryWindow::attemptRedo() {
-    // Symmetric guard: let a focused QLineEdit *outside* our editor tables
-    // redo its own character-level typing first; inside a cell editor, commit
-    // and fall through to the stack.
+    // Symmetric guard: let a focused QLineEdit redo its own character-level
+    // typing first.
     if (auto* le = qobject_cast<QLineEdit*>(QApplication::focusWidget())) {
-        if (!focusIsInsideEditorTable()) {
-            if (le->isRedoAvailable()) { le->redo(); return; }
-        } else {
-            le->clearFocus();
-        }
+        if (le->isRedoAvailable()) { le->redo(); return; }
     }
     if (!m_undoStack->canRedo()) return;
     const QString label = m_undoStack->redoText();
