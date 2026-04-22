@@ -151,7 +151,24 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="objNameEntry"/>
+      <layout class="QVBoxLayout" name="objNameFieldLayout">
+       <item>
+        <widget class="QLineEdit" name="objNameEntry"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="bottomPrefixHint">
+         <property name="text">
+          <string>Bottom Event names must start with 's' or 'n'.</string>
+         </property>
+         <property name="visible">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #b05000; font-size: 10px;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

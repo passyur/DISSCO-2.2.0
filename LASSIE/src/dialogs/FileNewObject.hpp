@@ -31,6 +31,9 @@ public:
 public slots:
     void accept() override;
 
+private slots:
+    void validateInput();
+
 private:
     QMap<QString, QStringList> m_existingNames;
 };

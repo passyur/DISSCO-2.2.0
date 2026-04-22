@@ -6,17 +6,20 @@
 #include <QHBoxLayout>
 #include <QRadioButton>
 #include <QMessageBox>
+#include <QPushButton>
 
 
 FileNewObject::FileNewObject(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::FileNewObject)
 {
-    // Sets up the user interface specified by the .ui file
     ui->setupUi(this);
-    // Connects the ui OK and CANCEL buttons to their corresponding actions
     connect(ui->objButtonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->objButtonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    for (QRadioButton* btn : findChildren<QRadioButton*>())
+        connect(btn, &QRadioButton::toggled, this, &FileNewObject::validateInput);
+    connect(ui->objNameEntry, &QLineEdit::textChanged, this, &FileNewObject::validateInput);
 }
 
 FileNewObject::~FileNewObject()
@@ -59,6 +62,21 @@ void FileNewObject::setDefaultType(const QString& typeStr)
     else if (typeStr == "Measurement")    ui->buttonMea->setChecked(true);
 }
 
+void FileNewObject::validateInput()
+{
+    bool bottomSelected = ui->buttonBottom->isChecked();
+    QString text = ui->objNameEntry->text();
+    QChar first = text.isEmpty() ? QChar() : text[0];
+    bool prefixOk = (first == QLatin1Char('s') || first == QLatin1Char('n'));
+
+    // Show hint only when Bottom is selected, name is non-empty, and prefix is wrong
+    ui->bottomPrefixHint->setVisible(bottomSelected && !text.isEmpty() && !prefixOk);
+
+    QPushButton* okBtn = ui->objButtonBox->button(QDialogButtonBox::Ok);
+    if (okBtn)
+        okBtn->setEnabled(!bottomSelected || prefixOk);
+}
+
 void FileNewObject::setExistingNames(const QMap<QString, QStringList>& names)
 {
     m_existingNames = names;
@@ -92,6 +110,11 @@ void FileNewObject::accept()
     else if (ui->buttonMea->isChecked())      typeStr = "Measurement";
 
     QString name = ui->objNameEntry->text().simplified();
+
+    if (typeStr == "Bottom" && !name.isEmpty() &&
+        name[0] != QLatin1Char('s') && name[0] != QLatin1Char('n'))
+        return;
+
     if (m_existingNames.contains(typeStr) && m_existingNames[typeStr].contains(name)) {
         QMessageBox::warning(this, "Duplicate Name",
             QString("A %1 event named \"%2\" already exists. Please choose a different name.")
