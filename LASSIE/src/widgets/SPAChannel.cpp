@@ -30,7 +30,7 @@ SPAChannel::SPAChannel(int id, bool isPartialMode, QWidget* parent)
 
 void SPAChannel::addRow(int index, bool silent) {
     QString label = m_isPartialMode ? QString("Partial %1:").arg(m_rows.size() + 1) : "Envelope:";
-    auto* row = new FunctionEntryRow(label, index, functionReturnENV, true, true, this);
+    auto* row = new FunctionEntryRow(label, index, functionReturnENV, m_isPartialMode, m_isPartialMode, this);
 
     m_rows.insert(index, row);
     m_rowsLayout->insertWidget(index, row);
