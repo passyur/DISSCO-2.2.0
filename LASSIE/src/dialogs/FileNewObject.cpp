@@ -20,6 +20,8 @@ FileNewObject::FileNewObject(QWidget *parent)
     for (QRadioButton* btn : findChildren<QRadioButton*>())
         connect(btn, &QRadioButton::toggled, this, &FileNewObject::validateInput);
     connect(ui->objNameEntry, &QLineEdit::textChanged, this, &FileNewObject::validateInput);
+
+    validateInput(); // set initial button state (disabled until conditions are met)
 }
 
 FileNewObject::~FileNewObject()
@@ -64,17 +66,24 @@ void FileNewObject::setDefaultType(const QString& typeStr)
 
 void FileNewObject::validateInput()
 {
+    bool typeSelected =
+        ui->buttonHigh->isChecked() || ui->buttonMid->isChecked() || ui->buttonLow->isChecked()
+        || ui->buttonBottom->isChecked() || ui->buttonSpectrum->isChecked() || ui->buttonNote->isChecked()
+        || ui->buttonEnv->isChecked() || ui->buttonSiv->isChecked() || ui->buttonSpa->isChecked()
+        || ui->buttonPat->isChecked() || ui->buttonRev->isChecked() || ui->buttonFil->isChecked()
+        || ui->buttonMea->isChecked();
+
     bool bottomSelected = ui->buttonBottom->isChecked();
     QString text = ui->objNameEntry->text();
+    bool nameOk = !text.simplified().isEmpty();
     QChar first = text.isEmpty() ? QChar() : text[0];
     bool prefixOk = (first == QLatin1Char('s') || first == QLatin1Char('n'));
 
-    // Show hint only when Bottom is selected, name is non-empty, and prefix is wrong
-    ui->bottomPrefixHint->setVisible(bottomSelected && !text.isEmpty() && !prefixOk);
+    ui->bottomPrefixHint->setVisible(bottomSelected && nameOk && !prefixOk);
 
     QPushButton* okBtn = ui->objButtonBox->button(QDialogButtonBox::Ok);
     if (okBtn)
-        okBtn->setEnabled(!bottomSelected || prefixOk);
+        okBtn->setEnabled(typeSelected && nameOk && (!bottomSelected || prefixOk));
 }
 
 void FileNewObject::setExistingNames(const QMap<QString, QStringList>& names)
@@ -116,6 +125,8 @@ void FileNewObject::accept()
         return;
 
     if (m_existingNames.contains(typeStr) && m_existingNames[typeStr].contains(name)) {
+        if (QPushButton* okBtn = ui->objButtonBox->button(QDialogButtonBox::Ok))
+            okBtn->setEnabled(false);
         QMessageBox::warning(this, "Duplicate Name",
             QString("A %1 event named \"%2\" already exists. Please choose a different name.")
                 .arg(typeStr, name));
