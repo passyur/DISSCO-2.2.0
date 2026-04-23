@@ -100,13 +100,29 @@ ProjectView::~ProjectView() {
 // Function to write XML Formatting
 void ProjectView::writeInlineXml(QXmlStreamWriter& xmlWriter, const QString& xmlString) {
     QDomDocument tempDoc;
-    if (tempDoc.setContent(xmlString.trimmed()) && !tempDoc.documentElement().isNull()) {
-        // Write raw XML 
-        QString str = tempDoc.toString();
-        str.remove(QRegularExpression("[\\n\\t\\r]+"));
-        str.replace(QRegularExpression(">\\s+<"), "><");
-        xmlWriter.writeCharacters("");
-        xmlWriter.device()->write(str.toUtf8());
+    QString wrappedXml = QString("<root>%1</root>").arg(xmlString.trimmed());
+    if (tempDoc.setContent(wrappedXml)) {
+        QDomNodeList children = tempDoc.documentElement().childNodes();
+        for (int i = 0; i < children.count(); ++i) {
+            QDomNode node = children.at(i);
+            if (node.isElement()) {
+                // Write raw XML
+                QString rawXml;
+                QTextStream stream(&rawXml);
+                node.save(stream, 0); 
+                rawXml.remove(QRegularExpression("[\\n\\t\\r]+"));
+                rawXml.replace(QRegularExpression(">\\s+<"), "><");
+                xmlWriter.device()->write(rawXml.toUtf8());
+            } else {
+                // Write plain text (like "1 - ") normally so it's safely escaped
+                xmlWriter.writeCharacters(node.nodeValue());
+            }
+        }
+        // QString str = tempDoc.toString();
+        // str.remove(QRegularExpression("[\\n\\t\\r]+"));
+        // str.replace(QRegularExpression(">\\s+<"), "><");
+        // xmlWriter.writeCharacters("");
+        // xmlWriter.device()->write(str.toUtf8());
     } else {
         // String/Number 
         xmlWriter.writeCharacters(xmlString);
