@@ -2,6 +2,7 @@
 #include "ProjectViewController.hpp"
 #include "../core/event_struct.hpp"
 #include "../core/project_struct.hpp"
+#include "../core/LayerReferenceUtils.hpp"
 #include "../inst.hpp"
 
 #include <QVBoxLayout>
@@ -15,100 +16,6 @@
 #include <QPushButton>
 #include <algorithm>
 
-namespace {
-
-// Associative list entry: key = (owner event type, owner index, layer index)
-// within the project; value = package indices in that layer whose reference
-// matches the stale name+type.
-struct StaleOwnerKey {
-    Eventtype ownerType;
-    int       ownerIndex;  // ignored when ownerType == top
-    int       layerIndex;
-};
-using StaleRefAssoc = QList<QPair<StaleOwnerKey, QList<int>>>;
-
-// Walk every HEvent's layers and collect references whose Package has
-// event_type == typeNumStr and event_name == oldName. Result is an
-// associative list grouped by the owning layer so that a single reconciliation
-// choice can be applied uniformly below.
-StaleRefAssoc collectStaleLayerReferences(const QString& typeNumStr,
-                                          const QString& oldName)
-{
-    StaleRefAssoc refs;
-    ProjectManager* pm = Inst::get_project_manager();
-
-    auto scan = [&](HEvent& h, Eventtype ownerType, int ownerIndex) {
-        for (int li = 0; li < h.event_layers.size(); ++li) {
-            const QList<Package>& pkgs = h.event_layers[li].discrete_packages;
-            QList<int> hits;
-            for (int pi = 0; pi < pkgs.size(); ++pi) {
-                if (pkgs[pi].event_type == typeNumStr &&
-                    pkgs[pi].event_name == oldName) {
-                    hits.append(pi);
-                }
-            }
-            if (!hits.isEmpty()) {
-                refs.append(qMakePair(StaleOwnerKey{ownerType, ownerIndex, li}, hits));
-            }
-        }
-    };
-
-    scan(pm->topevent(), top, -1);
-    for (int i = 0; i < pm->highevents().size(); ++i)
-        scan(pm->highevents()[i], high, i);
-    for (int i = 0; i < pm->midevents().size(); ++i)
-        scan(pm->midevents()[i], mid, i);
-    for (int i = 0; i < pm->lowevents().size(); ++i)
-        scan(pm->lowevents()[i], low, i);
-    for (int i = 0; i < pm->bottomevents().size(); ++i)
-        scan(pm->bottomevents()[i].event, bottom, i);
-
-    return refs;
-}
-
-HEvent* resolveOwner(const StaleOwnerKey& k) {
-    ProjectManager* pm = Inst::get_project_manager();
-    switch (k.ownerType) {
-        case top:    return &pm->topevent();
-        case high:   return (k.ownerIndex < pm->highevents().size())   ? &pm->highevents()[k.ownerIndex]        : nullptr;
-        case mid:    return (k.ownerIndex < pm->midevents().size())    ? &pm->midevents()[k.ownerIndex]         : nullptr;
-        case low:    return (k.ownerIndex < pm->lowevents().size())    ? &pm->lowevents()[k.ownerIndex]         : nullptr;
-        case bottom: return (k.ownerIndex < pm->bottomevents().size()) ? &pm->bottomevents()[k.ownerIndex].event : nullptr;
-        default:     return nullptr;
-    }
-}
-
-void applyRenameTo(const StaleRefAssoc& refs, const QString& newName) {
-    for (const auto& entry : refs) {
-        HEvent* h = resolveOwner(entry.first);
-        if (!h || entry.first.layerIndex >= h->event_layers.size()) continue;
-        QList<Package>& pkgs = h->event_layers[entry.first.layerIndex].discrete_packages;
-        for (int pi : entry.second) {
-            if (pi >= 0 && pi < pkgs.size()) pkgs[pi].event_name = newName;
-        }
-    }
-}
-
-void applyDeleteTo(const StaleRefAssoc& refs) {
-    for (const auto& entry : refs) {
-        HEvent* h = resolveOwner(entry.first);
-        if (!h || entry.first.layerIndex >= h->event_layers.size()) continue;
-        QList<Package>& pkgs = h->event_layers[entry.first.layerIndex].discrete_packages;
-        QList<int> desc = entry.second;
-        std::sort(desc.begin(), desc.end(), std::greater<int>());
-        for (int pi : desc) {
-            if (pi >= 0 && pi < pkgs.size()) pkgs.removeAt(pi);
-        }
-    }
-}
-
-int totalReferenceCount(const StaleRefAssoc& refs) {
-    int n = 0;
-    for (const auto& entry : refs) n += entry.second.size();
-    return n;
-}
-
-} // namespace
 
 // Sorts children within folders alphabetically, but keeps folders in insertion order.
 class PaletteSortProxy : public QSortFilterProxyModel {
@@ -348,6 +255,18 @@ QStandardItem* PaletteViewController::folderForType(const QString& typeStr) cons
     return nullptr;
 }
 
+void PaletteViewController::removeFolderRowQuiet(const QString& typeStr, int index)
+{
+    QStandardItem* folder = folderForType(typeStr);
+    if (!folder) return;
+    // Use a guard flag rather than blockSignals so the QTreeView still
+    // receives the rowsRemoved signal and repaints; only our backend-sync
+    // slot needs to be suppressed.
+    m_skipRowRemovalSync = true;
+    folder->removeRow(index);
+    m_skipRowRemovalSync = false;
+}
+
 void PaletteViewController::updateItemName(const QString& typeStr, int index, const QString& name)
 {
     QStandardItem* folder = folderForType(typeStr);
@@ -550,13 +469,13 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
     // we loop on the dialog until one of those actions is taken.
     if (!oldName.isEmpty() && oldName != newName) {
         const QString typeNumStr = displayStringToEventtypeString(eventType);
-        StaleRefAssoc stale = collectStaleLayerReferences(typeNumStr, oldName);
+        LayerRefs::Assoc stale = LayerRefs::collect(typeNumStr, oldName);
         if (!stale.isEmpty()) {
             QMessageBox mb;
             mb.setIcon(QMessageBox::Question);
             mb.setWindowTitle("Update layerbox references");
             mb.setText(QString("Renaming \"%1\" to \"%2\" leaves %3 layerbox reference(s) to the old name.\n\nChoose how to handle them:")
-                .arg(oldName, newName).arg(totalReferenceCount(stale)));
+                .arg(oldName, newName).arg(LayerRefs::totalCount(stale)));
             QPushButton* renameBtn = mb.addButton("Rename references",
                                                   QMessageBox::AcceptRole);
             QPushButton* deleteBtn = mb.addButton("Delete references",
@@ -569,8 +488,8 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
                 clicked = mb.clickedButton();
             }
 
-            if (clicked == renameBtn) applyRenameTo(stale, newName);
-            else                      applyDeleteTo(stale);
+            if (clicked == renameBtn) LayerRefs::applyRename(stale, newName);
+            else                      LayerRefs::applyDelete(stale);
 
             projectView->reloadAllLayerBoxes();
         }
@@ -579,6 +498,10 @@ void PaletteViewController::onItemChanged(QStandardItem* item)
 
 void PaletteViewController::onRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
 {
+    // Caller has already synced the backend — skip this slot's side effect
+    // to avoid a double removeAt that corrupts indices.
+    if (m_skipRowRemovalSync) return;
+
     // Only handle removals from folder items (not root level)
     if (!parent.isValid()) {
         return; // This would be removing a folder itself, not an event

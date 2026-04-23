@@ -28,6 +28,7 @@
 #include "../windows/MainWindow.hpp"
 #include "../ui/ui_mainwindow.h"
 #include "../inst.hpp"
+#include "../core/LayerReferenceUtils.hpp"
 #include "../core/EnvelopeLibraryEntry.hpp"
 #include "../dialogs/ProjectPropertiesDialog.hpp"
 #include "../ui/ui_ProjectPropertiesDialog.h"
@@ -1144,6 +1145,46 @@ void ProjectView::deleteEvent(const QString& typeStr, int index)
     ProjectManager* pm = Inst::get_project_manager();
     Eventtype etype = eventtypeFromString(typeStr);
 
+    // Look up the event's name so we can find layerbox references to it.
+    QString eventName;
+    if      (etype == high    && index < pm->highevents().size())     eventName = pm->highevents()[index].name;
+    else if (etype == mid     && index < pm->midevents().size())      eventName = pm->midevents()[index].name;
+    else if (etype == low     && index < pm->lowevents().size())      eventName = pm->lowevents()[index].name;
+    else if (etype == bottom  && index < pm->bottomevents().size())   eventName = pm->bottomevents()[index].event.name;
+    else if (etype == sound   && index < pm->spectrumevents().size()) eventName = pm->spectrumevents()[index].name;
+    else if (etype == note    && index < pm->noteevents().size())     eventName = pm->noteevents()[index].name;
+    else if (etype == env     && index < pm->envelopeevents().size()) eventName = pm->envelopeevents()[index].name;
+    else if (etype == sieve   && index < pm->sieveevents().size())    eventName = pm->sieveevents()[index].name;
+    else if (etype == spa     && index < pm->spaevents().size())      eventName = pm->spaevents()[index].name;
+    else if (etype == pattern && index < pm->patternevents().size())  eventName = pm->patternevents()[index].name;
+    else if (etype == reverb  && index < pm->reverbevents().size())   eventName = pm->reverbevents()[index].name;
+    else if (etype == filter  && index < pm->filterevents().size())   eventName = pm->filterevents()[index].name;
+
+    // If any layerbox references this event by name, warn the user and require
+    // explicit confirmation before cascading the delete.
+    LayerRefs::Assoc stale;
+    if (!eventName.isEmpty()) {
+        stale = LayerRefs::collect(displayStringToEventtypeString(typeStr), eventName);
+    }
+    if (!stale.isEmpty()) {
+        QMessageBox mb;
+        mb.setIcon(QMessageBox::Warning);
+        mb.setWindowTitle("Delete event?");
+        mb.setText(QString("The %1 event \"%2\" is referenced in %3 layerbox child "
+                           "package(s). Deleting it will also delete every reference "
+                           "to it.\n\nProceed?")
+            .arg(typeStr, eventName).arg(LayerRefs::totalCount(stale)));
+        QPushButton* proceedBtn = mb.addButton("Delete event and references",
+                                               QMessageBox::DestructiveRole);
+        QPushButton* cancelBtn  = mb.addButton("Cancel",
+                                               QMessageBox::RejectRole);
+        mb.setDefaultButton(cancelBtn);
+        mb.exec();
+        if (mb.clickedButton() != proceedBtn) return;
+
+        LayerRefs::applyDelete(stale);
+    }
+
     // Notify the attributes view before touching the backend
     eventAttributesView->onEventDeleted(etype, index);
 
@@ -1161,9 +1202,13 @@ void ProjectView::deleteEvent(const QString& typeStr, int index)
     else if (etype == reverb)  pm->reverbevents().removeAt(index);
     else if (etype == filter)  pm->filterevents().removeAt(index);
 
-    // Remove from the palette model
-    QStandardItem* folder = paletteView->folderForType(typeStr);
-    if (folder) folder->removeRow(index);
+    // Remove from the palette model. Use the quiet variant because the
+    // backend removeAt above has already synced state — letting the
+    // rowsAboutToBeRemoved signal fire would double-remove from the backend.
+    paletteView->removeFolderRowQuiet(typeStr, index);
+
+    // Refresh any visible layerboxes so the cascaded-delete is reflected in UI.
+    if (!stale.isEmpty()) reloadAllLayerBoxes();
 }
 
 void ProjectView::duplicateEvent(const QString& typeStr, int index)

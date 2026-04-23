@@ -40,6 +40,10 @@ public:
     // Return the folder item for the given type string, or nullptr if unknown
     QStandardItem* folderForType(const QString& typeStr) const;
 
+    // Remove a folder row without firing the onRowsAboutToBeRemoved signal.
+    // Use when the caller has already synced the backend itself.
+    void removeFolderRowQuiet(const QString& typeStr, int index);
+
     // Return the type string of the currently selected palette item, or empty string if none
     QString selectedType() const;
 
@@ -77,6 +81,10 @@ private:
     QTreeView* treeView;
     QStandardItemModel* model;
     QSortFilterProxyModel* proxyModel;
+
+    // When true, onRowsAboutToBeRemoved must skip its backend-sync side effect
+    // because the caller (e.g. removeFolderRowQuiet) has already synced.
+    bool m_skipRowRemovalSync = false;
 
 };
 
