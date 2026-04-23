@@ -277,7 +277,7 @@ void MainWindow::runProject()
         );
     qDebug() << "Project run with string:" << QString(CMOD_BINARY) + " " + pm->fileinfo().canonicalFilePath();
 
-    const auto pw = new PostWindow(cmod);
+    const auto pw = new PostWindow(cmod, this);
     pw->resize(600,400);
     pw->show();
 

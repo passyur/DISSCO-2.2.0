@@ -10,7 +10,7 @@
 #include <QTextCharFormat>
 
 PostWindow::PostWindow(QProcess *process, QWidget *parent)
-    : QWidget(parent), proc(process)
+    : QWidget(parent, Qt::Window), proc(process)
 {
     setWindowTitle("Process Output");
 
