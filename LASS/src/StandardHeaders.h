@@ -44,16 +44,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 
 
-/*The C++ standards committee only recently agreed on the new name
-for "unordered_map". It used to be referred to as a hash_map, which
-will be used here for now.*/
-#include <ext/hash_map>
-#define DISSCO_HASHMAP hash_map
-
-/* C++0x Alternative (must compile with -std=c++0x):
-  #include <unordered_map>
-  #define DISSCO_HASHMAP unordered_map
-*/
+#include <unordered_map>
+#define DISSCO_HASHMAP unordered_map
 
 //Also need pthreads from the POSIX library (link with -lpthread)
 #include <pthread.h>
@@ -61,7 +53,6 @@ will be used here for now.*/
 #include <semaphore.h>
 
 using namespace std;
-using namespace __gnu_cxx; 
 
 #endif
 
