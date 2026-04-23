@@ -77,7 +77,7 @@ typedef enum {
 
 typedef struct NumChildren NumChildren;
 struct NumChildren {
-    unsigned method_flag = 1; /* from Numchildrenflag */
+    unsigned method_flag = 0; /* from Numchildrenflag */
     QString entry_1;
     QString entry_2;
     QString entry_3;
@@ -105,8 +105,8 @@ struct ChildDef {
     QString attack_sieve;
     QString duration_sieve;
     unsigned definition_flag = 0; /* from Childdefnflag */
-    unsigned starttype_flag = 0; /* from Childdeftimeflag */
-    unsigned durationtype_flag = 0; /* from Childdeftimeflag */
+    unsigned starttype_flag = 2; /* from Childdeftimeflag */
+    unsigned durationtype_flag = 2; /* from Childdeftimeflag */
 };
 
 /// Convert an Eventtype enum value to a human-readable display string.
