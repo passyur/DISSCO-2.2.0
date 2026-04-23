@@ -76,6 +76,10 @@ public:
     // Update the displayed name entry if typeStr/index matches the currently shown event
     void updateNameEntryIfShowing(const QString& typeStr, int index, const QString& name);
 
+    // Rebuild all visible LayerBox widgets from the backend. Call after the
+    // backend's discrete_packages have been mutated externally.
+    void reloadAllLayerBoxes();
+
     // Blank the panel (e.g. when the viewed event is deleted)
     void clearView();
 

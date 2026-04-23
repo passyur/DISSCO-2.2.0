@@ -222,6 +222,12 @@ void EventAttributesViewController::updateNameEntryIfShowing(const QString& type
     else if (et == filter)    ui->filNameEntry->setText(name);
 }
 
+void EventAttributesViewController::reloadAllLayerBoxes() {
+    for (LayerBox* box : m_layerBoxes) {
+        if (box) box->reloadFromBackend();
+    }
+}
+
 void EventAttributesViewController::showAttributesOfEvent(Eventtype type, int index) {
     if (m_hasCurrentEvent && (m_curreventtype != type || m_curreventindex != index)) {
         saveCurrentShownEventData();

@@ -1214,3 +1214,8 @@ void ProjectView::updateAttributesNameEntry(const QString& typeStr, int index, c
 {
     if (eventAttributesView) eventAttributesView->updateNameEntryIfShowing(typeStr, index, name);
 }
+
+void ProjectView::reloadAllLayerBoxes()
+{
+    if (eventAttributesView) eventAttributesView->reloadAllLayerBoxes();
+}

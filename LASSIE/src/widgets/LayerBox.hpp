@@ -48,6 +48,11 @@ public:
     // Called when a preceding sibling event is deleted (index shifts down by 1)
     void setEventIndex(int eventIndex) { m_eventIndex = eventIndex; }
 
+    // Rebuild the tree-view model from the backend Layer. Use after the
+    // backend's discrete_packages have been mutated externally (e.g. after
+    // reconciling references to a renamed event).
+    void reloadFromBackend();
+
     // Flush the weight entry text to the backend Layer::by_layer.
     // \todo this is tremendously chud and should be somehow delegated to ProjectManager, but for now is fine
     void saveWeightToBackend() {

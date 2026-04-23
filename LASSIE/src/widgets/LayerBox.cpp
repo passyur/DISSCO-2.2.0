@@ -134,6 +134,41 @@ LayerBox::LayerBox(Eventtype eventType, int eventIndex, int layerIndex, QWidget*
 }
 
 
+void LayerBox::reloadFromBackend() {
+    Layer& layer = getBackendLayer();
+
+    m_weightEntry->blockSignals(true);
+    m_weightEntry->setText(layer.by_layer);
+    m_weightEntry->blockSignals(false);
+
+    // Preserve package-field column visibility across the rebuild.
+    QList<bool> hiddenCols;
+    for (int col = 0; col < m_model->columnCount(); ++col)
+        hiddenCols.append(m_treeView->isColumnHidden(col));
+
+    m_model->removeRows(0, m_model->rowCount());
+    for (const Package& pkg : layer.discrete_packages) {
+        int row = m_model->rowCount();
+        auto* rowItem  = new QStandardItem(QString::number(row));
+        auto* typeItem = new QStandardItem(eventtypeToDisplayString(pkg.event_type.toInt()));
+        auto* nameItem = new QStandardItem(pkg.event_name);
+        rowItem->setFlags(rowItem->flags()   & ~Qt::ItemIsEditable);
+        typeItem->setFlags(typeItem->flags() & ~Qt::ItemIsEditable);
+        nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
+        m_model->appendRow({rowItem, typeItem, nameItem,
+            new QStandardItem(pkg.weight),
+            new QStandardItem(pkg.attack_envelope),
+            new QStandardItem(pkg.attackenvelope_scale),
+            new QStandardItem(pkg.duration_envelope),
+            new QStandardItem(pkg.durationenvelope_scale)
+        });
+    }
+
+    for (int col = 0; col < hiddenCols.size() && col < m_model->columnCount(); ++col)
+        m_treeView->setColumnHidden(col, hiddenCols[col]);
+}
+
+
 Layer& LayerBox::getBackendLayer() {
     ProjectManager* pm = Inst::get_project_manager();
     HEvent* hevent = nullptr;

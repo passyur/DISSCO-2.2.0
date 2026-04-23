@@ -54,6 +54,10 @@ class ProjectView : public QObject {
         // Two-way name sync between palette and attributes view
         void updatePaletteItemName(const QString& typeStr, int index, const QString& name);
         void updateAttributesNameEntry(const QString& typeStr, int index, const QString& name);
+
+        // Rebuild all visible LayerBox UIs to reflect backend mutations
+        // (e.g. after reconciling references to a renamed event).
+        void reloadAllLayerBoxes();
         //void showAttributes(class IEvent* event);
 
     private:
