@@ -913,7 +913,46 @@ void FunctionGenerator::setupUi()
         selectComboItem("ReadSPAFile");
         DOMElement* fileEl = functionNameElement->getNextElementSibling(); // <File>
         ui->readSpaFileEdit->setText(QString::fromStdString(getFunctionString(fileEl)));
-    }
+    } else if (functionName == "RandomOrderInt") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->randomOrderIntLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        thisElement = thisElement->getNextElementSibling();
+        ui->randomOrderIntUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Random") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->randomLowerBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        thisElement = thisElement->getNextElementSibling();
+        ui->randomUpperBoundEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Randomizer") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->randomizerBaseEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        thisElement = thisElement->getNextElementSibling();
+        ui->randomizerDeviationEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "RandomDensity") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->randomDensityEnvEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        thisElement = thisElement->getNextElementSibling();
+        ui->randomDensityStartTimeEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+        thisElement = thisElement->getNextElementSibling();
+        ui->randomDensityEndTimeEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Inverse") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->numToInverseEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "LN") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->lnEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } else if (functionName == "Fibonacci") {
+        selectComboItem(functionName);
+        DOMElement* thisElement = functionNameElement->getNextElementSibling();
+        ui->fibEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
+    } 
+    //not work: stochos, select, Decay, SPA, REV_Simple, REV_Medium, REV_Advanced, 
 }
 
 std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElement){
