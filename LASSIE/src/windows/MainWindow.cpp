@@ -205,9 +205,13 @@ void MainWindow::saveFileAs()
 }
 
 void MainWindow::showEnvelopeLibraryWindow() const {
-    //nhi: use show() instead of showEnvelopeLibrary()
+    if (envelopeLibraryWindow->isVisible()) {
+        envelopeLibraryWindow->raise();
+        envelopeLibraryWindow->activateWindow();
+        return;
+    }
+
     envelopeLibraryWindow->show();
-    //nhi: connect to current project if available
     if (projectView) {
         envelopeLibraryWindow->setActiveProject(projectView);
     }
