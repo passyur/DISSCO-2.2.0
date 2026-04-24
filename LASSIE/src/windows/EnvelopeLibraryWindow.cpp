@@ -11,6 +11,7 @@
 #include <QAction>
 #include <QKeyEvent>
 #include <QHeaderView>
+#include <QShortcut>
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QFormLayout>
@@ -117,6 +118,9 @@ EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     envelopeLibrary->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(envelopeLibrary, &QWidget::customContextMenuRequested,
             this, &EnvelopeLibraryWindow::onRightClick);
+
+    auto* closeShortcut = new QShortcut(QKeySequence::Close, this);
+    connect(closeShortcut, &QShortcut::activated, this, &EnvelopeLibraryWindow::close);
 
     setCentralWidget(central);
     drawingArea->setMinimumSize(200, 200); // Ensure it has a visible size

@@ -327,6 +327,7 @@ void MainWindow::createActions()
     
     exitAct = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
+    exitAct->setShortcutContext(Qt::ApplicationShortcut);
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, &QAction::triggered, this, &QWidget::close);
 

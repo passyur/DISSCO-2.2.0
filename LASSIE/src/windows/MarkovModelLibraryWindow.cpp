@@ -410,6 +410,10 @@ MarkovModelLibraryWindow::MarkovModelLibraryWindow(QWidget* parent)
     winRedo->setContext(Qt::WindowShortcut);
     connect(winRedo, &QShortcut::activated,
             this, &MarkovModelLibraryWindow::attemptRedo);
+
+    auto* winClose = new QShortcut(QKeySequence::Close, this);
+    winClose->setContext(Qt::WindowShortcut);
+    connect(winClose, &QShortcut::activated, this, &MarkovModelLibraryWindow::close);
 }
 
 MarkovModelLibraryWindow::~MarkovModelLibraryWindow() = default;
