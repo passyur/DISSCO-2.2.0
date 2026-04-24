@@ -3,6 +3,8 @@
 #include "../core/EnvelopeLibraryEntry.hpp"
 
 #include <QTreeView>
+#include <QItemSelectionModel>
+#include <QModelIndexList>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -110,10 +112,14 @@ EnvelopeLibraryWindow::EnvelopeLibraryWindow(QWidget* parent)
     // Connect tree signals
     connect(envelopeLibrary, &QTreeView::activated,
             this, &EnvelopeLibraryWindow::objectActivated);
+    // selectionChanged (not currentChanged) — fires *after* Qt applies the
+     // selection change, and only when the selection actually changes, so
+     // currentChanged also fires when a focused tree view auto-assigns a
+     // current index on refocus (which would auto-load the first envelope).
     connect(envelopeLibrary->selectionModel(),
-            &QItemSelectionModel::currentChanged,
+            &QItemSelectionModel::selectionChanged,
             this,
-            &EnvelopeLibraryWindow::onCursorChanged);
+            [this]{ onCursorChanged(); });
 
     envelopeLibrary->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(envelopeLibrary, &QWidget::customContextMenuRequested,
@@ -258,9 +264,12 @@ void EnvelopeLibraryWindow::objectActivated(const QModelIndex& index)
  * @param current   current selection index
  * @param previous  previous selection index
  */
-void EnvelopeLibraryWindow::onCursorChanged(const QModelIndex& current,
-                                            const QModelIndex&)
+void EnvelopeLibraryWindow::onCursorChanged()
 {
+    const QModelIndexList rows =
+        envelopeLibrary->selectionModel()->selectedRows();
+    if (rows.isEmpty()) return;
+    const QModelIndex current = rows.first();
     if (!current.isValid()) return;
     QStandardItem* item = refModel->itemFromIndex(current);
     activeEnvelope = static_cast<EnvelopeLibraryEntry*>(item->data(Qt::UserRole).value<void*>());
