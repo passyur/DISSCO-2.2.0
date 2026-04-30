@@ -176,7 +176,7 @@ void Modifiers::updateModState() {
         /* DETUNE   */ { true,  false, false, false, true,  true,  true  },
         /* AMPTRANS */ { true,  true,  true,  true,  false, false, false },
         /* FREQTRANS*/ { true,  true,  true,  true,  false, false, false },
-        /* WAVE_TYPE*/ { false, true,  false, false, false, false, false },
+        /* WAVE_TYPE*/ { true,  true,  true,  false, false, false, false },
     };
 
     struct Row { QLabel* label; QLineEdit* edit; QPushButton* btn; };
