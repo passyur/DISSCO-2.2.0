@@ -34,7 +34,6 @@ FunctionEntryRow::FunctionEntryRow(const QString& labelText,
 
     m_entry->setFixedHeight(20);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    setFixedHeight(50);
 }
 
 QString FunctionEntryRow::getText() const {

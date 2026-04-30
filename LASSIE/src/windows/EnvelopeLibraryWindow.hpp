@@ -78,11 +78,14 @@ protected slots:
     void objectActivated(const QModelIndex& index);
     
     /**
-     * @brief Called when the selection changes in the envelope list
-     * @param current   current selection index
-     * @param previous  previous selection index
+     * @brief Called when the selection changes in the envelope list.
+     *
+     * Wired to QItemSelectionModel::selectionChanged (not currentChanged) so
+     * that merely unfocusing/refocusing the window — which shifts the tree's
+     * current index without actually changing what's selected — doesn't
+     * auto-load the first envelope.
      */
-    void onCursorChanged(const QModelIndex& current, const QModelIndex& previous);
+    void onCursorChanged();
     
     /**
      * @brief Show context menu on right‐click

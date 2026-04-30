@@ -955,7 +955,7 @@ void FunctionGenerator::setupUi()
         DOMElement* thisElement = functionNameElement->getNextElementSibling();
         ui->fibEdit->setText(QString::fromStdString(getFunctionString(thisElement)));
     } 
-    //not started: Decay, SPA, REV_Simple, REV_Medium, REV_Advanced, getPattern, MakeFilter, 
+    //not work: stochos, select, Decay 
 }
 
 std::string FunctionGenerator::getFunctionString(DOMElement* _thisFunctionElement){
