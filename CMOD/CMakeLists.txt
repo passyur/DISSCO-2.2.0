@@ -22,6 +22,21 @@ target_link_libraries(CMOD PUBLIC MUPARSER)
 target_link_libraries(CMOD PUBLIC LASS)
 message(STATUS "libsndfile, libxerces-c, muParser, and LASS includes linked with target!")
 
+# heavy libraries that won't change much from compile to compile in this project
+target_precompile_headers(CMOD PRIVATE
+    <xercesc/dom/DOM.hpp>
+    <xercesc/parsers/XercesDOMParser.hpp>
+    <xercesc/util/PlatformUtils.hpp>
+    <sndfile.h>
+    <vector>
+    <string>
+    <map>
+    <memory>
+    <iostream>
+    <fstream>
+    <sstream>
+)
+
 ### _external_ library checkers for informative errors ###
 if(NOT SNDFILE_FOUND)
     message(SEND_ERROR "Couldn't find libsndfile, won't go well; check BUILDING docs")

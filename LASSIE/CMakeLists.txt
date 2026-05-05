@@ -36,6 +36,8 @@ qt_add_executable(LASSIE
     src/widgets/generic/FunctionEntryRow.cpp src/widgets/generic/FunctionEntryRow.hpp
 )
 
+target_precompile_headers(LASSIE PRIVATE <QtWidgets> <QtCore> <QtXml>)
+
 target_link_libraries(LASSIE PRIVATE 
     Qt6::Widgets
     Qt6::Core
