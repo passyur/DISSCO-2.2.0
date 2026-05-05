@@ -11,6 +11,7 @@ Preliminary Requirements
 
 The following are *necessary* to compile CMOD and LASS:
 
+- git
 - Visual Studio 2022,
 - A C/C++ compiler (like MSVC `cl`),
 - cmake >= 3.25,
@@ -21,7 +22,7 @@ The following are *necessary* to compile CMOD and LASS:
 
 To compile with LASSIE, the following is *necessary*:
 
-- (🟡) Qt >= 6.4
+- (🟡) Qt >= 6.8
 
 Note: There are definitely other ways to compile DISSCO on Windows, but this is the way the author decided to go.
 

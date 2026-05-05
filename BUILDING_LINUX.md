@@ -1,12 +1,13 @@
 Building on Linux 
 =================
-(WIP)
+
 Preliminary Requirements
 --------------------------
 
 The following are *necessary* to compile CMOD and LASS:
 
-- A C++11-supporting compiler (g++, clang),
+- git
+- A C++17-supporting compiler (g++, clang),
 - A C compiler (gcc ...),
 - cmake >= 3.5,
 - libsndfile >= 1.0,
@@ -21,7 +22,7 @@ The following are *necessary* to compile CMOD and LASS:
 
 To compile with LASSIE, the following is *necessary*:
 
-- Qt >= 6.4
+- Qt >= 6.8
 
 Recommended
 -----------
@@ -37,6 +38,12 @@ Install the following:
     sudo apt install build-essential libsndfile1 libsndfile1-dev libxerces-c3.2 libxerces-c-dev qt6-base-dev
 
 `build-essential` includes `g++` and `gcc`. If you prefer another C/C++ compiler, you can install separately.
+
+**For developers**: it's recommended you have `ccache` set up and `lld` installed:
+
+    sudo apt install ccache lld
+
+Since we precompile headers for LASSIE and CMOD, we suggest `export CCACHE_SLOPPINESS=pch_defines,time_macros`. Please review the `ccache` man page provided in your distribution.
 
 <!-- TODO: RHEL, maybe -->
 
