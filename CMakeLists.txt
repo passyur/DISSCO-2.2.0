@@ -21,6 +21,14 @@ include(DISSCOVersions.txt)
 
 project(DISSCO VERSION ${DISSCO_VERSION})
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    find_program(LLD_LINKER ld.lld)
+    if(LLD_LINKER)
+        add_link_options(-fuse-ld=lld)
+        message(STATUS "Using lld linker")
+    endif()
+endif()
+
 option(BUILD_LASS_EXAMPLES "Build LASS examples" OFF)
 
 # see Cross Compiling with CMake -- Mastering CMake for more on the eponymous subject
